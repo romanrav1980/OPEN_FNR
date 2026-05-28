@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/adjustments" name="adjustment_approval_required_decision">
+  <decision id="adjustment_approval_required_decision" name="Adjustment approval required decision">
+    <decisionTable id="adjustment_approval_required_table" hitPolicy="FIRST">
+      <input id="input_mode" label="mode">
+        <inputExpression id="input_mode_expr" typeRef="string"><text>mode</text></inputExpression>
+      </input>
+      <input id="input_value" label="value">
+        <inputExpression id="input_value_expr" typeRef="number"><text>value</text></inputExpression>
+      </input>
+      <output id="output_required" label="approval_required" name="approval_required" typeRef="boolean" />
+      <rule id="rule_percent_large">
+        <inputEntry id="rule_percent_large_mode"><text>"percent"</text></inputEntry>
+        <inputEntry id="rule_percent_large_value"><text>&gt; 5</text></inputEntry>
+        <outputEntry id="rule_percent_large_required"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_absolute_large">
+        <inputEntry id="rule_absolute_large_mode"><text>"absolute"</text></inputEntry>
+        <inputEntry id="rule_absolute_large_value"><text>&gt; 250</text></inputEntry>
+        <outputEntry id="rule_absolute_large_required"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_no_approval">
+        <inputEntry id="rule_no_approval_mode"><text>-</text></inputEntry>
+        <inputEntry id="rule_no_approval_value"><text>-</text></inputEntry>
+        <outputEntry id="rule_no_approval_required"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

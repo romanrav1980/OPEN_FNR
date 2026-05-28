@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="manual_adjustment_process",
+        name="Manual adjustment process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-008",
+        source_path="processes/adjustments/manual_adjustment_process.bpmn20.xml",
+        owner_role="Forecast Planner",
+    ),
+    ProcessDefinition(
+        key="adjustment_approval_required_decision",
+        name="Adjustment approval required decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-008",
+        source_path="processes/adjustments/adjustment_approval_required_decision.dmn.xml",
+        owner_role="Forecast Planner",
+    ),
+    ProcessDefinition(
+        key="adjustment_dispute_case",
+        name="Adjustment dispute case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-008",
+        source_path="processes/adjustments/adjustment_dispute_case.cmmn.xml",
+        owner_role="Category Manager",
+    ),
+    ProcessDefinition(
         key="exception_escalation_process",
         name="Exception escalation process",
         artifact_type=ProcessArtifactType.BPMN,

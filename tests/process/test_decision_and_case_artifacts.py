@@ -349,3 +349,27 @@ def test_generic_exception_case_is_parseable() -> None:
     assert "Resolve exception" in human_task_names
     assert "Ignore exception" in human_task_names
     assert "Escalate exception" in human_task_names
+
+
+def test_adjustment_approval_required_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/adjustments/adjustment_approval_required_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "adjustment_approval_required_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_adjustment_dispute_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/adjustments/adjustment_dispute_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "adjustment_dispute_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review adjustment reason" in human_task_names
+    assert "Compare original and adjusted values" in human_task_names
+    assert "Approve or cancel adjustment" in human_task_names

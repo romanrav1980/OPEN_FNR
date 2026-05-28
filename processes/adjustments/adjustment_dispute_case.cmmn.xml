@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/adjustments">
+  <case id="adjustment_dispute_case" name="Adjustment dispute case">
+    <casePlanModel id="adjustment_dispute_plan" name="Adjustment dispute plan">
+      <humanTask id="review_adjustment_reason" name="Review adjustment reason" />
+      <humanTask id="compare_original_and_adjusted_values" name="Compare original and adjusted values" />
+      <humanTask id="approve_or_cancel_adjustment" name="Approve or cancel adjustment" />
+    </casePlanModel>
+  </case>
+</definitions>

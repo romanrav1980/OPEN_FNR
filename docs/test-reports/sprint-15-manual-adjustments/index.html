@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 15 - Manual Adjustments</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      main { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+      section { border: 1px solid var(--border); background: var(--panel); margin-top: 20px; padding: 20px; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-bottom: 12px; color: var(--red-light); font-size: 20px; }
+      h3 { margin: 16px 0 8px; font-size: 16px; }
+      p, li, td, th { line-height: 1.55; }
+      .subtitle { margin-top: 8px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .shot { width: 100%; border: 1px solid var(--border); margin-top: 12px; }
+      code { color: var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 15: Manual Adjustments Framework</h1>
+        <p class="subtitle">
+          Аннотация: тестируем безопасный слой ручных корректировок, где исходный ML forecast
+          или order proposal не затирается, а поверх него применяется adjustment overlay
+          с reason, validity period, preview impact, approval и audit.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем блок <code>Manual Adjustments</code>.</li>
+          <li>Проверяем adjustment modal: target, mode, value, reason, scope, validity dates.</li>
+          <li>Проверяем impact preview: 120 -> 132, 4 rows affected.</li>
+          <li>Проверяем таблицу adjustment overlays: forecast и order proposal.</li>
+          <li>Проверяем action buttons: Preview, Approve, Apply, Cancel.</li>
+          <li>Проверяем audit timeline: old value, new value, actor, reason.</li>
+        </ol>
+        <img class="shot" src="screenshots/manual-adjustments.png" alt="Manual Adjustments" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Зачем</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Planner создает adjustment с target и scope.</td>
+              <td>Корректировка должна быть ограничена магазином, SKU и датами.</td>
+              <td class="ok">Scope валидируется.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Planner указывает reason code и comment.</td>
+              <td>Без причины ручная корректировка запрещена.</td>
+              <td class="ok">Reason required в контракте.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>System считает preview impact.</td>
+              <td>Пользователь должен видеть эффект до применения.</td>
+              <td class="ok">120 -> 132, delta 12.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>DMN решает, нужно ли approval.</td>
+              <td>Большие изменения требуют контроля.</td>
+              <td class="ok">+10% требует approval.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>System применяет overlay.</td>
+              <td>Исходный ML forecast/order proposal не затирается.</td>
+              <td class="ok">Adjustment хранится отдельно.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>System пишет audit old/new value.</td>
+              <td>Все ручные изменения должны быть восстанавливаемыми.</td>
+              <td class="ok">Audit event создается.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">117 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

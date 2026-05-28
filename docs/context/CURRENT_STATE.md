@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 14 implementation is complete.
+Sprint 15 implementation is complete.
 
 ## Local Infrastructure
 
@@ -163,9 +163,19 @@ Known local URLs:
 - UI Exception Center section with filters, linked objects, recommended actions, action panel and audit trail.
 - HTML test report with screenshot: `docs/test-reports/sprint-14-exception-center-v1/index.html`.
 
+## Sprint 15 Artifacts
+
+- Manual adjustments API: `apps/backend/open_fnr_api/adjustments.py`.
+- Manual adjustments tests: `tests/backend/test_adjustments.py`.
+- Manual adjustment BPMN: `processes/adjustments/manual_adjustment_process.bpmn20.xml`.
+- Adjustment approval DMN: `processes/adjustments/adjustment_approval_required_decision.dmn.xml`.
+- Adjustment dispute CMMN: `processes/adjustments/adjustment_dispute_case.cmmn.xml`.
+- UI Manual Adjustments section with reason, validity, preview impact, apply/cancel actions and audit timeline.
+- HTML test report with screenshot: `docs/test-reports/sprint-15-manual-adjustments/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 109 passed.
+- `python -m pytest` -> 117 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -173,4 +183,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 14 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 15: Manual Adjustments Framework.
+Commit Sprint 15 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 16: Publication And Export V1.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/adjustments">
+  <process id="manual_adjustment_process" name="Manual adjustment process" isExecutable="true">
+    <startEvent id="start_adjustment_requested" name="Adjustment requested" />
+    <sequenceFlow id="flow_start_to_validate" sourceRef="start_adjustment_requested" targetRef="validate_adjustment_scope" />
+    <serviceTask id="validate_adjustment_scope" name="Validate adjustment scope" />
+    <sequenceFlow id="flow_validate_to_preview" sourceRef="validate_adjustment_scope" targetRef="preview_adjustment_impact" />
+    <serviceTask id="preview_adjustment_impact" name="Preview adjustment impact" />
+    <sequenceFlow id="flow_preview_to_decision" sourceRef="preview_adjustment_impact" targetRef="decide_approval_required" />
+    <businessRuleTask id="decide_approval_required" name="Decide approval required" />
+    <sequenceFlow id="flow_decision_to_gateway" sourceRef="decide_approval_required" targetRef="approval_required_gateway" />
+    <exclusiveGateway id="approval_required_gateway" name="Approval required?" />
+    <sequenceFlow id="flow_no_approval" sourceRef="approval_required_gateway" targetRef="apply_adjustment_overlay" />
+    <sequenceFlow id="flow_approval" sourceRef="approval_required_gateway" targetRef="approve_adjustment" />
+    <userTask id="approve_adjustment" name="Approve adjustment" />
+    <sequenceFlow id="flow_approved_to_apply" sourceRef="approve_adjustment" targetRef="apply_adjustment_overlay" />
+    <serviceTask id="apply_adjustment_overlay" name="Apply adjustment overlay" />
+    <sequenceFlow id="flow_apply_to_end" sourceRef="apply_adjustment_overlay" targetRef="end_applied" />
+    <endEvent id="end_applied" name="Adjustment applied" />
+  </process>
+</definitions>

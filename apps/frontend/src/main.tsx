@@ -290,6 +290,36 @@ const exceptionAudit = [
   { time: "14:00", actor: "Replenishment Planner", action: "resolve", reason: "order adjusted" },
 ];
 
+const manualAdjustments = [
+  {
+    id: "adj-forecast-20260528-001",
+    target: "regular-baseline-20260528-001",
+    type: "forecast",
+    status: "previewed",
+    mode: "percent",
+    value: "+10%",
+    reason: "local_event",
+    validity: "2026-06-01..2026-06-07",
+    effect: "120 -> 132",
+  },
+  {
+    id: "adj-order-20260528-001",
+    target: "order-proposal-20260528-s001-sku001",
+    type: "order_proposal",
+    status: "applied",
+    mode: "absolute",
+    value: "300",
+    reason: "supply_constraint",
+    validity: "2026-05-30",
+    effect: "276 -> 300",
+  },
+];
+
+const adjustmentAudit = [
+  { time: "15:00", actor: "Forecast Planner", action: "preview", oldValue: 120, newValue: 132, reason: "local_event" },
+  { time: "06:10", actor: "Replenishment Planner", action: "apply", oldValue: 276, newValue: 300, reason: "supply_constraint" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1247,6 +1277,99 @@ function App() {
                     <td>{event.time}</td>
                     <td>{event.actor}</td>
                     <td>{event.action}</td>
+                    <td>{event.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Manual adjustments">
+        <div className="section-heading">
+          <h2>Manual Adjustments</h2>
+          <p>Safe overlay for forecast, promo and order changes with preview, validity and audit</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Adjustment Modal</span>
+            <strong>Raise forecast by 10%</strong>
+            <p>Reason local_event is required. Scope: S001/S002, SKU001/SKU002, 2026-06-01..2026-06-07.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Impact Preview</span>
+            <strong>120 -&gt; 132, 4 rows affected</strong>
+            <p>Original ML forecast remains unchanged; adjustment is applied as an overlay before publication.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Adjustment</th>
+                <th>Target</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Mode</th>
+                <th>Value</th>
+                <th>Reason</th>
+                <th>Validity</th>
+                <th>Effect</th>
+              </tr>
+            </thead>
+            <tbody>
+              {manualAdjustments.map((adjustment) => (
+                <tr key={adjustment.id}>
+                  <td>{adjustment.id}</td>
+                  <td>{adjustment.target}</td>
+                  <td>{adjustment.type}</td>
+                  <td>{adjustment.status}</td>
+                  <td>{adjustment.mode}</td>
+                  <td>{adjustment.value}</td>
+                  <td>{adjustment.reason}</td>
+                  <td>{adjustment.validity}</td>
+                  <td>{adjustment.effect}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Actions</span>
+            <h3>Preview, apply or cancel</h3>
+            <p>
+              A planner can preview the effect, request approval when thresholds are exceeded,
+              apply the overlay, or cancel it before publication cutoff.
+            </p>
+            <div className="action-row">
+              <button type="button">Preview</button>
+              <button type="button">Approve</button>
+              <button type="button">Apply</button>
+              <button type="button">Cancel</button>
+            </div>
+          </aside>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Old</th>
+                  <th>New</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adjustmentAudit.map((event) => (
+                  <tr key={`${event.time}-${event.action}`}>
+                    <td>{event.time}</td>
+                    <td>{event.actor}</td>
+                    <td>{event.action}</td>
+                    <td>{event.oldValue}</td>
+                    <td>{event.newValue}</td>
                     <td>{event.reason}</td>
                   </tr>
                 ))}
