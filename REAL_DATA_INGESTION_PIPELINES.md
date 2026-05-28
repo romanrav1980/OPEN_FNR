@@ -41,6 +41,19 @@ flowchart LR
     MART --> BI[BI and diagnostics]
 ```
 
+## Clean Canonical Publication
+
+| Clean table | Source raw tables | Used by |
+| --- | --- | --- |
+| `clean_sales_daily` | `raw_pos_sales_lines` | regular forecast, promo backtesting, WAPE |
+| `clean_stock_snapshot_daily` | `raw_wms_stock_snapshots` | projected stock, true inventory |
+| `clean_open_orders` | `raw_wms_open_orders` | demand projection, replenishment |
+| `clean_in_transit` | `raw_wms_in_transit` | projected stock, multi-echelon |
+| `clean_prices` | `raw_erp_prices` | forecast features, promo validation |
+| `clean_promo_plans` | `raw_promo_plans` | promo uplift, shelf space, capacity |
+
+Every clean table carries `source_batch_id`, `quality_status` and `published_at` for lineage and reprocessing control.
+
 ## Canonical Contracts
 
 | Contract | Primary key | Required fields |

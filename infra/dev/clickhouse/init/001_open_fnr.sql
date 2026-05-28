@@ -290,6 +290,124 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(date_from)
 ORDER BY (date_from, date_to, store_scope_id, sku_id, promo_id);
 
+CREATE TABLE IF NOT EXISTS open_fnr.clean_sales_daily
+(
+    business_date Date,
+    store_id String,
+    sku_id String,
+    sales_qty Float64,
+    gross_amount Float64,
+    net_amount Float64,
+    discount_amount Float64,
+    receipt_count UInt32,
+    return_qty Float64,
+    source_batch_id String,
+    quality_status String,
+    published_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, store_id, sku_id, source_batch_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.clean_stock_snapshot_daily
+(
+    business_date Date,
+    location_id String,
+    location_type String,
+    sku_id String,
+    on_hand_qty Float64,
+    reserved_qty Float64,
+    available_qty Float64,
+    damaged_qty Float64,
+    source_batch_id String,
+    quality_status String,
+    published_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, location_id, sku_id, source_batch_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.clean_open_orders
+(
+    order_id String,
+    line_id String,
+    order_date Date,
+    expected_delivery_date Date,
+    source_location_id String,
+    target_location_id String,
+    sku_id String,
+    ordered_qty Float64,
+    confirmed_qty Float64,
+    status String,
+    source_batch_id String,
+    quality_status String,
+    published_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(expected_delivery_date)
+ORDER BY (expected_delivery_date, target_location_id, sku_id, order_id, line_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.clean_in_transit
+(
+    shipment_id String,
+    line_id String,
+    ship_date Date,
+    eta_date Date,
+    source_location_id String,
+    target_location_id String,
+    sku_id String,
+    shipped_qty Float64,
+    received_qty Float64,
+    status String,
+    source_batch_id String,
+    quality_status String,
+    published_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(eta_date)
+ORDER BY (eta_date, target_location_id, sku_id, shipment_id, line_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.clean_prices
+(
+    sku_id String,
+    location_scope String,
+    valid_from Date,
+    valid_to Nullable(Date),
+    regular_price Float64,
+    selling_price Float64,
+    currency String,
+    vat_rate Float64,
+    source_batch_id String,
+    quality_status String,
+    published_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(valid_from)
+ORDER BY (valid_from, location_scope, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.clean_promo_plans
+(
+    promo_id String,
+    sku_id String,
+    store_scope_id String,
+    date_from Date,
+    date_to Date,
+    regular_price Float64,
+    promo_price Float64,
+    discount_pct Float64,
+    display_type Nullable(String),
+    display_location Nullable(String),
+    display_capacity_units Nullable(Float64),
+    mechanics Nullable(String),
+    forecast_lock UInt8,
+    source_batch_id String,
+    quality_status String,
+    published_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(date_from)
+ORDER BY (date_from, date_to, store_scope_id, sku_id, promo_id);
+
 CREATE TABLE IF NOT EXISTS open_fnr.active_matrix_daily
 (
     business_date Date,
