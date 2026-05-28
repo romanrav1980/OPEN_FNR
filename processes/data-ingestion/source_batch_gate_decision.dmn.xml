@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmn:definitions xmlns:dmn="https://www.omg.org/spec/DMN/20191111/MODEL/" id="source_batch_gate_decision_definitions" namespace="https://open-fnr/decisions/data-ingestion">
+  <dmn:decision id="source_batch_gate_decision" name="Source Batch Gate Decision">
+    <dmn:decisionTable id="source_batch_gate_table" hitPolicy="FIRST">
+      <dmn:input id="schema_status" label="schema_status"><dmn:inputExpression id="schema_status_expr" typeRef="string"><dmn:text>schema_status</dmn:text></dmn:inputExpression></dmn:input>
+      <dmn:input id="checksum_status" label="checksum_status"><dmn:inputExpression id="checksum_status_expr" typeRef="string"><dmn:text>checksum_status</dmn:text></dmn:inputExpression></dmn:input>
+      <dmn:input id="dq_severity" label="dq_severity"><dmn:inputExpression id="dq_severity_expr" typeRef="string"><dmn:text>dq_severity</dmn:text></dmn:inputExpression></dmn:input>
+      <dmn:output id="decision" name="decision" typeRef="string" />
+      <dmn:output id="action" name="action" typeRef="string" />
+      <dmn:rule id="rule_block_schema">
+        <dmn:inputEntry id="rule_block_schema_schema"><dmn:text>"failed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_block_schema_checksum"><dmn:text>-</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_block_schema_dq"><dmn:text>-</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="rule_block_schema_decision"><dmn:text>"block"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="rule_block_schema_action"><dmn:text>"open_data_owner_task"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
+      <dmn:rule id="rule_block_checksum">
+        <dmn:inputEntry id="rule_block_checksum_schema"><dmn:text>"passed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_block_checksum_checksum"><dmn:text>"failed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_block_checksum_dq"><dmn:text>-</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="rule_block_checksum_decision"><dmn:text>"block"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="rule_block_checksum_action"><dmn:text>"request_source_resend"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
+      <dmn:rule id="rule_block_dq">
+        <dmn:inputEntry id="rule_block_dq_schema"><dmn:text>"passed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_block_dq_checksum"><dmn:text>"passed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_block_dq_dq"><dmn:text>"blocker"</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="rule_block_dq_decision"><dmn:text>"block"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="rule_block_dq_action"><dmn:text>"open_recovery_case"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
+      <dmn:rule id="rule_publish">
+        <dmn:inputEntry id="rule_publish_schema"><dmn:text>"passed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_publish_checksum"><dmn:text>"passed"</dmn:text></dmn:inputEntry>
+        <dmn:inputEntry id="rule_publish_dq"><dmn:text>"accepted"</dmn:text></dmn:inputEntry>
+        <dmn:outputEntry id="rule_publish_decision"><dmn:text>"publish"</dmn:text></dmn:outputEntry>
+        <dmn:outputEntry id="rule_publish_action"><dmn:text>"publish_clean_canonical"</dmn:text></dmn:outputEntry>
+      </dmn:rule>
+    </dmn:decisionTable>
+  </dmn:decision>
+</dmn:definitions>

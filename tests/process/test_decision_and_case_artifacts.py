@@ -24,6 +24,40 @@ def test_data_load_incident_cmmn_is_parseable() -> None:
     assert tree.find(".//cmmn:humanTask", CMMN_NS) is not None
 
 
+def test_source_batch_gate_decision_is_parseable_and_routes_publish_block_and_resend() -> None:
+    tree = ElementTree.parse(Path("processes/data-ingestion/source_batch_gate_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "source_batch_gate_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"decision", "action"}
+    assert {"rule_block_schema", "rule_block_checksum", "rule_block_dq", "rule_publish"}.issubset(rule_ids)
+
+
+def test_source_batch_recovery_case_has_triage_resend_reprocess_and_publication_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/data-ingestion/source_batch_recovery_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "source_batch_recovery_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage source batch failure" in human_task_names
+    assert "Request source resend" in human_task_names
+    assert "Approve source reprocessing" in human_task_names
+    assert "Confirm clean publication" in human_task_names
+
+
 def test_dq_decisions_are_parseable() -> None:
     for path, decision_id in (
         ("processes/data-quality/dq_severity_decision.dmn.xml", "dq_severity_decision"),

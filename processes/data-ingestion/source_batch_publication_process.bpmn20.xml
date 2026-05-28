@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="source_batch_publication_definitions" targetNamespace="https://open-fnr/processes/data-ingestion">
+  <bpmn:process id="source_batch_publication_process" name="Source Batch Publication Process" isExecutable="true">
+    <bpmn:startEvent id="start_batch_arrived" name="Source batch arrived" />
+    <bpmn:serviceTask id="load_manifest" name="Load source manifest" />
+    <bpmn:serviceTask id="discover_source_files" name="Discover source files" />
+    <bpmn:serviceTask id="validate_schema" name="Validate source schema" />
+    <bpmn:serviceTask id="validate_counts_checksum" name="Validate row count and checksum" />
+    <bpmn:businessRuleTask id="evaluate_source_batch_gate" name="Evaluate source batch gate" />
+    <bpmn:exclusiveGateway id="source_batch_accepted_gateway" name="Source batch accepted?" />
+    <bpmn:serviceTask id="publish_clean_canonical" name="Publish clean canonical tables" />
+    <bpmn:serviceTask id="write_lineage" name="Write source lineage" />
+    <bpmn:serviceTask id="write_publication_audit" name="Write publication audit" />
+    <bpmn:userTask id="review_source_batch_blocker" name="Review source batch blocker" />
+    <bpmn:userTask id="approve_reprocessing" name="Approve source reprocessing" />
+    <bpmn:serviceTask id="open_recovery_case" name="Open source batch recovery case" />
+    <bpmn:endEvent id="end_published" name="Clean data published" />
+    <bpmn:endEvent id="end_blocked" name="Source batch blocked" />
+  </bpmn:process>
+</bpmn:definitions>

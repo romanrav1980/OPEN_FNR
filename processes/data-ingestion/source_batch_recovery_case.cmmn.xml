@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cmmn:definitions xmlns:cmmn="http://www.omg.org/spec/CMMN/20151109/MODEL" id="source_batch_recovery_case_definitions" targetNamespace="https://open-fnr/cases/data-ingestion">
+  <cmmn:case id="source_batch_recovery_case" name="Source Batch Recovery Case">
+    <cmmn:casePlanModel id="source_batch_recovery_plan" name="Source Batch Recovery">
+      <cmmn:humanTask id="triage_source_batch_failure" name="Triage source batch failure" />
+      <cmmn:humanTask id="request_source_resend" name="Request source resend" />
+      <cmmn:humanTask id="approve_reprocessing" name="Approve source reprocessing" />
+      <cmmn:humanTask id="confirm_clean_publication" name="Confirm clean publication" />
+    </cmmn:casePlanModel>
+  </cmmn:case>
+</cmmn:definitions>

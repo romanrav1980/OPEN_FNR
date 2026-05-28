@@ -5,6 +5,7 @@ from xml.etree import ElementTree
 BPMN_NS = {"bpmn": "http://www.omg.org/spec/BPMN/20100524/MODEL"}
 PROCESS_PATH = Path("processes/dev-healthcheck/dev_healthcheck_process.bpmn20.xml")
 DATA_LOAD_PROCESS_PATH = Path("processes/data-ingestion/data_load_monitoring_process.bpmn20.xml")
+SOURCE_BATCH_PUBLICATION_PROCESS_PATH = Path("processes/data-ingestion/source_batch_publication_process.bpmn20.xml")
 DQ_PROCESS_PATH = Path("processes/data-quality/dq_check_process.bpmn20.xml")
 FEATURE_PROCESS_PATH = Path("processes/feature-mart/feature_build_process.bpmn20.xml")
 FORECAST_PROCESS_PATH = Path("processes/forecast/regular_forecast_run_process.bpmn20.xml")
@@ -73,6 +74,39 @@ def test_data_load_monitoring_bpmn_has_incident_path() -> None:
     }
     assert "Accept loaded batch" in user_task_names
     assert "Create data load incident" in user_task_names
+
+
+def test_source_batch_publication_bpmn_covers_gate_publication_recovery_and_audit() -> None:
+    tree = ElementTree.parse(SOURCE_BATCH_PUBLICATION_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "source_batch_publication_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Load source manifest" in service_task_names
+    assert "Discover source files" in service_task_names
+    assert "Validate source schema" in service_task_names
+    assert "Publish clean canonical tables" in service_task_names
+    assert "Write publication audit" in service_task_names
+    assert "Evaluate source batch gate" in business_rule_names
+    assert "Review source batch blocker" in user_task_names
+    assert "Approve source reprocessing" in user_task_names
+    assert "Source batch accepted?" in gateway_names
 
 
 def test_dq_check_bpmn_has_recheck_path() -> None:

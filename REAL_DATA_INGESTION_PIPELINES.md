@@ -105,6 +105,14 @@ Every clean table carries `source_batch_id`, `quality_status` and `published_at`
 | Display capacity | promo display capacity is present when required by mechanics | create Shelf Space review task |
 | Export reconciliation | ERP order status returns accepted/failed state for exported proposals | create Integration Owner exception |
 
+## Process Engine Coverage
+
+| Artifact | Purpose |
+| --- | --- |
+| `source_batch_publication_process.bpmn20.xml` | Controls manifest loading, source file discovery, schema/count/checksum validation, clean publication and recovery path |
+| `source_batch_gate_decision.dmn.xml` | Decides publish/block/resend/recovery action based on schema, checksum and DQ status |
+| `source_batch_recovery_case.cmmn.xml` | Manages Data Owner recovery tasks: triage, source resend, reprocessing approval and clean publication confirmation |
+
 ## Acceptance Criteria
 
 - All source systems have signed contracts.
