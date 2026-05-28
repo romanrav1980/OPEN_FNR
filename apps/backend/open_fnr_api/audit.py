@@ -3,6 +3,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
+from .config import settings
 from .repositories import AuditEventRecord, audit_event_repository
 
 
@@ -24,6 +25,12 @@ class AuditEventCreate(BaseModel):
 def record_audit_event(request: AuditEventCreate) -> AuditEventRecord:
     event = AuditEventRecord(event_id=f"audit-{uuid4()}", **request.model_dump())
     return audit_event_repository.append(event)
+
+
+def record_audit_event_if_enabled(request: AuditEventCreate) -> AuditEventRecord | None:
+    if not settings.audit_enabled:
+        return None
+    return record_audit_event(request)
 
 
 @router.post("/events", response_model=AuditEventRecord)

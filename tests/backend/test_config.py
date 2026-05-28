@@ -19,7 +19,8 @@ def test_settings_build_service_urls_from_central_host_and_ports() -> None:
 
 
 def test_settings_expose_runtime_mode_and_mock_mode() -> None:
-    settings = Settings(runtime_mode="test", mock_mode=False)
+    settings = Settings(runtime_mode="test", mock_mode=False, audit_enabled=True)
 
     assert settings.runtime_mode == "test"
     assert settings.mock_mode is False
+    assert settings.audit_enabled is True

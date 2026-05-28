@@ -3,6 +3,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/diagnostics", tags=["diagnostics"])
 
@@ -116,6 +118,23 @@ def create_exception_from_insight(insight_id: str, request: ExceptionCreateReque
         raise HTTPException(status_code=404, detail="Diagnostic insight not found")
     if request.actor_role not in {"Supply Chain Manager", "Forecast Planner", "Data Engineer"}:
         raise HTTPException(status_code=403, detail="Role is not allowed to convert diagnostic insight")
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="diagnostic_exception_created",
+            actor=request.actor,
+            actor_role=request.actor_role,
+            object_type="diagnostic_insight",
+            object_id=insight_id,
+            action="create_exception",
+            reason=request.comment,
+            correlation_id="exc-diagnostic-20260602-s001-sku001",
+            payload={
+                "root_cause": insight.root_cause,
+                "confidence": insight.confidence,
+                "evidence_ids": [item.evidence_id for item in insight.evidence],
+            },
+        )
+    )
     return {
         "insight_id": insight_id,
         "status": DiagnosticStatus.CONVERTED_TO_EXCEPTION,

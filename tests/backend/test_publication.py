@@ -74,6 +74,22 @@ def test_retry_failed_publication_package_increments_retry_count() -> None:
     assert payload["package"]["retry_count"] == 2
 
 
+def test_send_publication_package_does_not_auto_record_audit_when_disabled() -> None:
+    before = client.get("/audit/events", params={"limit": 500}).json()
+    response = client.post(
+        "/publication/packages/pub-wms-orders-20260528-001/send",
+        json={
+            "actor": "integration.owner@example.org",
+            "service_account": "svc-open-fnr-export",
+            "idempotency_key": "wms:orders:20260528:new",
+        },
+    )
+    assert response.status_code == 200
+
+    after = client.get("/audit/events", params={"limit": 500}).json()
+    assert len(after) == len(before)
+
+
 def test_publication_helpers() -> None:
     assert all_items_approved(PUBLICATION_PACKAGES[0]) is True
     assert all_items_approved(PUBLICATION_PACKAGES[3]) is False

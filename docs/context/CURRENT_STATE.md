@@ -410,7 +410,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 296 passed.
+- `python -m pytest` -> 298 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -437,6 +437,7 @@ Commit post-sprint documentation audit, environment strategy, real integration p
 ## H1 Industrial Hardening Artifacts
 
 - Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
+- Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=false` by default.
 - Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Audit API: `apps/backend/open_fnr_api/audit.py`.
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.

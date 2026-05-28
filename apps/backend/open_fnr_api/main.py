@@ -95,6 +95,7 @@ def metadata() -> dict[str, object]:
         "version": settings.version,
         "runtime_mode": settings.runtime_mode,
         "mock_mode": settings.mock_mode,
+        "audit_enabled": settings.audit_enabled,
         "modules": [
             "audit",
             "data-platform",

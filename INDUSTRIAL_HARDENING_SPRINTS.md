@@ -42,6 +42,7 @@ Status: in progress.
 - `apps/backend/open_fnr_api/database.py` provides lazy PostgreSQL connection management.
 - `PostgresAuditEventRepository` writes to and reads from `open_fnr.audit_events`.
 - `build_audit_event_repository(...)` selects in-memory repository for `mock_mode=true` and PostgreSQL repository for `mock_mode=false`.
+- Business action audit recording is controlled by `OPEN_FNR_AUDIT_ENABLED`; default is `false`.
 - `open_fnr.schema_migrations` tracks schema baseline.
 
 ## H3. ClickHouse Marts

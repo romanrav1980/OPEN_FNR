@@ -4,6 +4,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, model_validator
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/adjustments", tags=["manual-adjustments"])
 
@@ -250,6 +252,24 @@ def act_on_adjustment(adjustment_id: str, action: str, payload: AdjustmentAction
         new_value=adjustment.value,
         comment=payload.comment,
         created_at=datetime(2026, 5, 28, 15, 30, tzinfo=timezone.utc),
+    )
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="manual_adjustment_action",
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            object_type="manual_adjustment",
+            object_id=adjustment_id,
+            action=action,
+            reason=payload.comment,
+            correlation_id=event.event_id,
+            payload={
+                "old_status": adjustment.status,
+                "new_status": updated.status,
+                "target_type": adjustment.target_type,
+                "target_id": adjustment.target_id,
+            },
+        )
     )
     return {"adjustment": updated.model_dump(mode="json"), "audit_event": event.model_dump(mode="json")}
 

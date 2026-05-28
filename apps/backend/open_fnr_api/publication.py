@@ -4,6 +4,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/publication", tags=["publication"])
 
@@ -168,6 +170,23 @@ def send_export(package: PublicationPackage, request: ExportRequest) -> ExportRe
             "response_message": "sent to mock target",
         }
     )
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="publication_export_sent",
+            actor=request.actor,
+            actor_role="Integration Service",
+            object_type="publication_package",
+            object_id=package.package_id,
+            action="send",
+            reason=f"Export sent to {package.target}",
+            correlation_id=request.idempotency_key,
+            payload={
+                "target": package.target,
+                "idempotency_key": request.idempotency_key,
+                "item_count": len(package.items),
+            },
+        )
+    )
     return ExportResponse(package=sent_package, duplicate=False)
 
 
@@ -182,6 +201,23 @@ def retry_export(package: PublicationPackage, request: ExportRequest) -> ExportR
             "response_message": "retry sent to mock target",
             "retry_count": package.retry_count + 1,
         }
+    )
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="publication_export_retry",
+            actor=request.actor,
+            actor_role="Integration Service",
+            object_type="publication_package",
+            object_id=package.package_id,
+            action="retry",
+            reason=f"Retry failed export to {package.target}",
+            correlation_id=request.idempotency_key,
+            payload={
+                "target": package.target,
+                "idempotency_key": request.idempotency_key,
+                "retry_count": retried_package.retry_count,
+            },
+        )
     )
     return ExportResponse(package=retried_package, duplicate=False)
 

@@ -3,6 +3,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/store-management", tags=["store-management"])
 
@@ -120,9 +122,30 @@ def complete_store_task(task_id: str, request: StoreTaskCompletionRequest) -> di
         raise HTTPException(status_code=403, detail="Store scope mismatch")
 
     corrected = request.counted_qty != TRUE_INVENTORY.virtual_stock
+    status = InventoryStatus.CORRECTED if corrected else InventoryStatus.CHECKED
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="store_task_completed",
+            actor=request.actor,
+            actor_role=request.actor_role,
+            object_type="store_task",
+            object_id=task_id,
+            action="complete",
+            reason=request.comment,
+            correlation_id=f"{task_id}:{request.store_id}",
+            payload={
+                "store_id": request.store_id,
+                "sku": task.sku,
+                "task_type": task.task_type,
+                "counted_qty": request.counted_qty,
+                "previous_virtual_stock": TRUE_INVENTORY.virtual_stock,
+                "status": status,
+            },
+        )
+    )
     return {
         "task_id": task_id,
-        "status": InventoryStatus.CORRECTED if corrected else InventoryStatus.CHECKED,
+        "status": status,
         "counted_qty": request.counted_qty,
         "previous_virtual_stock": TRUE_INVENTORY.virtual_stock,
         "quality_flag": "store_feedback_received",

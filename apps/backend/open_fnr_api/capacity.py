@@ -3,6 +3,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/capacity", tags=["capacity"])
 
@@ -98,6 +100,24 @@ def approve_capacity_plan(plan_id: str, payload: CapacityActionRequest) -> dict[
     if payload.actor_role not in {"Supply Chain Manager", "Store Operations"}:
         raise HTTPException(status_code=403, detail="capacity approval role required")
     approved = plan.model_copy(update={"status": CapacityStatus.APPROVED})
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="capacity_plan_approved",
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            object_type="capacity_plan",
+            object_id=plan_id,
+            action="approve",
+            reason=payload.reason,
+            correlation_id=f"{plan_id}:approval",
+            payload={
+                "overloaded_date": plan.overloaded_date,
+                "overload_qty": plan.overload_qty,
+                "moved_qty": plan.moved_qty,
+                "affected_order_count": len(plan.affected_orders),
+            },
+        )
+    )
     return {"plan": approved.model_dump(mode="json"), "audit_message": f"{payload.actor} approved order moves: {payload.reason}"}
 
 

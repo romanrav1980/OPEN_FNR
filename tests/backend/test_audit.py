@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api.audit import AuditEventCreate, record_audit_event_if_enabled
 from open_fnr_api.main import app
 
 
@@ -38,4 +39,21 @@ def test_metadata_exposes_runtime_and_mock_mode() -> None:
     payload = response.json()
     assert payload["runtime_mode"] == "dev"
     assert payload["mock_mode"] is True
+    assert payload["audit_enabled"] is False
     assert "audit" in payload["modules"]
+
+
+def test_business_audit_recording_is_disabled_by_default() -> None:
+    event = record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="disabled_by_default",
+            actor="planner@example.org",
+            actor_role="Forecast Planner",
+            object_type="forecast",
+            object_id="forecast-1",
+            action="approve",
+            reason="audit disabled",
+        )
+    )
+
+    assert event is None

@@ -3,6 +3,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/supplier-collaboration", tags=["supplier-collaboration"])
 
@@ -94,6 +96,24 @@ def confirm_supplier_forecast(package_id: str, request: SupplierConfirmationRequ
         raise HTTPException(status_code=403, detail="Role is not allowed to confirm supplier forecast")
 
     status = decide_supplier_risk(request.confirmed_qty, FORECAST_SHARE.order_forecast_qty)
+    record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="supplier_forecast_confirmed",
+            actor=request.actor,
+            actor_role=request.actor_role,
+            object_type="supplier_forecast_share",
+            object_id=package_id,
+            action="confirm",
+            reason=request.comment,
+            correlation_id=FORECAST_SHARE.idempotency_key,
+            payload={
+                "supplier_id": FORECAST_SHARE.supplier_id,
+                "requested_qty": FORECAST_SHARE.order_forecast_qty,
+                "confirmed_qty": request.confirmed_qty,
+                "status": status,
+            },
+        )
+    )
     return {
         "package_id": package_id,
         "supplier_id": FORECAST_SHARE.supplier_id,
