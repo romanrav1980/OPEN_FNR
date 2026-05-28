@@ -1,5 +1,13 @@
 # Security Strategy OPEN FNR
 
+## 0. Post-Sprint Security Status
+
+The completed sprint implementation contains endpoint-level role checks and security smoke coverage. This is sufficient for the functional prototype, but not sufficient for production.
+
+The next phase must implement production-ready authentication, authorization, secrets, audit and object-level access. The execution plan is maintained in [PRODUCTION_SECURITY_HARDENING_PLAN.md](PRODUCTION_SECURITY_HARDENING_PLAN.md).
+
+Mandatory rule: IP addresses, host names, ports and secrets must not be hardcoded in feature code. Network configuration is governed by [CONFIGURATION_MANIFEST.md](CONFIGURATION_MANIFEST.md).
+
 ## 1. Назначение
 
 Документ описывает стратегию безопасности OPEN FNR: RBAC, аудит, секреты, доступы, сервисные аккаунты, сегментацию данных и требования к production-контру.
@@ -145,4 +153,3 @@ Security incident должен иметь:
 - admin actions audited;
 - security regression tests есть;
 - production access controlled.
-

@@ -708,3 +708,24 @@ Superset
 - AMD EPYC 9005: `https://www.amd.com/en/products/processors/server/epyc/9005-series.html`
 - NVIDIA L40S: `https://www.nvidia.com/en-gb/data-center/l40s/`
 - NVIDIA H200: `https://www.nvidia.com/en-sg/data-center/h200/`
+
+## 17. Post-Sprint Architecture Status
+
+As of 2026-05-28, the repository implements a functional prototype with FastAPI modules, React UI sections, Flowable-oriented BPMN/DMN/CMMN artifacts, Docker Compose development infrastructure and automated tests.
+
+The target architecture in this document remains valid, but the next implementation phase is industrialization:
+
+- persistence instead of in-memory mock data;
+- real POS/ERP/WMS/DWH/MDM/promo ingestion;
+- DEV/TEST/STAGE deployment contours;
+- production security;
+- routed API-backed UI;
+- pilot launch on limited stores/SKU.
+
+Detailed execution documents:
+
+- [DOCUMENTATION_AUDIT_AND_SYNC.md](DOCUMENTATION_AUDIT_AND_SYNC.md)
+- [NEXT_DELIVERY_PLAN.md](NEXT_DELIVERY_PLAN.md)
+- [DEPLOYMENT_ENVIRONMENTS_STRATEGY.md](DEPLOYMENT_ENVIRONMENTS_STRATEGY.md)
+- [REAL_DATA_INGESTION_PIPELINES.md](REAL_DATA_INGESTION_PIPELINES.md)
+- [UI_PRODUCTIZATION_PLAN.md](UI_PRODUCTIZATION_PLAN.md)

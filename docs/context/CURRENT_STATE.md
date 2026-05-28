@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 36 implementation is complete.
+Post-sprint documentation audit and next delivery planning are in progress after completion of all 37 sprint checkpoints.
 
 ## Local Infrastructure
 
@@ -413,12 +413,24 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - `python -m pytest` -> 290 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
+- `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
+- `docker compose --env-file infra/stage/.env.example -f infra/dev/compose.yaml config --quiet` -> STAGE compose config valid.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
 - `docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml ps` -> services up.
 
 ## Next Step
 
-Commit final block presentation to `romanrav1980/OPEN_FNR`, then review residual documentation consistency and decide next delivery block.
+Commit post-sprint documentation audit, environment strategy, real integration plan, security hardening plan, UI productization plan and pilot launch plan to `romanrav1980/OPEN_FNR`.
+
+## Post-Sprint Planning Artifacts
+
+- Documentation audit and synchronization: `DOCUMENTATION_AUDIT_AND_SYNC.md`.
+- Next delivery plan: `NEXT_DELIVERY_PLAN.md`.
+- Deployment environments strategy: `DEPLOYMENT_ENVIRONMENTS_STRATEGY.md`.
+- Real data ingestion pipelines: `REAL_DATA_INGESTION_PIPELINES.md`.
+- Production security hardening: `PRODUCTION_SECURITY_HARDENING_PLAN.md`.
+- UI productization: `UI_PRODUCTIZATION_PLAN.md`.
+- Pilot launch: `PILOT_LAUNCH_PLAN.md`.
 
 ## Block Presentations
 

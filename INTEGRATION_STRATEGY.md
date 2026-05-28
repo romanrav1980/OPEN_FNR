@@ -1,5 +1,17 @@
 # Integration Strategy OPEN FNR
 
+## 0. Post-Sprint Integration Status
+
+The completed sprint implementation contains integration mocks for ERP, WMS, DWH, TMS, supplier collaboration and store feedback. The next phase is to replace these mocks with real ingestion and export pipelines.
+
+Execution details are now split as follows:
+
+- high-level principles remain in this document;
+- detailed data loading contracts are in [DATA_INTEGRATION_SPEC.md](DATA_INTEGRATION_SPEC.md);
+- real pipeline transition plan is in [REAL_DATA_INGESTION_PIPELINES.md](REAL_DATA_INGESTION_PIPELINES.md);
+- environment and deployment rules are in [DEPLOYMENT_ENVIRONMENTS_STRATEGY.md](DEPLOYMENT_ENVIRONMENTS_STRATEGY.md);
+- IP addresses, host names and ports must follow [CONFIGURATION_MANIFEST.md](CONFIGURATION_MANIFEST.md).
+
 ## 1. Назначение
 
 Документ описывает стратегию интеграций OPEN FNR с корпоративными системами: ERP, WMS, DWH, POS, MDM, промо-системой, BI и внешними источниками.

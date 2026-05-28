@@ -1,5 +1,18 @@
 # Roadmap OPEN FNR
 
+## 0. Post-Sprint Status Update
+
+As of 2026-05-28, the repository contains a completed functional prototype across 37 sprint checkpoints. The implemented scope covers forecasting, promo, replenishment, process engine, procurement, shelf space, capacity, diagnostics, supplier collaboration and true inventory/store management.
+
+This does not mean production readiness. The roadmap is now re-baselined:
+
+- completed: functional prototype and process/UI/API coverage;
+- current phase: industrial hardening, real integrations, security and UI productization;
+- next business milestone: controlled pilot on limited stores/SKU;
+- next technical milestone: DEV/TEST/STAGE contours with real ingestion pipelines and production security foundation.
+
+The detailed next delivery plan is maintained in [NEXT_DELIVERY_PLAN.md](NEXT_DELIVERY_PLAN.md).
+
 ## 1. Назначение
 
 Roadmap фиксирует поэтапное развитие OPEN FNR от MVP до промышленного контура полной сети.

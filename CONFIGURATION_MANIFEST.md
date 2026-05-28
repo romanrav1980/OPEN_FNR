@@ -20,6 +20,8 @@ The following files may contain default local development addresses because they
 
 - `.env.example`
 - `apps/frontend/.env.example`
+- `infra/test/.env.example`
+- `infra/stage/.env.example`
 - `apps/backend/open_fnr_api/config.py`
 - `apps/frontend/src/app_config.ts`
 - `infra/dev/.env.example`

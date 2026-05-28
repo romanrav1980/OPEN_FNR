@@ -65,6 +65,13 @@ docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml up -d
 | [DEVELOPMENT_SPRINT_PLAN.md](DEVELOPMENT_SPRINT_PLAN.md) | план разработки по спринтам, вертикальные инкременты и тестовые слои |
 | [PROJECT_EXECUTION_PLAN.md](PROJECT_EXECUTION_PLAN.md) | подробный план выполнения проекта по спринтам с процессами и тестами |
 | [FUNCTIONAL_COVERAGE_MATRIX.md](FUNCTIONAL_COVERAGE_MATRIX.md) | матрица покрытия функциональности из raw-бенчмарка |
+| [DOCUMENTATION_AUDIT_AND_SYNC.md](DOCUMENTATION_AUDIT_AND_SYNC.md) | post-sprint audit: фактически реализованные модули, расхождения и следующие действия |
+| [NEXT_DELIVERY_PLAN.md](NEXT_DELIVERY_PLAN.md) | следующий план работ: industrial hardening, production deployment, real integrations, pilot |
+| [DEPLOYMENT_ENVIRONMENTS_STRATEGY.md](DEPLOYMENT_ENVIRONMENTS_STRATEGY.md) | стратегия DEV/TEST/STAGE/PROD контуров и команды запуска |
+| [REAL_DATA_INGESTION_PIPELINES.md](REAL_DATA_INGESTION_PIPELINES.md) | переход от mock-данных к реальным POS/ERP/WMS/DWH/MDM/promo pipelines |
+| [PRODUCTION_SECURITY_HARDENING_PLAN.md](PRODUCTION_SECURITY_HARDENING_PLAN.md) | production-ready security: OIDC, RBAC/ABAC, secrets, audit, service accounts |
+| [UI_PRODUCTIZATION_PLAN.md](UI_PRODUCTIZATION_PLAN.md) | перевод demo control tower в полноценный routed API-backed UI |
+| [PILOT_LAUNCH_PLAN.md](PILOT_LAUNCH_PLAN.md) | план пилота на ограниченной выборке магазинов/SKU |
 
 Ключевой масштаб:
 
