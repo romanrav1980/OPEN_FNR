@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 27 - Production Replenishment Scale</title>
+    <style>
+      :root { --bg:#1e1e1e; --panel:#252526; --red-light:#b83a4b; --text:#d4d4d4; --muted:#9da3ae; --border:#3a3a3a; --ok:#8fd19e; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,"Segoe UI",Arial,sans-serif; }
+      main { width:min(1180px, calc(100vw - 40px)); margin:0 auto; padding:32px 0 56px; }
+      section { border:1px solid var(--border); background:var(--panel); margin-top:20px; padding:20px; }
+      h1,h2,p { margin:0; }
+      h1 { font-size:30px; }
+      h2 { margin-bottom:12px; color:var(--red-light); font-size:20px; }
+      p,li,td,th { line-height:1.55; }
+      .subtitle { margin-top:8px; color:var(--muted); }
+      table { width:100%; border-collapse:collapse; margin-top:12px; }
+      th,td { border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+      th { color:var(--muted); font-size:12px; text-transform:uppercase; }
+      .ok { color:var(--ok); font-weight:700; }
+      .shot { width:100%; border:1px solid var(--border); margin-top:12px; }
+      code { color:var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 27: Production Replenishment Scale</h1>
+        <p class="subtitle">
+          Аннотация: тестируем промышленный контур replenishment: projected stock partitions,
+          3.6M order proposals, bulk approval, proposal retention и async export package.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем <code>Production Replenishment Scale</code>.</li>
+          <li>Проверяем industrial run: 3.6M proposals, 108M projected stock rows, runtime 94 minutes.</li>
+          <li>Проверяем partition table: fresh и grocery partitions в статусе approval_ready.</li>
+          <li>Проверяем bulk actions: Apply filter, Bulk approve, Queue export.</li>
+          <li>Проверяем exception panel: runtime/constraint/partition failure открывает scale exception case.</li>
+        </ol>
+        <img class="shot" src="screenshots/production-replenishment-scale.png" alt="Production Replenishment Scale" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Фактический результат</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Calculate projected stock partitions.</td><td>Промышленный расчет должен быть партиционирован.</td><td>BPMN содержит partitioned stock step.</td><td class="ok">Проверено BPMN.</td></tr>
+            <tr><td>2</td><td>Generate partitioned order proposals.</td><td>Миллионы предложений нельзя обрабатывать как один монолит.</td><td>Total proposals = 3.6M.</td><td class="ok">Проверено API.</td></tr>
+            <tr><td>3</td><td>Evaluate constraints at scale.</td><td>Constraint performance должен быть частью gate.</td><td>Max constraint eval <= 750 ms.</td><td class="ok">Проверено helper-тестом.</td></tr>
+            <tr><td>4</td><td>DMN evaluates bulk auto approval.</td><td>Bulk approval должен быть правилом, а не ручной кнопкой без контроля.</td><td>Rules: manual_review by partition/runtime, auto_approve.</td><td class="ok">Проверено DMN.</td></tr>
+            <tr><td>5</td><td>Replenishment Owner bulk-approves by saved filter.</td><td>Массовое действие требует роли и audit.</td><td>Wrong role gets 403, owner approves 3.6M proposals.</td><td class="ok">Проверено API RBAC.</td></tr>
+            <tr><td>6</td><td>Queue async export.</td><td>Большой export должен быть асинхронным и идемпотентным.</td><td>ERP/WMS package queued with idempotency key.</td><td class="ok">Проверено integration API.</td></tr>
+            <tr><td>7</td><td>CMMN handles scale exception.</td><td>Сбои runtime/constraint/export требуют управляемого восстановления.</td><td>Case содержит triage, performance review, rerun и recovery tasks.</td><td class="ok">Проверено CMMN.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead><tr><th>Тип</th><th>Проверка</th><th>Результат</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td><code>python -m pytest</code></td><td class="ok">220 passed</td></tr>
+            <tr><td>Frontend</td><td><code>npm.cmd run build</code> в <code>apps/frontend</code></td><td class="ok">Сборка успешна</td></tr>
+            <tr><td>UI screenshot</td><td>Playwright full-page screenshot</td><td class="ok">Скриншот сохранен</td></tr>
+            <tr><td>Process</td><td>BPMN industrial replenishment, DMN bulk approval, CMMN scale exception</td><td class="ok">Усиленные проверки пройдены</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

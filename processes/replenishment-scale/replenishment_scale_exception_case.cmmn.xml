@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment-scale">
+  <case id="replenishment_scale_exception_case" name="Replenishment scale exception case">
+    <casePlanModel id="replenishment_scale_exception_plan" name="Replenishment scale exception plan">
+      <humanTask id="triage_bulk_approval_block" name="Triage bulk approval block" />
+      <humanTask id="review_constraint_performance" name="Review constraint performance" />
+      <humanTask id="approve_partition_rerun" name="Approve partition rerun" />
+      <humanTask id="confirm_async_export_recovery" name="Confirm async export recovery" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -712,3 +712,37 @@ def test_model_drift_case_has_drift_shadow_rollback_and_retraining_tasks() -> No
     assert "Review shadow comparison" in human_task_names
     assert "Approve model rollback" in human_task_names
     assert "Confirm retraining plan" in human_task_names
+
+
+def test_bulk_auto_approval_decision_is_parseable_and_has_manual_and_auto_rules() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment-scale/bulk_auto_approval_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "bulk_auto_approval_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"decision", "action"}
+    assert {"rule_block_partition", "rule_block_runtime", "rule_auto_approve"}.issubset(rule_ids)
+
+
+def test_replenishment_scale_exception_case_has_bulk_constraint_rerun_and_export_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment-scale/replenishment_scale_exception_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "replenishment_scale_exception_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage bulk approval block" in human_task_names
+    assert "Review constraint performance" in human_task_names
+    assert "Approve partition rerun" in human_task_names
+    assert "Confirm async export recovery" in human_task_names

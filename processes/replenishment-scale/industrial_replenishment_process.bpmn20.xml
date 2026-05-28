@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment-scale">
+  <process id="industrial_replenishment_process" name="Industrial replenishment process" isExecutable="true">
+    <startEvent id="start_industrial_replenishment" name="Industrial replenishment started" />
+    <sequenceFlow id="flow_start_to_projected" sourceRef="start_industrial_replenishment" targetRef="calculate_projected_stock_partitions" />
+    <serviceTask id="calculate_projected_stock_partitions" name="Calculate projected stock partitions" />
+    <sequenceFlow id="flow_projected_to_proposals" sourceRef="calculate_projected_stock_partitions" targetRef="generate_partitioned_order_proposals" />
+    <serviceTask id="generate_partitioned_order_proposals" name="Generate partitioned order proposals" />
+    <sequenceFlow id="flow_proposals_to_constraints" sourceRef="generate_partitioned_order_proposals" targetRef="evaluate_constraints_at_scale" />
+    <serviceTask id="evaluate_constraints_at_scale" name="Evaluate constraints at scale" />
+    <sequenceFlow id="flow_constraints_to_gate" sourceRef="evaluate_constraints_at_scale" targetRef="evaluate_bulk_auto_approval" />
+    <businessRuleTask id="evaluate_bulk_auto_approval" name="Evaluate bulk auto approval" />
+    <sequenceFlow id="flow_gate_to_gateway" sourceRef="evaluate_bulk_auto_approval" targetRef="bulk_approval_gateway" />
+    <exclusiveGateway id="bulk_approval_gateway" name="Bulk approval allowed?" />
+    <sequenceFlow id="flow_allowed" sourceRef="bulk_approval_gateway" targetRef="approve_bulk_proposals" />
+    <sequenceFlow id="flow_exception" sourceRef="bulk_approval_gateway" targetRef="review_replenishment_scale_exception" />
+    <userTask id="review_replenishment_scale_exception" name="Review replenishment scale exception" />
+    <sequenceFlow id="flow_exception_to_approve" sourceRef="review_replenishment_scale_exception" targetRef="approve_bulk_proposals" />
+    <userTask id="approve_bulk_proposals" name="Approve bulk proposals" />
+    <sequenceFlow id="flow_approve_to_export" sourceRef="approve_bulk_proposals" targetRef="queue_async_export" />
+    <serviceTask id="queue_async_export" name="Queue async export" />
+    <sequenceFlow id="flow_export_to_retention" sourceRef="queue_async_export" targetRef="apply_proposal_retention" />
+    <serviceTask id="apply_proposal_retention" name="Apply proposal retention" />
+    <sequenceFlow id="flow_retention_to_end" sourceRef="apply_proposal_retention" targetRef="end_industrial_replenishment_completed" />
+    <endEvent id="end_industrial_replenishment_completed" name="Industrial replenishment completed" />
+  </process>
+</definitions>

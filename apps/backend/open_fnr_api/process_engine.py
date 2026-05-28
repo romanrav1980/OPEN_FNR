@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="industrial_replenishment_process",
+        name="Industrial replenishment process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-020",
+        source_path="processes/replenishment-scale/industrial_replenishment_process.bpmn20.xml",
+        owner_role="Replenishment Owner",
+    ),
+    ProcessDefinition(
+        key="bulk_auto_approval_decision",
+        name="Bulk auto approval decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-020",
+        source_path="processes/replenishment-scale/bulk_auto_approval_decision.dmn.xml",
+        owner_role="Replenishment Owner",
+    ),
+    ProcessDefinition(
+        key="replenishment_scale_exception_case",
+        name="Replenishment scale exception case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-020",
+        source_path="processes/replenishment-scale/replenishment_scale_exception_case.cmmn.xml",
+        owner_role="Replenishment Owner",
+    ),
+    ProcessDefinition(
         key="model_release_process",
         name="Model release process",
         artifact_type=ProcessArtifactType.BPMN,

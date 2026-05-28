@@ -35,6 +35,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "model_release_process" for item in payload["items"])
     assert any(item["key"] == "model_release_gate_decision" for item in payload["items"])
     assert any(item["key"] == "model_drift_case" for item in payload["items"])
+    assert any(item["key"] == "industrial_replenishment_process" for item in payload["items"])
+    assert any(item["key"] == "bulk_auto_approval_decision" for item in payload["items"])
+    assert any(item["key"] == "replenishment_scale_exception_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

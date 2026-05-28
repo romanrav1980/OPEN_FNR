@@ -607,6 +607,27 @@ const mlReleaseSteps = [
   { step: "Release approval", owner: "Forecast Owner", status: "ready", evidence: "release gate allowed" },
 ];
 
+const replenishmentScalePartitions = [
+  {
+    partition: "repl-north-fresh-p001",
+    region: "north",
+    category: "fresh",
+    proposals: "1.24M",
+    projected: "37.2M",
+    constraint: "420 ms",
+    status: "approval_ready",
+  },
+  {
+    partition: "repl-north-grocery-p002",
+    region: "north",
+    category: "grocery",
+    proposals: "2.36M",
+    projected: "70.8M",
+    constraint: "510 ms",
+    status: "approval_ready",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2725,6 +2746,76 @@ function App() {
             <h3>Rollback rehearsed</h3>
             <p>
               Drift case covers triage, shadow comparison review, rollback approval and retraining plan confirmation.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Production Replenishment Scale">
+        <div className="section-heading">
+          <h2>Production Replenishment Scale</h2>
+          <p>High-volume projected stock, partitioned proposals, bulk approval and async export</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Industrial Run</span>
+            <strong>3.6M proposals / 108M projected stock rows</strong>
+            <p>Runtime 94 minutes, retention 180 days and bulk approval gate is ready.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Async Export</span>
+            <strong>ERP/WMS package queued</strong>
+            <p>Export uses idempotency key industrial-repl-20260528-001:erp-wms:v1.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Partition</th>
+                <th>Region</th>
+                <th>Category</th>
+                <th>Proposals</th>
+                <th>Projected rows</th>
+                <th>Constraint eval</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {replenishmentScalePartitions.map((row) => (
+                <tr key={row.partition}>
+                  <td>{row.partition}</td>
+                  <td>{row.region}</td>
+                  <td>{row.category}</td>
+                  <td>{row.proposals}</td>
+                  <td>{row.projected}</td>
+                  <td>{row.constraint}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Bulk Approval</span>
+            <h3>Approve by saved filter</h3>
+            <p>
+              Replenishment Owner approves all ready partitions by saved filter after runtime,
+              constraint performance and blocked partition checks pass.
+            </p>
+            <div className="action-row">
+              <button type="button">Apply filter</button>
+              <button type="button">Bulk approve</button>
+              <button type="button">Queue export</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Exception Path</span>
+            <h3>Scale exception case</h3>
+            <p>
+              Runtime, constraint or partition failures open a case for triage, partition rerun
+              and async export recovery confirmation.
             </p>
           </aside>
         </div>

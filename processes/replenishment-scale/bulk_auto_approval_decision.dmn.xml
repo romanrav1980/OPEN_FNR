@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/replenishment-scale" name="bulk_auto_approval_decision">
+  <decision id="bulk_auto_approval_decision" name="Bulk auto approval decision">
+    <decisionTable id="bulk_auto_approval_table" hitPolicy="FIRST">
+      <input id="input_runtime_minutes" label="runtime_minutes">
+        <inputExpression id="input_runtime_expr" typeRef="number"><text>runtime_minutes</text></inputExpression>
+      </input>
+      <input id="input_max_constraint_ms" label="max_constraint_eval_ms">
+        <inputExpression id="input_constraint_expr" typeRef="number"><text>max_constraint_eval_ms</text></inputExpression>
+      </input>
+      <input id="input_blocked_partitions" label="blocked_partitions">
+        <inputExpression id="input_blocked_expr" typeRef="number"><text>blocked_partitions</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_block_partition">
+        <inputEntry id="rule_block_runtime"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_constraint"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_partitions"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_block_decision"><text>"manual_review"</text></outputEntry>
+        <outputEntry id="rule_block_action"><text>"open scale exception"</text></outputEntry>
+      </rule>
+      <rule id="rule_block_runtime">
+        <inputEntry id="rule_runtime_value"><text>&gt; 120</text></inputEntry>
+        <inputEntry id="rule_runtime_constraint"><text>-</text></inputEntry>
+        <inputEntry id="rule_runtime_partitions"><text>0</text></inputEntry>
+        <outputEntry id="rule_runtime_decision"><text>"manual_review"</text></outputEntry>
+        <outputEntry id="rule_runtime_action"><text>"review replenishment runtime"</text></outputEntry>
+      </rule>
+      <rule id="rule_auto_approve">
+        <inputEntry id="rule_auto_runtime"><text>&lt;= 120</text></inputEntry>
+        <inputEntry id="rule_auto_constraint"><text>&lt;= 750</text></inputEntry>
+        <inputEntry id="rule_auto_partitions"><text>0</text></inputEntry>
+        <outputEntry id="rule_auto_decision"><text>"auto_approve"</text></outputEntry>
+        <outputEntry id="rule_auto_action"><text>"approve bulk proposals"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

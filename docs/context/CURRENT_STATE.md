@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 26 implementation is complete.
+Sprint 27 implementation is complete.
 
 ## Local Infrastructure
 
@@ -292,9 +292,20 @@ Known local URLs:
 - UI Model Monitoring V2 section with drift panel, shadow comparison, release approval and rollback actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-26-production-ml-retraining/index.html`.
 
+## Sprint 27 Artifacts
+
+- Replenishment Scale API: `apps/backend/open_fnr_api/replenishment_scale.py`.
+- Replenishment Scale tests: `tests/backend/test_replenishment_scale.py`.
+- Replenishment scale process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Industrial replenishment BPMN: `processes/replenishment-scale/industrial_replenishment_process.bpmn20.xml`.
+- Bulk auto approval DMN: `processes/replenishment-scale/bulk_auto_approval_decision.dmn.xml`.
+- Replenishment scale exception CMMN: `processes/replenishment-scale/replenishment_scale_exception_case.cmmn.xml`.
+- UI Production Replenishment Scale section with partitioned proposal counts, bulk approval, retention and async export.
+- HTML test report with screenshot: `docs/test-reports/sprint-27-production-replenishment-scale/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 212 passed.
+- `python -m pytest` -> 220 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -302,4 +313,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 26 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 27: Production Replenishment Scale.
+Commit Sprint 27 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 28: Production Process Governance.

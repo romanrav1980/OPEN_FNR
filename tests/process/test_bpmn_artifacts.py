@@ -30,6 +30,7 @@ STAGE_DAILY_CYCLE_PROCESS_PATH = Path("processes/stage/stage_daily_cycle_process
 PILOT_OPERATIONAL_PROCESS_PATH = Path("processes/pilot/pilot_operational_process.bpmn20.xml")
 INDUSTRIAL_DATA_LOAD_PROCESS_PATH = Path("processes/data-scale/industrial_data_load_process.bpmn20.xml")
 MODEL_RELEASE_PROCESS_PATH = Path("processes/ml-governance/model_release_process.bpmn20.xml")
+INDUSTRIAL_REPLENISHMENT_PROCESS_PATH = Path("processes/replenishment-scale/industrial_replenishment_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -691,3 +692,36 @@ def test_model_release_bpmn_covers_retraining_shadow_approval_and_rollback_paths
     assert "Review model drift" in user_task_names
     assert "Approve model release" in user_task_names
     assert {"Model released", "Model rolled back"}.issubset(end_event_names)
+
+
+def test_industrial_replenishment_bpmn_covers_bulk_approval_and_async_export_paths() -> None:
+    tree = ElementTree.parse(INDUSTRIAL_REPLENISHMENT_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "industrial_replenishment_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Calculate projected stock partitions" in service_task_names
+    assert "Generate partitioned order proposals" in service_task_names
+    assert "Evaluate constraints at scale" in service_task_names
+    assert "Queue async export" in service_task_names
+    assert "Apply proposal retention" in service_task_names
+    assert "Evaluate bulk auto approval" in business_rule_names
+    assert "Review replenishment scale exception" in user_task_names
+    assert "Approve bulk proposals" in user_task_names
+    assert "Bulk approval allowed?" in gateway_names

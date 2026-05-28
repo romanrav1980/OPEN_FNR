@@ -16,6 +16,7 @@ from .process_engine import router as process_engine_router
 from .promo import router as promo_router
 from .publication import router as publication_router
 from .replenishment import router as replenishment_router
+from .replenishment_scale import router as replenishment_scale_router
 from .security import router as security_router
 from .stage import router as stage_router
 from .health import probe_http
@@ -45,6 +46,7 @@ app.include_router(promo_router)
 app.include_router(publication_router)
 app.include_router(process_engine_router)
 app.include_router(replenishment_router)
+app.include_router(replenishment_scale_router)
 app.include_router(kpi_router)
 app.include_router(lifecycle_router)
 app.include_router(security_router)
@@ -82,6 +84,7 @@ def metadata() -> dict[str, object]:
             "ml-governance",
             "promo",
             "replenishment",
+            "replenishment-scale",
             "multi-echelon",
             "performance",
             "business-pilot",
