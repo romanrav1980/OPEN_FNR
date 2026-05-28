@@ -113,6 +113,14 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run-shadow-load.ps1 -Busine
 
 The runner uses `OPEN_FNR_LANDING_ROOT_PATH` unless `-LandingRootPath` is provided. It checks that every registered source contract has at least one supported source file before the validation stage begins.
 
+The same gate is available through API:
+
+```http
+POST /data/ingestion/shadow-load/run
+```
+
+The API returns a process instance id, source discovery report and recovery tasks that map to `source_batch_recovery_case` when files are missing.
+
 ## Process Engine Coverage
 
 | Artifact | Purpose |

@@ -26,6 +26,7 @@ from .replenishment import router as replenishment_router
 from .replenishment_scale import router as replenishment_scale_router
 from .security import router as security_router
 from .shelf_space import router as shelf_space_router
+from .shadow_gate import router as shadow_gate_router
 from .stage import router as stage_router
 from .store_management import router as store_management_router
 from .supplier_collaboration import router as supplier_collaboration_router
@@ -70,6 +71,7 @@ app.include_router(lifecycle_router)
 app.include_router(marts_router)
 app.include_router(security_router)
 app.include_router(shelf_space_router)
+app.include_router(shadow_gate_router)
 app.include_router(stage_router)
 app.include_router(store_management_router)
 app.include_router(supplier_collaboration_router)
@@ -122,6 +124,7 @@ def metadata() -> dict[str, object]:
             "business-pilot",
             "security",
             "shelf-space",
+            "shadow-load-gate",
             "stage-rehearsal",
             "store-management",
             "supplier-collaboration",

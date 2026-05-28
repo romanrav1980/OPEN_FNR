@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="source_batch_publication_process",
+        name="Source batch publication process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260529-001",
+        source_path="processes/data-ingestion/source_batch_publication_process.bpmn20.xml",
+        owner_role="Data Platform Owner",
+    ),
+    ProcessDefinition(
+        key="source_batch_gate_decision",
+        name="Source batch gate decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260529-001",
+        source_path="processes/data-ingestion/source_batch_gate_decision.dmn.xml",
+        owner_role="Data Platform Owner",
+    ),
+    ProcessDefinition(
+        key="source_batch_recovery_case",
+        name="Source batch recovery case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260529-001",
+        source_path="processes/data-ingestion/source_batch_recovery_case.cmmn.xml",
+        owner_role="Data Owner",
+    ),
+    ProcessDefinition(
         key="store_task_process",
         name="Store task process",
         artifact_type=ProcessArtifactType.BPMN,

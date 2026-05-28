@@ -69,6 +69,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "true_inventory_confidence_decision" for item in payload["items"])
     assert any(item["key"] == "store_task_priority_decision" for item in payload["items"])
     assert any(item["key"] == "inventory_mismatch_case" for item in payload["items"])
+    assert any(item["key"] == "source_batch_publication_process" for item in payload["items"])
+    assert any(item["key"] == "source_batch_gate_decision" for item in payload["items"])
+    assert any(item["key"] == "source_batch_recovery_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:
