@@ -4,7 +4,7 @@ Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening I5 is in progress after completion of I4 MDM/PIM ingestion. The current focus is promo source ingestion with SKU, store scope, discount, price and display attributes.
+Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
 ## Local Infrastructure
 
@@ -54,6 +54,8 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Feature Mart API and models: `apps/backend/open_fnr_api/feature_mart.py`.
 - Feature Mart tests: `tests/backend/test_feature_mart.py`, `tests/data/test_feature_mart_rules.py`.
 - Feature Mart process artifacts: `processes/feature-mart`.
+- Feature mart build plan/run API: `/feature-mart/build-plans`, `/feature-mart/build-runs`.
+- Feature mart build task in Process Engine: `task-feature-build-001`.
 - Active matrix and feature store SQL structures in ClickHouse init script.
 - Feature version metadata SQL structure in PostgreSQL init script.
 - UI Feature Mart Status section.

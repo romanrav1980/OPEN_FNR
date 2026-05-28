@@ -94,6 +94,16 @@ def test_data_platform_owner_sees_clean_publication_task() -> None:
     assert "confirm_publication" in task["available_actions"]
 
 
+def test_data_science_owner_sees_feature_build_task() -> None:
+    response = client.get("/process/tasks", params={"role": "Data Science Owner"})
+    assert response.status_code == 200
+
+    tasks = response.json()["items"]
+    task = next(item for item in tasks if item["task_id"] == "task-feature-build-001")
+    assert task["process_key"] == "feature_build_process"
+    assert "publish" in task["available_actions"]
+
+
 def test_clean_publication_task_completion_returns_audit_events() -> None:
     response = client.post(
         "/process/tasks/task-clean-publication-001/complete",
