@@ -421,7 +421,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Complete I5 verification, commit promo ingestion, then prepare a compact real-ingestion block presentation and continue to pilot ingestion gate.
+Real-ingestion I1-I5 is implemented and verified. Next: connect real source adapters or file drops for pilot shadow load, then harden clean canonical tables and Process Engine DQ tasks.
 
 ## Post-Sprint Planning Artifacts
 
@@ -498,6 +498,13 @@ Complete I5 verification, commit promo ingestion, then prepare a compact real-in
 - Raw ClickHouse landing table: `open_fnr.raw_promo_plans`.
 - Promo ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_clickhouse_promo_schema.py`, `tests/orchestration/test_promo_plan_ingestion.py`.
 
+## Real Ingestion Gate Artifacts
+
+- Source readiness endpoint: `/data/ingestion/readiness`.
+- Pilot shadow load gate rules: `REAL_DATA_INGESTION_PIPELINES.md`.
+- Developer/user presentation: `docs/presentations/real-ingestion-sprints-i1-i5/index.html`.
+
 ## Block Presentations
 
 - Extended coverage sprints 31-36: `docs/presentations/extended-coverage-sprints-31-36/index.html`.
+- Real ingestion sprints I1-I5: `docs/presentations/real-ingestion-sprints-i1-i5/index.html`.

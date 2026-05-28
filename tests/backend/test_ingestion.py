@@ -103,3 +103,17 @@ def test_promo_manifest_exposes_plan_source() -> None:
     assert manifest["contract_name"] == "promo_plan_line"
     assert manifest["contract_version"] == "v1"
     assert manifest["idempotency_key"] == "PROMO:promo_plan_line:v1:2026-05-28"
+
+
+def test_ingestion_readiness_summarizes_all_real_sources() -> None:
+    response = client.get("/data/ingestion/readiness")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "ready_for_shadow_load"
+    assert payload["ready_count"] == payload["total"] == 5
+    sources = {pipeline["source_system"] for pipeline in payload["pipelines"]}
+    assert sources == {"POS", "WMS", "ERP", "MDM", "PROMO"}
+    promo = next(pipeline for pipeline in payload["pipelines"] if pipeline["source_system"] == "PROMO")
+    assert "overlap_dq" in promo["blocking_gates"]
+    assert "display_capacity_dq" in promo["blocking_gates"]

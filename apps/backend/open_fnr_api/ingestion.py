@@ -145,6 +145,54 @@ PROMO_PLAN_MANIFEST = SourceBatchManifest(
     landed_uri="s3-compatible://open-fnr-landing/promo/plans/business_date=2026-05-28/promo-plan.parquet",
 )
 
+SOURCE_PIPELINE_READINESS: tuple[dict[str, object], ...] = (
+    {
+        "source_system": "POS",
+        "pipeline": "pos_sales",
+        "contracts": ["pos_sales_line"],
+        "status": "ready_for_shadow_load",
+        "supports_projected_stock": False,
+        "supports_forecast": True,
+        "blocking_gates": ["schema", "row_count", "checksum", "dq"],
+    },
+    {
+        "source_system": "WMS",
+        "pipeline": "wms_inventory",
+        "contracts": ["wms_stock_snapshot_line", "wms_open_order_line", "wms_in_transit_line"],
+        "status": "ready_for_shadow_load",
+        "supports_projected_stock": True,
+        "supports_forecast": False,
+        "blocking_gates": ["schema", "row_count", "checksum", "dq"],
+    },
+    {
+        "source_system": "ERP",
+        "pipeline": "erp_commercial",
+        "contracts": ["erp_price_line", "erp_order_export_status_line"],
+        "status": "ready_for_shadow_load",
+        "supports_projected_stock": False,
+        "supports_forecast": True,
+        "blocking_gates": ["schema", "row_count", "checksum", "dq", "export_reconciliation"],
+    },
+    {
+        "source_system": "MDM",
+        "pipeline": "mdm_reference",
+        "contracts": ["mdm_product_line", "mdm_store_line"],
+        "status": "ready_for_shadow_load",
+        "supports_projected_stock": True,
+        "supports_forecast": True,
+        "blocking_gates": ["schema", "row_count", "checksum", "referential_integrity"],
+    },
+    {
+        "source_system": "PROMO",
+        "pipeline": "promo_plan",
+        "contracts": ["promo_plan_line"],
+        "status": "ready_for_shadow_load",
+        "supports_projected_stock": True,
+        "supports_forecast": True,
+        "blocking_gates": ["schema", "row_count", "checksum", "overlap_dq", "display_capacity_dq"],
+    },
+)
+
 
 @router.get("/contracts")
 def list_contracts() -> dict[str, object]:
@@ -194,6 +242,19 @@ def get_mdm_stores_manifest() -> dict[str, object]:
 @router.get("/ingestion/manifests/promo-plan")
 def get_promo_plan_manifest() -> dict[str, object]:
     return PROMO_PLAN_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/readiness")
+def get_ingestion_readiness() -> dict[str, object]:
+    pipelines = list(SOURCE_PIPELINE_READINESS)
+    ready_count = sum(1 for pipeline in pipelines if pipeline["status"] == "ready_for_shadow_load")
+    return {
+        "status": "ready_for_shadow_load" if ready_count == len(pipelines) else "incomplete",
+        "ready_count": ready_count,
+        "total": len(pipelines),
+        "pipelines": pipelines,
+        "next_gate": "pilot_shadow_load",
+    }
 
 
 @router.get("/ingestion/status")

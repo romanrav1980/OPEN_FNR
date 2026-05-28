@@ -78,6 +78,19 @@ flowchart LR
 | MDM/PIM | in progress | MDM product/store contracts, manifest APIs, Airflow DAG skeleton, ClickHouse raw MDM tables |
 | Promo system | in progress | Promo plan contract, manifest API, Airflow DAG skeleton, ClickHouse raw promo table |
 
+## Pilot Shadow Load Gate
+
+| Gate | Rule | Failure action |
+| --- | --- | --- |
+| Schema | inbound files/API payloads match versioned Pydantic contracts | reject batch and create DQ blocker |
+| Row count | manifest row count equals landed row count | stop clean publication |
+| Checksum | manifest checksum matches landed object checksum | stop clean publication and request source resend |
+| Idempotency | repeated batch uses same idempotency key and does not duplicate clean rows | mark duplicate/replayed batch |
+| Referential integrity | sales, stock, prices and promo rows reference valid SKU/store master data | create Data Owner case |
+| Promo overlap | promo plan has no invalid SKU/store/date overlaps | create Promo Planner task |
+| Display capacity | promo display capacity is present when required by mechanics | create Shelf Space review task |
+| Export reconciliation | ERP order status returns accepted/failed state for exported proposals | create Integration Owner exception |
+
 ## Acceptance Criteria
 
 - All source systems have signed contracts.
