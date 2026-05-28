@@ -34,6 +34,8 @@ The following files may contain default local development addresses because they
 - New frontend links must use `localServiceUrl(...)`.
 - Tests must assert behavior through configuration, not embedded addresses.
 - Sprint reports may mention command evidence, but executable code must stay configuration-driven.
+- Business process audit must be controlled by `OPEN_FNR_AUDIT_ENABLED`; default is enabled.
+- Source file landing paths must be controlled by `OPEN_FNR_LANDING_ROOT_PATH`; source adapters must not hardcode local paths.
 
 ## Quality Gate
 

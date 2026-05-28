@@ -26,6 +26,15 @@ Define how OPEN FNR is deployed across DEV, TEST, STAGE and PROD without hardcod
 
 `infra/dev/compose.yaml` is parameterized by `OPEN_FNR_PROJECT`, so multiple local contours can run without container name collisions.
 
+Runtime settings that must stay aligned across `.env.example` and `infra/*/.env.example`:
+
+| Setting | DEV | TEST | STAGE | Purpose |
+| --- | --- | --- | --- | --- |
+| `OPEN_FNR_RUNTIME_MODE` | `dev` | `test` | `stage` | runtime contour marker |
+| `OPEN_FNR_MOCK_MODE` | `true` | `true` | `false` | repository and fallback selection |
+| `OPEN_FNR_AUDIT_ENABLED` | `true` | `true` | `true` | configurable business process audit |
+| `OPEN_FNR_LANDING_ROOT_PATH` | `data/landing/dev` | `data/landing/test` | `data/landing/stage` | source file landing root |
+
 ## Commands
 
 DEV:
