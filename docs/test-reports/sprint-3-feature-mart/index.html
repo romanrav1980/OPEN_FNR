@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 3 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { font-size: 34px; line-height: 1.15; }
+      h2 { margin-top: 34px; color: #f0f0f0; }
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      code { color: #f6d6dc; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .warn { color: var(--warn); font-weight: 700; }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 3 / Feature Mart</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 3: активная матрица,
+          версионирование feature mart, point-in-time признаки и процесс
+          публикации версии признаков.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем Feature Mart Foundation, потому что это слой, на котором
+          будет построен первый регулярный прогноз. Метод проверки объединяет
+          API-тесты, data rules, process artifact tests и UI screenshot. Такой
+          подход подтверждает, что матрица исключает неактивные сущности,
+          признаки не допускают leakage, а процесс публикации версии признаков
+          управляется через BPMN/DMN/CMMN.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, data, process и encoding тесты.</td>
+              <td>Проверить feature mart API, active matrix rules и BPMN/DMN/CMMN.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">30 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить, что Feature Mart Status не ломает TypeScript и сборку.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI и снимаем full-page screenshot.</td>
+              <td>Зафиксировать визуальный результат Sprint 3.</td>
+              <td>Скриншот содержит Feature Mart Status.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Dev Control Tower.</td>
+              <td>Проверить доступность общего рабочего экрана.</td>
+              <td>Feature Mart должен быть виден рядом с ingestion и DQ.</td>
+              <td>Страница отображается без ошибок.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем Feature Mart Status.</td>
+              <td>Убедиться, что пользователь видит версию признаков и статус сборки.</td>
+              <td>Перед baseline forecast важно понимать, какая feature version опубликована.</td>
+              <td>Видны versions, status, active pairs, feature count, quality.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем карточки Active Matrix и Feature Groups.</td>
+              <td>Показать бизнес-смысл feature mart, а не только технический статус.</td>
+              <td>Пользователь должен видеть исключение закрытых магазинов и inactive SKU.</td>
+              <td>Карточки объясняют active matrix и point-in-time feature groups.</td>
+              <td class="ok">Карточки отображаются.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем failed partition status.</td>
+              <td>Убедиться, что ошибка сборки видима в UI.</td>
+              <td>Проблемная партиция должна приводить к incident case, а не теряться.</td>
+              <td>Версия со статусом failed выделена в таблице.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>feature_build_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс после принятия DQ.</td>
+              <td>Feature build должен начинаться только после quality gate.</td>
+              <td>BPMN содержит start event DQ accepted.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>feature_build_process</code></td>
+              <td>2</td>
+              <td>Собираем active matrix.</td>
+              <td>Исключить закрытые магазины, inactive SKU и невалидный ассортимент.</td>
+              <td>BPMN содержит Build active matrix.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>feature_build_process</code></td>
+              <td>3</td>
+              <td>Собираем и валидируем feature mart.</td>
+              <td>Не допустить leakage и неверные row counts до прогноза.</td>
+              <td>BPMN содержит Build feature mart и Validate feature mart.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>feature_build_process</code></td>
+              <td>4</td>
+              <td>Публикуем валидированную версию.</td>
+              <td>Forecast должен ссылаться на воспроизводимую feature version.</td>
+              <td>BPMN содержит Publish feature version.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>active_matrix_inclusion_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN-решение включения пары store x SKU.</td>
+              <td>Правило active matrix должно быть управляемым, а не hardcode.</td>
+              <td>DMN содержит decisionTable include_pair.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>feature_build_incident_case</code></td>
+              <td>1</td>
+              <td>Проверяем CMMN case для failed partition.</td>
+              <td>Ошибки сборки требуют triage, rebuild или fallback approval.</td>
+              <td>CMMN содержит triage и approve fallback tasks.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/feature-mart-status.png" alt="OPEN FNR Feature Mart Status screenshot" />
+        <p class="caption">
+          Скриншот: Dev Control Tower с Feature Mart Status после Sprint 3.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 3 test cycle passed. Active matrix, feature definitions,
+          version metadata, process artifacts and UI status are covered by
+          automated tests and visual evidence.
+        </p>
+        <p class="warn">
+          Ограничение: feature values пока представлены контрактом и sample
+          metadata; физический Spark/Polars расчёт будет добавлен в следующих
+          спринтах.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

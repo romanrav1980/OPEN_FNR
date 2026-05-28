@@ -6,6 +6,7 @@ BPMN_NS = {"bpmn": "http://www.omg.org/spec/BPMN/20100524/MODEL"}
 PROCESS_PATH = Path("processes/dev-healthcheck/dev_healthcheck_process.bpmn20.xml")
 DATA_LOAD_PROCESS_PATH = Path("processes/data-ingestion/data_load_monitoring_process.bpmn20.xml")
 DQ_PROCESS_PATH = Path("processes/data-quality/dq_check_process.bpmn20.xml")
+FEATURE_PROCESS_PATH = Path("processes/feature-mart/feature_build_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -53,3 +54,17 @@ def test_dq_check_bpmn_has_recheck_path() -> None:
     }
     assert "Run DQ rules" in service_task_names
     assert "Re-run DQ rules" in service_task_names
+
+
+def test_feature_build_bpmn_publishes_validated_version() -> None:
+    tree = ElementTree.parse(FEATURE_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "feature_build_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    assert "Build active matrix" in service_task_names
+    assert "Publish feature version" in service_task_names

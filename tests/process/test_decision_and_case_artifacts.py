@@ -49,3 +49,26 @@ def test_data_quality_incident_cmmn_is_parseable() -> None:
     }
     assert "Triage DQ incident" in human_task_names
     assert "Approve waiver" in human_task_names
+
+
+def test_feature_mart_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/feature-mart/active_matrix_inclusion_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "active_matrix_inclusion_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_feature_build_incident_cmmn_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/feature-mart/feature_build_incident_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "feature_build_incident_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage feature build failure" in human_task_names
+    assert "Approve feature fallback" in human_task_names

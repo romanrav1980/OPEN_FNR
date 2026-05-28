@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/feature-mart">
+  <case id="feature_build_incident_case" name="Feature Build Incident Case">
+    <casePlanModel id="feature_build_incident_case_plan" name="Feature Build Incident">
+      <planItem id="plan_triage_feature_failure" definitionRef="triage_feature_failure" />
+      <planItem id="plan_rebuild_feature_partition" definitionRef="rebuild_feature_partition" />
+      <planItem id="plan_approve_feature_fallback" definitionRef="approve_feature_fallback" />
+      <humanTask id="triage_feature_failure"
+                 name="Triage feature build failure"
+                 flowable:candidateGroups="data-engineering" />
+      <humanTask id="rebuild_feature_partition"
+                 name="Rebuild feature partition"
+                 flowable:candidateGroups="data-engineering" />
+      <humanTask id="approve_feature_fallback"
+                 name="Approve feature fallback"
+                 flowable:candidateGroups="data-science" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -66,3 +66,19 @@ CREATE TABLE IF NOT EXISTS open_fnr.dq_incidents
 
 CREATE INDEX IF NOT EXISTS ix_dq_incidents_business_date
     ON open_fnr.dq_incidents (business_date, domain, severity, status);
+
+CREATE TABLE IF NOT EXISTS open_fnr.feature_mart_versions
+(
+    feature_version text PRIMARY KEY,
+    business_date date NOT NULL,
+    status text NOT NULL,
+    input_batch_ids jsonb NOT NULL,
+    active_pairs bigint NOT NULL CHECK (active_pairs >= 0),
+    feature_count integer NOT NULL CHECK (feature_count >= 0),
+    quality_status text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    published_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS ix_feature_mart_versions_business_date
+    ON open_fnr.feature_mart_versions (business_date, status);

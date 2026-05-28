@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .config import settings
 from .data_quality import router as data_quality_router
+from .feature_mart import router as feature_mart_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
 
@@ -13,6 +14,7 @@ app = FastAPI(
 
 app.include_router(ingestion_router)
 app.include_router(data_quality_router)
+app.include_router(feature_mart_router)
 
 
 @app.get("/health")
@@ -39,6 +41,7 @@ def metadata() -> dict[str, object]:
             "data-platform",
             "data-ingestion",
             "data-quality",
+            "feature-mart",
             "forecasting",
             "promo",
             "replenishment",

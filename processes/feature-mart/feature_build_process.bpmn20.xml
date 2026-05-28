@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/feature-mart">
+  <process id="feature_build_process" name="Feature Build Process" isExecutable="true">
+    <startEvent id="start_feature_build" name="DQ accepted" />
+    <sequenceFlow id="flow_start_to_matrix" sourceRef="start_feature_build" targetRef="build_active_matrix" />
+    <serviceTask id="build_active_matrix"
+                 name="Build active matrix"
+                 flowable:delegateExpression="${activeMatrixBuildDelegate}" />
+    <sequenceFlow id="flow_matrix_to_features" sourceRef="build_active_matrix" targetRef="build_feature_mart" />
+    <serviceTask id="build_feature_mart"
+                 name="Build feature mart"
+                 flowable:delegateExpression="${featureMartBuildDelegate}" />
+    <sequenceFlow id="flow_features_to_validate" sourceRef="build_feature_mart" targetRef="validate_feature_mart" />
+    <serviceTask id="validate_feature_mart"
+                 name="Validate feature mart"
+                 flowable:delegateExpression="${featureMartValidationDelegate}" />
+    <sequenceFlow id="flow_validate_to_gateway" sourceRef="validate_feature_mart" targetRef="feature_build_gateway" />
+    <exclusiveGateway id="feature_build_gateway" name="Feature build valid?" />
+    <sequenceFlow id="flow_valid_to_publish" sourceRef="feature_build_gateway" targetRef="publish_feature_version">
+      <conditionExpression xsi:type="tFormalExpression">${featureBuildStatus == 'validated'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_invalid_to_incident" sourceRef="feature_build_gateway" targetRef="review_feature_build_incident">
+      <conditionExpression xsi:type="tFormalExpression">${featureBuildStatus == 'failed'}</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="publish_feature_version"
+                 name="Publish feature version"
+                 flowable:delegateExpression="${featureVersionPublisherDelegate}" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_feature_version" targetRef="end_feature_published" />
+    <userTask id="review_feature_build_incident"
+              name="Review feature build incident"
+              flowable:candidateGroups="data-engineering,data-science" />
+    <sequenceFlow id="flow_review_to_end" sourceRef="review_feature_build_incident" targetRef="end_feature_failed" />
+    <endEvent id="end_feature_published" name="Feature version published" />
+    <endEvent id="end_feature_failed" name="Feature build failed" />
+  </process>
+</definitions>

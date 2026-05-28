@@ -26,6 +26,14 @@ type DataQualityIncident = {
   message: string;
 };
 
+type FeatureMartStatus = {
+  version: string;
+  status: "published" | "validated" | "failed";
+  activePairs: string;
+  features: number;
+  quality: string;
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: "http://127.0.0.1:8000/docs", purpose: "OpenAPI" },
   { name: "Airflow", url: "http://127.0.0.1:18088", purpose: "Batch orchestration" },
@@ -62,6 +70,12 @@ const dataQualityIncidents: DataQualityIncident[] = [
     owner: "Data Owner",
     message: "Prices arrived after configured cutoff.",
   },
+];
+
+const featureMartStatuses: FeatureMartStatus[] = [
+  { version: "fm-20260528-001", status: "published", activePairs: "2.14M", features: 42, quality: "accepted" },
+  { version: "fm-20260528-002", status: "validated", activePairs: "0.82M", features: 42, quality: "pilot shard" },
+  { version: "fm-20260528-003", status: "failed", activePairs: "0.31M", features: 39, quality: "partition error" },
 ];
 
 function App() {
@@ -183,6 +197,51 @@ function App() {
               <button type="button">Export rows</button>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Feature mart status">
+        <div className="section-heading">
+          <h2>Feature Mart Status</h2>
+          <p>Active matrix and point-in-time features</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Active Matrix</span>
+            <strong>2.14M store x SKU pairs</strong>
+            <p>Closed stores, inactive SKU and invalid assortment pairs are excluded before feature build.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Feature Groups</span>
+            <strong>Lag / rolling / price / stock</strong>
+            <p>All registered features are marked as point-in-time safe for baseline forecasting.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Active Pairs</th>
+                <th>Features</th>
+                <th>Quality</th>
+              </tr>
+            </thead>
+            <tbody>
+              {featureMartStatuses.map((item) => (
+                <tr key={item.version}>
+                  <td>{item.version}</td>
+                  <td>
+                    <span className={`status-dot feature-${item.status}`}>{item.status}</span>
+                  </td>
+                  <td>{item.activePairs}</td>
+                  <td>{item.features}</td>
+                  <td>{item.quality}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
     </main>

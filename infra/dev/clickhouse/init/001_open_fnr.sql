@@ -105,3 +105,37 @@ CREATE TABLE IF NOT EXISTS open_fnr.dq_error_rows
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(business_date)
 ORDER BY (business_date, domain, incident_id, store_id, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.active_matrix_daily
+(
+    business_date Date,
+    store_id String,
+    sku_id String,
+    region_id String,
+    category_id String,
+    assortment_valid UInt8,
+    store_active UInt8,
+    sku_active UInt8,
+    include_pair UInt8,
+    feature_version String,
+    created_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, region_id, category_id, store_id, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.feature_store_daily
+(
+    feature_version String,
+    business_date Date,
+    store_id String,
+    sku_id String,
+    sales_lag_7d Float64,
+    sales_rolling_mean_28d Float64,
+    current_selling_price Float64,
+    stock_available_flag UInt8,
+    created_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (feature_version, business_date, store_id, sku_id);

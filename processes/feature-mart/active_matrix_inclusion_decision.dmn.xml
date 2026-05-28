@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_active_matrix_dmn"
+             name="OPEN FNR Active Matrix Inclusion"
+             namespace="https://open-fnr.local/decisions/feature-mart">
+  <decision id="active_matrix_inclusion_decision" name="Active Matrix Inclusion Decision">
+    <decisionTable id="active_matrix_inclusion_table" hitPolicy="FIRST">
+      <input id="input_store_active" label="store_active">
+        <inputExpression id="input_store_active_expression" typeRef="boolean"><text>store_active</text></inputExpression>
+      </input>
+      <input id="input_sku_active" label="sku_active">
+        <inputExpression id="input_sku_active_expression" typeRef="boolean"><text>sku_active</text></inputExpression>
+      </input>
+      <input id="input_assortment_valid" label="assortment_valid">
+        <inputExpression id="input_assortment_valid_expression" typeRef="boolean"><text>assortment_valid</text></inputExpression>
+      </input>
+      <output id="output_include_pair" name="include_pair" typeRef="boolean" />
+      <rule id="rule_include_active_pair">
+        <inputEntry id="rule_include_store"><text>true</text></inputEntry>
+        <inputEntry id="rule_include_sku"><text>true</text></inputEntry>
+        <inputEntry id="rule_include_assortment"><text>true</text></inputEntry>
+        <outputEntry id="rule_include_output"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_exclude_default">
+        <inputEntry id="rule_default_store"><text>-</text></inputEntry>
+        <inputEntry id="rule_default_sku"><text>-</text></inputEntry>
+        <inputEntry id="rule_default_assortment"><text>-</text></inputEntry>
+        <outputEntry id="rule_default_output"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

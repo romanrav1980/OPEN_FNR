@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 2 implementation is complete.
+Sprint 3 implementation is complete.
 
 ## Local Infrastructure
 
@@ -47,9 +47,19 @@ Known local URLs:
 - UI Data Quality Console: `apps/frontend/src/main.tsx`, `apps/frontend/src/styles.css`.
 - HTML test report with screenshot: `docs/test-reports/sprint-2-data-quality/index.html`.
 
+## Sprint 3 Artifacts
+
+- Feature Mart API and models: `apps/backend/open_fnr_api/feature_mart.py`.
+- Feature Mart tests: `tests/backend/test_feature_mart.py`, `tests/data/test_feature_mart_rules.py`.
+- Feature Mart process artifacts: `processes/feature-mart`.
+- Active matrix and feature store SQL structures in ClickHouse init script.
+- Feature version metadata SQL structure in PostgreSQL init script.
+- UI Feature Mart Status section.
+- HTML test report with screenshot: `docs/test-reports/sprint-3-feature-mart/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 21 passed.
+- `python -m pytest` -> 30 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -57,4 +67,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 2 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 3.
+Commit Sprint 3 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 4.
