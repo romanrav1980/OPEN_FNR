@@ -8,6 +8,7 @@ DATA_LOAD_PROCESS_PATH = Path("processes/data-ingestion/data_load_monitoring_pro
 DQ_PROCESS_PATH = Path("processes/data-quality/dq_check_process.bpmn20.xml")
 FEATURE_PROCESS_PATH = Path("processes/feature-mart/feature_build_process.bpmn20.xml")
 FORECAST_PROCESS_PATH = Path("processes/forecast/regular_forecast_run_process.bpmn20.xml")
+FORECAST_REVIEW_PROCESS_PATH = Path("processes/forecast/forecast_review_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -83,3 +84,17 @@ def test_regular_forecast_bpmn_scores_and_publishes() -> None:
     }
     assert "Score regular baseline" in service_task_names
     assert "Publish forecast version" in service_task_names
+
+
+def test_forecast_review_bpmn_has_anomaly_review_task() -> None:
+    tree = ElementTree.parse(FORECAST_REVIEW_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "forecast_review_process"
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    assert "Review forecast anomaly" in user_task_names
+    assert "Accept forecast slice" in user_task_names

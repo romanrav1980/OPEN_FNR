@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/forecast-review">
+  <case id="forecast_anomaly_case" name="Forecast Anomaly Case">
+    <casePlanModel id="forecast_anomaly_case_plan" name="Forecast Anomaly">
+      <planItem id="plan_investigate_anomaly" definitionRef="investigate_anomaly" />
+      <planItem id="plan_accept_anomaly" definitionRef="accept_anomaly" />
+      <humanTask id="investigate_anomaly"
+                 name="Investigate forecast anomaly"
+                 flowable:candidateGroups="forecast-planner" />
+      <humanTask id="accept_anomaly"
+                 name="Accept forecast anomaly"
+                 flowable:candidateGroups="category-manager" />
+    </casePlanModel>
+  </case>
+</definitions>

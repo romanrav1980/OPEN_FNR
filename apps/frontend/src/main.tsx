@@ -252,8 +252,26 @@ function App() {
 
       <section className="data-section" aria-label="Forecast baseline">
         <div className="section-heading">
-          <h2>Regular Forecast Baseline</h2>
+          <h2>Forecast Workbench</h2>
           <p>Latest published seasonal naive forecast</p>
+        </div>
+        <div className="filter-bar" aria-label="Forecast filters">
+          <label>
+            Date
+            <input value="2026-05-29" readOnly />
+          </label>
+          <label>
+            Store
+            <input value="S001" readOnly />
+          </label>
+          <label>
+            SKU
+            <input value="All" readOnly />
+          </label>
+          <label>
+            Category
+            <input value="fresh" readOnly />
+          </label>
         </div>
         <div className="feature-grid">
           <article className="feature-summary">
@@ -266,6 +284,15 @@ function App() {
             <strong>WAPE 18.4% / Bias -1.2%</strong>
             <p>Baseline is published and available for read-only review before ML model replacement.</p>
           </article>
+        </div>
+        <div className="chart-panel" aria-label="Fact vs forecast chart">
+          <div className="chart-bars">
+            <span style={{ height: "74%" }} title="Actual SKU001" />
+            <span style={{ height: "84%" }} title="Forecast SKU001" />
+            <span style={{ height: "38%" }} title="Actual SKU002" />
+            <span style={{ height: "33%" }} title="Forecast SKU002" />
+          </div>
+          <p>Fact vs forecast, selected slice</p>
         </div>
         <div className="table-shell">
           <table>

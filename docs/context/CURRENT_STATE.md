@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 4 implementation is complete.
+Sprint 5 implementation is complete.
 
 ## Local Infrastructure
 
@@ -66,9 +66,16 @@ Known local URLs:
 - UI Regular Forecast Baseline section.
 - HTML test report with screenshot: `docs/test-reports/sprint-4-regular-baseline/index.html`.
 
+## Sprint 5 Artifacts
+
+- Forecast Workbench API slice: `/forecast/workbench`.
+- Forecast review BPMN/DMN/CMMN artifacts in `processes/forecast`.
+- Forecast Workbench UI filters and chart panel.
+- HTML test report with screenshot: `docs/test-reports/sprint-5-forecast-workbench/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 38 passed.
+- `python -m pytest` -> 43 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -76,4 +83,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 4 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 5.
+Commit Sprint 5 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 6.

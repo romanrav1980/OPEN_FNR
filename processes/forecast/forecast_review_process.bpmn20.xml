@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/forecast-review">
+  <process id="forecast_review_process" name="Forecast Review Process" isExecutable="true">
+    <startEvent id="start_forecast_review" name="Forecast opened" />
+    <sequenceFlow id="flow_start_to_decision" sourceRef="start_forecast_review" targetRef="review_required_gateway" />
+    <exclusiveGateway id="review_required_gateway" name="Review required?" />
+    <sequenceFlow id="flow_no_review_to_end" sourceRef="review_required_gateway" targetRef="end_no_review">
+      <conditionExpression xsi:type="tFormalExpression">${reviewRequired == false}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_review_to_task" sourceRef="review_required_gateway" targetRef="review_forecast_anomaly">
+      <conditionExpression xsi:type="tFormalExpression">${reviewRequired == true}</conditionExpression>
+    </sequenceFlow>
+    <userTask id="review_forecast_anomaly"
+              name="Review forecast anomaly"
+              flowable:candidateGroups="forecast-planner,category-manager" />
+    <sequenceFlow id="flow_task_to_accept" sourceRef="review_forecast_anomaly" targetRef="accept_forecast_slice" />
+    <userTask id="accept_forecast_slice"
+              name="Accept forecast slice"
+              flowable:candidateGroups="forecast-planner" />
+    <sequenceFlow id="flow_accept_to_end" sourceRef="accept_forecast_slice" targetRef="end_review_accepted" />
+    <endEvent id="end_no_review" name="No review required" />
+    <endEvent id="end_review_accepted" name="Review accepted" />
+  </process>
+</definitions>

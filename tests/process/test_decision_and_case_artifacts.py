@@ -95,3 +95,26 @@ def test_forecast_run_failure_cmmn_is_parseable() -> None:
     }
     assert "Triage forecast failure" in human_task_names
     assert "Approve baseline publication" in human_task_names
+
+
+def test_forecast_review_required_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/forecast/forecast_review_required_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "forecast_review_required_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_forecast_anomaly_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/forecast/forecast_anomaly_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "forecast_anomaly_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Investigate forecast anomaly" in human_task_names
+    assert "Accept forecast anomaly" in human_task_names

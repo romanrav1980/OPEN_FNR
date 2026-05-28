@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 5 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      h1, h2, p { margin-top: 0; }
+      h1 { font-size: 34px; line-height: 1.15; }
+      h2 { margin-top: 34px; }
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      code { color: #f6d6dc; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .warn { color: var(--warn); font-weight: 700; }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 5 / Forecast Workbench V1</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 5: рабочий просмотр прогноза,
+          фильтры, fact vs forecast panel и процесс review anomalies.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем Forecast Workbench V1, потому что Forecast Planner должен
+          видеть прогноз не как техническую таблицу, а как управляемый рабочий
+          экран. Метод проверки объединяет API-фильтры, empty state, UI build,
+          screenshot и процессные артефакты review. Так мы подтверждаем, что
+          пользовательский сценарий анализа прогноза уже имеет контракт и
+          трассируемый бизнес-процесс.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, process, data и encoding тесты.</td>
+              <td>Проверить forecast workbench API, filters, empty state и process artifacts.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">43 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить, что фильтры и chart panel не ломают сборку.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI и снимаем full-page screenshot.</td>
+              <td>Зафиксировать визуальный результат Workbench.</td>
+              <td>Скриншот содержит filters, WAPE/Bias, table и chart panel.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Forecast Workbench.</td>
+              <td>Проверить основной рабочий сценарий Forecast Planner.</td>
+              <td>Workbench должен быть первым экраном анализа прогноза.</td>
+              <td>Блок Forecast Workbench отображается.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем фильтры Date, Store, SKU, Category.</td>
+              <td>Пользователь должен задавать срез анализа.</td>
+              <td>Фильтры являются критичным UX-контрактом для больших объёмов данных.</td>
+              <td>Фильтры видны и помещаются в layout.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем fact vs forecast panel.</td>
+              <td>Показать отличие факта от прогноза визуально.</td>
+              <td>График нужен для быстрых проверок аномалий.</td>
+              <td>Chart panel отображается и не перекрывает таблицу.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем таблицу прогноза.</td>
+              <td>Дать точные строки для SKU-store-date drill-down.</td>
+              <td>Таблица остаётся главным инструментом операционного анализа.</td>
+              <td>Видны date, store, SKU, regular, total, flag.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>forecast_review_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс при открытии прогноза.</td>
+              <td>Audit должен знать, кто и какой forecast slice смотрел.</td>
+              <td>BPMN содержит start event Forecast opened.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>forecast_review_process</code></td>
+              <td>2</td>
+              <td>Проверяем review_required gateway.</td>
+              <td>Аномальные срезы должны создавать задачу review.</td>
+              <td>BPMN содержит Review forecast anomaly.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>forecast_review_required_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN review decision.</td>
+              <td>Решение о review должно зависеть от WAPE/Bias.</td>
+              <td>DMN содержит decisionTable review_required.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>forecast_anomaly_case</code></td>
+              <td>1</td>
+              <td>Проверяем CMMN anomaly case.</td>
+              <td>При аномалиях нужен investigation и category manager acceptance.</td>
+              <td>CMMN содержит Investigate forecast anomaly и Accept forecast anomaly.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/forecast-workbench.png" alt="OPEN FNR Forecast Workbench screenshot" />
+        <p class="caption">Скриншот: Forecast Workbench V1 после Sprint 5.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 5 test cycle passed. Forecast Workbench имеет API-фильтры,
+          empty state, визуальный panel, таблицу и review process skeleton.
+        </p>
+        <p class="warn">
+          Ограничение: UI пока статичен; подключение фильтров к backend API и
+          интерактивные E2E-клики будут расширены в следующем UI-инкременте.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -34,3 +34,22 @@ def test_forecast_rows_endpoint() -> None:
 def test_forecast_rows_unknown_version_returns_404() -> None:
     response = client.get("/forecast/versions/missing/rows")
     assert response.status_code == 404
+
+
+def test_forecast_workbench_filters_by_sku() -> None:
+    response = client.get("/forecast/workbench", params={"sku_id": "SKU001"})
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["sku_id"] == "SKU001"
+    assert payload["summary"]["total_rows"] == 1
+
+
+def test_forecast_workbench_empty_state() -> None:
+    response = client.get("/forecast/workbench", params={"store_id": "missing"})
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["total"] == 0
+    assert payload["items"] == []

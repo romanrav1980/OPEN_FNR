@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_forecast_review_dmn"
+             name="OPEN FNR Forecast Review Required"
+             namespace="https://open-fnr.local/decisions/forecast-review">
+  <decision id="forecast_review_required_decision" name="Forecast Review Required Decision">
+    <decisionTable id="forecast_review_required_table" hitPolicy="FIRST">
+      <input id="input_wape" label="wape">
+        <inputExpression id="input_wape_expression" typeRef="number"><text>wape</text></inputExpression>
+      </input>
+      <input id="input_abs_bias" label="abs_bias">
+        <inputExpression id="input_abs_bias_expression" typeRef="number"><text>abs_bias</text></inputExpression>
+      </input>
+      <output id="output_review_required" name="review_required" typeRef="boolean" />
+      <rule id="rule_high_wape">
+        <inputEntry id="rule_high_wape_input"><text>&gt; 0.25</text></inputEntry>
+        <inputEntry id="rule_high_wape_bias"><text>-</text></inputEntry>
+        <outputEntry id="rule_high_wape_output"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_high_bias">
+        <inputEntry id="rule_high_bias_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_high_bias_input"><text>&gt; 0.05</text></inputEntry>
+        <outputEntry id="rule_high_bias_output"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_no_review">
+        <inputEntry id="rule_ok_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_ok_bias"><text>-</text></inputEntry>
+        <outputEntry id="rule_ok_output"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
