@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 28 - Process Governance</title>
+    <style>
+      :root { --bg:#1e1e1e; --panel:#252526; --red-light:#b83a4b; --text:#d4d4d4; --muted:#9da3ae; --border:#3a3a3a; --ok:#8fd19e; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,"Segoe UI",Arial,sans-serif; }
+      main { width:min(1180px, calc(100vw - 40px)); margin:0 auto; padding:32px 0 56px; }
+      section { border:1px solid var(--border); background:var(--panel); margin-top:20px; padding:20px; }
+      h1,h2,p { margin:0; }
+      h1 { font-size:30px; }
+      h2 { margin-bottom:12px; color:var(--red-light); font-size:20px; }
+      p,li,td,th { line-height:1.55; }
+      .subtitle { margin-top:8px; color:var(--muted); }
+      table { width:100%; border-collapse:collapse; margin-top:12px; }
+      th,td { border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+      th { color:var(--muted); font-size:12px; text-transform:uppercase; }
+      .ok { color:var(--ok); font-weight:700; }
+      .shot { width:100%; border:1px solid var(--border); margin-top:12px; }
+      code { color:var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 28: Production Process Governance</h1>
+        <p class="subtitle">
+          Аннотация: тестируем production discipline для BPMN/DMN/CMMN: versioning, artifact validation,
+          process test suite, risk decision, deployment approval, migration safety, release notes и rollback.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем <code>Process Governance</code>.</li>
+          <li>Проверяем version list: bulk_auto_approval_decision v1 deployed, v2 review.</li>
+          <li>Проверяем change request: from v1 to v2, medium risk, migration required.</li>
+          <li>Проверяем actions: Review, Deploy, Rollback.</li>
+          <li>Проверяем migration panel: existing instances continue.</li>
+        </ol>
+        <img class="shot" src="screenshots/process-governance.png" alt="Process Governance" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Фактический результат</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Validate process artifacts.</td><td>Нельзя деплоить битый BPMN/DMN/CMMN.</td><td>BPMN содержит validation step.</td><td class="ok">Проверено BPMN.</td></tr>
+            <tr><td>2</td><td>Run process test suite.</td><td>Процессные изменения должны проходить regression suite.</td><td>Существующие definitions читаются.</td><td class="ok">Проверено pytest.</td></tr>
+            <tr><td>3</td><td>DMN evaluates process change risk.</td><td>Risk/approver должны определяться правилом.</td><td>Rules: high failed tests, medium live instances, low no instances.</td><td class="ok">Проверено DMN.</td></tr>
+            <tr><td>4</td><td>Review process change.</td><td>BPM Owner/Process Owner контролируют изменение.</td><td>User task существует.</td><td class="ok">Проверено BPMN.</td></tr>
+            <tr><td>5</td><td>Release Manager deploys version.</td><td>Деплой разрешен только Release Manager.</td><td>Wrong role gets 403, deploy records migration safety.</td><td class="ok">Проверено API RBAC.</td></tr>
+            <tr><td>6</td><td>Migrate existing instances.</td><td>Новые версии не должны ломать запущенные процессы.</td><td>existing_instances_safe = true.</td><td class="ok">Проверено API.</td></tr>
+            <tr><td>7</td><td>Rollback process version.</td><td>Production change должен иметь обратный путь.</td><td>Process Owner can rollback with safe instances.</td><td class="ok">Проверено API.</td></tr>
+            <tr><td>8</td><td>CMMN handles process incident.</td><td>Deployment incident должен иметь triage, migration review, rollback и recovery.</td><td>Все human tasks есть.</td><td class="ok">Проверено CMMN.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead><tr><th>Тип</th><th>Проверка</th><th>Результат</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td><code>python -m pytest</code></td><td class="ok">228 passed</td></tr>
+            <tr><td>Frontend</td><td><code>npm.cmd run build</code> в <code>apps/frontend</code></td><td class="ok">Сборка успешна</td></tr>
+            <tr><td>UI screenshot</td><td>Playwright full-page screenshot</td><td class="ok">Скриншот сохранен</td></tr>
+            <tr><td>Process</td><td>BPMN change process, DMN risk, CMMN incident, regression definitions</td><td class="ok">Усиленные проверки пройдены</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

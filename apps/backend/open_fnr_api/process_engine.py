@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="process_change_management_process",
+        name="Process change management process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-021",
+        source_path="processes/process-governance/process_change_management_process.bpmn20.xml",
+        owner_role="BPM Owner",
+    ),
+    ProcessDefinition(
+        key="process_change_risk_decision",
+        name="Process change risk decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-021",
+        source_path="processes/process-governance/process_change_risk_decision.dmn.xml",
+        owner_role="Process Owner",
+    ),
+    ProcessDefinition(
+        key="process_incident_case",
+        name="Process incident case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-021",
+        source_path="processes/process-governance/process_incident_case.cmmn.xml",
+        owner_role="Process Owner",
+    ),
+    ProcessDefinition(
         key="industrial_replenishment_process",
         name="Industrial replenishment process",
         artifact_type=ProcessArtifactType.BPMN,

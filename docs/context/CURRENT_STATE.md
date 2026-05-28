@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 27 implementation is complete.
+Sprint 28 implementation is complete.
 
 ## Local Infrastructure
 
@@ -303,9 +303,20 @@ Known local URLs:
 - UI Production Replenishment Scale section with partitioned proposal counts, bulk approval, retention and async export.
 - HTML test report with screenshot: `docs/test-reports/sprint-27-production-replenishment-scale/index.html`.
 
+## Sprint 28 Artifacts
+
+- Process Governance API: `apps/backend/open_fnr_api/process_governance.py`.
+- Process Governance tests: `tests/backend/test_process_governance.py`.
+- Process governance definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Process change management BPMN: `processes/process-governance/process_change_management_process.bpmn20.xml`.
+- Process change risk DMN: `processes/process-governance/process_change_risk_decision.dmn.xml`.
+- Process incident CMMN: `processes/process-governance/process_incident_case.cmmn.xml`.
+- UI Process Governance section with process versions, change request, deployment, migration and rollback actions.
+- HTML test report with screenshot: `docs/test-reports/sprint-28-process-governance/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 220 passed.
+- `python -m pytest` -> 228 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -313,4 +324,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 27 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 28: Production Process Governance.
+Commit Sprint 28 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 29: Observability And Support.

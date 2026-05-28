@@ -13,6 +13,7 @@ from .multi_echelon import router as multi_echelon_router
 from .performance import router as performance_router
 from .pilot import router as pilot_router
 from .process_engine import router as process_engine_router
+from .process_governance import router as process_governance_router
 from .promo import router as promo_router
 from .publication import router as publication_router
 from .replenishment import router as replenishment_router
@@ -45,6 +46,7 @@ app.include_router(pilot_router)
 app.include_router(promo_router)
 app.include_router(publication_router)
 app.include_router(process_engine_router)
+app.include_router(process_governance_router)
 app.include_router(replenishment_router)
 app.include_router(replenishment_scale_router)
 app.include_router(kpi_router)
@@ -91,6 +93,7 @@ def metadata() -> dict[str, object]:
             "security",
             "stage-rehearsal",
             "process-engine",
+            "process-governance",
             "ui",
         ],
     }

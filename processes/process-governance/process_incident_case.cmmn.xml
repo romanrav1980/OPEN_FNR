@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/process-governance">
+  <case id="process_incident_case" name="Process incident case">
+    <casePlanModel id="process_incident_plan" name="Process incident plan">
+      <humanTask id="triage_process_deployment_incident" name="Triage process deployment incident" />
+      <humanTask id="review_instance_migration" name="Review instance migration" />
+      <humanTask id="approve_process_rollback" name="Approve process rollback" />
+      <humanTask id="confirm_process_recovery" name="Confirm process recovery" />
+    </casePlanModel>
+  </case>
+</definitions>

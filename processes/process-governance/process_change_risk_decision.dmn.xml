@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/process-governance" name="process_change_risk_decision">
+  <decision id="process_change_risk_decision" name="Process change risk decision">
+    <decisionTable id="process_change_risk_table" hitPolicy="FIRST">
+      <input id="input_artifact_kind" label="artifact_kind">
+        <inputExpression id="input_artifact_kind_expr" typeRef="string"><text>artifact_kind</text></inputExpression>
+      </input>
+      <input id="input_existing_instances" label="existing_instances">
+        <inputExpression id="input_existing_instances_expr" typeRef="number"><text>existing_instances</text></inputExpression>
+      </input>
+      <input id="input_tests_passed" label="tests_passed">
+        <inputExpression id="input_tests_passed_expr" typeRef="boolean"><text>tests_passed</text></inputExpression>
+      </input>
+      <output id="output_risk" label="risk" name="risk" typeRef="string" />
+      <output id="output_required_approver" label="required_approver" name="required_approver" typeRef="string" />
+      <rule id="rule_high_failed_tests">
+        <inputEntry id="rule_high_kind"><text>-</text></inputEntry>
+        <inputEntry id="rule_high_instances"><text>-</text></inputEntry>
+        <inputEntry id="rule_high_tests"><text>false</text></inputEntry>
+        <outputEntry id="rule_high_risk"><text>"high"</text></outputEntry>
+        <outputEntry id="rule_high_approver"><text>"Process Owner"</text></outputEntry>
+      </rule>
+      <rule id="rule_medium_live_instances">
+        <inputEntry id="rule_medium_kind"><text>"dmn"</text></inputEntry>
+        <inputEntry id="rule_medium_instances"><text>&gt; 0</text></inputEntry>
+        <inputEntry id="rule_medium_tests"><text>true</text></inputEntry>
+        <outputEntry id="rule_medium_risk"><text>"medium"</text></outputEntry>
+        <outputEntry id="rule_medium_approver"><text>"BPM Owner"</text></outputEntry>
+      </rule>
+      <rule id="rule_low_no_instances">
+        <inputEntry id="rule_low_kind"><text>-</text></inputEntry>
+        <inputEntry id="rule_low_instances"><text>0</text></inputEntry>
+        <inputEntry id="rule_low_tests"><text>true</text></inputEntry>
+        <outputEntry id="rule_low_risk"><text>"low"</text></outputEntry>
+        <outputEntry id="rule_low_approver"><text>"Release Manager"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

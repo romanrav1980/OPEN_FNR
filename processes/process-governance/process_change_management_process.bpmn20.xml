@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/process-governance">
+  <process id="process_change_management_process" name="Process change management process" isExecutable="true">
+    <startEvent id="start_process_change" name="Process change requested" />
+    <sequenceFlow id="flow_start_to_validate" sourceRef="start_process_change" targetRef="validate_process_artifacts" />
+    <serviceTask id="validate_process_artifacts" name="Validate process artifacts" />
+    <sequenceFlow id="flow_validate_to_tests" sourceRef="validate_process_artifacts" targetRef="run_process_test_suite" />
+    <serviceTask id="run_process_test_suite" name="Run process test suite" />
+    <sequenceFlow id="flow_tests_to_risk" sourceRef="run_process_test_suite" targetRef="evaluate_process_change_risk" />
+    <businessRuleTask id="evaluate_process_change_risk" name="Evaluate process change risk" />
+    <sequenceFlow id="flow_risk_to_review" sourceRef="evaluate_process_change_risk" targetRef="review_process_change" />
+    <userTask id="review_process_change" name="Review process change" />
+    <sequenceFlow id="flow_review_to_gateway" sourceRef="review_process_change" targetRef="process_change_gateway" />
+    <exclusiveGateway id="process_change_gateway" name="Process change approved?" />
+    <sequenceFlow id="flow_rejected" sourceRef="process_change_gateway" targetRef="record_process_change_rejection" />
+    <sequenceFlow id="flow_approved" sourceRef="process_change_gateway" targetRef="deploy_process_version" />
+    <serviceTask id="record_process_change_rejection" name="Record process change rejection" />
+    <sequenceFlow id="flow_rejected_to_end" sourceRef="record_process_change_rejection" targetRef="end_process_change_rejected" />
+    <serviceTask id="deploy_process_version" name="Deploy process version" />
+    <sequenceFlow id="flow_deploy_to_migrate" sourceRef="deploy_process_version" targetRef="migrate_existing_instances" />
+    <serviceTask id="migrate_existing_instances" name="Migrate existing instances" />
+    <sequenceFlow id="flow_migrate_to_notes" sourceRef="migrate_existing_instances" targetRef="publish_process_release_notes" />
+    <serviceTask id="publish_process_release_notes" name="Publish process release notes" />
+    <sequenceFlow id="flow_notes_to_end" sourceRef="publish_process_release_notes" targetRef="end_process_change_deployed" />
+    <endEvent id="end_process_change_rejected" name="Process change rejected" />
+    <endEvent id="end_process_change_deployed" name="Process change deployed" />
+  </process>
+</definitions>

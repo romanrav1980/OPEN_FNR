@@ -31,6 +31,7 @@ PILOT_OPERATIONAL_PROCESS_PATH = Path("processes/pilot/pilot_operational_process
 INDUSTRIAL_DATA_LOAD_PROCESS_PATH = Path("processes/data-scale/industrial_data_load_process.bpmn20.xml")
 MODEL_RELEASE_PROCESS_PATH = Path("processes/ml-governance/model_release_process.bpmn20.xml")
 INDUSTRIAL_REPLENISHMENT_PROCESS_PATH = Path("processes/replenishment-scale/industrial_replenishment_process.bpmn20.xml")
+PROCESS_CHANGE_MANAGEMENT_PROCESS_PATH = Path("processes/process-governance/process_change_management_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -725,3 +726,36 @@ def test_industrial_replenishment_bpmn_covers_bulk_approval_and_async_export_pat
     assert "Review replenishment scale exception" in user_task_names
     assert "Approve bulk proposals" in user_task_names
     assert "Bulk approval allowed?" in gateway_names
+
+
+def test_process_change_management_bpmn_covers_validation_approval_deploy_migration_and_rejection_paths() -> None:
+    tree = ElementTree.parse(PROCESS_CHANGE_MANAGEMENT_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "process_change_management_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    end_event_names = {
+        event.attrib["name"]
+        for event in tree.findall(".//bpmn:endEvent", BPMN_NS)
+    }
+    assert "Validate process artifacts" in service_task_names
+    assert "Run process test suite" in service_task_names
+    assert "Deploy process version" in service_task_names
+    assert "Migrate existing instances" in service_task_names
+    assert "Publish process release notes" in service_task_names
+    assert "Record process change rejection" in service_task_names
+    assert "Evaluate process change risk" in business_rule_names
+    assert "Review process change" in user_task_names
+    assert {"Process change rejected", "Process change deployed"}.issubset(end_event_names)

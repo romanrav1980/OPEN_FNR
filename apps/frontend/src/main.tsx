@@ -628,6 +628,23 @@ const replenishmentScalePartitions = [
   },
 ];
 
+const processVersionRows = [
+  { key: "bulk_auto_approval_decision", kind: "dmn", version: "1", status: "deployed", checksum: "sha256:bulk-auto-v1" },
+  { key: "bulk_auto_approval_decision", kind: "dmn", version: "2", status: "review", checksum: "sha256:bulk-auto-v2" },
+];
+
+const processDeployments = [
+  {
+    change: "proc-change-20260528-001",
+    process: "bulk_auto_approval_decision",
+    from: "v1",
+    to: "v2",
+    risk: "medium",
+    status: "review",
+    migration: "required",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2816,6 +2833,99 @@ function App() {
             <p>
               Runtime, constraint or partition failures open a case for triage, partition rerun
               and async export recovery confirmation.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Process Governance">
+        <div className="section-heading">
+          <h2>Process Governance</h2>
+          <p>BPMN/DMN/CMMN versioning, deployment approval, migration and rollback</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Change Request</span>
+            <strong>bulk_auto_approval_decision v1 -&gt; v2</strong>
+            <p>Medium-risk DMN change waits for review, test suite pass and Release Manager deployment.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Regression Safety</span>
+            <strong>Existing instances safe</strong>
+            <p>Deployment package records checksum, migration flag, approver and rollback path.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>Kind</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Checksum</th>
+              </tr>
+            </thead>
+            <tbody>
+              {processVersionRows.map((row) => (
+                <tr key={`${row.key}-${row.version}`}>
+                  <td>{row.key}</td>
+                  <td>{row.kind}</td>
+                  <td>{row.version}</td>
+                  <td>{row.status}</td>
+                  <td>{row.checksum}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Change</th>
+                <th>Process</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Risk</th>
+                <th>Status</th>
+                <th>Migration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {processDeployments.map((row) => (
+                <tr key={row.change}>
+                  <td>{row.change}</td>
+                  <td>{row.process}</td>
+                  <td>{row.from}</td>
+                  <td>{row.to}</td>
+                  <td>{row.risk}</td>
+                  <td>{row.status}</td>
+                  <td>{row.migration}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Deployment</span>
+            <h3>Release Manager deploys v2</h3>
+            <p>
+              Process change is deployed only after artifact validation, process test suite,
+              risk decision and review approval.
+            </p>
+            <div className="action-row">
+              <button type="button">Review</button>
+              <button type="button">Deploy</button>
+              <button type="button">Rollback</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Migration</span>
+            <h3>Existing instances continue</h3>
+            <p>
+              Migration status and release notes are captured so running process instances remain safe.
             </p>
           </aside>
         </div>
