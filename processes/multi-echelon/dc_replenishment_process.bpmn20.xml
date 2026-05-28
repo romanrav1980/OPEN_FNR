@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/multi-echelon">
+  <process id="dc_replenishment_process" name="DC replenishment process" isExecutable="true">
+    <startEvent id="start_dc_demand_calculated" name="Store demand calculated" />
+    <sequenceFlow id="flow_start_to_aggregate" sourceRef="start_dc_demand_calculated" targetRef="aggregate_store_demand" />
+    <serviceTask id="aggregate_store_demand" name="Aggregate store demand" />
+    <sequenceFlow id="flow_aggregate_to_stock" sourceRef="aggregate_store_demand" targetRef="load_dc_stock" />
+    <serviceTask id="load_dc_stock" name="Load DC stock and inbound" />
+    <sequenceFlow id="flow_stock_to_shortage" sourceRef="load_dc_stock" targetRef="calculate_dc_shortage" />
+    <serviceTask id="calculate_dc_shortage" name="Calculate DC shortage" />
+    <sequenceFlow id="flow_shortage_to_decision" sourceRef="calculate_dc_shortage" targetRef="prioritize_dc_allocation" />
+    <businessRuleTask id="prioritize_dc_allocation" name="Prioritize DC allocation" />
+    <sequenceFlow id="flow_decision_to_gateway" sourceRef="prioritize_dc_allocation" targetRef="dc_shortage_gateway" />
+    <exclusiveGateway id="dc_shortage_gateway" name="DC shortage detected?" />
+    <sequenceFlow id="flow_no_shortage" sourceRef="dc_shortage_gateway" targetRef="approve_dc_replenishment" />
+    <sequenceFlow id="flow_shortage" sourceRef="dc_shortage_gateway" targetRef="review_dc_shortage_allocation" />
+    <userTask id="review_dc_shortage_allocation" name="Review DC shortage allocation" />
+    <sequenceFlow id="flow_review_to_preview" sourceRef="review_dc_shortage_allocation" targetRef="publish_allocation_preview" />
+    <serviceTask id="publish_allocation_preview" name="Publish allocation preview" />
+    <sequenceFlow id="flow_preview_to_approve" sourceRef="publish_allocation_preview" targetRef="approve_dc_replenishment" />
+    <serviceTask id="approve_dc_replenishment" name="Approve DC replenishment" />
+    <sequenceFlow id="flow_approve_to_end" sourceRef="approve_dc_replenishment" targetRef="end_dc_allocation_approved" />
+    <endEvent id="end_dc_allocation_approved" name="DC allocation approved" />
+  </process>
+</definitions>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/multi-echelon" name="dc_allocation_priority_decision">
+  <decision id="dc_allocation_priority_decision" name="DC allocation priority decision">
+    <decisionTable id="dc_allocation_priority_table" hitPolicy="FIRST">
+      <input id="input_service_risk" label="service_risk">
+        <inputExpression id="input_service_risk_expr" typeRef="number"><text>service_risk</text></inputExpression>
+      </input>
+      <input id="input_store_priority" label="store_priority">
+        <inputExpression id="input_store_priority_expr" typeRef="string"><text>store_priority</text></inputExpression>
+      </input>
+      <output id="output_allocation_priority" label="allocation_priority" name="allocation_priority" typeRef="string" />
+      <output id="output_rule" label="rule" name="rule" typeRef="string" />
+      <rule id="rule_high_priority_risk">
+        <inputEntry id="rule_high_risk"><text>&gt;= 0.80</text></inputEntry>
+        <inputEntry id="rule_high_priority"><text>"high"</text></inputEntry>
+        <outputEntry id="rule_high_output"><text>"high"</text></outputEntry>
+        <outputEntry id="rule_high_reason"><text>"critical service risk and high store priority"</text></outputEntry>
+      </rule>
+      <rule id="rule_medium_risk">
+        <inputEntry id="rule_medium_risk"><text>&gt;= 0.50</text></inputEntry>
+        <inputEntry id="rule_medium_priority"><text>-</text></inputEntry>
+        <outputEntry id="rule_medium_output"><text>"medium"</text></outputEntry>
+        <outputEntry id="rule_medium_reason"><text>"moderate service risk"</text></outputEntry>
+      </rule>
+      <rule id="rule_low">
+        <inputEntry id="rule_low_risk"><text>-</text></inputEntry>
+        <inputEntry id="rule_low_priority"><text>-</text></inputEntry>
+        <outputEntry id="rule_low_output"><text>"low"</text></outputEntry>
+        <outputEntry id="rule_low_reason"><text>"allocated after higher priority demand"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

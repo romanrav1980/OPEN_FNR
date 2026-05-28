@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/multi-echelon">
+  <case id="dc_shortage_case" name="DC shortage case">
+    <casePlanModel id="dc_shortage_plan" name="DC shortage plan">
+      <humanTask id="review_dc_shortage" name="Review DC shortage" />
+      <humanTask id="approve_allocation_rule" name="Approve allocation rule" />
+      <humanTask id="notify_affected_stores" name="Notify affected stores" />
+      <humanTask id="confirm_store_order_cutoff" name="Confirm store order cutoff" />
+    </casePlanModel>
+  </case>
+</definitions>

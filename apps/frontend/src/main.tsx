@@ -444,6 +444,51 @@ const lifecycleRows = [
   },
 ];
 
+const dcPlanRows = [
+  {
+    plan: "dc-plan-20260528-dc001-sku001",
+    dc: "DC001",
+    region: "north",
+    sku: "SKU001",
+    status: "shortage",
+    demand: 270,
+    available: 210,
+    shortage: 60,
+    cutoff: "16:00",
+    rule: "priority_service_risk_first",
+  },
+];
+
+const dcAllocationRows = [
+  {
+    store: "S001",
+    priority: "high",
+    serviceRisk: "0.91",
+    requested: 120,
+    allocated: 120,
+    unfilled: 0,
+    reason: "priority and service risk covered",
+  },
+  {
+    store: "S002",
+    priority: "medium",
+    serviceRisk: "0.63",
+    requested: 90,
+    allocated: 90,
+    unfilled: 0,
+    reason: "priority and service risk covered",
+  },
+  {
+    store: "S003",
+    priority: "low",
+    serviceRisk: "0.28",
+    requested: 60,
+    allocated: 0,
+    unfilled: 60,
+    reason: "DC shortage after higher priority allocation",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1858,6 +1903,119 @@ function App() {
               <button type="button">Approve markdown</button>
               <button type="button">Confirm order block</button>
             </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Supply Chain Dashboard">
+        <div className="section-heading">
+          <h2>Supply Chain Dashboard</h2>
+          <p>Multi-echelon demand, DC stock, shortage and allocation preview</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>DC Demand Projection</span>
+            <strong>DC001 / SKU001 demand 270</strong>
+            <p>Store-level demand is aggregated into DC demand before supplier and WMS checks.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Shortage Event</span>
+            <strong>Available 210, shortage 60</strong>
+            <p>OPEN FNR Process Engine opens shortage review before the store order cutoff.</p>
+          </article>
+        </div>
+        <div className="chart-panel" aria-label="DC demand allocation graph">
+          <div className="chart-bars">
+            <span style={{ height: "82%" }} title="Store demand" />
+            <span style={{ height: "64%" }} title="DC available" />
+            <span style={{ height: "22%" }} title="Shortage" />
+            <span style={{ height: "78%" }} title="Allocated" />
+          </div>
+          <p>DC demand projection compares lower-level demand, WMS stock, shortage and allocation.</p>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Plan</th>
+                <th>DC</th>
+                <th>Region</th>
+                <th>SKU</th>
+                <th>Status</th>
+                <th>Demand</th>
+                <th>Available</th>
+                <th>Shortage</th>
+                <th>Cutoff</th>
+                <th>Rule</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dcPlanRows.map((row) => (
+                <tr key={row.plan}>
+                  <td>{row.plan}</td>
+                  <td>{row.dc}</td>
+                  <td>{row.region}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.status}</td>
+                  <td>{row.demand}</td>
+                  <td>{row.available}</td>
+                  <td>{row.shortage}</td>
+                  <td>{row.cutoff}</td>
+                  <td>{row.rule}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Store</th>
+                <th>Priority</th>
+                <th>Service risk</th>
+                <th>Requested</th>
+                <th>Allocated</th>
+                <th>Unfilled</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dcAllocationRows.map((row) => (
+                <tr key={row.store}>
+                  <td>{row.store}</td>
+                  <td>{row.priority}</td>
+                  <td>{row.serviceRisk}</td>
+                  <td>{row.requested}</td>
+                  <td>{row.allocated}</td>
+                  <td>{row.unfilled}</td>
+                  <td>{row.reason}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">BPMN Task</span>
+            <h3>Review DC shortage allocation</h3>
+            <p>
+              Supply Chain Manager checks WMS stock, demand aggregation and allocation priority
+              before approving replenishment for stores served by DC001.
+            </p>
+            <div className="action-row">
+              <button type="button">Open shortage</button>
+              <button type="button">Approve allocation</button>
+              <button type="button">Notify stores</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Drill-down</span>
+            <h3>DC -&gt; stores</h3>
+            <p>
+              Drill-down explains why S001 and S002 are covered first, while S003 remains unfilled
+              due to the shortage after higher priority allocation.
+            </p>
           </aside>
         </div>
       </section>

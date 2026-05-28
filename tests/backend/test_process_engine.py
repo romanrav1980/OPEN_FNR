@@ -14,6 +14,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     artifact_types = {item["artifact_type"] for item in payload["items"]}
     assert {"bpmn", "dmn", "cmmn"}.issubset(artifact_types)
     assert any(item["key"] == "forecast_review_process" for item in payload["items"])
+    assert any(item["key"] == "dc_replenishment_process" for item in payload["items"])
+    assert any(item["key"] == "dc_allocation_priority_decision" for item in payload["items"])
+    assert any(item["key"] == "dc_shortage_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

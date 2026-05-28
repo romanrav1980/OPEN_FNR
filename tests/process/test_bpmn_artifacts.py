@@ -23,6 +23,7 @@ KPI_REVIEW_PROCESS_PATH = Path("processes/kpi/weekly_kpi_review_process.bpmn20.x
 FRESH_ORDER_REVIEW_PROCESS_PATH = Path("processes/fresh/fresh_order_review_process.bpmn20.xml")
 SKU_PHASE_IN_PROCESS_PATH = Path("processes/lifecycle/sku_phase_in_process.bpmn20.xml")
 SKU_PHASE_OUT_PROCESS_PATH = Path("processes/lifecycle/sku_phase_out_process.bpmn20.xml")
+DC_REPLENISHMENT_PROCESS_PATH = Path("processes/multi-echelon/dc_replenishment_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -444,3 +445,46 @@ def test_sku_phase_out_bpmn_links_replacement_blocks_orders_and_terminates() -> 
     assert "Evaluate clearance risk" in business_rule_names
     assert "Block orders after termination" in service_task_names
     assert "Terminate SKU" in service_task_names
+
+
+def test_dc_replenishment_bpmn_covers_shortage_allocation_and_approval_paths() -> None:
+    tree = ElementTree.parse(DC_REPLENISHMENT_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "dc_replenishment_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    end_event_names = {
+        event.attrib["name"]
+        for event in tree.findall(".//bpmn:endEvent", BPMN_NS)
+    }
+    sequence_targets = {
+        flow.attrib["targetRef"]
+        for flow in tree.findall(".//bpmn:sequenceFlow", BPMN_NS)
+    }
+    assert "Aggregate store demand" in service_task_names
+    assert "Load DC stock and inbound" in service_task_names
+    assert "Calculate DC shortage" in service_task_names
+    assert "Publish allocation preview" in service_task_names
+    assert "Approve DC replenishment" in service_task_names
+    assert "Prioritize DC allocation" in business_rule_names
+    assert "Review DC shortage allocation" in user_task_names
+    assert "DC shortage detected?" in gateway_names
+    assert "DC allocation approved" in end_event_names
+    assert "review_dc_shortage_allocation" in sequence_targets
+    assert "approve_dc_replenishment" in sequence_targets

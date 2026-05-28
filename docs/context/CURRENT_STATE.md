@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 19 implementation is complete.
+Sprint 20 implementation is complete.
 
 ## Local Infrastructure
 
@@ -214,9 +214,20 @@ Known local URLs:
 - UI SKU Lifecycle section with reference product, cold-start forecast, termination date, replacement link and clearance risk warning.
 - HTML test report with screenshot: `docs/test-reports/sprint-19-lifecycle-sku-v1/index.html`.
 
+## Sprint 20 Artifacts
+
+- Multi-echelon API: `apps/backend/open_fnr_api/multi_echelon.py`.
+- Multi-echelon tests: `tests/backend/test_multi_echelon.py`.
+- DC replenishment process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- DC replenishment BPMN: `processes/multi-echelon/dc_replenishment_process.bpmn20.xml`.
+- DC allocation priority DMN: `processes/multi-echelon/dc_allocation_priority_decision.dmn.xml`.
+- DC shortage CMMN: `processes/multi-echelon/dc_shortage_case.cmmn.xml`.
+- UI Supply Chain Dashboard section with DC demand, shortage, allocation preview, drill-down and action panel.
+- HTML test report with screenshot: `docs/test-reports/sprint-20-multi-echelon-v1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 151 passed.
+- `python -m pytest` -> 161 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -224,4 +235,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 19 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 20: Multi-Echelon V1.
+Commit Sprint 20 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 21: Performance Gate 1.

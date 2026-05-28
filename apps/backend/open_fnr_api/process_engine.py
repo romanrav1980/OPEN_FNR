@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="dc_replenishment_process",
+        name="DC replenishment process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-013",
+        source_path="processes/multi-echelon/dc_replenishment_process.bpmn20.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
+        key="dc_allocation_priority_decision",
+        name="DC allocation priority decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-013",
+        source_path="processes/multi-echelon/dc_allocation_priority_decision.dmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
+        key="dc_shortage_case",
+        name="DC shortage case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-013",
+        source_path="processes/multi-echelon/dc_shortage_case.cmmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
         key="sku_phase_in_process",
         name="SKU phase-in process",
         artifact_type=ProcessArtifactType.BPMN,

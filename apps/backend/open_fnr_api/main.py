@@ -7,6 +7,7 @@ from .exceptions import router as exceptions_router
 from .feature_mart import router as feature_mart_router
 from .forecast import router as forecast_router
 from .ml_models import router as ml_models_router
+from .multi_echelon import router as multi_echelon_router
 from .process_engine import router as process_engine_router
 from .promo import router as promo_router
 from .publication import router as publication_router
@@ -29,6 +30,7 @@ app.include_router(exceptions_router)
 app.include_router(feature_mart_router)
 app.include_router(forecast_router)
 app.include_router(ml_models_router)
+app.include_router(multi_echelon_router)
 app.include_router(promo_router)
 app.include_router(publication_router)
 app.include_router(process_engine_router)
@@ -66,6 +68,7 @@ def metadata() -> dict[str, object]:
             "ml-models",
             "promo",
             "replenishment",
+            "multi-echelon",
             "process-engine",
             "ui",
         ],

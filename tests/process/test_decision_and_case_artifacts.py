@@ -469,3 +469,39 @@ def test_clearance_risk_case_is_parseable() -> None:
     assert "Review remaining stock" in human_task_names
     assert "Approve clearance markdown" in human_task_names
     assert "Confirm order block" in human_task_names
+
+
+def test_dc_allocation_priority_decision_is_parseable_and_has_explainable_outputs() -> None:
+    tree = ElementTree.parse(Path("processes/multi-echelon/dc_allocation_priority_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "dc_allocation_priority_decision"
+    table = tree.find(".//dmn:decisionTable", DMN_NS)
+    assert table is not None
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"allocation_priority", "rule"}
+    assert {"rule_high_priority_risk", "rule_medium_risk", "rule_low"}.issubset(rule_ids)
+
+
+def test_dc_shortage_case_has_required_human_tasks_for_case_lifecycle() -> None:
+    tree = ElementTree.parse(Path("processes/multi-echelon/dc_shortage_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "dc_shortage_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review DC shortage" in human_task_names
+    assert "Approve allocation rule" in human_task_names
+    assert "Notify affected stores" in human_task_names
+    assert "Confirm store order cutoff" in human_task_names
