@@ -53,6 +53,8 @@ class LocalFileDropAdapter:
 
         files: list[SourceFile] = []
         for path in sorted(source_dir.iterdir()):
+            if path.name == "manifest.json":
+                continue
             if not path.is_file() or path.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
                 continue
             files.append(

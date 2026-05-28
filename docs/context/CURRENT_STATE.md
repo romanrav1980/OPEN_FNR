@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 369 automated tests passed.
+Current backend regression status: 370 automated tests passed.
 
 ## Local Infrastructure
 
@@ -520,6 +520,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Configurable local file source adapter: `apps/backend/open_fnr_api/source_adapters.py`.
 - Local file discovery endpoint: `/data/source-adapters/local-files/discover`.
 - Local file manifest sidecar support: `manifest.json` beside source files.
+- Local file discovery excludes `manifest.json` from source data files and treats it only as sidecar metadata.
 - Pilot landing sample generator: `apps/backend/open_fnr_api/pilot_fixtures.py`, `scripts/dev/generate-pilot-landing.ps1`.
 - Pilot shadow-load discovery runner: `apps/backend/open_fnr_api/shadow_load.py`, `scripts/dev/run-shadow-load.ps1`.
 - Source contract DQ plans: `/data-quality/source-contract-plans`.

@@ -45,3 +45,29 @@ def test_local_file_drop_adapter_loads_manifest_sidecar(tmp_path) -> None:
     assert manifest is not None
     assert manifest.row_count == 2
     assert manifest.checksum == "sha256:test"
+
+
+def test_local_file_drop_adapter_does_not_treat_manifest_as_source_file(tmp_path) -> None:
+    source_dir = tmp_path / "pos" / "pos_sales_line" / "business_date=2026-05-28"
+    source_dir.mkdir(parents=True)
+    (source_dir / "manifest.json").write_text(
+        """
+        {
+          "source_system": "POS",
+          "contract_name": "pos_sales_line",
+          "business_date": "2026-05-28",
+          "row_count": 1,
+          "checksum": "sha256:test",
+          "idempotency_key": "POS:pos_sales_line:v1:2026-05-28",
+          "files": ["sales.json"]
+        }
+        """,
+        encoding="utf-8",
+    )
+    (source_dir / "sales.json").write_text('{"ok": true}', encoding="utf-8")
+
+    adapter = LocalFileDropAdapter(tmp_path)
+    files = adapter.discover("POS", "pos_sales_line", date(2026, 5, 28))
+
+    assert len(files) == 1
+    assert files[0].file_name == "sales.json"
