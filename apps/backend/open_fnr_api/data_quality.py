@@ -250,16 +250,27 @@ def evaluate_source_contract_dq_result(
             warning_count=0,
             message="Source files are missing; DQ execution cannot continue.",
         )
-    warning_count = 1 if contract.discovered_size_bytes == 0 else 0
+    if contract.discovered_size_bytes == 0:
+        return SourceContractDqCheckResult(
+            source_system=contract.source_system,
+            contract_name=contract.contract_name,
+            status="blocked",
+            severity=DqSeverity.BLOCKER,
+            blocking_rules_checked=plan.blocking_rules,
+            warning_rules_checked=plan.warning_rules,
+            blocker_count=1,
+            warning_count=0,
+            message="Source files are empty; clean publication is blocked.",
+        )
     return SourceContractDqCheckResult(
         source_system=contract.source_system,
         contract_name=contract.contract_name,
-        status="warning" if warning_count else "passed",
-        severity=DqSeverity.WARNING if warning_count else DqSeverity.INFO,
+        status="passed",
+        severity=DqSeverity.INFO,
         blocking_rules_checked=plan.blocking_rules,
         warning_rules_checked=plan.warning_rules,
         blocker_count=0,
-        warning_count=warning_count,
+        warning_count=0,
         message="Source file discovered and contract DQ plan executed.",
     )
 

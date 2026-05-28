@@ -130,6 +130,7 @@ POST /data/ingestion/shadow-load/run
 ```
 
 The API returns a process instance id, source discovery report and recovery tasks that map to `source_batch_recovery_case` when files are missing.
+When all files exist, the gate runs source-contract DQ checks. DQ blockers create recovery tasks with reason `dq_blocker`; warnings do not block clean publication.
 
 After source discovery and DQ gates pass, the Process Engine task `Confirm clean canonical publication` is assigned to `Data Platform Owner`. Completing it confirms that clean tables are ready for feature mart, forecast and replenishment runs.
 

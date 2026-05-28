@@ -61,6 +61,46 @@ def test_shadow_load_gate_is_ready_when_all_files_are_present(tmp_path) -> None:
     assert payload["recovery_tasks"] == []
 
 
+def test_shadow_load_gate_creates_dq_recovery_tasks_when_dq_blocks_after_discovery(tmp_path) -> None:
+    contracts = (
+        ("pos", "pos_sales_line"),
+        ("wms", "wms_stock_snapshot_line"),
+        ("wms", "wms_open_order_line"),
+        ("wms", "wms_in_transit_line"),
+        ("erp", "erp_price_line"),
+        ("erp", "erp_order_export_status_line"),
+        ("mdm", "mdm_product_line"),
+        ("mdm", "mdm_store_line"),
+        ("promo", "promo_plan_line"),
+    )
+    for source, contract in contracts:
+        source_dir = tmp_path / source / contract / "business_date=2026-05-28"
+        source_dir.mkdir(parents=True)
+        (source_dir / f"{contract}.json").write_text("", encoding="utf-8")
+
+    response = client.post(
+        "/data/ingestion/shadow-load/run",
+        json={
+            "business_date": "2026-05-28",
+            "actor": "data.engineer@example.org",
+            "landing_root_path": str(tmp_path),
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "recovery_required"
+    assert payload["report"]["missing_contracts"] == 0
+    assert len(payload["recovery_tasks"]) == 9
+    assert {task["reason"] for task in payload["recovery_tasks"]} == {"dq_blocker"}
+    assert payload["recovery_tasks"][0]["available_actions"] == [
+        "fix_source",
+        "request_resend",
+        "approve_waiver",
+        "comment",
+    ]
+
+
 def test_recovery_task_owner_routing_is_source_specific() -> None:
     assert shadow_gate.owner_role_for_source("POS") == "Data Engineer"
     assert shadow_gate.owner_role_for_source("WMS") == "Supply Chain Data Owner"

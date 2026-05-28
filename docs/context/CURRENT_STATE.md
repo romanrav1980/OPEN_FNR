@@ -502,6 +502,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 
 - Source readiness endpoint: `/data/ingestion/readiness`.
 - Shadow-load gate API: `/data/ingestion/shadow-load/run`.
+- Shadow-load gate creates recovery tasks for missing files and source-contract DQ blockers.
 - Configurable local file source adapter: `apps/backend/open_fnr_api/source_adapters.py`.
 - Local file discovery endpoint: `/data/source-adapters/local-files/discover`.
 - Pilot shadow-load discovery runner: `apps/backend/open_fnr_api/shadow_load.py`, `scripts/dev/run-shadow-load.ps1`.
