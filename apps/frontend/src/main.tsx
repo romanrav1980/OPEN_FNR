@@ -27,6 +27,22 @@ type DataQualityIncident = {
   message: string;
 };
 
+type ShadowLoadSource = {
+  source: string;
+  contract: string;
+  status: "discovered" | "missing_files";
+  files: number;
+  owner: string;
+};
+
+type ShadowLoadTask = {
+  task: string;
+  source: string;
+  owner: string;
+  reason: string;
+  actions: string;
+};
+
 type FeatureMartStatus = {
   version: string;
   status: "published" | "validated" | "failed";
@@ -70,6 +86,32 @@ const dataQualityIncidents: DataQualityIncident[] = [
     affectedRows: "5.4K",
     owner: "Data Owner",
     message: "Prices arrived after configured cutoff.",
+  },
+];
+
+const shadowLoadSources: ShadowLoadSource[] = [
+  { source: "POS", contract: "pos_sales_line", status: "discovered", files: 1, owner: "Data Engineer" },
+  { source: "WMS", contract: "wms_stock_snapshot_line", status: "missing_files", files: 0, owner: "Supply Chain Data Owner" },
+  { source: "WMS", contract: "wms_open_order_line", status: "missing_files", files: 0, owner: "Supply Chain Data Owner" },
+  { source: "ERP", contract: "erp_price_line", status: "discovered", files: 1, owner: "Commercial Data Owner" },
+  { source: "MDM", contract: "mdm_product_line", status: "discovered", files: 1, owner: "MDM Data Owner" },
+  { source: "PROMO", contract: "promo_plan_line", status: "missing_files", files: 0, owner: "Promo Planner" },
+];
+
+const shadowLoadTasks: ShadowLoadTask[] = [
+  {
+    task: "task-shadow-load-wms-wms_stock_snapshot_line",
+    source: "WMS",
+    owner: "Supply Chain Data Owner",
+    reason: "missing_files",
+    actions: "request_resend / approve_reprocessing / waive",
+  },
+  {
+    task: "task-shadow-load-promo-promo_plan_line",
+    source: "PROMO",
+    owner: "Promo Planner",
+    reason: "missing_files",
+    actions: "request_resend / approve_reprocessing / comment",
   },
 ];
 
@@ -925,6 +967,105 @@ function App() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Shadow load gate">
+        <div className="section-heading">
+          <h2>Shadow Load Gate</h2>
+          <p>API-backed process: discovery, recovery tasks and audit</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Process instance</span>
+            <strong>proc-shadow-load-2026-05-28</strong>
+            <p>
+              The gate calls <code>/data/ingestion/shadow-load/run</code>, checks every source contract
+              and opens recovery tasks for missing or blocked batches.
+            </p>
+          </article>
+          <article className="feature-summary">
+            <span>Business audit</span>
+            <strong>OPEN_FNR_AUDIT_ENABLED=true</strong>
+            <p>
+              Every gate run records actor, role, landing root, missing contracts and process correlation id.
+            </p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Contract</th>
+                <th>Status</th>
+                <th>Files</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shadowLoadSources.map((source) => (
+                <tr key={`${source.source}-${source.contract}`}>
+                  <td>{source.source}</td>
+                  <td>{source.contract}</td>
+                  <td>
+                    <span className={`status-dot status-${source.status === "discovered" ? "loaded" : "waiting"}`}>
+                      {source.status}
+                    </span>
+                  </td>
+                  <td>{source.files}</td>
+                  <td>{source.owner}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Recovery task</th>
+                <th>Source</th>
+                <th>Owner</th>
+                <th>Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shadowLoadTasks.map((task) => (
+                <tr key={task.task}>
+                  <td>{task.task}</td>
+                  <td>{task.source}</td>
+                  <td>{task.owner}</td>
+                  <td>{task.reason}</td>
+                  <td>{task.actions}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Run Gate</span>
+            <h3>Start pilot shadow load</h3>
+            <p>
+              Data Engineer selects business date and landing root. The system discovers files,
+              validates source coverage and creates recovery tasks before clean publication.
+            </p>
+            <div className="action-row">
+              <button type="button">Run gate</button>
+              <button type="button">Open recovery</button>
+              <button type="button">View audit</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Error State</span>
+            <h3>Missing source files</h3>
+            <p>
+              Missing files keep the gate in recovery_required state. Data Owner can request resend,
+              approve reprocessing or add an audited waiver.
+            </p>
+          </aside>
         </div>
       </section>
 
