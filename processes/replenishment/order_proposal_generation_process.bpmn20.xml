@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment">
+  <process id="order_proposal_generation_process" name="Order proposal generation process" isExecutable="true">
+    <startEvent id="start_projection_published" name="Inventory projection published" />
+    <sequenceFlow id="flow_start_to_requirement" sourceRef="start_projection_published" targetRef="calculate_gross_requirement" />
+    <serviceTask id="calculate_gross_requirement" name="Calculate gross requirement" />
+    <sequenceFlow id="flow_gross_to_net" sourceRef="calculate_gross_requirement" targetRef="calculate_net_requirement" />
+    <serviceTask id="calculate_net_requirement" name="Calculate net requirement" />
+    <sequenceFlow id="flow_net_to_constraints" sourceRef="calculate_net_requirement" targetRef="evaluate_order_constraints" />
+    <businessRuleTask id="evaluate_order_constraints" name="Evaluate order constraints" />
+    <sequenceFlow id="flow_constraints_to_round" sourceRef="evaluate_order_constraints" targetRef="apply_moq_and_rounding" />
+    <serviceTask id="apply_moq_and_rounding" name="Apply MOQ and rounding" />
+    <sequenceFlow id="flow_round_to_auto" sourceRef="apply_moq_and_rounding" targetRef="evaluate_auto_approval" />
+    <businessRuleTask id="evaluate_auto_approval" name="Evaluate auto approval" />
+    <sequenceFlow id="flow_auto_to_gateway" sourceRef="evaluate_auto_approval" targetRef="proposal_status_gateway" />
+    <exclusiveGateway id="proposal_status_gateway" name="Proposal status" />
+    <sequenceFlow id="flow_auto_approved" sourceRef="proposal_status_gateway" targetRef="publish_auto_approved_proposal" />
+    <sequenceFlow id="flow_manual_review" sourceRef="proposal_status_gateway" targetRef="review_order_proposal" />
+    <sequenceFlow id="flow_blocked" sourceRef="proposal_status_gateway" targetRef="open_supplier_constraint_case" />
+    <serviceTask id="publish_auto_approved_proposal" name="Publish auto-approved proposal" />
+    <userTask id="review_order_proposal" name="Review order proposal" />
+    <userTask id="open_supplier_constraint_case" name="Open supplier constraint case" />
+    <sequenceFlow id="flow_auto_to_end" sourceRef="publish_auto_approved_proposal" targetRef="end_created" />
+    <sequenceFlow id="flow_review_to_end" sourceRef="review_order_proposal" targetRef="end_created" />
+    <sequenceFlow id="flow_blocked_to_end" sourceRef="open_supplier_constraint_case" targetRef="end_blocked" />
+    <endEvent id="end_created" name="Order proposal created" />
+    <endEvent id="end_blocked" name="Order proposal blocked" />
+  </process>
+</definitions>

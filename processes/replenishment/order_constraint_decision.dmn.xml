@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/replenishment" name="order_constraint_decision">
+  <decision id="order_constraint_decision" name="Order constraint decision">
+    <decisionTable id="order_constraint_table" hitPolicy="COLLECT">
+      <input id="input_supplier_open" label="supplier_open">
+        <inputExpression id="input_supplier_open_expr" typeRef="boolean">
+          <text>supplier_open</text>
+        </inputExpression>
+      </input>
+      <input id="input_calendar_open" label="calendar_open">
+        <inputExpression id="input_calendar_open_expr" typeRef="boolean">
+          <text>calendar_open</text>
+        </inputExpression>
+      </input>
+      <output id="output_constraint" label="constraint" name="constraint" typeRef="string" />
+      <rule id="rule_supplier_blocked">
+        <inputEntry id="rule_supplier_blocked_open"><text>false</text></inputEntry>
+        <inputEntry id="rule_supplier_blocked_calendar"><text>-</text></inputEntry>
+        <outputEntry id="rule_supplier_blocked_constraint"><text>"supplier_blocked"</text></outputEntry>
+      </rule>
+      <rule id="rule_calendar_closed">
+        <inputEntry id="rule_calendar_closed_open"><text>-</text></inputEntry>
+        <inputEntry id="rule_calendar_closed_calendar"><text>false</text></inputEntry>
+        <outputEntry id="rule_calendar_closed_constraint"><text>"calendar_closed"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

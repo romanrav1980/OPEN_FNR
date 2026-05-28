@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment">
+  <case id="supplier_constraint_case" name="Supplier constraint case">
+    <casePlanModel id="supplier_constraint_plan" name="Supplier constraint plan">
+      <humanTask id="review_supplier_block" name="Review supplier block" />
+      <humanTask id="find_alternative_supplier" name="Find alternative supplier" />
+      <humanTask id="approve_manual_order_release" name="Approve manual order release" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/replenishment" name="order_auto_approval_decision">
+  <decision id="order_auto_approval_decision" name="Order auto approval decision">
+    <decisionTable id="order_auto_approval_table" hitPolicy="FIRST">
+      <input id="input_constraint_flags" label="constraint_flags">
+        <inputExpression id="input_constraint_flags_expr" typeRef="string">
+          <text>constraint_flags</text>
+        </inputExpression>
+      </input>
+      <input id="input_order_qty" label="rounded_order_qty">
+        <inputExpression id="input_order_qty_expr" typeRef="number">
+          <text>rounded_order_qty</text>
+        </inputExpression>
+      </input>
+      <output id="output_status" label="status" name="status" typeRef="string" />
+      <rule id="rule_blocked">
+        <inputEntry id="rule_blocked_flags"><text>contains("supplier_blocked")</text></inputEntry>
+        <inputEntry id="rule_blocked_qty"><text>-</text></inputEntry>
+        <outputEntry id="rule_blocked_status"><text>"blocked"</text></outputEntry>
+      </rule>
+      <rule id="rule_manual">
+        <inputEntry id="rule_manual_flags"><text>contains("stock_out_risk")</text></inputEntry>
+        <inputEntry id="rule_manual_qty"><text>-</text></inputEntry>
+        <outputEntry id="rule_manual_status"><text>"manual_review"</text></outputEntry>
+      </rule>
+      <rule id="rule_auto">
+        <inputEntry id="rule_auto_flags"><text>-</text></inputEntry>
+        <inputEntry id="rule_auto_qty"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_auto_status"><text>"auto_approved"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

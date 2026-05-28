@@ -21,6 +21,13 @@ class StockOutRisk(StrEnum):
     STOCK_OUT = "stock_out"
 
 
+class OrderProposalStatus(StrEnum):
+    DRAFT = "draft"
+    AUTO_APPROVED = "auto_approved"
+    MANUAL_REVIEW = "manual_review"
+    BLOCKED = "blocked"
+
+
 class StockSnapshot(BaseModel):
     snapshot_id: str
     store_id: str
@@ -80,6 +87,33 @@ class InventoryProjection(BaseModel):
     days: list[InventoryProjectionDay]
 
 
+class OrderProposalExplanation(BaseModel):
+    gross_requirement_qty: float = Field(ge=0)
+    projected_stock_at_receipt_qty: float
+    safety_stock_qty: float = Field(ge=0)
+    presentation_stock_qty: float = Field(ge=0)
+    net_requirement_qty: float = Field(ge=0)
+    raw_order_qty: float = Field(ge=0)
+    rounded_order_qty: float = Field(ge=0)
+    min_order_qty: float = Field(gt=0)
+    order_multiple: float = Field(gt=0)
+    constraint_flags: list[str]
+
+
+class OrderProposal(BaseModel):
+    proposal_id: str
+    projection_id: str
+    store_id: str
+    sku_id: str
+    supplier_id: str
+    status: OrderProposalStatus
+    order_date: date
+    expected_delivery_date: date
+    recommended_order_qty: float = Field(ge=0)
+    explanation: OrderProposalExplanation
+    created_at: datetime
+
+
 def calculate_projected_stock(
     opening_stock_qty: float,
     demand_projection_qty: float,
@@ -95,6 +129,23 @@ def classify_stock_out_risk(projected_stock_qty: float, safety_stock_qty: float)
     if projected_stock_qty < safety_stock_qty:
         return StockOutRisk.WARNING
     return StockOutRisk.NONE
+
+
+def calculate_net_requirement(
+    projected_stock_at_receipt_qty: float,
+    gross_requirement_qty: float,
+    safety_stock_qty: float,
+    presentation_stock_qty: float,
+) -> float:
+    target_qty = gross_requirement_qty + safety_stock_qty + presentation_stock_qty
+    return max(0, target_qty - projected_stock_at_receipt_qty)
+
+
+def round_order_qty(raw_order_qty: float, min_order_qty: float, order_multiple: float) -> float:
+    if raw_order_qty <= 0:
+        return 0
+    constrained_qty = max(raw_order_qty, min_order_qty)
+    return ((constrained_qty + order_multiple - 1) // order_multiple) * order_multiple
 
 
 STOCK_SNAPSHOTS: tuple[StockSnapshot, ...] = (
@@ -195,6 +246,81 @@ INVENTORY_PROJECTIONS: tuple[InventoryProjection, ...] = (
     ),
 )
 
+ORDER_PROPOSALS: tuple[OrderProposal, ...] = (
+    OrderProposal(
+        proposal_id="order-proposal-20260528-s001-sku001",
+        projection_id="projection-20260528-s001-sku001",
+        store_id="S001",
+        sku_id="SKU001",
+        supplier_id="SUP001",
+        status=OrderProposalStatus.MANUAL_REVIEW,
+        order_date=date(2026, 5, 28),
+        expected_delivery_date=date(2026, 5, 30),
+        recommended_order_qty=276,
+        explanation=OrderProposalExplanation(
+            gross_requirement_qty=321,
+            projected_stock_at_receipt_qty=163,
+            safety_stock_qty=90,
+            presentation_stock_qty=25,
+            net_requirement_qty=273,
+            raw_order_qty=273,
+            rounded_order_qty=276,
+            min_order_qty=24,
+            order_multiple=12,
+            constraint_flags=["stock_out_risk", "manual_review_required"],
+        ),
+        created_at=datetime(2026, 5, 28, 5, 0, tzinfo=timezone.utc),
+    ),
+    OrderProposal(
+        proposal_id="order-proposal-20260528-s001-sku002",
+        projection_id="projection-20260528-s001-sku002",
+        store_id="S001",
+        sku_id="SKU002",
+        supplier_id="SUP001",
+        status=OrderProposalStatus.AUTO_APPROVED,
+        order_date=date(2026, 5, 28),
+        expected_delivery_date=date(2026, 5, 30),
+        recommended_order_qty=48,
+        explanation=OrderProposalExplanation(
+            gross_requirement_qty=42,
+            projected_stock_at_receipt_qty=55,
+            safety_stock_qty=40,
+            presentation_stock_qty=10,
+            net_requirement_qty=37,
+            raw_order_qty=37,
+            rounded_order_qty=48,
+            min_order_qty=24,
+            order_multiple=12,
+            constraint_flags=["rounded_to_order_multiple"],
+        ),
+        created_at=datetime(2026, 5, 28, 5, 0, tzinfo=timezone.utc),
+    ),
+    OrderProposal(
+        proposal_id="order-proposal-20260528-s001-sku003",
+        projection_id="projection-20260528-s001-sku003",
+        store_id="S001",
+        sku_id="SKU003",
+        supplier_id="SUP002",
+        status=OrderProposalStatus.BLOCKED,
+        order_date=date(2026, 5, 28),
+        expected_delivery_date=date(2026, 5, 31),
+        recommended_order_qty=0,
+        explanation=OrderProposalExplanation(
+            gross_requirement_qty=120,
+            projected_stock_at_receipt_qty=20,
+            safety_stock_qty=50,
+            presentation_stock_qty=15,
+            net_requirement_qty=165,
+            raw_order_qty=165,
+            rounded_order_qty=168,
+            min_order_qty=24,
+            order_multiple=12,
+            constraint_flags=["supplier_blocked", "calendar_closed"],
+        ),
+        created_at=datetime(2026, 5, 28, 5, 0, tzinfo=timezone.utc),
+    ),
+)
+
 
 @router.get("/stock-snapshots")
 def list_stock_snapshots() -> dict[str, object]:
@@ -222,3 +348,16 @@ def get_inventory_projection(projection_id: str = Path(min_length=1)) -> dict[st
         if projection.projection_id == projection_id:
             return projection.model_dump(mode="json")
     raise HTTPException(status_code=404, detail="inventory projection not found")
+
+
+@router.get("/order-proposals")
+def list_order_proposals() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in ORDER_PROPOSALS], "total": len(ORDER_PROPOSALS)}
+
+
+@router.get("/order-proposals/{proposal_id}")
+def get_order_proposal(proposal_id: str = Path(min_length=1)) -> dict[str, object]:
+    for proposal in ORDER_PROPOSALS:
+        if proposal.proposal_id == proposal_id:
+            return proposal.model_dump(mode="json")
+    raise HTTPException(status_code=404, detail="order proposal not found")

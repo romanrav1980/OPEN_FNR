@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 12 - Order Proposal V1</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+      section {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        margin-top: 20px;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        margin-bottom: 12px;
+        color: var(--red-light);
+        font-size: 20px;
+      }
+      h3 {
+        margin: 16px 0 8px;
+        font-size: 16px;
+      }
+      p,
+      li,
+      td,
+      th {
+        line-height: 1.55;
+      }
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .shot {
+        width: 100%;
+        border: 1px solid var(--border);
+        margin-top: 12px;
+      }
+      code {
+        color: var(--red-light);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 12: Order Proposal V1</h1>
+        <p class="subtitle">
+          Аннотация: тестируем преобразование projected stock в объяснимое предложение заказа:
+          gross requirement, net requirement, safety stock, presentation stock,
+          MOQ/rounding, constraint flags и статусы auto/manual/blocked.
+        </p>
+      </header>
+
+      <section>
+        <h2>Что тестируем</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Область</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Факт</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Order proposal API</td>
+              <td>Открываем <code>/replenishment/order-proposals/order-proposal-20260528-s001-sku001</code>.</td>
+              <td>Проверяем, что заказ объясним по компонентам формулы.</td>
+              <td class="ok">Explanation получен.</td>
+            </tr>
+            <tr>
+              <td>Net requirement</td>
+              <td>Считаем gross + safety + presentation - projected stock at receipt.</td>
+              <td>Это основа для заказа до округления.</td>
+              <td class="ok">321 + 90 + 25 - 163 = 273.</td>
+            </tr>
+            <tr>
+              <td>MOQ and rounding</td>
+              <td>Применяем min order qty и order multiple.</td>
+              <td>Заказ должен соответствовать ограничениям поставщика.</td>
+              <td class="ok">273 округлено до 276.</td>
+            </tr>
+            <tr>
+              <td>Routing</td>
+              <td>Проверяем auto_approved, manual_review и blocked.</td>
+              <td>Процесс должен маршрутизировать предложения по рискам и constraints.</td>
+              <td class="ok">Все три статуса проверены.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем экран и находим блок <code>Order Proposal V1</code>.</li>
+          <li>Проверяем карточку выбранного предложения.</li>
+          <li>Проверяем формулу: gross, safety, presentation, projected stock, raw order.</li>
+          <li>Проверяем таблицу proposal со статусами manual_review, auto_approved, blocked.</li>
+          <li>Проверяем flags: stock_out_risk, rounded_to_order_multiple, supplier_blocked.</li>
+          <li>Проверяем action panel: Approve, Adjust, Block.</li>
+        </ol>
+        <img class="shot" src="screenshots/order-proposal-v1.png" alt="Order Proposal V1" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Почему</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>BPMN стартует после публикации inventory projection.</td>
+              <td>Order proposal должен опираться на утвержденный projected stock.</td>
+              <td class="ok">Start event создан.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Считается gross requirement.</td>
+              <td>Нужно понимать спрос на период покрытия.</td>
+              <td class="ok">Gross layer присутствует.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Считается net requirement.</td>
+              <td>Учитываются safety, presentation и projected stock.</td>
+              <td class="ok">Net formula проверена.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>DMN оценивает constraints.</td>
+              <td>Поставщик или календарь могут заблокировать заказ.</td>
+              <td class="ok">order_constraint_decision создан.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Применяются MOQ и rounding.</td>
+              <td>Заказ должен быть физически исполним поставщиком.</td>
+              <td class="ok">273 -> 276.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>DMN определяет auto/manual/blocked.</td>
+              <td>Planner подключается только при рисках или блокировках.</td>
+              <td class="ok">Routing проверен.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">94 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

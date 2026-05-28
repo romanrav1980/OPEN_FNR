@@ -206,6 +206,42 @@ const inventoryProjectionDays = [
   { date: "2026-06-01", opening: 135, demand: 168, openOrders: 0, inTransit: 0, projected: -33, risk: "stock_out" },
 ];
 
+const orderProposals = [
+  {
+    id: "order-proposal-20260528-s001-sku001",
+    status: "manual_review",
+    sku: "SKU001",
+    supplier: "SUP001",
+    gross: 321,
+    net: 273,
+    raw: 273,
+    rounded: 276,
+    flags: "stock_out_risk, manual_review_required",
+  },
+  {
+    id: "order-proposal-20260528-s001-sku002",
+    status: "auto_approved",
+    sku: "SKU002",
+    supplier: "SUP001",
+    gross: 42,
+    net: 37,
+    raw: 37,
+    rounded: 48,
+    flags: "rounded_to_order_multiple",
+  },
+  {
+    id: "order-proposal-20260528-s001-sku003",
+    status: "blocked",
+    sku: "SKU003",
+    supplier: "SUP002",
+    gross: 120,
+    net: 165,
+    raw: 165,
+    rounded: 168,
+    flags: "supplier_blocked, calendar_closed",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -886,6 +922,81 @@ function App() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Order proposals">
+        <div className="section-heading">
+          <h2>Order Proposal V1</h2>
+          <p>Explainable order quantity with net requirement, MOQ, rounding and constraints</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Selected Proposal</span>
+            <strong>order-proposal-20260528-s001-sku001</strong>
+            <p>Manual review because the projection has stock-out risk during promo demand.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Formula</span>
+            <strong>321 + 90 + 25 - 163 = 273 raw</strong>
+            <p>Rounded to 276 by MOQ 24 and order multiple 12 before planner approval.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Proposal</th>
+                <th>Status</th>
+                <th>SKU</th>
+                <th>Supplier</th>
+                <th>Gross</th>
+                <th>Net</th>
+                <th>Raw</th>
+                <th>Rounded</th>
+                <th>Flags</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orderProposals.map((proposal) => (
+                <tr key={proposal.id}>
+                  <td>{proposal.id}</td>
+                  <td>{proposal.status}</td>
+                  <td>{proposal.sku}</td>
+                  <td>{proposal.supplier}</td>
+                  <td>{proposal.gross}</td>
+                  <td>{proposal.net}</td>
+                  <td>{proposal.raw}</td>
+                  <td>{proposal.rounded}</td>
+                  <td>{proposal.flags}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Explanation Drawer</span>
+            <h3>Why 276 units?</h3>
+            <p>
+              Gross requirement 321 plus safety stock 90 and presentation stock 25,
+              minus projected stock at receipt 163, gives net requirement 273.
+              Order multiple 12 rounds it to 276.
+            </p>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Constraint Flags</span>
+            <h3>Manual review required</h3>
+            <p>
+              The order is explainable and not blocked, but stock-out risk requires
+              Replenishment Planner review before publication.
+            </p>
+            <div className="action-row">
+              <button type="button">Approve</button>
+              <button type="button">Adjust</button>
+              <button type="button">Block</button>
+            </div>
+          </aside>
         </div>
       </section>
     </main>

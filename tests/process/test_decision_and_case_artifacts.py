@@ -267,3 +267,31 @@ def test_stock_projection_issue_case_is_parseable() -> None:
     assert "Review stock-out risk" in human_task_names
     assert "Verify open orders and in-transit" in human_task_names
     assert "Approve projection fallback" in human_task_names
+
+
+def test_order_proposal_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/replenishment/order_auto_approval_decision.dmn.xml", "order_auto_approval_decision"),
+        ("processes/replenishment/order_constraint_decision.dmn.xml", "order_constraint_decision"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_supplier_constraint_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment/supplier_constraint_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "supplier_constraint_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review supplier block" in human_task_names
+    assert "Find alternative supplier" in human_task_names
+    assert "Approve manual order release" in human_task_names

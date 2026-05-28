@@ -3,7 +3,14 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from open_fnr_api.main import app
-from open_fnr_api.replenishment import StockOutRisk, StockSnapshot, calculate_projected_stock, classify_stock_out_risk
+from open_fnr_api.replenishment import (
+    StockOutRisk,
+    StockSnapshot,
+    calculate_net_requirement,
+    calculate_projected_stock,
+    classify_stock_out_risk,
+    round_order_qty,
+)
 
 
 client = TestClient(app)
@@ -59,3 +66,41 @@ def test_replenishment_policy_endpoint_exposes_lead_time_and_order_constraints()
     assert policy["safety_stock_qty"] == 90
     assert policy["min_order_qty"] == 24
     assert policy["order_multiple"] == 12
+
+
+def test_order_proposal_endpoint_exposes_explanation_and_constraints() -> None:
+    response = client.get("/replenishment/order-proposals/order-proposal-20260528-s001-sku001")
+    assert response.status_code == 200
+
+    payload = response.json()
+    explanation = payload["explanation"]
+    assert payload["status"] == "manual_review"
+    assert payload["recommended_order_qty"] == 276
+    assert explanation["gross_requirement_qty"] == 321
+    assert explanation["projected_stock_at_receipt_qty"] == 163
+    assert explanation["net_requirement_qty"] == 273
+    assert explanation["rounded_order_qty"] == 276
+    assert explanation["constraint_flags"] == ["stock_out_risk", "manual_review_required"]
+
+
+def test_order_proposal_list_contains_auto_manual_and_blocked_statuses() -> None:
+    response = client.get("/replenishment/order-proposals")
+    assert response.status_code == 200
+
+    statuses = {item["status"] for item in response.json()["items"]}
+    assert statuses == {"manual_review", "auto_approved", "blocked"}
+
+
+def test_net_requirement_formula() -> None:
+    assert calculate_net_requirement(
+        projected_stock_at_receipt_qty=163,
+        gross_requirement_qty=321,
+        safety_stock_qty=90,
+        presentation_stock_qty=25,
+    ) == 273
+
+
+def test_order_rounding_uses_moq_and_order_multiple() -> None:
+    assert round_order_qty(raw_order_qty=0, min_order_qty=24, order_multiple=12) == 0
+    assert round_order_qty(raw_order_qty=13, min_order_qty=24, order_multiple=12) == 24
+    assert round_order_qty(raw_order_qty=273, min_order_qty=24, order_multiple=12) == 276
