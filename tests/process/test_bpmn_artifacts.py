@@ -10,6 +10,7 @@ FEATURE_PROCESS_PATH = Path("processes/feature-mart/feature_build_process.bpmn20
 FORECAST_PROCESS_PATH = Path("processes/forecast/regular_forecast_run_process.bpmn20.xml")
 FORECAST_REVIEW_PROCESS_PATH = Path("processes/forecast/forecast_review_process.bpmn20.xml")
 MODEL_REVIEW_PROCESS_PATH = Path("processes/ml/model_candidate_review_process.bpmn20.xml")
+PROMO_VALIDATION_PROCESS_PATH = Path("processes/promo/promo_draft_validation_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -118,3 +119,22 @@ def test_model_candidate_review_bpmn_has_approval_and_promotion() -> None:
     assert "Run model backtesting" in service_task_names
     assert "Promote model candidate" in service_task_names
     assert "Approve model candidate" in user_task_names
+
+
+def test_promo_validation_bpmn_checks_completeness_and_overlap() -> None:
+    tree = ElementTree.parse(PROMO_VALIDATION_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "promo_draft_validation_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    assert "Validate promo completeness" in service_task_names
+    assert "Detect promo overlap" in service_task_names
+    assert "Resolve promo data issue" in user_task_names

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 7 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      h1, h2, p { margin-top: 0; }
+      h1 { font-size: 34px; line-height: 1.15; }
+      h2 { margin-top: 34px; }
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      code { color: #f6d6dc; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .warn { color: var(--warn); font-weight: 700; }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 7 / Promo Data Model And Validation</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 7: промо как управляемый объект,
+          обязательные поля, проверка скидки/цены/выкладки и overlap validation.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем Promo Workbench Draft, потому что промо-прогноз невозможен
+          без корректного промо-плана. Метод проверки объединяет API-контракт,
+          Pydantic validation, DMN completeness/overlap rules, BPMN validation
+          process, CMMN issue case, UI screenshot и regression tests. Такой способ
+          нужен, чтобы промо не попадало в forecast без SKU, магазинов, дат,
+          цены, скидки, места выкладки и мощности выкладки.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, promo, process, data и encoding тесты.</td>
+              <td>Проверить обязательные поля промо, overlap, BPMN/DMN/CMMN.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">58 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить Promo Workbench Draft.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI и снимаем full-page screenshot.</td>
+              <td>Зафиксировать визуальный результат промо-сценария.</td>
+              <td>Скриншот содержит промо-таблицу и обязательные атрибуты.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Promo Workbench Draft.</td>
+              <td>Проверить, что Promo Planner видит рабочий промо-экран.</td>
+              <td>Промо должно быть отдельным объектом до promo uplift.</td>
+              <td>Отображается блок Promo Workbench Draft.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем обязательные поля.</td>
+              <td>Убедиться, что UI показывает SKU, магазины, даты, цену, скидку и выкладку.</td>
+              <td>Эти поля напрямую влияют на uplift и доступность товара.</td>
+              <td>Все обязательные атрибуты видны в таблице.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем display capacity.</td>
+              <td>Понять, есть ли физическая возможность выкладки.</td>
+              <td>RELEX-подобный контур учитывает место и мощность выкладки как фактор спроса.</td>
+              <td>Видны End cap / 120 units и Island / 80 units.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем статус conflict.</td>
+              <td>Показать, что промо с конфликтом не готово к прогнозу.</td>
+              <td>Overlap должен создавать бизнес-задачу, а не тихо проходить в forecast.</td>
+              <td>Видна строка promo со статусом conflict.</td>
+              <td class="ok">Видна.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>promo_draft_validation_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс после сохранения draft.</td>
+              <td>Каждое промо должно автоматически проверяться после изменения.</td>
+              <td>BPMN содержит start event Promo draft saved.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_draft_validation_process</code></td>
+              <td>2</td>
+              <td>Проверяем completeness.</td>
+              <td>Нельзя прогнозировать промо без SKU, магазинов, цены, скидки и выкладки.</td>
+              <td>BPMN содержит Validate promo completeness.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_draft_validation_process</code></td>
+              <td>3</td>
+              <td>Проверяем overlap.</td>
+              <td>Одновременные промо на тот же SKU/store/date искажают uplift.</td>
+              <td>BPMN содержит Detect promo overlap.</td>
+              <td class="ok">Подтверждено XML-тестом и API-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_completeness_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN required fields.</td>
+              <td>Правила полноты должны быть настраиваемыми.</td>
+              <td>DMN содержит has_sku, has_store, has_display, has_price.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_overlap_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN overlap.</td>
+              <td>Конфликт должен зависеть от SKU, store и пересечения дат.</td>
+              <td>DMN содержит same_sku, same_store, date_overlap.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_data_issue_case</code></td>
+              <td>1</td>
+              <td>Проверяем CMMN issue case.</td>
+              <td>Promo Planner и Category Manager должны совместно исправлять конфликт.</td>
+              <td>CMMN содержит Fix required promo fields и Resolve promo overlap.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/promo-workbench-draft.png" alt="OPEN FNR Promo Workbench Draft screenshot" />
+        <p class="caption">Скриншот: Promo Workbench Draft после Sprint 7.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 7 test cycle passed. Промо стало управляемым объектом с обязательными
+          полями, проверкой цен/скидок/выкладки, overlap detection и process-driven
+          issue handling.
+        </p>
+        <p class="warn">
+          Ограничение: UI показывает draft read-only; создание/редактирование формы и
+          API persistence будут расширяться в следующих промо-инкрементах.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

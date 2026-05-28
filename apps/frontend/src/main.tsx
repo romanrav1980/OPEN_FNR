@@ -104,6 +104,29 @@ const modelVersions = [
   },
 ];
 
+const promoPlans = [
+  {
+    id: "promo-20260601-fresh-001",
+    status: "ready_for_forecast",
+    sku: "SKU001, SKU002",
+    stores: "S001, S002",
+    dates: "2026-06-01..2026-06-07",
+    discount: "20%",
+    price: "119.90",
+    display: "End cap / 120 units",
+  },
+  {
+    id: "promo-20260605-grocery-002",
+    status: "conflict",
+    sku: "SKU010",
+    stores: "S001",
+    dates: "2026-06-05..2026-06-12",
+    discount: "11%",
+    price: "79.90",
+    display: "Island / 80 units",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -388,6 +411,55 @@ function App() {
                   <td>{model.bias}</td>
                   <td>{model.delta}</td>
                   <td>{model.fallback}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Promo workbench">
+        <div className="section-heading">
+          <h2>Promo Workbench Draft</h2>
+          <p>Mandatory fields, display capacity and overlap validation</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Required Promo Fields</span>
+            <strong>SKU / stores / dates / price / discount / display</strong>
+            <p>Promo cannot move to forecast until required commercial and display attributes are complete.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Validation Process</span>
+            <strong>Completeness + overlap checks</strong>
+            <p>Conflicts create a promo data issue case for Promo Planner and Category Manager.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Promo</th>
+                <th>Status</th>
+                <th>SKU</th>
+                <th>Stores</th>
+                <th>Dates</th>
+                <th>Discount</th>
+                <th>Price</th>
+                <th>Display</th>
+              </tr>
+            </thead>
+            <tbody>
+              {promoPlans.map((promo) => (
+                <tr key={promo.id}>
+                  <td>{promo.id}</td>
+                  <td>{promo.status}</td>
+                  <td>{promo.sku}</td>
+                  <td>{promo.stores}</td>
+                  <td>{promo.dates}</td>
+                  <td>{promo.discount}</td>
+                  <td>{promo.price}</td>
+                  <td>{promo.display}</td>
                 </tr>
               ))}
             </tbody>

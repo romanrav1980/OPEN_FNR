@@ -141,3 +141,30 @@ def test_model_degradation_case_is_parseable() -> None:
     }
     assert "Investigate model degradation" in human_task_names
     assert "Activate baseline fallback" in human_task_names
+
+
+def test_promo_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/promo/promo_completeness_decision.dmn.xml", "promo_completeness_decision"),
+        ("processes/promo/promo_overlap_decision.dmn.xml", "promo_overlap_decision"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_promo_data_issue_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/promo/promo_data_issue_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "promo_data_issue_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Fix required promo fields" in human_task_names
+    assert "Resolve promo overlap" in human_task_names

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/promo">
+  <case id="promo_data_issue_case" name="Promo Data Issue Case">
+    <casePlanModel id="promo_data_issue_case_plan" name="Promo Data Issue">
+      <planItem id="plan_fix_required_fields" definitionRef="fix_required_fields" />
+      <planItem id="plan_resolve_overlap" definitionRef="resolve_overlap" />
+      <planItem id="plan_category_approval" definitionRef="category_approval" />
+      <humanTask id="fix_required_fields"
+                 name="Fix required promo fields"
+                 flowable:candidateGroups="promo-planner" />
+      <humanTask id="resolve_overlap"
+                 name="Resolve promo overlap"
+                 flowable:candidateGroups="promo-planner,category-manager" />
+      <humanTask id="category_approval"
+                 name="Approve promo correction"
+                 flowable:candidateGroups="category-manager" />
+    </casePlanModel>
+  </case>
+</definitions>

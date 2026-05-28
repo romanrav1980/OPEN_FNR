@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_promo_overlap_dmn"
+             name="OPEN FNR Promo Overlap"
+             namespace="https://open-fnr.local/decisions/promo">
+  <decision id="promo_overlap_decision" name="Promo Overlap Decision">
+    <decisionTable id="promo_overlap_table" hitPolicy="FIRST">
+      <input id="input_same_sku" label="same_sku">
+        <inputExpression id="input_same_sku_expression" typeRef="boolean"><text>same_sku</text></inputExpression>
+      </input>
+      <input id="input_same_store" label="same_store">
+        <inputExpression id="input_same_store_expression" typeRef="boolean"><text>same_store</text></inputExpression>
+      </input>
+      <input id="input_date_overlap" label="date_overlap">
+        <inputExpression id="input_date_overlap_expression" typeRef="boolean"><text>date_overlap</text></inputExpression>
+      </input>
+      <output id="output_conflict" name="conflict" typeRef="boolean" />
+      <rule id="rule_conflict">
+        <inputEntry id="rule_conflict_sku"><text>true</text></inputEntry>
+        <inputEntry id="rule_conflict_store"><text>true</text></inputEntry>
+        <inputEntry id="rule_conflict_date"><text>true</text></inputEntry>
+        <outputEntry id="rule_conflict_output"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_no_conflict">
+        <inputEntry id="rule_no_conflict_sku"><text>-</text></inputEntry>
+        <inputEntry id="rule_no_conflict_store"><text>-</text></inputEntry>
+        <inputEntry id="rule_no_conflict_date"><text>-</text></inputEntry>
+        <outputEntry id="rule_no_conflict_output"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

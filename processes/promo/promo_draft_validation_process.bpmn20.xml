@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/promo">
+  <process id="promo_draft_validation_process" name="Promo Draft Validation Process" isExecutable="true">
+    <startEvent id="start_promo_validation" name="Promo draft saved" />
+    <sequenceFlow id="flow_start_to_validate" sourceRef="start_promo_validation" targetRef="validate_promo_completeness" />
+    <serviceTask id="validate_promo_completeness"
+                 name="Validate promo completeness"
+                 flowable:delegateExpression="${promoCompletenessDelegate}" />
+    <sequenceFlow id="flow_completeness_to_overlap" sourceRef="validate_promo_completeness" targetRef="detect_promo_overlap" />
+    <serviceTask id="detect_promo_overlap"
+                 name="Detect promo overlap"
+                 flowable:delegateExpression="${promoOverlapDelegate}" />
+    <sequenceFlow id="flow_overlap_to_gateway" sourceRef="detect_promo_overlap" targetRef="promo_validation_gateway" />
+    <exclusiveGateway id="promo_validation_gateway" name="Promo ready for forecast?" />
+    <sequenceFlow id="flow_ready_to_mark" sourceRef="promo_validation_gateway" targetRef="mark_ready_for_forecast">
+      <conditionExpression xsi:type="tFormalExpression">${promoValidationStatus == 'ready_for_forecast'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_conflict_to_task" sourceRef="promo_validation_gateway" targetRef="resolve_promo_data_issue">
+      <conditionExpression xsi:type="tFormalExpression">${promoValidationStatus == 'conflict' || promoValidationStatus == 'data_incomplete'}</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="mark_ready_for_forecast"
+                 name="Mark promo ready for forecast"
+                 flowable:delegateExpression="${promoReadyPublisherDelegate}" />
+    <sequenceFlow id="flow_mark_to_end" sourceRef="mark_ready_for_forecast" targetRef="end_ready_for_forecast" />
+    <userTask id="resolve_promo_data_issue"
+              name="Resolve promo data issue"
+              flowable:candidateGroups="promo-planner,category-manager" />
+    <sequenceFlow id="flow_resolve_to_end" sourceRef="resolve_promo_data_issue" targetRef="end_promo_issue" />
+    <endEvent id="end_ready_for_forecast" name="Ready for forecast" />
+    <endEvent id="end_promo_issue" name="Promo issue created" />
+  </process>
+</definitions>

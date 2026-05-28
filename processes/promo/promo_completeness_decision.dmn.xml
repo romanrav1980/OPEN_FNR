@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_promo_completeness_dmn"
+             name="OPEN FNR Promo Completeness"
+             namespace="https://open-fnr.local/decisions/promo">
+  <decision id="promo_completeness_decision" name="Promo Completeness Decision">
+    <decisionTable id="promo_completeness_table" hitPolicy="FIRST">
+      <input id="input_has_sku" label="has_sku">
+        <inputExpression id="input_has_sku_expression" typeRef="boolean"><text>has_sku</text></inputExpression>
+      </input>
+      <input id="input_has_store" label="has_store">
+        <inputExpression id="input_has_store_expression" typeRef="boolean"><text>has_store</text></inputExpression>
+      </input>
+      <input id="input_has_display" label="has_display">
+        <inputExpression id="input_has_display_expression" typeRef="boolean"><text>has_display</text></inputExpression>
+      </input>
+      <input id="input_has_price" label="has_price">
+        <inputExpression id="input_has_price_expression" typeRef="boolean"><text>has_price</text></inputExpression>
+      </input>
+      <output id="output_status" name="status" typeRef="string" />
+      <rule id="rule_complete">
+        <inputEntry id="rule_complete_sku"><text>true</text></inputEntry>
+        <inputEntry id="rule_complete_store"><text>true</text></inputEntry>
+        <inputEntry id="rule_complete_display"><text>true</text></inputEntry>
+        <inputEntry id="rule_complete_price"><text>true</text></inputEntry>
+        <outputEntry id="rule_complete_output"><text>"complete"</text></outputEntry>
+      </rule>
+      <rule id="rule_incomplete">
+        <inputEntry id="rule_incomplete_sku"><text>-</text></inputEntry>
+        <inputEntry id="rule_incomplete_store"><text>-</text></inputEntry>
+        <inputEntry id="rule_incomplete_display"><text>-</text></inputEntry>
+        <inputEntry id="rule_incomplete_price"><text>-</text></inputEntry>
+        <outputEntry id="rule_incomplete_output"><text>"data_incomplete"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

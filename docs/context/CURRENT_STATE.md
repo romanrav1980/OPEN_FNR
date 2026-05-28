@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 6 implementation is complete.
+Sprint 7 implementation is complete.
 
 ## Local Infrastructure
 
@@ -81,9 +81,17 @@ Known local URLs:
 - UI Model Monitoring V1 section.
 - HTML test report with screenshot: `docs/test-reports/sprint-6-ml-regular-model/index.html`.
 
+## Sprint 7 Artifacts
+
+- Promo API and validation: `apps/backend/open_fnr_api/promo.py`.
+- Promo tests: `tests/backend/test_promo.py`.
+- Promo BPMN/DMN/CMMN artifacts in `processes/promo`.
+- UI Promo Workbench Draft section.
+- HTML test report with screenshot: `docs/test-reports/sprint-7-promo-data-validation/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 51 passed.
+- `python -m pytest` -> 58 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -91,4 +99,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 6 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 7.
+Commit Sprint 7 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 8.
