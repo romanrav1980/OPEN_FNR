@@ -139,3 +139,82 @@ CREATE TABLE IF NOT EXISTS open_fnr.feature_store_daily
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(business_date)
 ORDER BY (feature_version, business_date, store_id, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.stock_projection_daily
+(
+    projection_version String,
+    run_date Date,
+    projection_date Date,
+    store_id String,
+    sku_id String,
+    opening_stock_qty Float64,
+    demand_projection_qty Float64,
+    open_order_receipt_qty Float64,
+    in_transit_receipt_qty Float64,
+    projected_stock_qty Float64,
+    safety_stock_qty Float64,
+    stock_out_risk String,
+    created_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(run_date)
+ORDER BY (run_date, projection_date, store_id, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.kpi_daily
+(
+    calculation_version String,
+    period_start Date,
+    period_end Date,
+    network String,
+    region_id String,
+    category_id String,
+    store_id String,
+    sku_id String,
+    actual_qty Float64,
+    ml_forecast_qty Float64,
+    final_forecast_qty Float64,
+    wape Float64,
+    bias Float64,
+    service_level Float64,
+    out_of_stock_rate Float64,
+    overstock_value Float64,
+    lost_sales_value Float64,
+    waste_value Float64,
+    proposal_acceptance_rate Float64,
+    calculated_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(period_end)
+ORDER BY (period_end, region_id, category_id, store_id, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.diagnostic_insights
+(
+    insight_id String,
+    run_date Date,
+    object_type String,
+    object_id String,
+    root_cause String,
+    confidence Float64,
+    severity String,
+    recommended_action String,
+    evidence_count UInt32,
+    status String,
+    created_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(run_date)
+ORDER BY (run_date, severity, object_type, object_id, insight_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.supplier_performance_daily
+(
+    calculation_date Date,
+    supplier_id String,
+    fill_rate Float64,
+    on_time_rate Float64,
+    confirmation_rate Float64,
+    open_exceptions UInt32,
+    created_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(calculation_date)
+ORDER BY (calculation_date, supplier_id);

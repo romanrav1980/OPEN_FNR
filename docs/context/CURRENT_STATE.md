@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Industrial hardening H2 is in progress after completion of H1 foundation.
+Industrial hardening H3 is in progress after completion of H2 PostgreSQL audit repository.
 
 ## Local Infrastructure
 
@@ -410,7 +410,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 298 passed.
+- `python -m pytest` -> 301 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -450,6 +450,13 @@ Commit post-sprint documentation audit, environment strategy, real integration p
 - PostgreSQL audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Schema migration baseline: `open_fnr.schema_migrations` in `infra/dev/postgres/init/001_open_fnr.sql`.
 - Repository tests: `tests/backend/test_repositories.py`.
+
+## H3 Industrial Hardening Artifacts
+
+- ClickHouse industrial mart DDL: `infra/dev/clickhouse/init/001_open_fnr.sql`.
+- Mart metadata repository: `apps/backend/open_fnr_api/mart_repositories.py`.
+- Mart metadata API: `apps/backend/open_fnr_api/marts.py`.
+- Mart tests: `tests/backend/test_marts.py`, `tests/data/test_clickhouse_mart_schema.py`.
 
 ## Block Presentations
 

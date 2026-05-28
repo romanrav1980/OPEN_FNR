@@ -33,6 +33,7 @@ from .health import probe_http
 from .ingestion import router as ingestion_router
 from .kpi import router as kpi_router
 from .lifecycle import router as lifecycle_router
+from .marts import router as marts_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -66,6 +67,7 @@ app.include_router(replenishment_router)
 app.include_router(replenishment_scale_router)
 app.include_router(kpi_router)
 app.include_router(lifecycle_router)
+app.include_router(marts_router)
 app.include_router(security_router)
 app.include_router(shelf_space_router)
 app.include_router(stage_router)
@@ -108,6 +110,7 @@ def metadata() -> dict[str, object]:
             "forecasting",
             "ml-models",
             "ml-governance",
+            "marts",
             "promo",
             "procurement",
             "replenishment",

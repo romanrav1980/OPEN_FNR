@@ -47,12 +47,20 @@ Status: in progress.
 
 ## H3. ClickHouse Marts
 
+Status: in progress.
+
 ### Scope
 
 - create forecast, order proposal, stock projection and KPI marts;
 - add write/read repository boundaries;
 - add ClickHouse integration smoke tests;
 - define retention and partitioning.
+
+### Current Implementation
+
+- ClickHouse DDL declares industrial marts for forecast, order proposals, stock projections, KPI, diagnostics and supplier performance.
+- `apps/backend/open_fnr_api/mart_repositories.py` defines a ClickHouse mart metadata boundary.
+- `/marts/clickhouse` exposes mart metadata for readiness and diagnostics.
 
 ## I1. POS Sales Ingestion
 
