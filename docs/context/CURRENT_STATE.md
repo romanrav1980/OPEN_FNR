@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Industrial hardening H1 is in progress after completion of all 37 functional sprint checkpoints.
+Industrial hardening H2 is in progress after completion of H1 foundation.
 
 ## Local Infrastructure
 
@@ -410,7 +410,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 293 passed.
+- `python -m pytest` -> 296 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -442,6 +442,13 @@ Commit post-sprint documentation audit, environment strategy, real integration p
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.
 - CI workflow: `.github/workflows/ci.yml`.
 - Audit tests: `tests/backend/test_audit.py`.
+
+## H2 Industrial Hardening Artifacts
+
+- PostgreSQL connection management: `apps/backend/open_fnr_api/database.py`.
+- PostgreSQL audit repository: `apps/backend/open_fnr_api/repositories.py`.
+- Schema migration baseline: `open_fnr.schema_migrations` in `infra/dev/postgres/init/001_open_fnr.sql`.
+- Repository tests: `tests/backend/test_repositories.py`.
 
 ## Block Presentations
 

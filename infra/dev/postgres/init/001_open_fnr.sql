@@ -7,6 +7,17 @@ CREATE TABLE IF NOT EXISTS open_fnr.dev_healthcheck
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS open_fnr.schema_migrations
+(
+    version text PRIMARY KEY,
+    description text NOT NULL,
+    applied_at timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO open_fnr.schema_migrations (version, description)
+VALUES ('001', 'initial open_fnr schema')
+ON CONFLICT (version) DO NOTHING;
+
 INSERT INTO open_fnr.dev_healthcheck (service_name)
 VALUES ('postgres')
 ON CONFLICT DO NOTHING;

@@ -27,6 +27,8 @@ Status: in progress.
 
 ## H2. PostgreSQL Persistence And Audit Store
 
+Status: in progress.
+
 ### Scope
 
 - introduce database connection management;
@@ -34,6 +36,13 @@ Status: in progress.
 - add repository tests with a temporary PostgreSQL service;
 - add migration/version table;
 - persist process/action audit events.
+
+### Current Implementation
+
+- `apps/backend/open_fnr_api/database.py` provides lazy PostgreSQL connection management.
+- `PostgresAuditEventRepository` writes to and reads from `open_fnr.audit_events`.
+- `build_audit_event_repository(...)` selects in-memory repository for `mock_mode=true` and PostgreSQL repository for `mock_mode=false`.
+- `open_fnr.schema_migrations` tracks schema baseline.
 
 ## H3. ClickHouse Marts
 
