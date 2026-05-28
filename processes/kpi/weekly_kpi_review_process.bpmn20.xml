@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/kpi">
+  <process id="weekly_kpi_review_process" name="Weekly KPI review process" isExecutable="true">
+    <startEvent id="start_kpi_calculated" name="KPI calculated" />
+    <sequenceFlow id="flow_start_to_alert" sourceRef="start_kpi_calculated" targetRef="evaluate_kpi_alert" />
+    <businessRuleTask id="evaluate_kpi_alert" name="Evaluate KPI alert" />
+    <sequenceFlow id="flow_alert_to_gateway" sourceRef="evaluate_kpi_alert" targetRef="review_required_gateway" />
+    <exclusiveGateway id="review_required_gateway" name="Review required?" />
+    <sequenceFlow id="flow_no_review" sourceRef="review_required_gateway" targetRef="store_reviewed_status" />
+    <sequenceFlow id="flow_review" sourceRef="review_required_gateway" targetRef="review_kpi_degradation" />
+    <userTask id="review_kpi_degradation" name="Review KPI degradation" />
+    <sequenceFlow id="flow_review_to_action" sourceRef="review_kpi_degradation" targetRef="create_kpi_action" />
+    <serviceTask id="create_kpi_action" name="Create KPI action" />
+    <sequenceFlow id="flow_action_to_end" sourceRef="create_kpi_action" targetRef="end_action_created" />
+    <serviceTask id="store_reviewed_status" name="Store reviewed status" />
+    <sequenceFlow id="flow_no_review_to_end" sourceRef="store_reviewed_status" targetRef="end_reviewed" />
+    <endEvent id="end_reviewed" name="KPI reviewed" />
+    <endEvent id="end_action_created" name="KPI action created" />
+  </process>
+</definitions>

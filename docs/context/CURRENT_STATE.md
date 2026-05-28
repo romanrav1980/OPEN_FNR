@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 16 implementation is complete.
+Sprint 17 implementation is complete.
 
 ## Local Infrastructure
 
@@ -183,9 +183,19 @@ Known local URLs:
 - UI Publication Console section with package list, statuses, idempotency keys, retry action, error details and linked exceptions.
 - HTML test report with screenshot: `docs/test-reports/sprint-16-publication-export-v1/index.html`.
 
+## Sprint 17 Artifacts
+
+- KPI API: `apps/backend/open_fnr_api/kpi.py`.
+- KPI tests: `tests/backend/test_kpi.py`.
+- Weekly KPI review BPMN: `processes/kpi/weekly_kpi_review_process.bpmn20.xml`.
+- KPI alert DMN: `processes/kpi/kpi_alert_decision.dmn.xml`.
+- KPI degradation CMMN: `processes/kpi/kpi_degradation_case.cmmn.xml`.
+- UI Accuracy And KPI Dashboard section with filters, trend visual, KPI table, review task and SKU drill-down.
+- HTML test report with screenshot: `docs/test-reports/sprint-17-accuracy-kpi-dashboards/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 126 passed.
+- `python -m pytest` -> 134 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -193,4 +203,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 16 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 17: Accuracy And KPI Dashboards.
+Commit Sprint 17 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 18: Fresh V1.

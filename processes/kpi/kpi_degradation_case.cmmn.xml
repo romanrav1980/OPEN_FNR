@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/kpi">
+  <case id="kpi_degradation_case" name="KPI degradation case">
+    <casePlanModel id="kpi_degradation_plan" name="KPI degradation plan">
+      <humanTask id="review_accuracy_drop" name="Review accuracy drop" />
+      <humanTask id="assign_corrective_action" name="Assign corrective action" />
+      <humanTask id="confirm_business_impact" name="Confirm business impact" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 17 - Accuracy And KPI Dashboards</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      main { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+      section { border: 1px solid var(--border); background: var(--panel); margin-top: 20px; padding: 20px; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-bottom: 12px; color: var(--red-light); font-size: 20px; }
+      p, li, td, th { line-height: 1.55; }
+      .subtitle { margin-top: 8px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .shot { width: 100%; border: 1px solid var(--border); margin-top: 12px; }
+      code { color: var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 17: Accuracy And KPI Dashboards</h1>
+        <p class="subtitle">
+          Аннотация: тестируем видимость качества прогноза и бизнес-эффекта:
+          WAPE, Bias, service level, out-of-stock, overstock, lost sales, waste,
+          proposal acceptance, manual adjustment effect и drill-down до SKU.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем блок <code>Accuracy And KPI Dashboard</code>.</li>
+          <li>Проверяем фильтры Network, Region, Category, SKU.</li>
+          <li>Проверяем карточки Accuracy и Business Value Draft.</li>
+          <li>Проверяем trend visual и KPI table.</li>
+          <li>Проверяем drill-down: Network -> North/fresh -> S001/SKU001.</li>
+          <li>Проверяем review task при нарушении WAPE/service level threshold.</li>
+        </ol>
+        <img class="shot" src="screenshots/accuracy-kpi-dashboard.png" alt="Accuracy KPI Dashboard" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Зачем</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>System рассчитывает KPI по утвержденным формулам.</td>
+              <td>Бизнес и DS должны видеть один источник правды.</td>
+              <td class="ok">WAPE/Bias formula tests passed.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Dashboard показывает network-level KPI.</td>
+              <td>Executive view нужен для контроля общей пользы.</td>
+              <td class="ok">Network row available.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>User drills down до region/category/SKU.</td>
+              <td>Команда должна находить источник деградации.</td>
+              <td class="ok">SKU drill-down works.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>DMN проверяет WAPE, Bias и service level thresholds.</td>
+              <td>Threshold breach должен создавать review task.</td>
+              <td class="ok">Alert decision tested.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Process Owner reviews degradation.</td>
+              <td>Деградация должна приводить к action, а не только к графику.</td>
+              <td class="ok">BPMN/CMMN artifacts created.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">134 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="weekly_kpi_review_process",
+        name="Weekly KPI review process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-010",
+        source_path="processes/kpi/weekly_kpi_review_process.bpmn20.xml",
+        owner_role="Process Owner",
+    ),
+    ProcessDefinition(
+        key="kpi_alert_decision",
+        name="KPI alert decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-010",
+        source_path="processes/kpi/kpi_alert_decision.dmn.xml",
+        owner_role="Data Scientist",
+    ),
+    ProcessDefinition(
+        key="kpi_degradation_case",
+        name="KPI degradation case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-010",
+        source_path="processes/kpi/kpi_degradation_case.cmmn.xml",
+        owner_role="Process Owner",
+    ),
+    ProcessDefinition(
         key="publication_process",
         name="Publication process",
         artifact_type=ProcessArtifactType.BPMN,

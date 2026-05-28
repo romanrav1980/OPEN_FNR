@@ -369,6 +369,45 @@ const publicationAudit = [
   { time: "07:05", target: "erp", event: "retry_sent", key: "erp:orders:20260528:001", response: "202 retry sent" },
 ];
 
+const kpiRows = [
+  {
+    segment: "Network",
+    status: "calculated",
+    wape: "15.8%",
+    bias: "-0.6%",
+    service: "96.5%",
+    oos: "2.1%",
+    overstock: "1.42M",
+    lostSales: "680K",
+    waste: "210K",
+    acceptance: "87%",
+  },
+  {
+    segment: "North / fresh",
+    status: "review_required",
+    wape: "22.6%",
+    bias: "-4.2%",
+    service: "91.8%",
+    oos: "5.7%",
+    overstock: "210K",
+    lostSales: "180K",
+    waste: "65K",
+    acceptance: "71%",
+  },
+  {
+    segment: "S001 / SKU001",
+    status: "action_created",
+    wape: "24.1%",
+    bias: "-4.4%",
+    service: "90.2%",
+    oos: "8.3%",
+    overstock: "0",
+    lostSales: "18K",
+    waste: "0",
+    acceptance: "67%",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1513,6 +1552,109 @@ function App() {
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Accuracy and KPI dashboard">
+        <div className="section-heading">
+          <h2>Accuracy And KPI Dashboard</h2>
+          <p>Forecast accuracy, replenishment impact and business value drill-down</p>
+        </div>
+        <div className="filter-bar" aria-label="KPI filters">
+          <label>
+            Network
+            <input value="OPEN_FNR_NETWORK" readOnly />
+          </label>
+          <label>
+            Region
+            <input value="north" readOnly />
+          </label>
+          <label>
+            Category
+            <input value="fresh" readOnly />
+          </label>
+          <label>
+            SKU
+            <input value="SKU001 drill-down" readOnly />
+          </label>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Accuracy</span>
+            <strong>WAPE 15.8% / Bias -0.6%</strong>
+            <p>Network level is within threshold, while North fresh requires review due to WAPE and service level.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Business Value Draft</span>
+            <strong>Service + stock + lost sales + waste</strong>
+            <p>Dashboard connects forecast quality to service level, lost sales, overstock and waste impact.</p>
+          </article>
+        </div>
+        <div className="chart-panel" aria-label="KPI trend chart">
+          <div className="chart-bars">
+            <span style={{ height: "58%" }} title="Network WAPE" />
+            <span style={{ height: "80%" }} title="North fresh WAPE" />
+            <span style={{ height: "86%" }} title="SKU WAPE" />
+            <span style={{ height: "65%" }} title="Service impact" />
+          </div>
+          <p>Trend visual: network WAPE, segment WAPE, SKU WAPE and service impact alert.</p>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Segment</th>
+                <th>Status</th>
+                <th>WAPE</th>
+                <th>Bias</th>
+                <th>Service</th>
+                <th>OOS</th>
+                <th>Overstock</th>
+                <th>Lost sales</th>
+                <th>Waste</th>
+                <th>Proposal acceptance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {kpiRows.map((row) => (
+                <tr key={row.segment}>
+                  <td>{row.segment}</td>
+                  <td>{row.status}</td>
+                  <td>{row.wape}</td>
+                  <td>{row.bias}</td>
+                  <td>{row.service}</td>
+                  <td>{row.oos}</td>
+                  <td>{row.overstock}</td>
+                  <td>{row.lostSales}</td>
+                  <td>{row.waste}</td>
+                  <td>{row.acceptance}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Review Task</span>
+            <h3>North fresh KPI degradation</h3>
+            <p>
+              KPI alert decision creates weekly review when WAPE is above 20%,
+              absolute bias is above 5%, or service level is below 94%.
+            </p>
+            <div className="action-row">
+              <button type="button">Open review</button>
+              <button type="button">Create action</button>
+              <button type="button">Mark reviewed</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Drill-down</span>
+            <h3>S001 / SKU001</h3>
+            <p>
+              SKU view compares ML forecast and final forecast, showing manual adjustment effect
+              and whether proposal acceptance improved replenishment outcomes.
+            </p>
+          </aside>
         </div>
       </section>
     </main>

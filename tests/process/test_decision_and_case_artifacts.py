@@ -397,3 +397,27 @@ def test_export_failure_case_is_parseable() -> None:
     assert "Review export error" in human_task_names
     assert "Retry export" in human_task_names
     assert "Create export failure exception" in human_task_names
+
+
+def test_kpi_alert_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/kpi/kpi_alert_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "kpi_alert_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_kpi_degradation_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/kpi/kpi_degradation_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "kpi_degradation_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review accuracy drop" in human_task_names
+    assert "Assign corrective action" in human_task_names
+    assert "Confirm business impact" in human_task_names

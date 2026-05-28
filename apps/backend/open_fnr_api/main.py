@@ -13,6 +13,7 @@ from .publication import router as publication_router
 from .replenishment import router as replenishment_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
+from .kpi import router as kpi_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -31,6 +32,7 @@ app.include_router(promo_router)
 app.include_router(publication_router)
 app.include_router(process_engine_router)
 app.include_router(replenishment_router)
+app.include_router(kpi_router)
 
 
 @app.get("/health")

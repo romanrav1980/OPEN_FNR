@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/kpi" name="kpi_alert_decision">
+  <decision id="kpi_alert_decision" name="KPI alert decision">
+    <decisionTable id="kpi_alert_table" hitPolicy="FIRST">
+      <input id="input_wape" label="wape">
+        <inputExpression id="input_wape_expr" typeRef="number"><text>wape</text></inputExpression>
+      </input>
+      <input id="input_bias" label="bias_abs">
+        <inputExpression id="input_bias_expr" typeRef="number"><text>bias_abs</text></inputExpression>
+      </input>
+      <input id="input_service" label="service_level">
+        <inputExpression id="input_service_expr" typeRef="number"><text>service_level</text></inputExpression>
+      </input>
+      <output id="output_alert" label="review_required" name="review_required" typeRef="boolean" />
+      <rule id="rule_wape">
+        <inputEntry id="rule_wape_value"><text>&gt; 0.20</text></inputEntry>
+        <inputEntry id="rule_wape_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_wape_service"><text>-</text></inputEntry>
+        <outputEntry id="rule_wape_alert"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_bias">
+        <inputEntry id="rule_bias_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_bias_value"><text>&gt; 0.05</text></inputEntry>
+        <inputEntry id="rule_bias_service"><text>-</text></inputEntry>
+        <outputEntry id="rule_bias_alert"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_service">
+        <inputEntry id="rule_service_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_service_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_service_value"><text>&lt; 0.94</text></inputEntry>
+        <outputEntry id="rule_service_alert"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_ok">
+        <inputEntry id="rule_ok_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_ok_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_ok_service"><text>-</text></inputEntry>
+        <outputEntry id="rule_ok_alert"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
