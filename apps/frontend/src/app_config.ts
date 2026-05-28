@@ -24,3 +24,7 @@ export function localServiceUrl(port: string, path = ""): string {
   const normalizedPath = path.startsWith("/") || path === "" ? path : `/${path}`;
   return `http://${serviceConfig.host}:${port}${normalizedPath}`;
 }
+
+export function apiUrl(path = ""): string {
+  return localServiceUrl(serviceConfig.apiPort, path);
+}

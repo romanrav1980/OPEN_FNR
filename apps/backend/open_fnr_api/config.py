@@ -24,6 +24,13 @@ def env_bool(name: str, default: bool) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def env_csv(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    raw = os.getenv(f"OPEN_FNR_{name}")
+    if raw is None:
+        return default
+    return tuple(item.strip() for item in raw.split(",") if item.strip())
+
+
 class Settings(BaseModel):
     app_name: str = env_str("APP_NAME", "OPEN FNR API")
     version: str = env_str("VERSION", "0.1.0")
@@ -50,6 +57,9 @@ class Settings(BaseModel):
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
+    cors_allow_origins: tuple[str, ...] = Field(
+        default_factory=lambda: env_csv("CORS_ALLOW_ORIGINS", ("http://127.0.0.1:13000", "http://localhost:13000"))
+    )
 
     def http_url(self, host: str, port: int, path: str = "") -> str:
         normalized_path = path if path.startswith("/") or path == "" else f"/{path}"

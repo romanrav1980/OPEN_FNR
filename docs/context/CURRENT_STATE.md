@@ -58,7 +58,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Feature mart build task in Process Engine: `task-feature-build-001`.
 - Active matrix and feature store SQL structures in ClickHouse init script.
 - Feature version metadata SQL structure in PostgreSQL init script.
-- UI Feature Mart Status section with build plan dependencies, validation rules and process task actions.
+- UI Feature Mart Status section with live API loading for build plan dependencies, validation rules and process task actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-3-feature-mart/index.html`.
 - Feature build plan UI/process test report: `docs/test-reports/sprint-feature-build-plan/index.html`.
 

@@ -41,13 +41,14 @@
       <section class="grid" aria-label="Summary">
         <article class="card"><span>UI</span><strong class="ok">Экран отображает build plan</strong></article>
         <article class="card"><span>Process</span><strong class="ok">task-feature-build-001 видна Data Science Owner</strong></article>
-        <article class="card"><span>Backend</span><strong class="ok">363 pytest passed</strong></article>
+        <article class="card"><span>Backend</span><strong class="ok">364 pytest passed</strong></article>
       </section>
 
       <h2>Скриншот</h2>
       <p>
-        Скриншот снят с локального control tower на <code>127.0.0.1:13000</code>.
-        Адрес используется из конфигурации dev-окружения, не из application code.
+        Скриншот снят с локального control tower на <code>127.0.0.1:13000</code>
+        при поднятом backend API на <code>127.0.0.1:8000</code>. Адреса используются
+        из конфигурации dev-окружения, не из application code.
       </p>
       <img src="screenshots/feature-build-plan.png" alt="Feature mart build plan in OPEN FNR Control Tower" />
 
@@ -69,7 +70,7 @@
             <td>Находим секцию Feature Mart Status.</td>
             <td>Проверяем, что Data Science Owner видит версии feature mart.</td>
             <td>Отображается <code>fm-20260528-001</code> и статус published.</td>
-            <td class="ok">Пройдено.</td>
+            <td class="ok">Пройдено: UI показывает API status live.</td>
           </tr>
           <tr>
             <td>3</td>
@@ -145,8 +146,9 @@
           <tr><th>Контроль</th><th>Проверка</th><th>Результат</th></tr>
         </thead>
         <tbody>
-          <tr><td>Backend regression</td><td><code>python -m pytest</code></td><td class="ok">363 passed</td></tr>
+          <tr><td>Backend regression</td><td><code>python -m pytest</code></td><td class="ok">364 passed</td></tr>
           <tr><td>Frontend build</td><td><code>npm run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>API integration smoke</td><td><code>GET /feature-mart/build-plans?business_date=2026-05-28</code></td><td class="ok">live endpoint returned plan</td></tr>
           <tr><td>Data rules</td><td>Published clean dependencies, freshness, no leakage</td><td class="ok">passed</td></tr>
           <tr><td>Performance smoke</td><td>UI screenshot and build artifact generation</td><td class="ok">passed</td></tr>
         </tbody>

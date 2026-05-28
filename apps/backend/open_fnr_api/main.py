@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .adjustments import router as adjustments_router
 from .audit import router as audit_router
@@ -41,6 +42,14 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.version,
     description="OPEN FNR backend API skeleton.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(settings.cors_allow_origins),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(ingestion_router)

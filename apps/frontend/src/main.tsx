@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { localServiceUrl, serviceConfig } from "./app_config";
+import { apiUrl, localServiceUrl, serviceConfig } from "./app_config";
 import "./styles.css";
 
 type ServiceLink = {
@@ -63,6 +63,24 @@ type FeatureBuildRule = {
   rule: string;
   purpose: string;
   status: "passed" | "ready";
+};
+
+type FeatureBuildPlanApiDependency = {
+  dependency_name: string;
+  source_table: string;
+  status: FeatureBuildDependency["status"];
+  freshness_status: FeatureBuildDependency["freshness"];
+  expected_min_rows: number;
+};
+
+type FeatureBuildPlanApi = {
+  feature_version: string;
+  dependencies: FeatureBuildPlanApiDependency[];
+  validation_rules: string[];
+};
+
+type FeatureBuildPlanApiResponse = {
+  items: FeatureBuildPlanApi[];
 };
 
 const serviceLinks: ServiceLink[] = [
@@ -150,6 +168,17 @@ const featureBuildRules: FeatureBuildRule[] = [
   { rule: "no_future_fact_leakage", purpose: "Keep forecast features point-in-time safe", status: "passed" },
   { rule: "feature_version_idempotent_for_business_date", purpose: "Re-run must publish the same controlled version", status: "ready" },
 ];
+
+function featureBuildRulePurpose(rule: string): string {
+  const purposes: Record<string, string> = {
+    all_required_clean_dependencies_published: "Block forecast input if clean data is absent",
+    active_matrix_non_empty: "Protect ML from empty store x SKU scope",
+    no_future_fact_leakage: "Keep forecast features point-in-time safe",
+    feature_null_rate_within_threshold: "Prevent degraded model input quality",
+    feature_version_idempotent_for_business_date: "Re-run must publish the same controlled version",
+  };
+  return purposes[rule] ?? "Feature mart validation control";
+}
 
 const forecastRows = [
   { date: "2026-05-29", store: "S001", sku: "SKU001", regular: "12.4", total: "12.4", flag: "ok" },
@@ -927,6 +956,52 @@ const storeFeedbackRows = [
 ];
 
 function App() {
+  const [featureBuildApiStatus, setFeatureBuildApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeFeatureBuildDependencies, setRuntimeFeatureBuildDependencies] =
+    React.useState<FeatureBuildDependency[]>(featureBuildDependencies);
+  const [runtimeFeatureBuildRules, setRuntimeFeatureBuildRules] = React.useState<FeatureBuildRule[]>(featureBuildRules);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/feature-mart/build-plans?business_date=2026-05-28"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Feature build plan API returned ${response.status}`);
+        }
+        return response.json() as Promise<FeatureBuildPlanApiResponse>;
+      })
+      .then((payload) => {
+        const plan = payload.items[0];
+        if (!plan) {
+          throw new Error("Feature build plan API returned no plan");
+        }
+        setRuntimeFeatureBuildDependencies(
+          plan.dependencies.map((dependency) => ({
+            name: dependency.dependency_name,
+            table: dependency.source_table.replace("open_fnr.", ""),
+            status: dependency.status,
+            freshness: dependency.freshness_status,
+            minRows: `>= ${dependency.expected_min_rows}`,
+          })),
+        );
+        setRuntimeFeatureBuildRules(
+          plan.validation_rules.map((rule) => ({
+            rule,
+            purpose: featureBuildRulePurpose(rule),
+            status: rule === "feature_version_idempotent_for_business_date" ? "ready" : "passed",
+          })),
+        );
+        setFeatureBuildApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setFeatureBuildApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -1211,6 +1286,7 @@ function App() {
               BPMN task validates feature mart build after clean canonical publication.
               SLA is controlled by Process Engine audit and role assignment.
             </p>
+            <p>API status: {featureBuildApiStatus}</p>
           </aside>
         </div>
         <div className="table-shell">
@@ -1225,7 +1301,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {featureBuildDependencies.map((dependency) => (
+              {runtimeFeatureBuildDependencies.map((dependency) => (
                 <tr key={dependency.name}>
                   <td>{dependency.name}</td>
                   <td>{dependency.table}</td>
@@ -1247,7 +1323,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {featureBuildRules.map((rule) => (
+              {runtimeFeatureBuildRules.map((rule) => (
                 <tr key={rule.rule}>
                   <td>{rule.rule}</td>
                   <td>{rule.purpose}</td>

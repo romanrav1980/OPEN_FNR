@@ -60,3 +60,9 @@ def test_landing_root_path_is_configurable() -> None:
     settings = Settings(landing_root_path="custom/landing")
 
     assert settings.landing_root_path == "custom/landing"
+
+
+def test_cors_origins_are_centralized_settings() -> None:
+    settings = Settings(cors_allow_origins=("http://ui.local:13000",))
+
+    assert settings.cors_allow_origins == ("http://ui.local:13000",)
