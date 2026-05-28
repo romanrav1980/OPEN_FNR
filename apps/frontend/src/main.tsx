@@ -83,6 +83,21 @@ type FeatureBuildPlanApiResponse = {
   items: FeatureBuildPlanApi[];
 };
 
+type DailyPipelineStage = {
+  stage_key: string;
+  name: string;
+  status: "passed" | "ready" | "blocked" | "skipped";
+  owner_role: string;
+  process_key: string;
+  task_id: string | null;
+  details: string;
+};
+
+type DailyPipelineGateApiResponse = {
+  status: string;
+  stages: DailyPipelineStage[];
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -144,6 +159,45 @@ const shadowLoadTasks: ShadowLoadTask[] = [
     owner: "Promo Planner",
     reason: "missing_files",
     actions: "request_resend / approve_reprocessing / comment",
+  },
+];
+
+const dailyPipelineStages: DailyPipelineStage[] = [
+  {
+    stage_key: "shadow_load",
+    name: "Shadow-load source discovery",
+    status: "passed",
+    owner_role: "Data Engineer",
+    process_key: "source_batch_publication_process",
+    task_id: null,
+    details: "discovered=9; missing=0; total=9",
+  },
+  {
+    stage_key: "source_contract_dq",
+    name: "Source contract DQ",
+    status: "passed",
+    owner_role: "Data Platform Owner",
+    process_key: "source_batch_publication_process",
+    task_id: null,
+    details: "status=passed; blockers=0; warnings=0",
+  },
+  {
+    stage_key: "clean_publication",
+    name: "Clean canonical publication dry-run",
+    status: "ready",
+    owner_role: "Data Platform Owner",
+    process_key: "source_batch_publication_process",
+    task_id: "task-clean-publication-001",
+    details: "plans=6; mode=dry_run",
+  },
+  {
+    stage_key: "feature_build",
+    name: "Feature mart build dry-run",
+    status: "ready",
+    owner_role: "Data Science Owner",
+    process_key: "feature_build_process",
+    task_id: "task-feature-build-001",
+    details: "feature_version=fm-20260528-001; dependencies=6; status=validated",
   },
 ];
 
@@ -960,6 +1014,9 @@ function App() {
   const [runtimeFeatureBuildDependencies, setRuntimeFeatureBuildDependencies] =
     React.useState<FeatureBuildDependency[]>(featureBuildDependencies);
   const [runtimeFeatureBuildRules, setRuntimeFeatureBuildRules] = React.useState<FeatureBuildRule[]>(featureBuildRules);
+  const [dailyPipelineApiStatus, setDailyPipelineApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeDailyPipelineStages, setRuntimeDailyPipelineStages] =
+    React.useState<DailyPipelineStage[]>(dailyPipelineStages);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -998,6 +1055,37 @@ function App() {
           return;
         }
         setFeatureBuildApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/pipeline/daily-gate/run"), {
+      method: "POST",
+      signal: controller.signal,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        business_date: "2026-05-28",
+        actor: "data.platform.owner@example.org",
+        actor_role: "Data Platform Owner",
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Daily pipeline API returned ${response.status}`);
+        }
+        return response.json() as Promise<DailyPipelineGateApiResponse>;
+      })
+      .then((payload) => {
+        setRuntimeDailyPipelineStages(payload.stages);
+        setDailyPipelineApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setDailyPipelineApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -1219,6 +1307,51 @@ function App() {
               <button type="button">Export rows</button>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Daily pipeline gate">
+        <div className="section-heading">
+          <h2>Daily Pipeline Gate</h2>
+          <p>Shadow-load, source DQ, clean publication and feature build readiness</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{dailyPipelineApiStatus}</strong>
+            <p>When backend is available, stage rows are loaded from `/pipeline/daily-gate/run`.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Operational Flow</span>
+            <strong>Data Platform Owner to Data Science Owner</strong>
+            <p>The gate shows who owns the next action and which BPMN task/process is involved.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>Process</th>
+                <th>Task</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runtimeDailyPipelineStages.map((stage) => (
+                <tr key={stage.stage_key}>
+                  <td>{stage.name}</td>
+                  <td>{stage.status}</td>
+                  <td>{stage.owner_role}</td>
+                  <td>{stage.process_key}</td>
+                  <td>{stage.task_id ?? "-"}</td>
+                  <td>{stage.details}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

@@ -78,7 +78,9 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Daily pipeline gate API: `apps/backend/open_fnr_api/daily_pipeline.py`.
 - Pipeline endpoint: `/pipeline/daily-gate/run`.
 - Pipeline stages: shadow-load source discovery, source contract DQ, clean canonical publication dry-run, feature mart build dry-run.
+- UI Daily Pipeline Gate section with live API loading and per-stage owner/process/task details.
 - Pipeline tests: `tests/backend/test_daily_pipeline.py`.
+- Daily pipeline UI/process report: `docs/test-reports/sprint-daily-pipeline-gate/index.html`.
 
 ## Sprint 5 Artifacts
 

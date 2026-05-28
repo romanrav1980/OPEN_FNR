@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Daily Pipeline Gate Test Report</title>
+    <style>
+      body { margin: 0; background: #1e1e1e; color: #d4d4d4; font-family: Arial, sans-serif; }
+      main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 32px 0; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-top: 28px; }
+      p { margin-top: 8px; color: #aeb4bf; line-height: 1.55; }
+      .eyebrow { color: #b83a4b; font-weight: 700; text-transform: uppercase; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; border: 1px solid #3a3a3a; background: #252526; }
+      th, td { border-bottom: 1px solid #3a3a3a; padding: 12px; text-align: left; vertical-align: top; }
+      th { color: #9da3ae; font-size: 12px; text-transform: uppercase; }
+      tr:last-child td { border-bottom: 0; }
+      .ok { color: #8fd19e; font-weight: 700; }
+      .warn { color: #ffcf70; font-weight: 700; }
+      img { width: 100%; margin-top: 16px; border: 1px solid #3a3a3a; }
+      code { color: #ffcf70; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">UI, API и бизнес-процесс тест</p>
+      <h1>Daily Pipeline Gate</h1>
+      <p>
+        Аннотация: тестируем дневной диспетчерский сценарий, который объединяет загрузку источников,
+        DQ, clean publication и готовность feature mart. Такой тест нужен, чтобы бизнес и IT видели
+        не отдельные технические эндпоинты, а понятную цепочку сменного запуска.
+      </p>
+
+      <h2>Скриншот</h2>
+      <p>
+        Скриншот снят при поднятых frontend и backend. UI обращается к
+        <code>POST /pipeline/daily-gate/run</code> и показывает live-стадии процесса.
+      </p>
+      <img src="screenshots/daily-pipeline-gate.png" alt="Daily pipeline gate in OPEN FNR Control Tower" />
+
+      <h2>UI-тестирование</h2>
+      <table>
+        <thead>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Открываем control tower.</td><td>Проверяем доступность рабочего места.</td><td>Страница загружается.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем блок Daily Pipeline Gate.</td><td>Оператор должен видеть сквозной статус дня.</td><td>Есть таблица стадий.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем API status.</td><td>Нужно отличать live API от fallback.</td><td>При backend online статус live.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем владельцев и BPMN-ссылки.</td><td>Следующее действие должно иметь владельца.</td><td>Видны owner_role, process_key, task_id.</td><td class="ok">Пройдено.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Тестирование бизнес-процесса</h2>
+      <table>
+        <thead>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Запускаем gate без source-файлов.</td><td>Проверяем error path.</td><td>Shadow-load blocked, downstream skipped.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Генерируем pilot landing pack.</td><td>Нужен happy path с 9 контрактами.</td><td>Shadow-load passed.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Выполняем source contract DQ.</td><td>Clean publication нельзя запускать при blockers.</td><td>DQ passed.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Выполняем clean publication dry-run.</td><td>Проверяем готовность clean-слоя.</td><td>Stage ready, task-clean-publication-001.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Выполняем feature build dry-run.</td><td>Проверяем переход к Data Science Owner.</td><td>Stage ready, task-feature-build-001.</td><td class="ok">Покрыто тестом.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Проверки</h2>
+      <table>
+        <thead><tr><th>Тип</th><th>Команда</th><th>Результат</th></tr></thead>
+        <tbody>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_daily_pipeline.py</code></td><td class="ok">3 passed</td></tr>
+          <tr><td>Backend regression</td><td><code>python -m pytest</code></td><td class="ok">367 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx playwright screenshot</code></td><td class="ok">captured</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Итог</h2>
+      <p>
+        Сквозной daily gate готов как backend API, UI-блок и автоматизированный процессный тест.
+        Ограничение: при отсутствии реальных source-файлов live gate честно показывает blocked-сценарий;
+        для happy path используется pilot landing pack.
+      </p>
+    </main>
+  </body>
+</html>
