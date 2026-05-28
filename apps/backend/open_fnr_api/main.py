@@ -4,6 +4,7 @@ from .adjustments import router as adjustments_router
 from .audit import router as audit_router
 from .capacity import router as capacity_router
 from .config import settings
+from .clean_publication import router as clean_publication_router
 from .data_quality import router as data_quality_router
 from .data_scale import router as data_scale_router
 from .diagnostics import router as diagnostics_router
@@ -43,6 +44,7 @@ app = FastAPI(
 )
 
 app.include_router(ingestion_router)
+app.include_router(clean_publication_router)
 app.include_router(adjustments_router)
 app.include_router(audit_router)
 app.include_router(capacity_router)
@@ -104,6 +106,7 @@ def metadata() -> dict[str, object]:
             "audit",
             "data-platform",
             "capacity",
+            "clean-publication",
             "data-ingestion",
             "data-quality",
             "production-data-scale",

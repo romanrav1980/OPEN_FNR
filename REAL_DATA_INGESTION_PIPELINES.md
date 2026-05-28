@@ -54,6 +54,8 @@ flowchart LR
 
 Every clean table carries `source_batch_id`, `quality_status` and `published_at` for lineage and reprocessing control.
 
+The API endpoint `/data/clean-publication/plans?business_date=YYYY-MM-DD` exposes ClickHouse publication SQL plans. The current idempotency strategy is `delete_by_source_batch_then_insert`: delete existing clean rows for the source batch, then insert normalized rows from raw tables.
+
 ## Canonical Contracts
 
 | Contract | Primary key | Required fields |
