@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Post-sprint documentation audit and next delivery planning are in progress after completion of all 37 sprint checkpoints.
+Industrial hardening H1 is in progress after completion of all 37 functional sprint checkpoints.
 
 ## Local Infrastructure
 
@@ -410,11 +410,12 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 290 passed.
+- `python -m pytest` -> 293 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
 - `docker compose --env-file infra/stage/.env.example -f infra/dev/compose.yaml config --quiet` -> STAGE compose config valid.
+- `docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml config --quiet` -> DEV compose config valid.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
 - `docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml ps` -> services up.
 
@@ -426,11 +427,21 @@ Commit post-sprint documentation audit, environment strategy, real integration p
 
 - Documentation audit and synchronization: `DOCUMENTATION_AUDIT_AND_SYNC.md`.
 - Next delivery plan: `NEXT_DELIVERY_PLAN.md`.
+- Industrial hardening sprint plan: `INDUSTRIAL_HARDENING_SPRINTS.md`.
 - Deployment environments strategy: `DEPLOYMENT_ENVIRONMENTS_STRATEGY.md`.
 - Real data ingestion pipelines: `REAL_DATA_INGESTION_PIPELINES.md`.
 - Production security hardening: `PRODUCTION_SECURITY_HARDENING_PLAN.md`.
 - UI productization: `UI_PRODUCTIZATION_PLAN.md`.
 - Pilot launch: `PILOT_LAUNCH_PLAN.md`.
+
+## H1 Industrial Hardening Artifacts
+
+- Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
+- Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
+- Audit API: `apps/backend/open_fnr_api/audit.py`.
+- PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.
+- CI workflow: `.github/workflows/ci.yml`.
+- Audit tests: `tests/backend/test_audit.py`.
 
 ## Block Presentations
 

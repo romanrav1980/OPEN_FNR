@@ -17,6 +17,13 @@ def env_int(name: str, default: int) -> int:
     return int(os.getenv(f"OPEN_FNR_{name}", str(default)))
 
 
+def env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(f"OPEN_FNR_{name}")
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Settings(BaseModel):
     app_name: str = env_str("APP_NAME", "OPEN FNR API")
     version: str = env_str("VERSION", "0.1.0")
@@ -33,6 +40,8 @@ class Settings(BaseModel):
     postgres_user: str = Field(default_factory=lambda: env_str("POSTGRES_USER", "open_fnr"))
     postgres_password: str = Field(default_factory=lambda: env_str("POSTGRES_PASSWORD", "open_fnr_dev"))
     postgres_database: str = Field(default_factory=lambda: env_str("POSTGRES_DATABASE", "open_fnr"))
+    runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
+    mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
 
     def http_url(self, port: int, path: str = "") -> str:
         normalized_path = path if path.startswith("/") or path == "" else f"/{path}"

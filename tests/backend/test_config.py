@@ -16,3 +16,10 @@ def test_settings_build_service_urls_from_central_host_and_ports() -> None:
     assert settings.airflow_health_url == "http://10.0.0.10:8088/health"
     assert settings.opensearch_url == "http://10.0.0.10:9200"
     assert settings.superset_health_url == "http://10.0.0.10:8089/health"
+
+
+def test_settings_expose_runtime_mode_and_mock_mode() -> None:
+    settings = Settings(runtime_mode="test", mock_mode=False)
+
+    assert settings.runtime_mode == "test"
+    assert settings.mock_mode is False

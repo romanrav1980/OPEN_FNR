@@ -105,6 +105,8 @@ Move OPEN FNR from a completed functional prototype with process/UI/API coverage
 | Pilot 1 | Shadow Pilot | no operational exports, KPI comparison |
 | Pilot 2 | Controlled Export Pilot | limited real exports and business sign-off |
 
+Detailed industrial hardening sprint execution is tracked in [INDUSTRIAL_HARDENING_SPRINTS.md](INDUSTRIAL_HARDENING_SPRINTS.md).
+
 ## Immediate Next Actions
 
 1. Approve pilot scope: stores, categories, SKU, suppliers and regions.
