@@ -510,6 +510,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Pilot shadow-load discovery runner: `apps/backend/open_fnr_api/shadow_load.py`, `scripts/dev/run-shadow-load.ps1`.
 - Source contract DQ plans: `/data-quality/source-contract-plans`.
 - Source contract DQ execution API: `/data-quality/source-contract-runs`.
+- DEV/TEST/STAGE Docker Compose validation uses a shared compose file with per-contour env files; service ports and Superset secret are parameterized through environment settings.
 - Clean canonical ClickHouse tables for sales, stock, open orders, in-transit, prices and promo plans.
 - Clean publication plan API: `/data/clean-publication/plans`.
 - Clean publication run API: `/data/clean-publication/runs` with `dry_run` and `mock_run`.
