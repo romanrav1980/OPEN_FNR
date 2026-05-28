@@ -170,6 +170,44 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(business_date)
 ORDER BY (business_date, store_id, sku_id, batch_id);
 
+CREATE TABLE IF NOT EXISTS open_fnr.raw_erp_prices
+(
+    batch_id String,
+    price_id String,
+    sku_id String,
+    location_scope String,
+    valid_from Date,
+    valid_to Nullable(Date),
+    regular_price Float64,
+    selling_price Float64,
+    currency String,
+    vat_rate Float64,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(valid_from)
+ORDER BY (valid_from, location_scope, sku_id, price_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.raw_erp_order_export_statuses
+(
+    batch_id String,
+    export_id String,
+    proposal_id String,
+    external_order_id Nullable(String),
+    exported_at DateTime,
+    target_system String,
+    status String,
+    retry_count UInt32,
+    error_code Nullable(String),
+    error_message Nullable(String),
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(exported_at)
+ORDER BY (exported_at, target_system, status, proposal_id, export_id);
+
 CREATE TABLE IF NOT EXISTS open_fnr.dq_error_rows
 (
     incident_id String,

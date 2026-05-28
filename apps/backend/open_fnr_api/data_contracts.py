@@ -199,10 +199,45 @@ class WmsInTransitLine(BaseModel):
     source_system: str = Field(default="WMS", min_length=1, max_length=64)
 
 
+class ErpPriceLine(BaseModel):
+    price_id: str = Field(min_length=1, max_length=128)
+    sku_id: str = Field(min_length=1, max_length=64)
+    location_scope: str = Field(min_length=1, max_length=64)
+    valid_from: date
+    valid_to: date | None = None
+    regular_price: float = Field(gt=0)
+    selling_price: float = Field(gt=0)
+    currency: str = Field(default="RUB", min_length=3, max_length=3)
+    vat_rate: float = Field(default=0, ge=0, le=1)
+    source_system: str = Field(default="ERP", min_length=1, max_length=64)
+
+    @field_validator("selling_price")
+    @classmethod
+    def erp_selling_price_is_not_extreme(cls, value: float, info: Any) -> float:
+        regular_price = info.data.get("regular_price")
+        if regular_price and value > regular_price * 10:
+            msg = "selling_price must not exceed regular_price by more than 10x"
+            raise ValueError(msg)
+        return value
+
+
+class ErpOrderExportStatusLine(BaseModel):
+    export_id: str = Field(min_length=1, max_length=128)
+    proposal_id: str = Field(min_length=1, max_length=128)
+    external_order_id: str | None = Field(default=None, max_length=128)
+    exported_at: datetime
+    target_system: str = Field(min_length=1, max_length=64)
+    status: str = Field(min_length=1, max_length=64)
+    retry_count: int = Field(default=0, ge=0)
+    error_code: str | None = Field(default=None, max_length=64)
+    error_message: str | None = Field(default=None, max_length=512)
+    source_system: str = Field(default="ERP", min_length=1, max_length=64)
+
+
 SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
     DataDomain.SALES: PosSalesLine,
     DataDomain.STOCK: WmsStockSnapshotLine,
-    DataDomain.PRICES: PriceRecord,
+    DataDomain.PRICES: ErpPriceLine,
     DataDomain.PRODUCT_MDM: ProductMdmRecord,
     DataDomain.STORE_MDM: StoreMdmRecord,
     DataDomain.CALENDAR: CalendarDayRecord,

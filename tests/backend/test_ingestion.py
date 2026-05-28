@@ -60,3 +60,19 @@ def test_wms_manifests_expose_projected_stock_inputs() -> None:
         assert manifest["contract_version"] == "v1"
         assert manifest["idempotency_key"] == f"WMS:{contract_name}:v1:2026-05-28"
         assert manifest["checksum"].startswith("sha256:")
+
+
+def test_erp_manifests_expose_prices_and_order_export_statuses() -> None:
+    endpoints = {
+        "erp-prices": "erp_price_line",
+        "erp-order-statuses": "erp_order_export_status_line",
+    }
+
+    for endpoint, contract_name in endpoints.items():
+        response = client.get(f"/data/ingestion/manifests/{endpoint}")
+        assert response.status_code == 200
+
+        manifest = response.json()
+        assert manifest["source_system"] == "ERP"
+        assert manifest["contract_name"] == contract_name
+        assert manifest["idempotency_key"] == f"ERP:{contract_name}:v1:2026-05-28"

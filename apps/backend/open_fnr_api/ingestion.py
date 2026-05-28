@@ -85,6 +85,30 @@ WMS_IN_TRANSIT_MANIFEST = SourceBatchManifest(
     landed_uri="s3-compatible://open-fnr-landing/wms/in_transit/business_date=2026-05-28/wms-in-transit.parquet",
 )
 
+ERP_PRICES_MANIFEST = SourceBatchManifest(
+    batch_id="erp-prices-2026-05-28-v1",
+    source_system="ERP",
+    contract_name="erp_price_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=640_000,
+    checksum="sha256:erp-prices-20260528-v1",
+    idempotency_key="ERP:erp_price_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/erp/prices/business_date=2026-05-28/erp-prices.parquet",
+)
+
+ERP_ORDER_STATUS_MANIFEST = SourceBatchManifest(
+    batch_id="erp-order-statuses-2026-05-28-v1",
+    source_system="ERP",
+    contract_name="erp_order_export_status_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=44_000,
+    checksum="sha256:erp-order-statuses-20260528-v1",
+    idempotency_key="ERP:erp_order_export_status_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/erp/order_statuses/business_date=2026-05-28/erp-order-statuses.parquet",
+)
+
 
 @router.get("/contracts")
 def list_contracts() -> dict[str, object]:
@@ -109,6 +133,16 @@ def get_wms_open_orders_manifest() -> dict[str, object]:
 @router.get("/ingestion/manifests/wms-in-transit")
 def get_wms_in_transit_manifest() -> dict[str, object]:
     return WMS_IN_TRANSIT_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/erp-prices")
+def get_erp_prices_manifest() -> dict[str, object]:
+    return ERP_PRICES_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/erp-order-statuses")
+def get_erp_order_status_manifest() -> dict[str, object]:
+    return ERP_ORDER_STATUS_MANIFEST.model_dump(mode="json")
 
 
 @router.get("/ingestion/status")

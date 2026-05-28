@@ -99,6 +99,25 @@ Status: in progress.
 - `orchestration/airflow/dags/wms_inventory_ingestion.py` defines the WMS inventory ingestion DAG skeleton.
 - ClickHouse raw landing DDL includes WMS stock snapshot, open order and in-transit tables.
 
+## I3. ERP Prices And Order Export Statuses
+
+Status: in progress.
+
+### Scope
+
+- add ERP price source contract;
+- add ERP order export status contract;
+- add raw ClickHouse landing tables;
+- add Airflow DAG skeleton for ERP commercial ingestion;
+- expose idempotent manifests for prices and order status reconciliation.
+
+### Current Implementation
+
+- ERP contracts cover price validity and order export statuses.
+- ERP manifest endpoints expose idempotency keys for price and order status batches.
+- `orchestration/airflow/dags/erp_commercial_ingestion.py` defines the ERP commercial ingestion DAG skeleton.
+- ClickHouse raw landing DDL includes ERP price and order export status tables.
+
 ## S1. Production Security Foundation
 
 ### Scope
