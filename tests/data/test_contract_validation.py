@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
-from open_fnr_api.data_contracts import PosSalesLine, PriceRecord, SalesRecord
+from open_fnr_api.data_contracts import PosSalesLine, PriceRecord, SalesRecord, WmsStockSnapshotLine
 
 
 def test_sales_contract_rejects_negative_quantity() -> None:
@@ -61,4 +61,19 @@ def test_price_contract_rejects_zero_price() -> None:
             sku_id="SKU001",
             regular_price=0,
             selling_price=10,
+        )
+
+
+def test_wms_stock_snapshot_rejects_available_qty_above_on_hand() -> None:
+    with pytest.raises(ValidationError):
+        WmsStockSnapshotLine(
+            snapshot_id="SNAP001",
+            snapshot_at="2026-05-28T04:00:00Z",
+            business_date=date(2026, 5, 28),
+            location_id="STORE001",
+            location_type="store",
+            sku_id="SKU001",
+            on_hand_qty=10,
+            reserved_qty=0,
+            available_qty=11,
         )

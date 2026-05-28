@@ -4,7 +4,7 @@ Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening I1 is in progress after completion of H1-H3 foundations. The current focus is real POS sales ingestion: source contract, manifest, raw landing table, orchestration skeleton and data tests.
+Industrial hardening I2 is in progress after completion of I1 POS sales ingestion. The current focus is real WMS stock, open orders and in-transit ingestion for projected stock and demand projection inputs.
 
 ## Local Infrastructure
 
@@ -421,7 +421,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Complete I1 verification, commit POS sales ingestion, then continue to I2 WMS stock, open orders and in-transit ingestion.
+Complete I2 verification, commit WMS ingestion, then continue to ERP prices/order statuses and MDM/promo source hardening.
 
 ## Post-Sprint Planning Artifacts
 
@@ -465,6 +465,14 @@ Complete I1 verification, commit POS sales ingestion, then continue to I2 WMS st
 - POS ingestion DAG skeleton: `orchestration/airflow/dags/pos_sales_ingestion.py`.
 - Raw ClickHouse landing table: `open_fnr.raw_pos_sales_lines`.
 - POS ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_contract_validation.py`, `tests/data/test_clickhouse_pos_sales_schema.py`, `tests/orchestration/test_pos_sales_ingestion.py`.
+
+## I2 Real Data Ingestion Artifacts
+
+- WMS stock, open order and in-transit contracts: `apps/backend/open_fnr_api/data_contracts.py`.
+- WMS manifest endpoints: `/data/ingestion/manifests/wms-stock`, `/data/ingestion/manifests/wms-open-orders`, `/data/ingestion/manifests/wms-in-transit`.
+- WMS inventory DAG skeleton: `orchestration/airflow/dags/wms_inventory_ingestion.py`.
+- Raw ClickHouse landing tables: `open_fnr.raw_wms_stock_snapshots`, `open_fnr.raw_wms_open_orders`, `open_fnr.raw_wms_in_transit`.
+- WMS ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_clickhouse_wms_schema.py`, `tests/orchestration/test_wms_inventory_ingestion.py`.
 
 ## Block Presentations
 

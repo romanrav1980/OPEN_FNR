@@ -49,6 +49,42 @@ POS_SALES_MANIFEST = SourceBatchManifest(
     landed_uri="s3-compatible://open-fnr-landing/pos/business_date=2026-05-28/pos-sales.parquet",
 )
 
+WMS_STOCK_MANIFEST = SourceBatchManifest(
+    batch_id="wms-stock-2026-05-28-v1",
+    source_system="WMS",
+    contract_name="wms_stock_snapshot_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=1_195_000,
+    checksum="sha256:wms-stock-20260528-v1",
+    idempotency_key="WMS:wms_stock_snapshot_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/wms/stock/business_date=2026-05-28/wms-stock.parquet",
+)
+
+WMS_OPEN_ORDERS_MANIFEST = SourceBatchManifest(
+    batch_id="wms-open-orders-2026-05-28-v1",
+    source_system="WMS",
+    contract_name="wms_open_order_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=185_000,
+    checksum="sha256:wms-open-orders-20260528-v1",
+    idempotency_key="WMS:wms_open_order_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/wms/open_orders/business_date=2026-05-28/wms-open-orders.parquet",
+)
+
+WMS_IN_TRANSIT_MANIFEST = SourceBatchManifest(
+    batch_id="wms-in-transit-2026-05-28-v1",
+    source_system="WMS",
+    contract_name="wms_in_transit_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=92_000,
+    checksum="sha256:wms-in-transit-20260528-v1",
+    idempotency_key="WMS:wms_in_transit_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/wms/in_transit/business_date=2026-05-28/wms-in-transit.parquet",
+)
+
 
 @router.get("/contracts")
 def list_contracts() -> dict[str, object]:
@@ -58,6 +94,21 @@ def list_contracts() -> dict[str, object]:
 @router.get("/ingestion/manifests/pos-sales")
 def get_pos_sales_manifest() -> dict[str, object]:
     return POS_SALES_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/wms-stock")
+def get_wms_stock_manifest() -> dict[str, object]:
+    return WMS_STOCK_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/wms-open-orders")
+def get_wms_open_orders_manifest() -> dict[str, object]:
+    return WMS_OPEN_ORDERS_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/wms-in-transit")
+def get_wms_in_transit_manifest() -> dict[str, object]:
+    return WMS_IN_TRANSIT_MANIFEST.model_dump(mode="json")
 
 
 @router.get("/ingestion/status")

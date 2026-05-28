@@ -148,9 +148,60 @@ class PosSalesLine(BaseModel):
         return value
 
 
+class WmsStockSnapshotLine(BaseModel):
+    snapshot_id: str = Field(min_length=1, max_length=128)
+    snapshot_at: datetime
+    business_date: date
+    location_id: str = Field(min_length=1, max_length=64)
+    location_type: str = Field(min_length=1, max_length=32)
+    sku_id: str = Field(min_length=1, max_length=64)
+    on_hand_qty: float = Field(ge=0)
+    reserved_qty: float = Field(default=0, ge=0)
+    available_qty: float = Field(ge=0)
+    damaged_qty: float = Field(default=0, ge=0)
+    source_system: str = Field(default="WMS", min_length=1, max_length=64)
+
+    @field_validator("available_qty")
+    @classmethod
+    def available_qty_cannot_exceed_physical_stock(cls, value: float, info: Any) -> float:
+        on_hand_qty = info.data.get("on_hand_qty")
+        if on_hand_qty is not None and value > on_hand_qty:
+            msg = "available_qty must not exceed on_hand_qty"
+            raise ValueError(msg)
+        return value
+
+
+class WmsOpenOrderLine(BaseModel):
+    order_id: str = Field(min_length=1, max_length=128)
+    line_id: str = Field(min_length=1, max_length=128)
+    order_date: date
+    expected_delivery_date: date
+    source_location_id: str = Field(min_length=1, max_length=64)
+    target_location_id: str = Field(min_length=1, max_length=64)
+    sku_id: str = Field(min_length=1, max_length=64)
+    ordered_qty: float = Field(gt=0)
+    confirmed_qty: float = Field(default=0, ge=0)
+    status: str = Field(min_length=1, max_length=64)
+    source_system: str = Field(default="WMS", min_length=1, max_length=64)
+
+
+class WmsInTransitLine(BaseModel):
+    shipment_id: str = Field(min_length=1, max_length=128)
+    line_id: str = Field(min_length=1, max_length=128)
+    ship_date: date
+    eta_date: date
+    source_location_id: str = Field(min_length=1, max_length=64)
+    target_location_id: str = Field(min_length=1, max_length=64)
+    sku_id: str = Field(min_length=1, max_length=64)
+    shipped_qty: float = Field(gt=0)
+    received_qty: float = Field(default=0, ge=0)
+    status: str = Field(min_length=1, max_length=64)
+    source_system: str = Field(default="WMS", min_length=1, max_length=64)
+
+
 SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
     DataDomain.SALES: PosSalesLine,
-    DataDomain.STOCK: StockRecord,
+    DataDomain.STOCK: WmsStockSnapshotLine,
     DataDomain.PRICES: PriceRecord,
     DataDomain.PRODUCT_MDM: ProductMdmRecord,
     DataDomain.STORE_MDM: StoreMdmRecord,

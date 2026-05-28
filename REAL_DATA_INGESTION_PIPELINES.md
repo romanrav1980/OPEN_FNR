@@ -73,7 +73,7 @@ flowchart LR
 | Pipeline | Status | Implemented artifacts |
 | --- | --- | --- |
 | POS sales | in progress | `PosSalesLine`, POS manifest API, Airflow DAG skeleton, ClickHouse raw POS sales table |
-| WMS stock/orders/in-transit | planned | source contracts and raw/clean tables to be added in I2 |
+| WMS stock/orders/in-transit | in progress | WMS stock/open order/in-transit contracts, manifest APIs, Airflow DAG skeleton, ClickHouse raw WMS tables |
 | ERP prices/order statuses | planned | source contracts and export status reconciliation to be added after WMS |
 | MDM/PIM | planned | product/store hierarchy contract hardening to be added before pilot |
 | Promo system | planned | promo plan source contract and overlap DQ to be added before promo pilot |

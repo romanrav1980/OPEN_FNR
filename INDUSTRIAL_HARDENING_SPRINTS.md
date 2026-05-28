@@ -83,12 +83,21 @@ Status: in progress.
 
 ## I2. WMS Stock, Open Orders And In-Transit
 
+Status: in progress.
+
 ### Scope
 
 - add WMS stock snapshot contract;
 - add open order and in-transit contracts;
 - add canonical clean tables;
 - connect projected stock pipeline to real inputs.
+
+### Current Implementation
+
+- WMS contracts cover stock snapshots, open order lines and in-transit shipment lines.
+- WMS manifest endpoints expose idempotency keys for stock, open orders and in-transit batches.
+- `orchestration/airflow/dags/wms_inventory_ingestion.py` defines the WMS inventory ingestion DAG skeleton.
+- ClickHouse raw landing DDL includes WMS stock snapshot, open order and in-transit tables.
 
 ## S1. Production Security Foundation
 

@@ -41,3 +41,22 @@ def test_pos_sales_manifest_exposes_idempotency_checksum_and_landing_uri() -> No
     assert manifest["idempotency_key"] == "POS:pos_sales_line:v1:2026-05-28"
     assert manifest["checksum"].startswith("sha256:")
     assert "business_date=2026-05-28" in manifest["landed_uri"]
+
+
+def test_wms_manifests_expose_projected_stock_inputs() -> None:
+    endpoints = {
+        "wms-stock": "wms_stock_snapshot_line",
+        "wms-open-orders": "wms_open_order_line",
+        "wms-in-transit": "wms_in_transit_line",
+    }
+
+    for endpoint, contract_name in endpoints.items():
+        response = client.get(f"/data/ingestion/manifests/{endpoint}")
+        assert response.status_code == 200
+
+        manifest = response.json()
+        assert manifest["source_system"] == "WMS"
+        assert manifest["contract_name"] == contract_name
+        assert manifest["contract_version"] == "v1"
+        assert manifest["idempotency_key"] == f"WMS:{contract_name}:v1:2026-05-28"
+        assert manifest["checksum"].startswith("sha256:")
