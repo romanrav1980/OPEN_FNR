@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from open_fnr_api.main import app
-from open_fnr_api.promo import PromoDisplayLocation, PromoMechanic, PromoPlan, PromoStatus, validate_promo
+from open_fnr_api.promo import PromoDisplayLocation, PromoMechanic, PromoPlan, PromoStatus, build_total_forecast, validate_promo
 
 
 client = TestClient(app)
@@ -73,3 +73,20 @@ def test_promo_overlap_detection() -> None:
     validation = validate_promo(plan)
     assert validation.ready_for_forecast is False
     assert validation.errors == ["overlaps with promo-20260601-fresh-001"]
+
+
+def test_promo_forecast_endpoint_separates_regular_and_uplift() -> None:
+    response = client.get("/promo/forecasts/promo-20260601-fresh-001")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "forecasted"
+    first_day = payload["days"][0]
+    assert first_day["regular_forecast_qty"] == 120
+    assert first_day["promo_uplift_qty"] == 48
+    assert first_day["total_forecast_qty"] == 168
+    assert payload["reference_promos"][0]["similarity_score"] == 0.91
+
+
+def test_total_forecast_formula() -> None:
+    assert build_total_forecast(120, 48) == 168

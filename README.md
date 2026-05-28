@@ -58,6 +58,7 @@ docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml up -d
 | [DATA_GOVERNANCE.md](DATA_GOVERNANCE.md) | владельцы данных, DQ, SLA, MDM, lineage и правила исправлений |
 | [PROCESS_ENGINE_GOVERNANCE.md](PROCESS_ENGINE_GOVERNANCE.md) | управление BPMN/DMN/CMMN, Flowable, версиями и релизами процессов |
 | [INTEGRATION_STRATEGY.md](INTEGRATION_STRATEGY.md) | интеграции с ERP, WMS, DWH, POS, MDM и промо-системой |
+| [DATA_INTEGRATION_SPEC.md](DATA_INTEGRATION_SPEC.md) | детальный контракт загрузки продаж, остатков, товаров в пути, заказов и MDM |
 | [ML_GOVERNANCE.md](ML_GOVERNANCE.md) | жизненный цикл моделей, approval, monitoring, drift, retraining, rollback |
 | [TESTING_STRATEGY.md](TESTING_STRATEGY.md) | общая стратегия тестирования data, ML, API, UI, process, performance |
 | [SECURITY_STRATEGY.md](SECURITY_STRATEGY.md) | RBAC, audit, secrets, service security и security testing |

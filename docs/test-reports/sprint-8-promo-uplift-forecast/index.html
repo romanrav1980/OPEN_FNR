@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 8 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      h1, h2, p { margin-top: 0; }
+      h1 { font-size: 34px; line-height: 1.15; }
+      h2 { margin-top: 34px; }
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      code { color: #f6d6dc; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .warn { color: var(--warn); font-weight: 700; }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 8 / Promo Uplift Forecast V1</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 8: расчёт promo uplift отдельно
+          от regular forecast, total forecast, reference promos и post-promo stock preview.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем Promo Uplift Forecast V1, потому что промо должно влиять
+          на прогноз как отдельный эффект, а не загрязнять регулярный спрос.
+          Метод проверки объединяет API-контракт, формулу total forecast,
+          BPMN/DMN/CMMN процесса, UI screenshot и regression tests. Такой способ
+          нужен, чтобы доказать: regular baseline, uplift и total forecast хранятся
+          и отображаются отдельно, а пользователь понимает источник промо-эффекта.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, promo forecast, process и encoding тесты.</td>
+              <td>Проверить uplift, total forecast, reference promos и BPMN/DMN/CMMN.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">63 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить Promo Forecast V1 экран.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI и снимаем full-page screenshot.</td>
+              <td>Зафиксировать визуальный результат promo forecast.</td>
+              <td>Скриншот содержит regular/uplift/total и reference promos.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Promo Forecast V1.</td>
+              <td>Проверить, что Promo Planner видит расчёт промо-эффекта.</td>
+              <td>После validation промо должно переходить к forecasted-состоянию.</td>
+              <td>Отображается promo id и статус forecasted.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем regular/uplift/total.</td>
+              <td>Убедиться, что uplift отделён от regular forecast.</td>
+              <td>Иначе промо исказит регулярную модель спроса.</td>
+              <td>Видны regular, uplift и total по дням.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем reference promo list.</td>
+              <td>Понять, на каких аналогах основан uplift.</td>
+              <td>Пользователь должен доверять промо-эффекту и видеть объяснение.</td>
+              <td>Видны promo-ref, similarity, discount и uplift factor.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем post-promo stock preview.</td>
+              <td>Показать влияние uplift на будущий запас.</td>
+              <td>Промо-прогноз должен сразу готовить вход для replenishment.</td>
+              <td>Видны значения stock после промо-дней.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>promo_forecast_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс из статуса ready_for_forecast.</td>
+              <td>Только валидированное промо должно идти в uplift.</td>
+              <td>BPMN содержит start event Promo ready for forecast.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_forecast_process</code></td>
+              <td>2</td>
+              <td>Загружаем regular baseline на период промо.</td>
+              <td>Uplift считается относительно обычного спроса.</td>
+              <td>BPMN содержит Load regular baseline for promo period.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_forecast_process</code></td>
+              <td>3</td>
+              <td>Выбираем reference promos и считаем uplift.</td>
+              <td>Аналоги объясняют промо-эффект и fallback к категории.</td>
+              <td>BPMN содержит Select reference promos и Calculate promo uplift.</td>
+              <td class="ok">Подтверждено XML-тестом и API-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_forecast_process</code></td>
+              <td>4</td>
+              <td>Считаем total forecast.</td>
+              <td>Пользователь и replenishment получают итоговый спрос.</td>
+              <td>Total = regular + uplift.</td>
+              <td class="ok">Подтверждено формульным тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_forecast_quality_decision</code></td>
+              <td>1</td>
+              <td>Проверяем quality decision.</td>
+              <td>Плохой uplift должен уходить в warning review.</td>
+              <td>DMN содержит uplift_accuracy_smoke и reference_count.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>promo_forecast_anomaly_case</code></td>
+              <td>1</td>
+              <td>Проверяем anomaly case.</td>
+              <td>При сомнительном uplift нужен review reference promos и ручной draft adjustment.</td>
+              <td>CMMN содержит Review reference promos и Adjust uplift draft.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/promo-forecast-v1.png" alt="OPEN FNR Promo Forecast V1 screenshot" />
+        <p class="caption">Скриншот: Promo Forecast V1 после Sprint 8.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 8 test cycle passed. Promo uplift считается отдельно от regular,
+          total forecast прозрачен, reference promos объясняют uplift, а post-promo
+          stock preview готовит переход к replenishment.
+        </p>
+        <p class="warn">
+          Ограничение: uplift представлен baseline/sample model contract; физический
+          scoring на полном промо-шарде будет расширяться дальше.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

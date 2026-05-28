@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_promo_forecast_quality_dmn"
+             name="OPEN FNR Promo Forecast Quality"
+             namespace="https://open-fnr.local/decisions/promo-forecast">
+  <decision id="promo_forecast_quality_decision" name="Promo Forecast Quality Decision">
+    <decisionTable id="promo_forecast_quality_table" hitPolicy="FIRST">
+      <input id="input_accuracy_smoke" label="uplift_accuracy_smoke">
+        <inputExpression id="input_accuracy_smoke_expression" typeRef="number"><text>uplift_accuracy_smoke</text></inputExpression>
+      </input>
+      <input id="input_reference_count" label="reference_count">
+        <inputExpression id="input_reference_count_expression" typeRef="number"><text>reference_count</text></inputExpression>
+      </input>
+      <output id="output_quality" name="quality" typeRef="string" />
+      <rule id="rule_ok">
+        <inputEntry id="rule_ok_accuracy"><text>&gt;= 0.75</text></inputEntry>
+        <inputEntry id="rule_ok_reference"><text>&gt;= 2</text></inputEntry>
+        <outputEntry id="rule_ok_output"><text>"ok"</text></outputEntry>
+      </rule>
+      <rule id="rule_warning">
+        <inputEntry id="rule_warning_accuracy"><text>-</text></inputEntry>
+        <inputEntry id="rule_warning_reference"><text>-</text></inputEntry>
+        <outputEntry id="rule_warning_output"><text>"warning"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

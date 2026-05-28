@@ -23,22 +23,23 @@ EXCLUDED_DIRS = {
     "node_modules",
 }
 
+# Written as Unicode escapes so this quality gate cannot become mojibake itself.
 MOJIBAKE_MARKERS = (
-    "Рџ",
-    "РЎ",
-    "Рќ",
-    "Рґ",
-    "Р»",
-    "Рµ",
-    "Рѕ",
-    "Р°",
-    "СЃ",
-    "С‚",
-    "СЊ",
-    "Р ",
-    "Р",
-    "Ð",
-    "Ñ",
+    "\u0420\u045f",
+    "\u0420\u045e",
+    "\u0420\u0459",
+    "\u0420\u203a",
+    "\u0420\u045c",
+    "\u0420\u0491",
+    "\u0420\u00bb",
+    "\u0420\u00b5",
+    "\u0420\u0455",
+    "\u0420\u00b0",
+    "\u0421\u0453",
+    "\u0421\u201a",
+    "\u0421\u0152",
+    "\u00d0",
+    "\u00d1",
 )
 
 
@@ -48,8 +49,6 @@ def iter_text_files() -> list[Path]:
         if not path.is_file():
             continue
         if any(part in EXCLUDED_DIRS for part in path.parts):
-            continue
-        if path == Path("tests/quality/test_text_encoding.py"):
             continue
         if path.suffix.lower() in TEXT_EXTENSIONS:
             files.append(path)

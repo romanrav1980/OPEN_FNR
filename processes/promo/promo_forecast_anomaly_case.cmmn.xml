@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/promo-forecast">
+  <case id="promo_forecast_anomaly_case" name="Promo Forecast Anomaly Case">
+    <casePlanModel id="promo_forecast_anomaly_case_plan" name="Promo Forecast Anomaly">
+      <planItem id="plan_review_reference_promos" definitionRef="review_reference_promos" />
+      <planItem id="plan_adjust_uplift" definitionRef="adjust_uplift" />
+      <planItem id="plan_approve_promo_forecast" definitionRef="approve_promo_forecast" />
+      <humanTask id="review_reference_promos"
+                 name="Review reference promos"
+                 flowable:candidateGroups="promo-planner" />
+      <humanTask id="adjust_uplift"
+                 name="Adjust uplift draft"
+                 flowable:candidateGroups="forecast-planner" />
+      <humanTask id="approve_promo_forecast"
+                 name="Approve promo forecast"
+                 flowable:candidateGroups="promo-planner,forecast-planner" />
+    </casePlanModel>
+  </case>
+</definitions>

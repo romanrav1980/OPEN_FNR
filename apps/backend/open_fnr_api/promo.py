@@ -61,6 +61,41 @@ class PromoValidationResult(BaseModel):
     warnings: list[str]
 
 
+class PromoForecastStatus(StrEnum):
+    READY_FOR_FORECAST = "ready_for_forecast"
+    FORECASTING = "forecasting"
+    FORECASTED = "forecasted"
+    FORECAST_WARNING = "forecast_warning"
+
+
+class ReferencePromo(BaseModel):
+    promo_id: str
+    similarity_score: float = Field(ge=0, le=1)
+    mechanic: PromoMechanic
+    discount_percent: float = Field(ge=0, le=100)
+    uplift_factor: float = Field(ge=0)
+
+
+class PromoForecastDay(BaseModel):
+    promo_id: str
+    forecast_date: date
+    regular_forecast_qty: float = Field(ge=0)
+    promo_uplift_qty: float = Field(ge=0)
+    total_forecast_qty: float = Field(ge=0)
+    post_promo_stock_qty: float = Field(ge=0)
+
+
+class PromoForecast(BaseModel):
+    promo_id: str
+    status: PromoForecastStatus
+    regular_forecast_version: str
+    uplift_version: str
+    reference_promos: list[ReferencePromo]
+    days: list[PromoForecastDay]
+    uplift_accuracy_smoke: float = Field(ge=0, le=1)
+    warning: str | None = None
+
+
 router = APIRouter(prefix="/promo", tags=["promo"])
 
 
@@ -98,6 +133,54 @@ PROMOS: tuple[PromoPlan, ...] = (
         updated_at=datetime(2026, 5, 28, 9, 30, tzinfo=timezone.utc),
     ),
 )
+
+PROMO_FORECASTS: tuple[PromoForecast, ...] = (
+    PromoForecast(
+        promo_id="promo-20260601-fresh-001",
+        status=PromoForecastStatus.FORECASTED,
+        regular_forecast_version="regular-baseline-20260528-001",
+        uplift_version="promo-uplift-v1-20260528",
+        reference_promos=[
+            ReferencePromo(
+                promo_id="promo-ref-202505-fresh-011",
+                similarity_score=0.91,
+                mechanic=PromoMechanic.DISCOUNT,
+                discount_percent=20,
+                uplift_factor=0.42,
+            ),
+            ReferencePromo(
+                promo_id="promo-ref-202504-fresh-007",
+                similarity_score=0.84,
+                mechanic=PromoMechanic.DISCOUNT,
+                discount_percent=18,
+                uplift_factor=0.37,
+            ),
+        ],
+        days=[
+            PromoForecastDay(
+                promo_id="promo-20260601-fresh-001",
+                forecast_date=date(2026, 6, 1),
+                regular_forecast_qty=120,
+                promo_uplift_qty=48,
+                total_forecast_qty=168,
+                post_promo_stock_qty=340,
+            ),
+            PromoForecastDay(
+                promo_id="promo-20260601-fresh-001",
+                forecast_date=date(2026, 6, 2),
+                regular_forecast_qty=118,
+                promo_uplift_qty=45,
+                total_forecast_qty=163,
+                post_promo_stock_qty=290,
+            ),
+        ],
+        uplift_accuracy_smoke=0.82,
+    ),
+)
+
+
+def build_total_forecast(regular_forecast_qty: float, promo_uplift_qty: float) -> float:
+    return regular_forecast_qty + promo_uplift_qty
 
 
 def validate_promo(plan: PromoPlan) -> PromoValidationResult:
@@ -149,3 +232,16 @@ def get_promo_validation(promo_id: str = Path(min_length=1)) -> dict[str, object
         if promo.promo_id == promo_id:
             return validate_promo(promo).model_dump(mode="json")
     raise HTTPException(status_code=404, detail="promo not found")
+
+
+@router.get("/forecasts")
+def list_promo_forecasts() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in PROMO_FORECASTS], "total": len(PROMO_FORECASTS)}
+
+
+@router.get("/forecasts/{promo_id}")
+def get_promo_forecast(promo_id: str = Path(min_length=1)) -> dict[str, object]:
+    for forecast in PROMO_FORECASTS:
+        if forecast.promo_id == promo_id:
+            return forecast.model_dump(mode="json")
+    raise HTTPException(status_code=404, detail="promo forecast not found")

@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 7 implementation is complete.
+Sprint 8 implementation is complete.
 
 ## Local Infrastructure
 
@@ -89,9 +89,19 @@ Known local URLs:
 - UI Promo Workbench Draft section.
 - HTML test report with screenshot: `docs/test-reports/sprint-7-promo-data-validation/index.html`.
 
+## Sprint 8 Artifacts
+
+- Promo uplift forecast API slice: `/promo/forecasts`.
+- Regular forecast plus promo uplift separation in `apps/backend/open_fnr_api/promo.py`.
+- Promo uplift tests in `tests/backend/test_promo.py`.
+- Promo forecast BPMN/DMN/CMMN artifacts in `processes/promo`.
+- UI Promo Forecast V1 section with regular/uplift/total forecast and reference promos.
+- HTML test report with screenshot: `docs/test-reports/sprint-8-promo-uplift-forecast/index.html`.
+- Data integration specification for factual sales, stock, in-transit and open orders: `DATA_INTEGRATION_SPEC.md`.
+
 ## Verification
 
-- `python -m pytest` -> 58 passed.
+- `python -m pytest` -> 63 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -99,4 +109,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 7 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 8.
+Commit Sprint 8 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 9: Process Engine Foundation.

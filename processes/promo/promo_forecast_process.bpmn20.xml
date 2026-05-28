@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/promo-forecast">
+  <process id="promo_forecast_process" name="Promo Forecast Process" isExecutable="true">
+    <startEvent id="start_promo_forecast" name="Promo ready for forecast" />
+    <sequenceFlow id="flow_start_to_regular" sourceRef="start_promo_forecast" targetRef="load_regular_baseline" />
+    <serviceTask id="load_regular_baseline"
+                 name="Load regular baseline for promo period"
+                 flowable:delegateExpression="${regularBaselineLoaderDelegate}" />
+    <sequenceFlow id="flow_regular_to_reference" sourceRef="load_regular_baseline" targetRef="select_reference_promos" />
+    <serviceTask id="select_reference_promos"
+                 name="Select reference promos"
+                 flowable:delegateExpression="${referencePromoSelectionDelegate}" />
+    <sequenceFlow id="flow_reference_to_uplift" sourceRef="select_reference_promos" targetRef="calculate_promo_uplift" />
+    <serviceTask id="calculate_promo_uplift"
+                 name="Calculate promo uplift"
+                 flowable:delegateExpression="${promoUpliftDelegate}" />
+    <sequenceFlow id="flow_uplift_to_total" sourceRef="calculate_promo_uplift" targetRef="calculate_total_forecast" />
+    <serviceTask id="calculate_total_forecast"
+                 name="Calculate total forecast"
+                 flowable:delegateExpression="${promoTotalForecastDelegate}" />
+    <sequenceFlow id="flow_total_to_quality" sourceRef="calculate_total_forecast" targetRef="promo_forecast_quality_gateway" />
+    <exclusiveGateway id="promo_forecast_quality_gateway" name="Promo forecast quality ok?" />
+    <sequenceFlow id="flow_quality_to_publish" sourceRef="promo_forecast_quality_gateway" targetRef="publish_promo_forecast">
+      <conditionExpression xsi:type="tFormalExpression">${promoForecastQuality == 'ok'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_quality_to_warning" sourceRef="promo_forecast_quality_gateway" targetRef="review_promo_forecast_warning">
+      <conditionExpression xsi:type="tFormalExpression">${promoForecastQuality == 'warning'}</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="publish_promo_forecast"
+                 name="Publish promo forecast"
+                 flowable:delegateExpression="${promoForecastPublisherDelegate}" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_promo_forecast" targetRef="end_promo_forecasted" />
+    <userTask id="review_promo_forecast_warning"
+              name="Review promo forecast warning"
+              flowable:candidateGroups="promo-planner,forecast-planner" />
+    <sequenceFlow id="flow_warning_to_end" sourceRef="review_promo_forecast_warning" targetRef="end_promo_forecast_warning" />
+    <endEvent id="end_promo_forecasted" name="Promo forecasted" />
+    <endEvent id="end_promo_forecast_warning" name="Promo forecast warning" />
+  </process>
+</definitions>

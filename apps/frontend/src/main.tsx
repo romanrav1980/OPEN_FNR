@@ -127,6 +127,16 @@ const promoPlans = [
   },
 ];
 
+const promoForecastDays = [
+  { date: "2026-06-01", regular: 120, uplift: 48, total: 168, stock: 340 },
+  { date: "2026-06-02", regular: 118, uplift: 45, total: 163, stock: 290 },
+];
+
+const referencePromos = [
+  { id: "promo-ref-202505-fresh-011", similarity: "0.91", discount: "20%", uplift: "42%" },
+  { id: "promo-ref-202504-fresh-007", similarity: "0.84", discount: "18%", uplift: "37%" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -464,6 +474,84 @@ function App() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Promo forecast">
+        <div className="section-heading">
+          <h2>Promo Forecast V1</h2>
+          <p>Regular baseline + promo uplift = total forecast</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Promo Forecast</span>
+            <strong>promo-20260601-fresh-001</strong>
+            <p>Uplift version promo-uplift-v1-20260528, status forecasted, accuracy smoke 82%.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Post-promo Stock</span>
+            <strong>340 → 290 units</strong>
+            <p>Preview helps replenishment see stock pressure after promo demand uplift.</p>
+          </article>
+        </div>
+        <div className="chart-panel" aria-label="Promo regular uplift total chart">
+          <div className="chart-bars">
+            <span style={{ height: "62%" }} title="Regular day 1" />
+            <span style={{ height: "25%" }} title="Uplift day 1" />
+            <span style={{ height: "88%" }} title="Total day 1" />
+            <span style={{ height: "61%" }} title="Regular day 2" />
+            <span style={{ height: "23%" }} title="Uplift day 2" />
+            <span style={{ height: "85%" }} title="Total day 2" />
+          </div>
+          <p>Regular, uplift and total demand curve for promo period</p>
+        </div>
+        <div className="feature-grid">
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Regular</th>
+                  <th>Uplift</th>
+                  <th>Total</th>
+                  <th>Post-stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promoForecastDays.map((day) => (
+                  <tr key={day.date}>
+                    <td>{day.date}</td>
+                    <td>{day.regular}</td>
+                    <td>{day.uplift}</td>
+                    <td>{day.total}</td>
+                    <td>{day.stock}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Reference promo</th>
+                  <th>Similarity</th>
+                  <th>Discount</th>
+                  <th>Uplift</th>
+                </tr>
+              </thead>
+              <tbody>
+                {referencePromos.map((promo) => (
+                  <tr key={promo.id}>
+                    <td>{promo.id}</td>
+                    <td>{promo.similarity}</td>
+                    <td>{promo.discount}</td>
+                    <td>{promo.uplift}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>
