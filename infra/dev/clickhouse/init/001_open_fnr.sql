@@ -41,3 +41,51 @@ CREATE TABLE IF NOT EXISTS open_fnr.order_proposals
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(run_date)
 ORDER BY (run_date, order_date, target_location_id, sku_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.staging_sales_daily
+(
+    batch_id String,
+    business_date Date,
+    store_id String,
+    sku_id String,
+    sales_qty Float64,
+    sales_amount Float64,
+    receipt_count UInt32,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, store_id, sku_id, batch_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.staging_stock_daily
+(
+    batch_id String,
+    business_date Date,
+    store_id String,
+    sku_id String,
+    on_hand_qty Float64,
+    reserved_qty Float64,
+    in_transit_qty Float64,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, store_id, sku_id, batch_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.staging_prices_daily
+(
+    batch_id String,
+    business_date Date,
+    store_id String,
+    sku_id String,
+    regular_price Float64,
+    selling_price Float64,
+    currency String,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, store_id, sku_id, batch_id);

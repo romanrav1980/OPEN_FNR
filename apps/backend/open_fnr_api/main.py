@@ -2,12 +2,15 @@ from fastapi import FastAPI
 
 from .config import settings
 from .health import probe_http
+from .ingestion import router as ingestion_router
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.version,
     description="OPEN FNR backend API skeleton.",
 )
+
+app.include_router(ingestion_router)
 
 
 @app.get("/health")
@@ -32,6 +35,7 @@ def metadata() -> dict[str, object]:
         "version": settings.version,
         "modules": [
             "data-platform",
+            "data-ingestion",
             "forecasting",
             "promo",
             "replenishment",
@@ -39,4 +43,3 @@ def metadata() -> dict[str, object]:
             "ui",
         ],
     }
-

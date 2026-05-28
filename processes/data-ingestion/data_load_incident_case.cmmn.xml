@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/data-ingestion">
+  <case id="data_load_incident_case" name="Data Load Incident Case">
+    <casePlanModel id="data_load_incident_case_plan" name="Data Load Incident">
+      <planItem id="plan_investigate_incident" definitionRef="investigate_incident" />
+      <planItem id="plan_request_source_replay" definitionRef="request_source_replay" />
+      <humanTask id="investigate_incident"
+                 name="Investigate data load incident"
+                 flowable:candidateGroups="data-engineering" />
+      <humanTask id="request_source_replay"
+                 name="Request source replay"
+                 flowable:candidateGroups="data-owner" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="https://open-fnr.local/processes/data-ingestion">
+  <process id="data_load_monitoring_process" name="Data Load Monitoring" isExecutable="true">
+    <documentation>
+      Monitors daily inbound data batches before forecast cutoff.
+    </documentation>
+    <startEvent id="start_data_load_monitoring" name="Batch event received" />
+    <sequenceFlow id="flow_start_to_check" sourceRef="start_data_load_monitoring" targetRef="check_batch_status" />
+    <serviceTask id="check_batch_status"
+                 name="Check batch status"
+                 flowable:delegateExpression="${dataLoadStatusDelegate}" />
+    <sequenceFlow id="flow_check_to_gateway" sourceRef="check_batch_status" targetRef="batch_status_gateway" />
+    <exclusiveGateway id="batch_status_gateway" name="Batch accepted?" />
+    <sequenceFlow id="flow_gateway_to_accepted" sourceRef="batch_status_gateway" targetRef="mark_batch_accepted">
+      <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${batchStatus == 'loaded'}
+      </conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_gateway_to_incident" sourceRef="batch_status_gateway" targetRef="create_data_load_incident">
+      <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${batchStatus == 'failed' || batchStatus == 'partial'}
+      </conditionExpression>
+    </sequenceFlow>
+    <userTask id="mark_batch_accepted"
+              name="Accept loaded batch"
+              flowable:candidateGroups="data-engineering,data-owner" />
+    <sequenceFlow id="flow_accepted_to_end" sourceRef="mark_batch_accepted" targetRef="end_data_load_accepted" />
+    <userTask id="create_data_load_incident"
+              name="Create data load incident"
+              flowable:candidateGroups="data-engineering" />
+    <sequenceFlow id="flow_incident_to_end" sourceRef="create_data_load_incident" targetRef="end_data_load_incident" />
+    <endEvent id="end_data_load_accepted" name="Batch accepted" />
+    <endEvent id="end_data_load_incident" name="Incident created" />
+  </process>
+</definitions>

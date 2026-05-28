@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_data_load_dmn"
+             name="OPEN FNR Data Load Decisions"
+             namespace="https://open-fnr.local/decisions/data-ingestion">
+  <decision id="data_load_severity_decision" name="Data Load Severity Decision">
+    <decisionTable id="data_load_severity_table" hitPolicy="FIRST">
+      <input id="input_status" label="status">
+        <inputExpression id="input_status_expression" typeRef="string">
+          <text>status</text>
+        </inputExpression>
+      </input>
+      <input id="input_row_gap_pct" label="row_gap_pct">
+        <inputExpression id="input_row_gap_expression" typeRef="number">
+          <text>row_gap_pct</text>
+        </inputExpression>
+      </input>
+      <output id="output_severity" label="severity" name="severity" typeRef="string" />
+      <rule id="rule_failed">
+        <inputEntry id="rule_failed_status"><text>"failed"</text></inputEntry>
+        <inputEntry id="rule_failed_gap"><text>-</text></inputEntry>
+        <outputEntry id="rule_failed_output"><text>"blocker"</text></outputEntry>
+      </rule>
+      <rule id="rule_partial_high_gap">
+        <inputEntry id="rule_partial_status"><text>"partial"</text></inputEntry>
+        <inputEntry id="rule_partial_gap"><text>&gt; 5</text></inputEntry>
+        <outputEntry id="rule_partial_output"><text>"error"</text></outputEntry>
+      </rule>
+      <rule id="rule_loaded">
+        <inputEntry id="rule_loaded_status"><text>"loaded"</text></inputEntry>
+        <inputEntry id="rule_loaded_gap"><text>-</text></inputEntry>
+        <outputEntry id="rule_loaded_output"><text>"info"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 0 implementation is complete.
+Sprint 1 implementation is complete.
 
 ## Local Infrastructure
 
@@ -29,9 +29,18 @@ Known local URLs:
 - Encoding quality gate: `tests/quality/test_text_encoding.py`.
 - Dev helper scripts: `scripts/dev`.
 
+## Sprint 1 Artifacts
+
+- Canonical ingestion contracts: `apps/backend/open_fnr_api/data_contracts.py`.
+- Ingestion status API: `apps/backend/open_fnr_api/ingestion.py`.
+- Data ingestion process artifacts: `processes/data-ingestion`.
+- Airflow DAG skeleton: `orchestration/airflow/dags/daily_ingestion.py`.
+- Dev SQL metadata/staging tables: `infra/dev/postgres/init/001_open_fnr.sql`, `infra/dev/clickhouse/init/001_open_fnr.sql`.
+- UI Data Load Status section: `apps/frontend/src/main.tsx`, `apps/frontend/src/styles.css`.
+
 ## Verification
 
-- `python -m pytest` -> 6 passed.
+- `python -m pytest` -> 14 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -39,4 +48,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 0 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 1.
+Commit Sprint 1 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 2.
