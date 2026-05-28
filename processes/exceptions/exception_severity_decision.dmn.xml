@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/exceptions" name="exception_severity_decision">
+  <decision id="exception_severity_decision" name="Exception severity decision">
+    <decisionTable id="exception_severity_table" hitPolicy="FIRST">
+      <input id="input_type" label="exception_type">
+        <inputExpression id="input_type_expr" typeRef="string"><text>exception_type</text></inputExpression>
+      </input>
+      <input id="input_impact" label="impact_qty">
+        <inputExpression id="input_impact_expr" typeRef="number"><text>impact_qty</text></inputExpression>
+      </input>
+      <output id="output_severity" label="severity" name="severity" typeRef="string" />
+      <rule id="rule_promo_critical">
+        <inputEntry id="rule_promo_critical_type"><text>"promo_shortage_risk"</text></inputEntry>
+        <inputEntry id="rule_promo_critical_impact"><text>-</text></inputEntry>
+        <outputEntry id="rule_promo_critical_severity"><text>"critical"</text></outputEntry>
+      </rule>
+      <rule id="rule_high">
+        <inputEntry id="rule_high_type"><text>-</text></inputEntry>
+        <inputEntry id="rule_high_impact"><text>&gt;= 100</text></inputEntry>
+        <outputEntry id="rule_high_severity"><text>"high"</text></outputEntry>
+      </rule>
+      <rule id="rule_medium">
+        <inputEntry id="rule_medium_type"><text>-</text></inputEntry>
+        <inputEntry id="rule_medium_impact"><text>&gt;= 10</text></inputEntry>
+        <outputEntry id="rule_medium_severity"><text>"medium"</text></outputEntry>
+      </rule>
+      <rule id="rule_low">
+        <inputEntry id="rule_low_type"><text>-</text></inputEntry>
+        <inputEntry id="rule_low_impact"><text>-</text></inputEntry>
+        <outputEntry id="rule_low_severity"><text>"low"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

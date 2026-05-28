@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/exceptions">
+  <process id="exception_escalation_process" name="Exception escalation process" isExecutable="true">
+    <startEvent id="start_exception_created" name="Exception created" />
+    <sequenceFlow id="flow_start_to_severity" sourceRef="start_exception_created" targetRef="decide_exception_severity" />
+    <businessRuleTask id="decide_exception_severity" name="Decide exception severity" />
+    <sequenceFlow id="flow_severity_to_owner" sourceRef="decide_exception_severity" targetRef="route_exception_owner" />
+    <businessRuleTask id="route_exception_owner" name="Route exception owner" />
+    <sequenceFlow id="flow_owner_to_review" sourceRef="route_exception_owner" targetRef="review_exception" />
+    <userTask id="review_exception" name="Review exception" />
+    <sequenceFlow id="flow_review_to_gateway" sourceRef="review_exception" targetRef="exception_action_gateway" />
+    <exclusiveGateway id="exception_action_gateway" name="Exception action" />
+    <sequenceFlow id="flow_resolve" sourceRef="exception_action_gateway" targetRef="resolve_exception" />
+    <sequenceFlow id="flow_ignore" sourceRef="exception_action_gateway" targetRef="ignore_exception" />
+    <sequenceFlow id="flow_escalate" sourceRef="exception_action_gateway" targetRef="escalate_exception" />
+    <serviceTask id="resolve_exception" name="Resolve exception" />
+    <serviceTask id="ignore_exception" name="Ignore exception" />
+    <userTask id="escalate_exception" name="Escalate exception" />
+    <sequenceFlow id="flow_resolve_to_end" sourceRef="resolve_exception" targetRef="end_resolved" />
+    <sequenceFlow id="flow_ignore_to_end" sourceRef="ignore_exception" targetRef="end_ignored" />
+    <sequenceFlow id="flow_escalate_to_end" sourceRef="escalate_exception" targetRef="end_escalated" />
+    <endEvent id="end_resolved" name="Exception resolved" />
+    <endEvent id="end_ignored" name="Exception ignored" />
+    <endEvent id="end_escalated" name="Exception escalated" />
+  </process>
+</definitions>

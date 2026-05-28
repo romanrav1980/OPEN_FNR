@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/exceptions">
+  <case id="generic_exception_case" name="Generic exception case">
+    <casePlanModel id="generic_exception_plan" name="Generic exception plan">
+      <humanTask id="take_exception" name="Take exception" />
+      <humanTask id="investigate_exception" name="Investigate exception" />
+      <humanTask id="resolve_exception" name="Resolve exception" />
+      <humanTask id="ignore_exception" name="Ignore exception" />
+      <humanTask id="escalate_exception" name="Escalate exception" />
+    </casePlanModel>
+  </case>
+</definitions>

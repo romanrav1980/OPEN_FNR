@@ -319,3 +319,33 @@ def test_order_exception_case_is_parseable() -> None:
     assert "Review order exception" in human_task_names
     assert "Approve large adjustment" in human_task_names
     assert "Prepare async export" in human_task_names
+
+
+def test_exception_center_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/exceptions/exception_severity_decision.dmn.xml", "exception_severity_decision"),
+        ("processes/exceptions/exception_owner_routing.dmn.xml", "exception_owner_routing"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_generic_exception_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/exceptions/generic_exception_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "generic_exception_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Take exception" in human_task_names
+    assert "Investigate exception" in human_task_names
+    assert "Resolve exception" in human_task_names
+    assert "Ignore exception" in human_task_names
+    assert "Escalate exception" in human_task_names

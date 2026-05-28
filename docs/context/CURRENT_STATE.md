@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 13 implementation is complete.
+Sprint 14 implementation is complete.
 
 ## Local Infrastructure
 
@@ -152,9 +152,20 @@ Known local URLs:
 - UI Replenishment Workbench section with filters, final orders, adjustment preview, actions and audit trail.
 - HTML test report with screenshot: `docs/test-reports/sprint-13-replenishment-workbench-v1/index.html`.
 
+## Sprint 14 Artifacts
+
+- Exception Center API: `apps/backend/open_fnr_api/exceptions.py`.
+- Exception Center tests: `tests/backend/test_exceptions.py`.
+- Exception escalation BPMN: `processes/exceptions/exception_escalation_process.bpmn20.xml`.
+- Exception severity DMN: `processes/exceptions/exception_severity_decision.dmn.xml`.
+- Exception owner routing DMN: `processes/exceptions/exception_owner_routing.dmn.xml`.
+- Generic exception CMMN: `processes/exceptions/generic_exception_case.cmmn.xml`.
+- UI Exception Center section with filters, linked objects, recommended actions, action panel and audit trail.
+- HTML test report with screenshot: `docs/test-reports/sprint-14-exception-center-v1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 101 passed.
+- `python -m pytest` -> 109 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -162,4 +173,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 13 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 14: Exception Center V1.
+Commit Sprint 14 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 15: Manual Adjustments Framework.

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/exceptions" name="exception_owner_routing">
+  <decision id="exception_owner_routing" name="Exception owner routing">
+    <decisionTable id="exception_owner_routing_table" hitPolicy="FIRST">
+      <input id="input_type" label="exception_type">
+        <inputExpression id="input_type_expr" typeRef="string"><text>exception_type</text></inputExpression>
+      </input>
+      <output id="output_owner" label="owner_role" name="owner_role" typeRef="string" />
+      <rule id="rule_replenishment">
+        <inputEntry id="rule_replenishment_type"><text>"stock_out_risk","overstock_risk","supplier_constraint"</text></inputEntry>
+        <outputEntry id="rule_replenishment_owner"><text>"Replenishment Planner"</text></outputEntry>
+      </rule>
+      <rule id="rule_promo">
+        <inputEntry id="rule_promo_type"><text>"promo_shortage_risk"</text></inputEntry>
+        <outputEntry id="rule_promo_owner"><text>"Supply Chain Manager"</text></outputEntry>
+      </rule>
+      <rule id="rule_dq">
+        <inputEntry id="rule_dq_type"><text>"data_quality"</text></inputEntry>
+        <outputEntry id="rule_dq_owner"><text>"Data Owner"</text></outputEntry>
+      </rule>
+      <rule id="rule_forecast">
+        <inputEntry id="rule_forecast_type"><text>"forecast_anomaly"</text></inputEntry>
+        <outputEntry id="rule_forecast_owner"><text>"Forecast Planner"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

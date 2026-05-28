@@ -16,6 +16,7 @@ PROMO_PLANNING_PROCESS_PATH = Path("processes/promo/promo_planning_process.bpmn2
 REPLENISHMENT_APPROVAL_PROCESS_PATH = Path("processes/process-engine/replenishment_approval_process.bpmn20.xml")
 REPLENISHMENT_CALCULATION_PROCESS_PATH = Path("processes/replenishment/replenishment_calculation_process.bpmn20.xml")
 ORDER_PROPOSAL_PROCESS_PATH = Path("processes/replenishment/order_proposal_generation_process.bpmn20.xml")
+EXCEPTION_ESCALATION_PROCESS_PATH = Path("processes/exceptions/exception_escalation_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -259,3 +260,29 @@ def test_order_proposal_bpmn_generates_explainable_proposals() -> None:
     assert "Evaluate auto approval" in business_rule_names
     assert "Review order proposal" in user_task_names
     assert "Open supplier constraint case" in user_task_names
+
+
+def test_exception_escalation_bpmn_routes_and_closes_exceptions() -> None:
+    tree = ElementTree.parse(EXCEPTION_ESCALATION_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "exception_escalation_process"
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    assert "Decide exception severity" in business_rule_names
+    assert "Route exception owner" in business_rule_names
+    assert "Review exception" in user_task_names
+    assert "Escalate exception" in user_task_names
+    assert "Resolve exception" in service_task_names
+    assert "Ignore exception" in service_task_names

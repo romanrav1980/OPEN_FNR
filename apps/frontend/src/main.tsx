@@ -252,6 +252,44 @@ const orderAudit = [
   { time: "06:00", actor: "Replenishment Planner", event: "adjusted", oldQty: 276, newQty: 300, reason: "cover promo stock-out" },
 ];
 
+const exceptionItems = [
+  {
+    id: "exc-stockout-20260528-001",
+    type: "stock_out_risk",
+    severity: "high",
+    status: "new",
+    owner: "Replenishment Planner",
+    title: "Projected stock-out on promo start",
+    action: "Raise final order before cutoff",
+    linked: "projection-20260528-s001-sku001, order-proposal-20260528-s001-sku001",
+  },
+  {
+    id: "exc-promo-shortage-20260528-001",
+    type: "promo_shortage_risk",
+    severity: "critical",
+    status: "escalated",
+    owner: "Supply Chain Manager",
+    title: "Promo supply shortage risk",
+    action: "Approve mitigation plan",
+    linked: "promo-20260601-fresh-001",
+  },
+  {
+    id: "exc-supplier-20260528-001",
+    type: "supplier_constraint",
+    severity: "medium",
+    status: "in_review",
+    owner: "Replenishment Planner",
+    title: "Supplier calendar closed",
+    action: "Find alternative supplier",
+    linked: "order-proposal-20260528-s001-sku003",
+  },
+];
+
+const exceptionAudit = [
+  { time: "05:20", actor: "Replenishment Planner", action: "take", reason: "supplier calendar issue" },
+  { time: "14:00", actor: "Replenishment Planner", action: "resolve", reason: "order adjusted" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1106,6 +1144,109 @@ function App() {
                     <td>{event.event}</td>
                     <td>{event.oldQty}</td>
                     <td>{event.newQty}</td>
+                    <td>{event.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Exception center">
+        <div className="section-heading">
+          <h2>Exception Center</h2>
+          <p>Unified exception workspace with owners, SLA, linked objects and audited actions</p>
+        </div>
+        <div className="filter-bar" aria-label="Exception filters">
+          <label>
+            Type
+            <input value="All risks" readOnly />
+          </label>
+          <label>
+            Severity
+            <input value="Critical + high" readOnly />
+          </label>
+          <label>
+            Owner
+            <input value="My teams" readOnly />
+          </label>
+          <label>
+            Status
+            <input value="New + in review + escalated" readOnly />
+          </label>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Selected Exception</span>
+            <strong>Projected stock-out on promo start</strong>
+            <p>Owner Replenishment Planner, SLA 2026-05-28 14:30, linked to projection and order proposal.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Recommended Action</span>
+            <strong>Raise final order before cutoff</strong>
+            <p>Resolving this exception requires an audited comment and linked final order change.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Exception</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>Recommended action</th>
+                <th>Linked objects</th>
+              </tr>
+            </thead>
+            <tbody>
+              {exceptionItems.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.title}</td>
+                  <td>{item.type}</td>
+                  <td>{item.severity}</td>
+                  <td>{item.status}</td>
+                  <td>{item.owner}</td>
+                  <td>{item.action}</td>
+                  <td>{item.linked}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Action Panel</span>
+            <h3>Resolve stock-out exception</h3>
+            <p>
+              The owner can take, resolve, ignore or escalate an exception. Every action
+              requires a reason and comment, and creates an audit event.
+            </p>
+            <div className="action-row">
+              <button type="button">Take</button>
+              <button type="button">Resolve</button>
+              <button type="button">Ignore</button>
+              <button type="button">Escalate</button>
+            </div>
+          </aside>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {exceptionAudit.map((event) => (
+                  <tr key={`${event.time}-${event.action}`}>
+                    <td>{event.time}</td>
+                    <td>{event.actor}</td>
+                    <td>{event.action}</td>
                     <td>{event.reason}</td>
                   </tr>
                 ))}

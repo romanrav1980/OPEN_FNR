@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .config import settings
 from .data_quality import router as data_quality_router
+from .exceptions import router as exceptions_router
 from .feature_mart import router as feature_mart_router
 from .forecast import router as forecast_router
 from .ml_models import router as ml_models_router
@@ -19,6 +20,7 @@ app = FastAPI(
 
 app.include_router(ingestion_router)
 app.include_router(data_quality_router)
+app.include_router(exceptions_router)
 app.include_router(feature_mart_router)
 app.include_router(forecast_router)
 app.include_router(ml_models_router)

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 14 - Exception Center V1</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      main { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+      section { border: 1px solid var(--border); background: var(--panel); margin-top: 20px; padding: 20px; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-bottom: 12px; color: var(--red-light); font-size: 20px; }
+      h3 { margin: 16px 0 8px; font-size: 16px; }
+      p, li, td, th { line-height: 1.55; }
+      .subtitle { margin-top: 8px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .shot { width: 100%; border: 1px solid var(--border); margin-top: 12px; }
+      code { color: var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 14: Exception Center V1</h1>
+        <p class="subtitle">
+          Аннотация: тестируем единый центр исключений: stock-out, promo shortage,
+          supplier constraint и DQ incidents с владельцами, SLA, recommended action,
+          linked objects, CMMN lifecycle и audit каждого действия.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем блок <code>Exception Center</code>.</li>
+          <li>Проверяем фильтры Type, Severity, Owner, Status.</li>
+          <li>Проверяем список исключений: type, severity, status, owner, recommended action.</li>
+          <li>Проверяем linked objects: projection, order proposal, promo, DQ incident.</li>
+          <li>Открываем action panel и проверяем Take, Resolve, Ignore, Escalate.</li>
+          <li>Проверяем audit table: actor, action, reason.</li>
+        </ol>
+        <img class="shot" src="screenshots/exception-center-v1.png" alt="Exception Center V1" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Зачем</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Система создает exception из linked object.</td>
+              <td>Исключение должно быть связано с прогнозом, промо, заказом или DQ.</td>
+              <td class="ok">Linked objects проверены.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>DMN определяет severity.</td>
+              <td>SLA и приоритет зависят от типа и impact.</td>
+              <td class="ok">Critical/high/medium/low работают.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>DMN назначает owner role.</td>
+              <td>Исключение должно попасть правильной команде.</td>
+              <td class="ok">Owner routing проверен.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Owner берет exception в работу.</td>
+              <td>Статус меняется на in_review, фиксируется actor.</td>
+              <td class="ok">Action API работает.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Owner resolve/ignore/escalate с reason/comment.</td>
+              <td>Каждое решение должно быть аудируемым.</td>
+              <td class="ok">Audit event создается.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Wrong role пытается закрыть exception.</td>
+              <td>Проверяем owner/scope based visibility.</td>
+              <td class="ok">HTTP 403.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">109 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
