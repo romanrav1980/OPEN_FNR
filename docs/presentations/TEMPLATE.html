@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Block Presentation</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1200px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+      }
+
+      section {
+        min-height: 70vh;
+        border-bottom: 1px solid var(--border);
+        padding: 36px 0;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 42px;
+        line-height: 1.1;
+      }
+
+      h2 {
+        font-size: 30px;
+      }
+
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+
+      code {
+        color: #f6d6dc;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <p class="eyebrow">OPEN FNR / Sprint Block</p>
+        <h1>Название блока</h1>
+        <p>Кратко: какую бизнес-проблему закрывает блок.</p>
+      </section>
+
+      <section>
+        <h2>Назначение модуля</h2>
+        <div class="grid">
+          <article class="panel">
+            <h3>Для пользователей</h3>
+            <p>Что пользователь делает и какой результат получает.</p>
+          </article>
+          <article class="panel">
+            <h3>Для разработчиков</h3>
+            <p>Где живёт код, данные, API, процессы и тесты.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Структура модуля</h2>
+        <p>Backend, UI, data, storage, process engine, integrations.</p>
+      </section>
+
+      <section>
+        <h2>Бизнес-процессы</h2>
+        <p>BPMN, DMN, CMMN, роли, статусы, переходы, SLA, audit trail.</p>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <p>Добавить реальные скриншоты рабочих сценариев.</p>
+      </section>
+
+      <section>
+        <h2>Тестирование и следующие шаги</h2>
+        <p>Ссылки на test reports, ограничения и план следующего блока.</p>
+      </section>
+    </main>
+  </body>
+</html>

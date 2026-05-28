@@ -10,3 +10,6 @@ Each report must include:
 - references to automated checks;
 - screenshots for UI-visible behavior;
 - conclusion and known gaps.
+
+Major sprint blocks also require a separate user/developer HTML presentation in
+`docs/presentations/<block-name>/index.html`.
