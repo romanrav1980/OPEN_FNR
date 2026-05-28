@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/processes/store-management">
+  <process id="store_task_process" name="Store task process" isExecutable="true">
+    <startEvent id="start_low_confidence_inventory" name="Low confidence inventory detected" />
+    <serviceTask id="calculate_virtual_stock" name="Calculate virtual stock" />
+    <businessRuleTask id="evaluate_true_inventory_confidence" name="Evaluate true inventory confidence" />
+    <businessRuleTask id="prioritize_store_task" name="Prioritize store task" />
+    <userTask id="complete_store_check" name="Complete store check" />
+    <userTask id="confirm_promo_display" name="Confirm promo display" />
+    <serviceTask id="apply_stock_feedback" name="Apply stock feedback" />
+    <serviceTask id="write_store_audit" name="Write store audit" />
+    <endEvent id="end_store_task_closed" name="Store task closed" />
+    <sequenceFlow id="flow_1" sourceRef="start_low_confidence_inventory" targetRef="calculate_virtual_stock" />
+    <sequenceFlow id="flow_2" sourceRef="calculate_virtual_stock" targetRef="evaluate_true_inventory_confidence" />
+    <sequenceFlow id="flow_3" sourceRef="evaluate_true_inventory_confidence" targetRef="prioritize_store_task" />
+    <sequenceFlow id="flow_4" sourceRef="prioritize_store_task" targetRef="complete_store_check" />
+    <sequenceFlow id="flow_5" sourceRef="complete_store_check" targetRef="confirm_promo_display" />
+    <sequenceFlow id="flow_6" sourceRef="confirm_promo_display" targetRef="apply_stock_feedback" />
+    <sequenceFlow id="flow_7" sourceRef="apply_stock_feedback" targetRef="write_store_audit" />
+    <sequenceFlow id="flow_8" sourceRef="write_store_audit" targetRef="end_store_task_closed" />
+  </process>
+</definitions>

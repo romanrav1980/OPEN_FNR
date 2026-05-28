@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 35 implementation is complete.
+Sprint 36 implementation is complete.
 
 ## Local Infrastructure
 
@@ -396,9 +396,21 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - UI Supplier Collaboration section with forecast share, supplier confirmation, performance and exception actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-35-supplier-collaboration/index.html`.
 
+## Sprint 36 Artifacts
+
+- Store Management API: `apps/backend/open_fnr_api/store_management.py`.
+- Store Management tests: `tests/backend/test_store_management.py`.
+- Store management process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Store task BPMN: `processes/store-management/store_task_process.bpmn20.xml`.
+- True inventory confidence DMN: `processes/store-management/true_inventory_confidence_decision.dmn.xml`.
+- Store task priority DMN: `processes/store-management/store_task_priority_decision.dmn.xml`.
+- Inventory mismatch CMMN: `processes/store-management/inventory_mismatch_case.cmmn.xml`.
+- UI True Inventory And Store Management section with virtual stock, confidence, store tasks and feedback audit.
+- HTML test report with screenshot: `docs/test-reports/sprint-36-true-inventory-store-management/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 283 passed.
+- `python -m pytest` -> 290 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -406,4 +418,4 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Commit Sprint 35 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 36: True Inventory And Store Management.
+Commit Sprint 36 checkpoint to `romanrav1980/OPEN_FNR`, then prepare final block presentation for extended coverage sprints.

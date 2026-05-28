@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPEN FNR Sprint 36 - True Inventory And Store Management</title>
+  <style>
+    :root { --bg:#1f1f1f; --panel:#252526; --panel2:#2d2d30; --text:#f3f3f3; --muted:#b7b7b7; --red:#b91c1c; --line:#3c3c3c; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:"Segoe UI", Arial, sans-serif; line-height:1.55; }
+    header, section { max-width:1180px; margin:0 auto; padding:28px; }
+    header { border-bottom:4px solid var(--red); background:linear-gradient(90deg,#252526,#1f1f1f); }
+    h1,h2,h3 { margin:0 0 12px; font-weight:650; }
+    p { margin:0 0 14px; color:var(--muted); }
+    .badge { display:inline-block; margin-bottom:14px; padding:4px 10px; border:1px solid var(--red); color:#fecaca; background:rgba(185,28,28,.14); border-radius:6px; font-size:13px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px; }
+    table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); margin-top:12px; }
+    th,td { padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; font-size:14px; }
+    th { color:#fecaca; background:var(--panel2); }
+    .ok { color:#86efac; font-weight:650; }
+    img { width:100%; border:1px solid var(--line); border-radius:8px; background:#111; }
+    code { color:#fecaca; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Sprint 36 / True Inventory And Store Management</span>
+    <h1>OPEN FNR - отчет по true inventory и задачам магазина</h1>
+    <p>
+      Тестируем расчет виртуального остатка, confidence score, создание задачи магазина,
+      подтверждение промо-выкладки, завершение задачи с counted qty/comment/photo placeholder
+      и влияние store feedback на quality flags.
+    </p>
+  </header>
+
+  <section>
+    <h2>Что и зачем тестируем</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>True Inventory</h3>
+        <p>Проверяем расчет virtual stock из system stock, POS movements, deliveries и corrections.</p>
+      </div>
+      <div class="card">
+        <h3>Store Task Loop</h3>
+        <p>Проверяем, что низкая уверенность остатка создает задачу магазина и возвращает корректирующую обратную связь.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>UI-тестирование по шагам</h2>
+    <table>
+      <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Открываем True Inventory And Store Management.</td><td>Проверяем доступность рабочего места магазина.</td><td>Видны virtual stock, confidence и store tasks.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>2</td><td>Проверяем расчет S001/SKU001.</td><td>Планировщик должен понимать происхождение виртуального остатка.</td><td>System 120, movements 72, corrections -8, virtual 40.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>3</td><td>Проверяем task list.</td><td>Магазин должен видеть stock check и promo display confirmation.</td><td>Две задачи со SLA и инструкциями отображаются.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>4</td><td>Проверяем completion actions.</td><td>Пользователь должен закрыть задачу с count/comment/photo placeholder.</td><td>Open task, Submit count, Confirm display видны.</td><td class="ok">Пройдено.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Тестирование бизнес-процессов</h2>
+    <table>
+      <thead><tr><th>Процессный шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+      <tbody>
+        <tr><td>Calculate virtual stock</td><td>Считаем остаток из движений, поставок и корректировок.</td><td>True inventory должен объяснять источник значения.</td><td>API и unit test возвращают 40.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Evaluate confidence</td><td>DMN определяет low confidence.</td><td>Задачи магазина создаются правилом, а не hardcode.</td><td>DMN parseable, low confidence rule есть.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Prioritize store task</td><td>DMN задает priority и SLA.</td><td>Задачи магазина должны сортироваться по риску.</td><td>High stock check и medium display rules есть.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Complete store check</td><td>Store Operations отправляет counted qty 38.</td><td>Факт магазина должен корректировать quality flag.</td><td>Статус corrected, quality_flag store_feedback_received.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Inventory mismatch case</td><td>CMMN ведет input review, count, correction approval, closure.</td><td>Расхождение остатка требует управляемого кейса.</td><td>CMMN tasks присутствуют.</td><td class="ok">Пройдено.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Автоматические проверки</h2>
+    <table>
+      <thead><tr><th>Проверка</th><th>Команда</th><th>Результат</th></tr></thead>
+      <tbody>
+        <tr><td>Backend, process, data, quality tests</td><td><code>python -m pytest</code></td><td class="ok">290 passed</td></tr>
+        <tr><td>Frontend production build</td><td><code>npm.cmd run build</code></td><td class="ok">completed</td></tr>
+        <tr><td>UI screenshot</td><td><code>npx.cmd playwright screenshot</code></td><td class="ok">true-inventory-store-management.png создан</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Скриншот</h2>
+    <p>Скриншот показывает True Inventory And Store Management в общем UI OPEN FNR.</p>
+    <img src="screenshots/true-inventory-store-management.png" alt="True Inventory And Store Management screenshot">
+  </section>
+</body>
+</html>

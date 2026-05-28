@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  id="store_task_priority_definitions"
+  name="Store task priority"
+  namespace="https://open-fnr.local/processes/store-management">
+  <decision id="store_task_priority_decision" name="Store task priority decision">
+    <decisionTable id="store_task_priority_table" hitPolicy="FIRST">
+      <input id="input_task_type" label="Task type">
+        <inputExpression id="input_task_type_expr" typeRef="string">
+          <text>task_type</text>
+        </inputExpression>
+      </input>
+      <input id="input_stockout_risk" label="Stock-out risk">
+        <inputExpression id="input_stockout_risk_expr" typeRef="boolean">
+          <text>stockout_risk</text>
+        </inputExpression>
+      </input>
+      <output id="output_priority" name="priority" typeRef="string" />
+      <output id="output_sla" name="sla_hours" typeRef="number" />
+      <rule id="rule_stock_check_high">
+        <inputEntry id="rule_stock_check_high_input_1"><text>"stock_check"</text></inputEntry>
+        <inputEntry id="rule_stock_check_high_input_2"><text>true</text></inputEntry>
+        <outputEntry id="rule_stock_check_high_output_1"><text>"high"</text></outputEntry>
+        <outputEntry id="rule_stock_check_high_output_2"><text>4</text></outputEntry>
+      </rule>
+      <rule id="rule_display_medium">
+        <inputEntry id="rule_display_medium_input_1"><text>"promo_display_confirmation"</text></inputEntry>
+        <inputEntry id="rule_display_medium_input_2"><text>-</text></inputEntry>
+        <outputEntry id="rule_display_medium_output_1"><text>"medium"</text></outputEntry>
+        <outputEntry id="rule_display_medium_output_2"><text>6</text></outputEntry>
+      </rule>
+      <rule id="rule_default_low">
+        <inputEntry id="rule_default_low_input_1"><text>-</text></inputEntry>
+        <inputEntry id="rule_default_low_input_2"><text>-</text></inputEntry>
+        <outputEntry id="rule_default_low_output_1"><text>"low"</text></outputEntry>
+        <outputEntry id="rule_default_low_output_2"><text>24</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

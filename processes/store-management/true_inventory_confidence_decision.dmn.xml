@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  id="true_inventory_confidence_definitions"
+  name="True inventory confidence"
+  namespace="https://open-fnr.local/processes/store-management">
+  <decision id="true_inventory_confidence_decision" name="True inventory confidence decision">
+    <decisionTable id="true_inventory_confidence_table" hitPolicy="FIRST">
+      <input id="input_confidence" label="Confidence">
+        <inputExpression id="input_confidence_expr" typeRef="number">
+          <text>confidence</text>
+        </inputExpression>
+      </input>
+      <output id="output_status" name="status" typeRef="string" />
+      <output id="output_action" name="action" typeRef="string" />
+      <rule id="rule_low_confidence">
+        <inputEntry id="rule_low_confidence_input"><text>&lt; 0.7</text></inputEntry>
+        <outputEntry id="rule_low_confidence_output_1"><text>"low_confidence"</text></outputEntry>
+        <outputEntry id="rule_low_confidence_output_2"><text>"create_store_task"</text></outputEntry>
+      </rule>
+      <rule id="rule_accepted">
+        <inputEntry id="rule_accepted_input"><text>&gt;= 0.7</text></inputEntry>
+        <outputEntry id="rule_accepted_output_1"><text>"calculated"</text></outputEntry>
+        <outputEntry id="rule_accepted_output_2"><text>"no_action"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

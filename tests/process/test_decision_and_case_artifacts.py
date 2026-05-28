@@ -1005,3 +1005,32 @@ def test_supplier_shortage_case_has_confirmation_mitigation_and_resolution_tasks
     assert "Request supplier reconfirmation" in human_task_names
     assert "Approve supply mitigation" in human_task_names
     assert "Confirm supplier resolution" in human_task_names
+
+
+def test_true_inventory_and_store_task_priority_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/store-management/true_inventory_confidence_decision.dmn.xml", "true_inventory_confidence_decision"),
+        ("processes/store-management/store_task_priority_decision.dmn.xml", "store_task_priority_decision"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_inventory_mismatch_case_has_input_count_correction_and_closure_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/store-management/inventory_mismatch_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "inventory_mismatch_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review virtual stock inputs" in human_task_names
+    assert "Perform store count" in human_task_names
+    assert "Approve stock correction" in human_task_names
+    assert "Confirm feedback closure" in human_task_names

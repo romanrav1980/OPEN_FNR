@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/processes/store-management">
+  <case id="inventory_mismatch_case" name="Inventory mismatch case">
+    <casePlanModel id="inventory_mismatch_case_plan" name="Inventory mismatch case plan">
+      <humanTask id="review_virtual_stock_inputs" name="Review virtual stock inputs" />
+      <humanTask id="perform_store_count" name="Perform store count" />
+      <humanTask id="approve_stock_correction" name="Approve stock correction" />
+      <humanTask id="confirm_feedback_closure" name="Confirm feedback closure" />
+    </casePlanModel>
+  </case>
+</definitions>

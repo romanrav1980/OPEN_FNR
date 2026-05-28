@@ -39,6 +39,7 @@ SHELF_SPACE_REVIEW_PROCESS_PATH = Path("processes/shelf-space/shelf_space_review
 CAPACITY_SMOOTHING_PROCESS_PATH = Path("processes/capacity/capacity_smoothing_process.bpmn20.xml")
 DIAGNOSTIC_INSIGHT_REVIEW_PROCESS_PATH = Path("processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml")
 SUPPLIER_COLLABORATION_PROCESS_PATH = Path("processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml")
+STORE_TASK_PROCESS_PATH = Path("processes/store-management/store_task_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -986,3 +987,30 @@ def test_supplier_collaboration_bpmn_covers_forecast_share_confirmation_risk_and
     assert "Supplier confirm forecast" in user_task_names
     assert "Review supply exception" in user_task_names
     assert "Supplier risk reported?" in gateway_names
+
+
+def test_store_task_bpmn_covers_virtual_stock_store_check_display_feedback_and_audit_paths() -> None:
+    tree = ElementTree.parse(STORE_TASK_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "store_task_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    assert "Calculate virtual stock" in service_task_names
+    assert "Apply stock feedback" in service_task_names
+    assert "Write store audit" in service_task_names
+    assert "Evaluate true inventory confidence" in business_rule_names
+    assert "Prioritize store task" in business_rule_names
+    assert "Complete store check" in user_task_names
+    assert "Confirm promo display" in user_task_names

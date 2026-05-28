@@ -810,6 +810,50 @@ const supplierConfirmationRows = [
   },
 ];
 
+const trueInventoryRows = [
+  {
+    store: "S001",
+    sku: "SKU001",
+    system: 120,
+    movements: 72,
+    deliveries: 0,
+    corrections: -8,
+    virtual: 40,
+    confidence: "0.58",
+    status: "low_confidence",
+  },
+];
+
+const storeTaskRows = [
+  {
+    task: "store-task-stock-s001-sku001",
+    type: "stock_check",
+    priority: "high",
+    status: "task_created",
+    sla: "2026-06-02 12:00",
+    instruction: "Count shelf and backroom stock",
+  },
+  {
+    task: "store-task-display-s001-sku001",
+    type: "promo_display_confirmation",
+    priority: "medium",
+    status: "task_created",
+    sla: "2026-06-02 10:00",
+    instruction: "Confirm promo display is installed",
+  },
+];
+
+const storeFeedbackRows = [
+  {
+    task: "store-task-stock-s001-sku001",
+    counted: 38,
+    previous: 40,
+    result: "corrected",
+    quality: "store_feedback_received",
+    photo: "store-photo-placeholder-001",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -3782,6 +3826,131 @@ function App() {
             <h3>API/CSV package</h3>
             <p>
               Export package contains supplier, SKU, DC, horizon, order forecast, cutoff and idempotency key.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="True Inventory And Store Management">
+        <div className="section-heading">
+          <h2>True Inventory And Store Management</h2>
+          <p>Virtual stock, confidence score, store tasks, promo display confirmation and feedback audit</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>True Inventory</span>
+            <strong>S001 / SKU001 confidence 0.58</strong>
+            <p>Low confidence creates high-priority store stock check and correction suggestion.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Store Feedback</span>
+            <strong>Counted 38 vs virtual 40</strong>
+            <p>Store task completion updates quality flag and records optional photo placeholder.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Store</th>
+                <th>SKU</th>
+                <th>System</th>
+                <th>POS movements</th>
+                <th>Deliveries</th>
+                <th>Corrections</th>
+                <th>Virtual</th>
+                <th>Confidence</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trueInventoryRows.map((row) => (
+                <tr key={`${row.store}-${row.sku}`}>
+                  <td>{row.store}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.system}</td>
+                  <td>{row.movements}</td>
+                  <td>{row.deliveries}</td>
+                  <td>{row.corrections}</td>
+                  <td>{row.virtual}</td>
+                  <td>{row.confidence}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Type</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>SLA</th>
+                <th>Instruction</th>
+              </tr>
+            </thead>
+            <tbody>
+              {storeTaskRows.map((row) => (
+                <tr key={row.task}>
+                  <td>{row.task}</td>
+                  <td>{row.type}</td>
+                  <td>{row.priority}</td>
+                  <td>{row.status}</td>
+                  <td>{row.sla}</td>
+                  <td>{row.instruction}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Counted</th>
+                <th>Previous virtual</th>
+                <th>Result</th>
+                <th>Quality flag</th>
+                <th>Photo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {storeFeedbackRows.map((row) => (
+                <tr key={row.task}>
+                  <td>{row.task}</td>
+                  <td>{row.counted}</td>
+                  <td>{row.previous}</td>
+                  <td>{row.result}</td>
+                  <td>{row.quality}</td>
+                  <td>{row.photo}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Mobile Store Task</span>
+            <h3>Complete count and display confirmation</h3>
+            <p>
+              Store Operations sees only own store tasks, enters counted quantity,
+              optional photo placeholder and comment before closing the task.
+            </p>
+            <div className="action-row">
+              <button type="button">Open task</button>
+              <button type="button">Submit count</button>
+              <button type="button">Confirm display</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Inventory Data Owner</span>
+            <h3>Approve correction</h3>
+            <p>
+              Mismatch case records virtual stock inputs, store count, correction approval and feedback closure.
             </p>
           </aside>
         </div>
