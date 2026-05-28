@@ -121,6 +121,10 @@ The runner uses `OPEN_FNR_LANDING_ROOT_PATH` unless `-LandingRootPath` is provid
 | `source_batch_gate_decision.dmn.xml` | Decides publish/block/resend/recovery action based on schema, checksum and DQ status |
 | `source_batch_recovery_case.cmmn.xml` | Manages Data Owner recovery tasks: triage, source resend, reprocessing approval and clean publication confirmation |
 
+## Source Contract DQ Plans
+
+The API endpoint `/data-quality/source-contract-plans` exposes required blocker and warning checks for each pilot source contract. These plans are the bridge between source discovery, DQ execution and Process Engine recovery tasks.
+
 ## Acceptance Criteria
 
 - All source systems have signed contracts.
