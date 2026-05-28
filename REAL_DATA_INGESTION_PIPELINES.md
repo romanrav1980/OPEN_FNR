@@ -124,6 +124,12 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run-shadow-load.ps1 -Busine
 The runner uses `OPEN_FNR_LANDING_ROOT_PATH` unless `-LandingRootPath` is provided. It checks that every registered source contract has at least one supported source file before the validation stage begins.
 Local file-drop sources may include `manifest.json` sidecars in each `business_date=YYYY-MM-DD` directory. Sidecars carry source system, contract name, business date, row count, checksum, idempotency key and file list.
 
+For local pilot rehearsals a full source pack can be generated:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/generate-pilot-landing.ps1 -BusinessDate 2026-05-28 -LandingRootPath data/landing/pilot
+```
+
 The same gate is available through API:
 
 ```http

@@ -25,3 +25,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local smoke artifacts
+tmp/
