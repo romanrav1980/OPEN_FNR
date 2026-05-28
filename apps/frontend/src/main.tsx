@@ -725,6 +725,36 @@ const shelfValidationRows = [
   },
 ];
 
+const capacityCalendarRows = [
+  {
+    dc: "DC001",
+    date: "2026-06-02",
+    inbound: "12 400 / 10 000",
+    transport: "260 / 220",
+    receiving: "8 h",
+    status: "overload",
+  },
+];
+
+const capacityMoveRows = [
+  {
+    order: "po-001",
+    supplier: "SUP_FAST",
+    original: "2026-06-02",
+    proposed: "2026-06-03",
+    qty: "1 400",
+    priority: "medium",
+  },
+  {
+    order: "po-002",
+    supplier: "SUP_CHEAP",
+    original: "2026-06-02",
+    proposed: "2026-06-04",
+    qty: "1 000",
+    priority: "low",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -3372,6 +3402,99 @@ function App() {
             <h3>Store zone hierarchy</h3>
             <p>
               Planogram fields provide shelf capacity, display capacity, direct-to-shelf flag and zone filters.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Capacity Workbench">
+        <div className="section-heading">
+          <h2>Capacity Workbench</h2>
+          <p>DC, transport and store receiving capacity with workload smoothing preview</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Overload</span>
+            <strong>DC001 / 2026-06-02 overloaded</strong>
+            <p>Inbound plan exceeds receiving capacity by 2 400 units and transport by 40 pallets.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Smoothing</span>
+            <strong>Move 2 400 units</strong>
+            <p>Medium and low priority orders are shifted to the following available receiving days.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>DC</th>
+                <th>Date</th>
+                <th>Inbound planned / capacity</th>
+                <th>Transport planned / capacity</th>
+                <th>Receiving hours</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {capacityCalendarRows.map((row) => (
+                <tr key={`${row.dc}-${row.date}`}>
+                  <td>{row.dc}</td>
+                  <td>{row.date}</td>
+                  <td>{row.inbound}</td>
+                  <td>{row.transport}</td>
+                  <td>{row.receiving}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Supplier</th>
+                <th>Original date</th>
+                <th>Proposed date</th>
+                <th>Qty</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              {capacityMoveRows.map((row) => (
+                <tr key={row.order}>
+                  <td>{row.order}</td>
+                  <td>{row.supplier}</td>
+                  <td>{row.original}</td>
+                  <td>{row.proposed}</td>
+                  <td>{row.qty}</td>
+                  <td>{row.priority}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Review</span>
+            <h3>Approve capacity smoothing</h3>
+            <p>
+              Supply Chain Manager reviews affected orders, workload impact and audit reason
+              before publishing order moves.
+            </p>
+            <div className="action-row">
+              <button type="button">Filter week</button>
+              <button type="button">Approve moves</button>
+              <button type="button">Export to TMS</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">TMS Mock</span>
+            <h3>Idempotent capacity export</h3>
+            <p>
+              Export carries plan id, proposed delivery dates, moved quantities and idempotency key.
             </p>
           </aside>
         </div>

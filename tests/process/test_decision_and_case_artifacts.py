@@ -908,3 +908,32 @@ def test_shelf_capacity_exception_case_has_display_location_direct_shelf_and_aud
     assert "Adjust display location" in human_task_names
     assert "Approve direct-to-shelf" in human_task_names
     assert "Confirm shelf audit" in human_task_names
+
+
+def test_capacity_overload_and_order_shift_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/capacity/capacity_overload_decision.dmn.xml", "capacity_overload_decision"),
+        ("processes/capacity/order_shift_priority_decision.dmn.xml", "order_shift_priority_decision"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_capacity_overload_case_has_calendar_preview_approval_and_export_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/capacity/capacity_overload_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "capacity_overload_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review overload calendar" in human_task_names
+    assert "Review smoothing preview" in human_task_names
+    assert "Approve order moves" in human_task_names
+    assert "Confirm TMS export" in human_task_names

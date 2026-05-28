@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/capacity" name="capacity_overload_decision">
+  <decision id="capacity_overload_decision" name="Capacity overload decision">
+    <decisionTable id="capacity_overload_table" hitPolicy="FIRST">
+      <input id="input_planned_qty" label="planned_inbound_qty">
+        <inputExpression id="input_planned_expr" typeRef="number"><text>planned_inbound_qty</text></inputExpression>
+      </input>
+      <input id="input_capacity_qty" label="inbound_capacity_qty">
+        <inputExpression id="input_capacity_expr" typeRef="number"><text>inbound_capacity_qty</text></inputExpression>
+      </input>
+      <output id="output_status" label="status" name="status" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_overload">
+        <inputEntry id="rule_overload_planned"><text>&gt; inbound_capacity_qty</text></inputEntry>
+        <inputEntry id="rule_overload_capacity"><text>-</text></inputEntry>
+        <outputEntry id="rule_overload_status"><text>"overload"</text></outputEntry>
+        <outputEntry id="rule_overload_action"><text>"create smoothing preview"</text></outputEntry>
+      </rule>
+      <rule id="rule_ok">
+        <inputEntry id="rule_ok_planned"><text>-</text></inputEntry>
+        <inputEntry id="rule_ok_capacity"><text>-</text></inputEntry>
+        <outputEntry id="rule_ok_status"><text>"ok"</text></outputEntry>
+        <outputEntry id="rule_ok_action"><text>"publish capacity plan"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

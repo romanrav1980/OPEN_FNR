@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from .adjustments import router as adjustments_router
+from .capacity import router as capacity_router
 from .config import settings
 from .data_quality import router as data_quality_router
 from .data_scale import router as data_scale_router
@@ -37,6 +38,7 @@ app = FastAPI(
 
 app.include_router(ingestion_router)
 app.include_router(adjustments_router)
+app.include_router(capacity_router)
 app.include_router(data_quality_router)
 app.include_router(data_scale_router)
 app.include_router(exceptions_router)
@@ -85,6 +87,7 @@ def metadata() -> dict[str, object]:
         "version": settings.version,
         "modules": [
             "data-platform",
+            "capacity",
             "data-ingestion",
             "data-quality",
             "production-data-scale",

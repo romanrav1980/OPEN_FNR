@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPEN FNR Sprint 33 - Capacity And Workload</title>
+  <style>
+    :root {
+      --bg: #1f1f1f;
+      --panel: #252526;
+      --panel-2: #2d2d30;
+      --text: #f3f3f3;
+      --muted: #b7b7b7;
+      --red: #b91c1c;
+      --red-soft: #7f1d1d;
+      --line: #3c3c3c;
+      --green: #16a34a;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.55;
+    }
+    header, section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    header {
+      border-bottom: 4px solid var(--red);
+      background: linear-gradient(90deg, #252526, #1f1f1f);
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      font-weight: 650;
+    }
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+    .badge {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 4px 10px;
+      border: 1px solid var(--red);
+      color: #fecaca;
+      background: rgba(185, 28, 28, 0.14);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      color: #fecaca;
+      background: var(--panel-2);
+    }
+    .ok {
+      color: #86efac;
+      font-weight: 650;
+    }
+    img {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #111;
+    }
+    code {
+      color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Sprint 33 / Capacity And Workload</span>
+    <h1>OPEN FNR - отчет по UI и бизнес-процессам</h1>
+    <p>
+      Тестируем контур управления мощностями РЦ, транспорта и приемки магазина: система должна
+      найти перегрузку, предложить перенос заказов, показать affected orders, провести согласование
+      через Process Engine и подготовить идемпотентный экспорт в TMS.
+    </p>
+  </header>
+
+  <section>
+    <h2>Что и зачем тестируем</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>UI Capacity Workbench</h3>
+        <p>
+          Проверяем, что пользователь видит день перегрузки, план/лимит по inbound и transport,
+          список переносимых заказов, кнопки фильтрации, согласования и экспорта.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Бизнес-процесс smoothing</h3>
+        <p>
+          Проверяем, что BPMN/DMN/CMMN покрывают загрузку календаря мощностей, обнаружение
+          перегрузки, приоритизацию переносов, ручное согласование, audit trail и TMS export.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>UI-тестирование по шагам</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Шаг</th>
+          <th>Что делаем</th>
+          <th>Зачем</th>
+          <th>Ожидаемый результат</th>
+          <th>Полученный результат</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Открываем Dev Control Tower и прокручиваем до Capacity Workbench.</td>
+          <td>Проверить доступность нового экрана в общей навигационной ленте модулей.</td>
+          <td>Раздел присутствует, заголовок и summary-карточки читаются.</td>
+          <td class="ok">Пройдено: скриншот зафиксирован.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Проверяем календарь мощности DC001 на 2026-06-02.</td>
+          <td>Убедиться, что план/лимит отображаются вместе, чтобы перегрузка была объяснима.</td>
+          <td>Inbound 12 400 / 10 000, transport 260 / 220, status overload.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Проверяем список affected orders.</td>
+          <td>Планировщик должен видеть, какие заказы будут перенесены и на какие даты.</td>
+          <td>po-001 и po-002 имеют original/proposed date, qty и priority.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Проверяем действия Filter week, Approve moves, Export to TMS.</td>
+          <td>Экран должен поддерживать полный пользовательский сценарий согласования.</td>
+          <td>Кнопки отображаются в action panel.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Тестирование бизнес-процессов</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Процессный шаг</th>
+          <th>Что делаем</th>
+          <th>Почему так</th>
+          <th>Ожидаемый результат</th>
+          <th>Факт</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Load capacity calendar</td>
+          <td>Загружаем календарь мощности РЦ, транспорта и приемки.</td>
+          <td>Без календаря нельзя отличить нормальный план от перегрузки.</td>
+          <td>BPMN содержит service task загрузки календаря.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Detect capacity overload</td>
+          <td>Сравниваем planned inbound с capacity.</td>
+          <td>Перегрузка должна выявляться правилом, а не ручной догадкой.</td>
+          <td>DMN <code>capacity_overload_decision</code> доступен и parseable.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Prioritize order shifts</td>
+          <td>Оставляем high priority, переносим medium/low.</td>
+          <td>Сервисный риск важнее простого выравнивания нагрузки.</td>
+          <td>DMN <code>order_shift_priority_decision</code> доступен.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Create smoothing preview</td>
+          <td>Формируем список переносимых заказов и объем 2 400.</td>
+          <td>Пользователь должен увидеть последствия до утверждения.</td>
+          <td>API возвращает plan со статусом smoothing_proposed.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Approve order moves</td>
+          <td>Проверяем RBAC и audit reason.</td>
+          <td>Перенос поставок влияет на операции и должен быть согласован.</td>
+          <td>Viewer получает 403, Supply Chain Manager получает approved.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Confirm TMS export</td>
+          <td>Проверяем экспорт с idempotency key.</td>
+          <td>Повторная отправка не должна создавать дубликаты в TMS.</td>
+          <td>Экспорт содержит <code>capacity-plan-20260602-dc001:tms:v1</code>.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Автоматические проверки</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Проверка</th>
+          <th>Команда</th>
+          <th>Результат</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Backend, process, data, quality tests</td>
+          <td><code>python -m pytest</code></td>
+          <td class="ok">267 passed</td>
+        </tr>
+        <tr>
+          <td>Frontend production build</td>
+          <td><code>npm.cmd run build</code></td>
+          <td class="ok">completed</td>
+        </tr>
+        <tr>
+          <td>UI evidence screenshot</td>
+          <td><code>npx.cmd playwright screenshot</code></td>
+          <td class="ok">capacity-workbench.png создан</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Скриншот</h2>
+    <p>Скриншот показывает новый Capacity Workbench внутри общего UI OPEN FNR.</p>
+    <img src="screenshots/capacity-workbench.png" alt="Capacity Workbench screenshot">
+  </section>
+</body>
+</html>

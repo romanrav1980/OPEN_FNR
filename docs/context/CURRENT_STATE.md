@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 32 implementation is complete.
+Sprint 33 implementation is complete.
 
 ## Local Infrastructure
 
@@ -360,9 +360,21 @@ Known local URLs:
 - UI Shelf Space section with planogram, zone filters, display warnings and direct-to-shelf recommendation.
 - HTML test report with screenshot: `docs/test-reports/sprint-32-shelf-space-optimization/index.html`.
 
+## Sprint 33 Artifacts
+
+- Capacity API: `apps/backend/open_fnr_api/capacity.py`.
+- Capacity tests: `tests/backend/test_capacity.py`.
+- Capacity process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Capacity smoothing BPMN: `processes/capacity/capacity_smoothing_process.bpmn20.xml`.
+- Capacity overload DMN: `processes/capacity/capacity_overload_decision.dmn.xml`.
+- Order shift priority DMN: `processes/capacity/order_shift_priority_decision.dmn.xml`.
+- Capacity overload CMMN: `processes/capacity/capacity_overload_case.cmmn.xml`.
+- UI Capacity Workbench section with overload calendar, smoothing preview, affected orders and TMS export action.
+- HTML test report with screenshot: `docs/test-reports/sprint-33-capacity-workload/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 260 passed.
+- `python -m pytest` -> 267 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -370,4 +382,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 32 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 33: Capacity And Workload.
+Commit Sprint 33 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 34: Supply Chain Diagnostics.

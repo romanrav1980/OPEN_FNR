@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/capacity">
+  <case id="capacity_overload_case" name="Capacity overload case">
+    <casePlanModel id="capacity_overload_plan" name="Capacity overload plan">
+      <humanTask id="review_overload_calendar" name="Review overload calendar" />
+      <humanTask id="review_smoothing_preview" name="Review smoothing preview" />
+      <humanTask id="approve_order_moves" name="Approve order moves" />
+      <humanTask id="confirm_tms_export" name="Confirm TMS export" />
+    </casePlanModel>
+  </case>
+</definitions>

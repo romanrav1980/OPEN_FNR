@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/capacity" name="order_shift_priority_decision">
+  <decision id="order_shift_priority_decision" name="Order shift priority decision">
+    <decisionTable id="order_shift_priority_table" hitPolicy="FIRST">
+      <input id="input_order_priority" label="order_priority">
+        <inputExpression id="input_priority_expr" typeRef="string"><text>order_priority</text></inputExpression>
+      </input>
+      <output id="output_shift_allowed" label="shift_allowed" name="shift_allowed" typeRef="boolean" />
+      <output id="output_reason" label="reason" name="reason" typeRef="string" />
+      <rule id="rule_keep_high">
+        <inputEntry id="rule_high_priority"><text>"high"</text></inputEntry>
+        <outputEntry id="rule_high_shift"><text>false</text></outputEntry>
+        <outputEntry id="rule_high_reason"><text>"keep high priority order on original date"</text></outputEntry>
+      </rule>
+      <rule id="rule_shift_medium_low">
+        <inputEntry id="rule_medium_low_priority"><text>-</text></inputEntry>
+        <outputEntry id="rule_medium_low_shift"><text>true</text></outputEntry>
+        <outputEntry id="rule_medium_low_reason"><text>"shift medium and low priority order"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

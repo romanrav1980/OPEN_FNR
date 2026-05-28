@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/capacity">
+  <process id="capacity_smoothing_process" name="Capacity smoothing process" isExecutable="true">
+    <startEvent id="start_capacity_forecast_ready" name="Capacity forecast ready" />
+    <sequenceFlow id="flow_start_to_calendar" sourceRef="start_capacity_forecast_ready" targetRef="load_capacity_calendar" />
+    <serviceTask id="load_capacity_calendar" name="Load capacity calendar" />
+    <sequenceFlow id="flow_calendar_to_overload" sourceRef="load_capacity_calendar" targetRef="detect_capacity_overload" />
+    <businessRuleTask id="detect_capacity_overload" name="Detect capacity overload" />
+    <sequenceFlow id="flow_overload_to_priority" sourceRef="detect_capacity_overload" targetRef="prioritize_order_shifts" />
+    <businessRuleTask id="prioritize_order_shifts" name="Prioritize order shifts" />
+    <sequenceFlow id="flow_priority_to_preview" sourceRef="prioritize_order_shifts" targetRef="create_smoothing_preview" />
+    <serviceTask id="create_smoothing_preview" name="Create smoothing preview" />
+    <sequenceFlow id="flow_preview_to_gateway" sourceRef="create_smoothing_preview" targetRef="capacity_overload_gateway" />
+    <exclusiveGateway id="capacity_overload_gateway" name="Capacity overload?" />
+    <sequenceFlow id="flow_no_overload" sourceRef="capacity_overload_gateway" targetRef="publish_capacity_plan" />
+    <sequenceFlow id="flow_overload" sourceRef="capacity_overload_gateway" targetRef="review_capacity_overload" />
+    <userTask id="review_capacity_overload" name="Review capacity overload" />
+    <sequenceFlow id="flow_review_to_approval" sourceRef="review_capacity_overload" targetRef="approve_order_moves" />
+    <userTask id="approve_order_moves" name="Approve order moves" />
+    <sequenceFlow id="flow_approval_to_publish" sourceRef="approve_order_moves" targetRef="publish_capacity_plan" />
+    <serviceTask id="publish_capacity_plan" name="Publish capacity plan" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_capacity_plan" targetRef="end_capacity_plan_published" />
+    <endEvent id="end_capacity_plan_published" name="Capacity plan published" />
+  </process>
+</definitions>
