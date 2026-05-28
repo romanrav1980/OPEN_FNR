@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/lifecycle" name="lifecycle_order_allowed_decision">
+  <decision id="lifecycle_order_allowed_decision" name="Lifecycle order allowed decision">
+    <decisionTable id="lifecycle_order_allowed_table" hitPolicy="FIRST">
+      <input id="input_status" label="status">
+        <inputExpression id="input_status_expr" typeRef="string"><text>status</text></inputExpression>
+      </input>
+      <input id="input_after_termination" label="after_termination_date">
+        <inputExpression id="input_after_termination_expr" typeRef="boolean"><text>after_termination_date</text></inputExpression>
+      </input>
+      <output id="output_allowed" label="allowed" name="allowed" typeRef="boolean" />
+      <rule id="rule_terminated">
+        <inputEntry id="rule_terminated_status"><text>"terminated"</text></inputEntry>
+        <inputEntry id="rule_terminated_after"><text>-</text></inputEntry>
+        <outputEntry id="rule_terminated_allowed"><text>false</text></outputEntry>
+      </rule>
+      <rule id="rule_after_termination">
+        <inputEntry id="rule_after_status"><text>-</text></inputEntry>
+        <inputEntry id="rule_after_termination_after"><text>true</text></inputEntry>
+        <outputEntry id="rule_after_allowed"><text>false</text></outputEntry>
+      </rule>
+      <rule id="rule_allowed">
+        <inputEntry id="rule_allowed_status"><text>-</text></inputEntry>
+        <inputEntry id="rule_allowed_after"><text>false</text></inputEntry>
+        <outputEntry id="rule_allowed_value"><text>true</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

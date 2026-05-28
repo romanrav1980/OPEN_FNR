@@ -445,3 +445,27 @@ def test_high_spoilage_risk_case_is_parseable() -> None:
     assert "Review shelf-life batches" in human_task_names
     assert "Adjust fresh order quantity" in human_task_names
     assert "Approve waste-service tradeoff" in human_task_names
+
+
+def test_lifecycle_order_allowed_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/lifecycle/lifecycle_order_allowed_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "lifecycle_order_allowed_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_clearance_risk_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/lifecycle/clearance_risk_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "clearance_risk_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review remaining stock" in human_task_names
+    assert "Approve clearance markdown" in human_task_names
+    assert "Confirm order block" in human_task_names

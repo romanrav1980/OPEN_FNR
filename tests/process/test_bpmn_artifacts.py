@@ -21,6 +21,8 @@ MANUAL_ADJUSTMENT_PROCESS_PATH = Path("processes/adjustments/manual_adjustment_p
 PUBLICATION_PROCESS_PATH = Path("processes/publication/publication_process.bpmn20.xml")
 KPI_REVIEW_PROCESS_PATH = Path("processes/kpi/weekly_kpi_review_process.bpmn20.xml")
 FRESH_ORDER_REVIEW_PROCESS_PATH = Path("processes/fresh/fresh_order_review_process.bpmn20.xml")
+SKU_PHASE_IN_PROCESS_PATH = Path("processes/lifecycle/sku_phase_in_process.bpmn20.xml")
+SKU_PHASE_OUT_PROCESS_PATH = Path("processes/lifecycle/sku_phase_out_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -391,3 +393,54 @@ def test_fresh_order_review_bpmn_handles_spoilage_risk() -> None:
     assert "Approve fresh order" in service_task_names
     assert "Decide spoilage risk" in business_rule_names
     assert "Review fresh spoilage risk" in user_task_names
+
+
+def test_sku_phase_in_bpmn_selects_reference_and_activates_sku() -> None:
+    tree = ElementTree.parse(SKU_PHASE_IN_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "sku_phase_in_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    end_event_names = {
+        event.attrib["name"]
+        for event in tree.findall(".//bpmn:endEvent", BPMN_NS)
+    }
+    assert "Select reference product" in user_task_names
+    assert "Approve phase-in" in user_task_names
+    assert "Calculate cold-start forecast" in service_task_names
+    assert "Update active matrix" in service_task_names
+    assert "Activate SKU" in service_task_names
+    assert "SKU active" in end_event_names
+
+
+def test_sku_phase_out_bpmn_links_replacement_blocks_orders_and_terminates() -> None:
+    tree = ElementTree.parse(SKU_PHASE_OUT_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "sku_phase_out_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    assert "Link replacement SKU" in user_task_names
+    assert "Approve phase-out" in user_task_names
+    assert "Evaluate clearance risk" in business_rule_names
+    assert "Block orders after termination" in service_task_names
+    assert "Terminate SKU" in service_task_names

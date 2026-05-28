@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/lifecycle">
+  <case id="clearance_risk_case" name="Clearance risk case">
+    <casePlanModel id="clearance_risk_plan" name="Clearance risk plan">
+      <humanTask id="review_remaining_stock" name="Review remaining stock" />
+      <humanTask id="approve_clearance_markdown" name="Approve clearance markdown" />
+      <humanTask id="confirm_order_block" name="Confirm order block" />
+    </casePlanModel>
+  </case>
+</definitions>

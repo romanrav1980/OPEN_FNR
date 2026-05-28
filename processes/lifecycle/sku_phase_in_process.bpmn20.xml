@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/lifecycle">
+  <process id="sku_phase_in_process" name="SKU phase-in process" isExecutable="true">
+    <startEvent id="start_sku_planned" name="SKU phase-in planned" />
+    <sequenceFlow id="flow_start_to_reference" sourceRef="start_sku_planned" targetRef="select_reference_product" />
+    <userTask id="select_reference_product" name="Select reference product" />
+    <sequenceFlow id="flow_reference_to_forecast" sourceRef="select_reference_product" targetRef="calculate_cold_start_forecast" />
+    <serviceTask id="calculate_cold_start_forecast" name="Calculate cold-start forecast" />
+    <sequenceFlow id="flow_forecast_to_matrix" sourceRef="calculate_cold_start_forecast" targetRef="update_active_matrix" />
+    <serviceTask id="update_active_matrix" name="Update active matrix" />
+    <sequenceFlow id="flow_matrix_to_approve" sourceRef="update_active_matrix" targetRef="approve_phase_in" />
+    <userTask id="approve_phase_in" name="Approve phase-in" />
+    <sequenceFlow id="flow_approve_to_active" sourceRef="approve_phase_in" targetRef="activate_sku" />
+    <serviceTask id="activate_sku" name="Activate SKU" />
+    <sequenceFlow id="flow_active_to_end" sourceRef="activate_sku" targetRef="end_active" />
+    <endEvent id="end_active" name="SKU active" />
+  </process>
+</definitions>

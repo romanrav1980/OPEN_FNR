@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/lifecycle">
+  <process id="sku_phase_out_process" name="SKU phase-out process" isExecutable="true">
+    <startEvent id="start_phase_out_requested" name="SKU phase-out requested" />
+    <sequenceFlow id="flow_start_to_replacement" sourceRef="start_phase_out_requested" targetRef="link_replacement_sku" />
+    <userTask id="link_replacement_sku" name="Link replacement SKU" />
+    <sequenceFlow id="flow_replacement_to_clearance" sourceRef="link_replacement_sku" targetRef="evaluate_clearance_risk" />
+    <businessRuleTask id="evaluate_clearance_risk" name="Evaluate clearance risk" />
+    <sequenceFlow id="flow_clearance_to_orders" sourceRef="evaluate_clearance_risk" targetRef="block_orders_after_termination" />
+    <serviceTask id="block_orders_after_termination" name="Block orders after termination" />
+    <sequenceFlow id="flow_orders_to_approve" sourceRef="block_orders_after_termination" targetRef="approve_phase_out" />
+    <userTask id="approve_phase_out" name="Approve phase-out" />
+    <sequenceFlow id="flow_approve_to_terminate" sourceRef="approve_phase_out" targetRef="terminate_sku" />
+    <serviceTask id="terminate_sku" name="Terminate SKU" />
+    <sequenceFlow id="flow_terminate_to_end" sourceRef="terminate_sku" targetRef="end_terminated" />
+    <endEvent id="end_terminated" name="SKU terminated" />
+  </process>
+</definitions>

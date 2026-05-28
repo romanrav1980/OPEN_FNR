@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 18 implementation is complete.
+Sprint 19 implementation is complete.
 
 ## Local Infrastructure
 
@@ -203,9 +203,20 @@ Known local URLs:
 - UI Fresh Workbench section with shelf-life batches, FEFO, waste graph, availability-vs-waste preview and fresh adjustment.
 - HTML test report with screenshot: `docs/test-reports/sprint-18-fresh-v1/index.html`.
 
+## Sprint 19 Artifacts
+
+- SKU lifecycle API: `apps/backend/open_fnr_api/lifecycle.py`.
+- SKU lifecycle tests: `tests/backend/test_lifecycle.py`.
+- SKU phase-in BPMN: `processes/lifecycle/sku_phase_in_process.bpmn20.xml`.
+- SKU phase-out BPMN: `processes/lifecycle/sku_phase_out_process.bpmn20.xml`.
+- Lifecycle order allowed DMN: `processes/lifecycle/lifecycle_order_allowed_decision.dmn.xml`.
+- Clearance risk CMMN: `processes/lifecycle/clearance_risk_case.cmmn.xml`.
+- UI SKU Lifecycle section with reference product, cold-start forecast, termination date, replacement link and clearance risk warning.
+- HTML test report with screenshot: `docs/test-reports/sprint-19-lifecycle-sku-v1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 140 passed.
+- `python -m pytest` -> 151 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -213,4 +224,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 18 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 19: Lifecycle SKU V1.
+Commit Sprint 19 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 20: Multi-Echelon V1.

@@ -419,6 +419,31 @@ const freshProjection = [
   { date: "2026-05-31", demand: 48, available: 38, waste: 16, service: "95%" },
 ];
 
+const lifecycleRows = [
+  {
+    sku: "SKU_NEW_001",
+    status: "planned",
+    launch: "2026-06-10",
+    termination: "-",
+    reference: "SKU001",
+    replacement: "-",
+    forecast: "12.4",
+    stock: "0",
+    risk: "low",
+  },
+  {
+    sku: "SKU_OLD_001",
+    status: "phase_out",
+    launch: "2024-01-15",
+    termination: "2026-06-05",
+    reference: "-",
+    replacement: "SKU_NEW_001",
+    forecast: "0",
+    stock: "420",
+    risk: "high",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1757,6 +1782,83 @@ function App() {
             <button type="button">Adjust</button>
             <button type="button">Approve</button>
           </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="SKU lifecycle">
+        <div className="section-heading">
+          <h2>SKU Lifecycle</h2>
+          <p>Phase-in, reference product, phase-out, termination and clearance risk</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Phase-in</span>
+            <strong>SKU_NEW_001 uses SKU001 as reference</strong>
+            <p>Cold-start forecast 12.4 is generated before launch date and active matrix update.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Phase-out</span>
+            <strong>SKU_OLD_001 terminates on 2026-06-05</strong>
+            <p>Replacement SKU_NEW_001 is linked. Orders after termination date are blocked.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Status</th>
+                <th>Launch</th>
+                <th>Termination</th>
+                <th>Reference</th>
+                <th>Replacement</th>
+                <th>Cold-start forecast</th>
+                <th>Remaining stock</th>
+                <th>Clearance risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lifecycleRows.map((row) => (
+                <tr key={row.sku}>
+                  <td>{row.sku}</td>
+                  <td>{row.status}</td>
+                  <td>{row.launch}</td>
+                  <td>{row.termination}</td>
+                  <td>{row.reference}</td>
+                  <td>{row.replacement}</td>
+                  <td>{row.forecast}</td>
+                  <td>{row.stock}</td>
+                  <td>{row.risk}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Phase-in Form</span>
+            <h3>Select reference product</h3>
+            <p>
+              Category Manager chooses a reference SKU, validates launch date and approves
+              cold-start forecast before the new SKU enters active matrix.
+            </p>
+            <div className="action-row">
+              <button type="button">Select reference</button>
+              <button type="button">Approve phase-in</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Clearance Risk</span>
+            <h3>Order blocked after termination</h3>
+            <p>
+              Remaining stock 420 creates high clearance risk. The phase-out process confirms
+              replacement link, markdown and order block after termination date.
+            </p>
+            <div className="action-row">
+              <button type="button">Approve markdown</button>
+              <button type="button">Confirm order block</button>
+            </div>
+          </aside>
         </div>
       </section>
     </main>
