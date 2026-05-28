@@ -1049,6 +1049,19 @@ PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
 
 TASKS: tuple[ProcessTask, ...] = (
     ProcessTask(
+        task_id="task-clean-publication-001",
+        process_instance_id="proc-shadow-load-2026-05-28",
+        process_key="source_batch_publication_process",
+        name="Confirm clean canonical publication",
+        status=TaskStatus.OPEN,
+        assigned_role="Data Platform Owner",
+        candidate_roles=("Data Platform Owner", "Data Engineer"),
+        available_actions=("confirm_publication", "request_recheck", "comment"),
+        sla_due_at=datetime(2026, 5, 28, 18, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 14, 0, tzinfo=timezone.utc),
+        business_key="shadow-load-2026-05-28",
+    ),
+    ProcessTask(
         task_id="task-stock-projection-001",
         process_instance_id="proc-stock-projection-20260528-001",
         process_key="replenishment_calculation_process",
@@ -1129,6 +1142,24 @@ TASKS: tuple[ProcessTask, ...] = (
 )
 
 AUDIT_EVENTS: tuple[AuditEvent, ...] = (
+    AuditEvent(
+        event_id="audit-shadow-load-001",
+        process_instance_id="proc-shadow-load-2026-05-28",
+        task_id=None,
+        event_type=AuditEventType.PROCESS_STARTED,
+        actor="Data Engineer",
+        message="Started source batch publication process for business date 2026-05-28.",
+        created_at=datetime(2026, 5, 28, 13, 50, tzinfo=timezone.utc),
+    ),
+    AuditEvent(
+        event_id="audit-shadow-load-002",
+        process_instance_id="proc-shadow-load-2026-05-28",
+        task_id="task-clean-publication-001",
+        event_type=AuditEventType.TASK_CREATED,
+        actor="Flowable",
+        message="Created clean canonical publication confirmation task.",
+        created_at=datetime(2026, 5, 28, 14, 0, tzinfo=timezone.utc),
+    ),
     AuditEvent(
         event_id="audit-promo-approval-001",
         process_instance_id="proc-promo-approval-20260601-001",

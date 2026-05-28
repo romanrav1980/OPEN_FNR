@@ -84,6 +84,33 @@ def test_task_inbox_filters_by_candidate_role() -> None:
     assert "complete" in tasks[0]["available_actions"]
 
 
+def test_data_platform_owner_sees_clean_publication_task() -> None:
+    response = client.get("/process/tasks", params={"role": "Data Platform Owner"})
+    assert response.status_code == 200
+
+    tasks = response.json()["items"]
+    task = next(item for item in tasks if item["task_id"] == "task-clean-publication-001")
+    assert task["process_key"] == "source_batch_publication_process"
+    assert "confirm_publication" in task["available_actions"]
+
+
+def test_clean_publication_task_completion_returns_audit_events() -> None:
+    response = client.post(
+        "/process/tasks/task-clean-publication-001/complete",
+        json={
+            "action": "confirm_publication",
+            "actor": "data.platform.owner@example.org",
+            "actor_role": "Data Platform Owner",
+            "comment": "Clean canonical publication confirmed after DQ gate.",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["task"]["status"] == "completed"
+    assert payload["audit_events"][1]["message"] == "Task completed with action confirm_publication."
+
+
 def test_task_completion_returns_audit_events() -> None:
     response = client.post(
         "/process/tasks/task-promo-001/complete",
@@ -149,3 +176,12 @@ def test_process_audit_endpoint_returns_instance_history() -> None:
     events = response.json()["items"]
     assert events[0]["event_type"] == "process_started"
     assert events[1]["event_type"] == "task_created"
+
+
+def test_shadow_load_process_audit_endpoint_returns_publication_history() -> None:
+    response = client.get("/process/instances/proc-shadow-load-2026-05-28/audit")
+    assert response.status_code == 200
+
+    events = response.json()["items"]
+    assert events[0]["event_type"] == "process_started"
+    assert events[1]["task_id"] == "task-clean-publication-001"

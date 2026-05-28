@@ -509,6 +509,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Clean canonical ClickHouse tables for sales, stock, open orders, in-transit, prices and promo plans.
 - Clean publication plan API: `/data/clean-publication/plans`.
 - Source batch publication BPMN/DMN/CMMN artifacts for Process Engine recovery and audit flow.
+- Process Engine clean publication confirmation task: `task-clean-publication-001`.
 - Pilot shadow load gate rules: `REAL_DATA_INGESTION_PIPELINES.md`.
 - Developer/user presentation: `docs/presentations/real-ingestion-sprints-i1-i5/index.html`.
 
