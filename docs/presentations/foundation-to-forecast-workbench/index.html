@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Foundation To Forecast Workbench</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1220px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 42px 0 72px;
+      }
+
+      section {
+        min-height: 72vh;
+        border-bottom: 1px solid var(--border);
+        padding: 40px 0;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 980px;
+        font-size: 46px;
+        line-height: 1.08;
+      }
+
+      h2 {
+        font-size: 30px;
+      }
+
+      h3 {
+        font-size: 18px;
+      }
+
+      a {
+        color: #f6d6dc;
+      }
+
+      code {
+        color: #f6d6dc;
+      }
+
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .lead {
+        max-width: 860px;
+        color: var(--muted);
+        font-size: 19px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .panel p,
+      li {
+        color: var(--muted);
+      }
+
+      .metric {
+        display: block;
+        margin-top: 8px;
+        color: var(--text);
+        font-size: 24px;
+        font-weight: 800;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+
+      .caption {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .ok {
+        color: var(--ok);
+        font-weight: 800;
+      }
+
+      .warn {
+        color: var(--warn);
+        font-weight: 800;
+      }
+
+      @media (max-width: 880px) {
+        .grid,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 34px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <p class="eyebrow">OPEN FNR / Спринты 0-5 / Блоковая презентация</p>
+        <h1>От foundation до Forecast Workbench</h1>
+        <p class="lead">
+          Этот блок превращает проект из набора документов в первый рабочий
+          контур: загрузка данных, контроль качества, feature mart, регулярный
+          baseline forecast и пользовательский экран анализа прогноза.
+        </p>
+        <div class="grid-3">
+          <article class="panel">
+            <h3>Для бизнеса</h3>
+            <p>Появляется видимость: какие данные пришли, какие ошибки блокируют прогноз, какой forecast опубликован.</p>
+          </article>
+          <article class="panel">
+            <h3>Для пользователей</h3>
+            <p>Forecast Planner получает первый рабочий Workbench для просмотра прогноза, метрик и среза SKU-store-date.</p>
+          </article>
+          <article class="panel">
+            <h3>Для разработки</h3>
+            <p>Заложены API, UI, BPMN/DMN/CMMN, тесты, отчёты, контракты данных и контекст восстановления.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">Product Increment</p>
+        <h2>Что входит в крупный блок</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Спринт</th>
+              <th>Модуль</th>
+              <th>Назначение</th>
+              <th>Главный бизнес-результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sprint 0</td>
+              <td>Dev foundation</td>
+              <td>Локальная инфраструктура, backend, frontend, процессные артефакты, UTF-8 gate.</td>
+              <td>Команда может развивать систему воспроизводимо.</td>
+            </tr>
+            <tr>
+              <td>Sprint 1</td>
+              <td>Data Ingestion</td>
+              <td>Контракты продаж, остатков, цен, MDM, календаря и batch status.</td>
+              <td>Появляется управляемая точка входа данных.</td>
+            </tr>
+            <tr>
+              <td>Sprint 2</td>
+              <td>Data Quality</td>
+              <td>DQ rules, incidents, waiver, blocking/non-blocking severity.</td>
+              <td>Ошибки данных становятся видимыми и управляемыми.</td>
+            </tr>
+            <tr>
+              <td>Sprint 3</td>
+              <td>Feature Mart</td>
+              <td>Active matrix, feature versions, point-in-time safe features.</td>
+              <td>Готова основа признаков для регулярного прогноза.</td>
+            </tr>
+            <tr>
+              <td>Sprint 4</td>
+              <td>Regular Baseline</td>
+              <td>Первый baseline forecast, WAPE/Bias, публикация версии прогноза.</td>
+              <td>Есть первый прогноз, который можно сравнивать с ML.</td>
+            </tr>
+            <tr>
+              <td>Sprint 5</td>
+              <td>Forecast Workbench</td>
+              <td>Фильтры, таблица, fact vs forecast panel, review process.</td>
+              <td>Forecast Planner получает рабочий интерфейс анализа.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <p class="eyebrow">User Journey</p>
+        <h2>Как работает пользовательский сценарий</h2>
+        <div class="grid">
+          <article class="panel">
+            <h3>1. Проверить загрузку данных</h3>
+            <p>Пользователь видит домены данных, источники, статус, объём строк и cutoff.</p>
+            <p><strong>Результат:</strong> понятно, можно ли переходить к DQ и прогнозу.</p>
+          </article>
+          <article class="panel">
+            <h3>2. Разобрать DQ-инциденты</h3>
+            <p>Data Engineer и Data Owner видят blocker/warning, affected rows, owner и возможные действия.</p>
+            <p><strong>Результат:</strong> blocker останавливает публикацию, waiver требует роли и причины.</p>
+          </article>
+          <article class="panel">
+            <h3>3. Проверить feature mart</h3>
+            <p>Команда видит active matrix, feature version, качество и failed partitions.</p>
+            <p><strong>Результат:</strong> прогноз опирается на воспроизводимые признаки.</p>
+          </article>
+          <article class="panel">
+            <h3>4. Открыть Forecast Workbench</h3>
+            <p>Forecast Planner фильтрует forecast slice, смотрит WAPE/Bias, таблицу и fact vs forecast.</p>
+            <p><strong>Результат:</strong> прогноз можно анализировать и готовить к review.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">UI Evidence</p>
+        <h2>Data Quality Console</h2>
+        <img src="../../test-reports/sprint-2-data-quality/screenshots/data-quality-console.png" alt="Data Quality Console screenshot" />
+        <p class="caption">
+          Экран показывает Data Load Status и DQ-инциденты: severity, affected rows, owner, waiver/re-run/export actions.
+        </p>
+      </section>
+
+      <section>
+        <p class="eyebrow">UI Evidence</p>
+        <h2>Feature Mart Status</h2>
+        <img src="../../test-reports/sprint-3-feature-mart/screenshots/feature-mart-status.png" alt="Feature Mart Status screenshot" />
+        <p class="caption">
+          Экран показывает active matrix, feature groups, feature versions, quality status и failed partition.
+        </p>
+      </section>
+
+      <section>
+        <p class="eyebrow">UI Evidence</p>
+        <h2>Regular Forecast Baseline</h2>
+        <img src="../../test-reports/sprint-4-regular-baseline/screenshots/regular-forecast-baseline.png" alt="Regular Forecast Baseline screenshot" />
+        <p class="caption">
+          Экран показывает forecast version, seasonal naive baseline, WAPE/Bias и строки прогноза.
+        </p>
+      </section>
+
+      <section>
+        <p class="eyebrow">UI Evidence</p>
+        <h2>Forecast Workbench V1</h2>
+        <img src="../../test-reports/sprint-5-forecast-workbench/screenshots/forecast-workbench.png" alt="Forecast Workbench screenshot" />
+        <p class="caption">
+          Экран показывает фильтры, fact vs forecast panel, таблицу прогноза и quality flags.
+        </p>
+      </section>
+
+      <section>
+        <p class="eyebrow">Business Processes</p>
+        <h2>Работающие бизнес-процессы блока</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Тип</th>
+              <th>Что делает</th>
+              <th>Роли</th>
+              <th>Ключевой результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>data_load_monitoring_process</code></td>
+              <td>BPMN</td>
+              <td>Следит за загрузкой batch, переводит failed/partial в incident.</td>
+              <td>Data Engineer, Data Owner</td>
+              <td>Данные не попадают дальше без статуса и audit.</td>
+            </tr>
+            <tr>
+              <td><code>dq_check_process</code></td>
+              <td>BPMN</td>
+              <td>Запускает DQ rules, блокирует публикацию при critical incidents.</td>
+              <td>Data Engineer, Data Owner</td>
+              <td>Качество данных становится управляемым gate.</td>
+            </tr>
+            <tr>
+              <td><code>data_quality_incident_case</code></td>
+              <td>CMMN</td>
+              <td>Ведёт triage, исправление source data и waiver approval.</td>
+              <td>Data Engineering, Data Owner, Admin</td>
+              <td>Исключения не теряются и имеют владельца.</td>
+            </tr>
+            <tr>
+              <td><code>feature_build_process</code></td>
+              <td>BPMN</td>
+              <td>Строит active matrix, feature mart, валидирует и публикует feature version.</td>
+              <td>Data Engineer, Data Scientist</td>
+              <td>Прогноз получает воспроизводимый набор признаков.</td>
+            </tr>
+            <tr>
+              <td><code>regular_forecast_run_process</code></td>
+              <td>BPMN</td>
+              <td>Считает baseline, валидирует WAPE/Bias и публикует forecast version.</td>
+              <td>Data Scientist, Forecast Planner</td>
+              <td>Появляется первая опубликованная версия прогноза.</td>
+            </tr>
+            <tr>
+              <td><code>forecast_review_process</code></td>
+              <td>BPMN</td>
+              <td>Определяет, нужен ли review прогноза, и создаёт задачи по аномалиям.</td>
+              <td>Forecast Planner, Category Manager</td>
+              <td>Планировщик получает управляемый review workflow.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <p class="eyebrow">Decision Rules</p>
+        <h2>DMN-правила и зачем они вынесены из кода</h2>
+        <div class="grid">
+          <article class="panel">
+            <h3>Severity и publication block</h3>
+            <p><code>dq_severity_decision</code> и <code>publication_block_decision</code> определяют, что блокирует публикацию и когда нужен waiver.</p>
+          </article>
+          <article class="panel">
+            <h3>Active matrix inclusion</h3>
+            <p><code>active_matrix_inclusion_decision</code> решает, входит ли пара магазин-SKU в расчёт.</p>
+          </article>
+          <article class="panel">
+            <h3>Forecast publish eligibility</h3>
+            <p><code>forecast_publish_eligibility_decision</code> проверяет WAPE, Bias и blocking DQ перед публикацией.</p>
+          </article>
+          <article class="panel">
+            <h3>Forecast review required</h3>
+            <p><code>forecast_review_required_decision</code> определяет, когда Forecast Planner должен вручную проверить срез.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">Developer Map</p>
+        <h2>Структура реализации для разработчиков</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Слой</th>
+              <th>Где смотреть</th>
+              <th>Назначение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Backend API</td>
+              <td><code>apps/backend/open_fnr_api</code></td>
+              <td>Контракты ingestion, DQ, feature mart, forecast, workbench.</td>
+            </tr>
+            <tr>
+              <td>Frontend UI</td>
+              <td><code>apps/frontend/src</code></td>
+              <td>Dev Control Tower, DQ Console, Feature Mart, Forecast Workbench.</td>
+            </tr>
+            <tr>
+              <td>Process Engine</td>
+              <td><code>processes/*</code></td>
+              <td>BPMN/DMN/CMMN артефакты для Flowable OSS.</td>
+            </tr>
+            <tr>
+              <td>Storage</td>
+              <td><code>infra/dev/postgres/init</code>, <code>infra/dev/clickhouse/init</code></td>
+              <td>Metadata, DQ incidents, feature versions, forecast versions, forecast store.</td>
+            </tr>
+            <tr>
+              <td>Tests</td>
+              <td><code>tests/backend</code>, <code>tests/data</code>, <code>tests/process</code>, <code>tests/quality</code></td>
+              <td>API, formulas, data rules, process artifacts, encoding gate.</td>
+            </tr>
+            <tr>
+              <td>Reports</td>
+              <td><code>docs/test-reports</code>, <code>docs/presentations</code></td>
+              <td>HTML-доказательства тестирования и блоковые презентации.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <p class="eyebrow">Quality Gates</p>
+        <h2>Что проверено</h2>
+        <div class="grid-3">
+          <article class="panel">
+            <h3>Automated tests</h3>
+            <span class="metric">43 passed</span>
+            <p>Backend, data, process, forecast formulas, encoding quality gate.</p>
+          </article>
+          <article class="panel">
+            <h3>Frontend build</h3>
+            <span class="metric">OK</span>
+            <p>React/Vite production build проходит.</p>
+          </article>
+          <article class="panel">
+            <h3>Visual evidence</h3>
+            <span class="metric">4 screenshots</span>
+            <p>DQ, Feature Mart, Baseline Forecast, Forecast Workbench.</p>
+          </article>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Отчёт</th>
+              <th>Ссылка</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sprint 2 Data Quality</td>
+              <td><a href="../../test-reports/sprint-2-data-quality/index.html">HTML report</a></td>
+            </tr>
+            <tr>
+              <td>Sprint 3 Feature Mart</td>
+              <td><a href="../../test-reports/sprint-3-feature-mart/index.html">HTML report</a></td>
+            </tr>
+            <tr>
+              <td>Sprint 4 Regular Baseline</td>
+              <td><a href="../../test-reports/sprint-4-regular-baseline/index.html">HTML report</a></td>
+            </tr>
+            <tr>
+              <td>Sprint 5 Forecast Workbench</td>
+              <td><a href="../../test-reports/sprint-5-forecast-workbench/index.html">HTML report</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <p class="eyebrow">Limitations And Next</p>
+        <h2>Ограничения текущего блока и следующий шаг</h2>
+        <div class="grid">
+          <article class="panel">
+            <h3>Ограничения</h3>
+            <ul>
+              <li>UI пока использует статические данные, API-контракты уже готовы.</li>
+              <li>Baseline forecast представлен sample output и формулами метрик.</li>
+              <li>Физический Spark/Polars batch scoring ещё не реализован.</li>
+              <li>Flowable artifacts версионированы, но deployment automation будет расширяться.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>Следующий блок</h3>
+            <ul>
+              <li>Sprint 6: ML Regular Model V1.</li>
+              <li>Sprint 7: Backtesting and Monitoring.</li>
+              <li>Sprint 8-10: Promo data, uplift model, approval process.</li>
+              <li>После блока regular ML будет новая презентация для пользователей и разработчиков.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
