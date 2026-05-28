@@ -70,6 +70,21 @@ Production should use Kubernetes when high availability is required:
 
 Docker Compose may be used only for non-critical single-node pilot rehearsal.
 
+## Application Containers
+
+The Compose file includes optional `app` profile services:
+
+```powershell
+docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml --profile app up -d
+```
+
+| Service | Image source | Purpose |
+| --- | --- | --- |
+| `backend` | `apps/backend/Dockerfile` | FastAPI application container |
+| `frontend` | `apps/frontend/Dockerfile` | Static React build served by nginx |
+
+Backend container runtime uses per-service host variables for container network access while local host ports remain configured through `infra/*/.env.example`.
+
 ## Configuration Rule
 
 All addresses, host names and ports must come from:

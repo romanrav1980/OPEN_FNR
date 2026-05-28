@@ -14,6 +14,8 @@ All network addresses must be read from central project configuration:
 - Frontend environment example: `apps/frontend/.env.example`
 - Docker/development infrastructure: `infra/dev/.env.example` and `infra/dev/compose.yaml`
 
+Backend runtime supports both a shared `OPEN_FNR_SERVICE_HOST` for local host access and per-service hosts such as `OPEN_FNR_POSTGRES_HOST`, `OPEN_FNR_CLICKHOUSE_HOST`, `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_AIRFLOW_HOST`, `OPEN_FNR_OPENSEARCH_HOST` and `OPEN_FNR_SUPERSET_HOST` for container networks.
+
 ## Allowed Exceptions
 
 The following files may contain default local development addresses because they are configuration sources:

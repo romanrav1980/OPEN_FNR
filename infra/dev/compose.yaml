@@ -1,6 +1,56 @@
 name: ${OPEN_FNR_PROJECT:-open-fnr-dev}
 
 services:
+  backend:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: apps/backend/Dockerfile
+    container_name: ${OPEN_FNR_PROJECT:-open-fnr-dev}-backend
+    restart: unless-stopped
+    environment:
+      OPEN_FNR_RUNTIME_MODE: ${OPEN_FNR_RUNTIME_MODE:-dev}
+      OPEN_FNR_MOCK_MODE: ${OPEN_FNR_MOCK_MODE:-true}
+      OPEN_FNR_AUDIT_ENABLED: ${OPEN_FNR_AUDIT_ENABLED:-true}
+      OPEN_FNR_SERVICE_HOST: ${OPEN_FNR_SERVICE_HOST:-127.0.0.1}
+      OPEN_FNR_POSTGRES_HOST: ${OPEN_FNR_POSTGRES_HOST:-postgres}
+      OPEN_FNR_CLICKHOUSE_HOST: ${OPEN_FNR_CLICKHOUSE_HOST:-clickhouse}
+      OPEN_FNR_FLOWABLE_HOST: ${OPEN_FNR_FLOWABLE_HOST:-flowable}
+      OPEN_FNR_AIRFLOW_HOST: ${OPEN_FNR_AIRFLOW_HOST:-airflow-webserver}
+      OPEN_FNR_OPENSEARCH_HOST: ${OPEN_FNR_OPENSEARCH_HOST:-opensearch}
+      OPEN_FNR_SUPERSET_HOST: ${OPEN_FNR_SUPERSET_HOST:-superset}
+      OPEN_FNR_POSTGRES_PORT: 5432
+      OPEN_FNR_CLICKHOUSE_HTTP_PORT: 8123
+      OPEN_FNR_FLOWABLE_PORT: 8080
+      OPEN_FNR_AIRFLOW_PORT: 8080
+      OPEN_FNR_OPENSEARCH_PORT: 9200
+      OPEN_FNR_SUPERSET_PORT: 8088
+      OPEN_FNR_POSTGRES_USER: ${POSTGRES_USER:-open_fnr}
+      OPEN_FNR_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-open_fnr_dev}
+      OPEN_FNR_POSTGRES_DATABASE: ${POSTGRES_DB:-open_fnr}
+      OPEN_FNR_LANDING_ROOT_PATH: /data/landing
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ../../data/landing:/data/landing
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: apps/frontend/Dockerfile
+    container_name: ${OPEN_FNR_PROJECT:-open-fnr-dev}-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-13000}:80"
+    depends_on:
+      - backend
+
   postgres:
     image: postgres:16
     container_name: ${OPEN_FNR_PROJECT:-open-fnr-dev}-postgres

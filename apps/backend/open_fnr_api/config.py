@@ -28,6 +28,12 @@ class Settings(BaseModel):
     app_name: str = env_str("APP_NAME", "OPEN FNR API")
     version: str = env_str("VERSION", "0.1.0")
     service_host: str = Field(default_factory=lambda: env_str("SERVICE_HOST", "127.0.0.1"))
+    postgres_host: str = Field(default_factory=lambda: env_str("POSTGRES_HOST", ""))
+    clickhouse_host: str = Field(default_factory=lambda: env_str("CLICKHOUSE_HOST", ""))
+    flowable_host: str = Field(default_factory=lambda: env_str("FLOWABLE_HOST", ""))
+    airflow_host: str = Field(default_factory=lambda: env_str("AIRFLOW_HOST", ""))
+    opensearch_host: str = Field(default_factory=lambda: env_str("OPENSEARCH_HOST", ""))
+    superset_host: str = Field(default_factory=lambda: env_str("SUPERSET_HOST", ""))
     api_port: int = Field(default_factory=lambda: env_int("API_PORT", 8000), ge=1, le=65535)
     frontend_port: int = Field(default_factory=lambda: env_int("FRONTEND_PORT", 13000), ge=1, le=65535)
     postgres_port: int = Field(default_factory=lambda: env_int("POSTGRES_PORT", 15432), ge=1, le=65535)
@@ -45,36 +51,40 @@ class Settings(BaseModel):
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
 
-    def http_url(self, port: int, path: str = "") -> str:
+    def http_url(self, host: str, port: int, path: str = "") -> str:
         normalized_path = path if path.startswith("/") or path == "" else f"/{path}"
-        return f"http://{self.service_host}:{port}{normalized_path}"
+        resolved_host = host or self.service_host
+        return f"http://{resolved_host}:{port}{normalized_path}"
+
+    def tcp_host(self, host: str) -> str:
+        return host or self.service_host
 
     @property
     def postgres_dsn(self) -> str:
         return (
             f"postgresql://{self.postgres_user}:{self.postgres_password}"
-            f"@{self.service_host}:{self.postgres_port}/{self.postgres_database}"
+            f"@{self.tcp_host(self.postgres_host)}:{self.postgres_port}/{self.postgres_database}"
         )
 
     @property
     def clickhouse_ping_url(self) -> str:
-        return self.http_url(self.clickhouse_http_port, "/ping")
+        return self.http_url(self.clickhouse_host, self.clickhouse_http_port, "/ping")
 
     @property
     def flowable_engine_url(self) -> str:
-        return self.http_url(self.flowable_port, "/flowable-rest/service/management/engine")
+        return self.http_url(self.flowable_host, self.flowable_port, "/flowable-rest/service/management/engine")
 
     @property
     def airflow_health_url(self) -> str:
-        return self.http_url(self.airflow_port, "/health")
+        return self.http_url(self.airflow_host, self.airflow_port, "/health")
 
     @property
     def opensearch_url(self) -> str:
-        return self.http_url(self.opensearch_port)
+        return self.http_url(self.opensearch_host, self.opensearch_port)
 
     @property
     def superset_health_url(self) -> str:
-        return self.http_url(self.superset_port, "/health")
+        return self.http_url(self.superset_host, self.superset_port, "/health")
 
     def service_endpoints(self) -> list[ServiceEndpoint]:
         return [
