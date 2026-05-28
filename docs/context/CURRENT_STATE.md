@@ -508,6 +508,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Source contract DQ plans: `/data-quality/source-contract-plans`.
 - Clean canonical ClickHouse tables for sales, stock, open orders, in-transit, prices and promo plans.
 - Clean publication plan API: `/data/clean-publication/plans`.
+- Clean publication run API: `/data/clean-publication/runs` with `dry_run` and `mock_run`.
 - Source batch publication BPMN/DMN/CMMN artifacts for Process Engine recovery and audit flow.
 - Process Engine clean publication confirmation task: `task-clean-publication-001`.
 - Pilot shadow load gate rules: `REAL_DATA_INGESTION_PIPELINES.md`.

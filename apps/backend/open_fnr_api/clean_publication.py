@@ -1,12 +1,21 @@
 from __future__ import annotations
 
 from datetime import date
+from enum import StrEnum
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+
 
 router = APIRouter(prefix="/data/clean-publication", tags=["data-ingestion"])
+
+
+class CleanPublicationRunMode(StrEnum):
+    DRY_RUN = "dry_run"
+    MOCK_RUN = "mock_run"
+    CLICKHOUSE = "clickhouse"
 
 
 class CleanPublicationPlan(BaseModel):
@@ -21,6 +30,32 @@ class CleanPublicationPlan(BaseModel):
     delete_sql: str
     insert_sql: str
     quality_status: str = "accepted"
+
+
+class CleanPublicationRunRequest(BaseModel):
+    business_date: date
+    actor: str = Field(min_length=1, max_length=128)
+    actor_role: str = Field(default="Data Platform Owner", min_length=1, max_length=64)
+    mode: CleanPublicationRunMode = CleanPublicationRunMode.DRY_RUN
+
+
+class CleanPublicationPlanRunResult(BaseModel):
+    plan_id: str
+    source_batch_id: str
+    clean_table: str
+    status: str
+    executed_statements: tuple[str, ...]
+    affected_rows: int = Field(ge=0)
+
+
+class CleanPublicationRunResponse(BaseModel):
+    run_id: str
+    business_date: date
+    mode: CleanPublicationRunMode
+    status: str
+    plan_count: int = Field(ge=0)
+    results: tuple[CleanPublicationPlanRunResult, ...]
+    audit_recorded: bool
 
 
 def clean_publication_plans_for_date(business_date: date) -> tuple[CleanPublicationPlan, ...]:
@@ -140,6 +175,31 @@ def clean_publication_plans_for_date(business_date: date) -> tuple[CleanPublicat
     )
 
 
+def execute_clean_publication_plan(
+    plan: CleanPublicationPlan,
+    mode: CleanPublicationRunMode,
+) -> CleanPublicationPlanRunResult:
+    if mode == CleanPublicationRunMode.DRY_RUN:
+        return CleanPublicationPlanRunResult(
+            plan_id=plan.plan_id,
+            source_batch_id=plan.source_batch_id,
+            clean_table=plan.clean_table,
+            status="validated",
+            executed_statements=(),
+            affected_rows=0,
+        )
+    if mode == CleanPublicationRunMode.MOCK_RUN:
+        return CleanPublicationPlanRunResult(
+            plan_id=plan.plan_id,
+            source_batch_id=plan.source_batch_id,
+            clean_table=plan.clean_table,
+            status="mock_executed",
+            executed_statements=(plan.delete_sql, plan.insert_sql),
+            affected_rows=0,
+        )
+    raise HTTPException(status_code=501, detail="clickhouse execution is not implemented yet")
+
+
 @router.get("/plans")
 def list_clean_publication_plans(business_date: date) -> dict[str, object]:
     plans = clean_publication_plans_for_date(business_date)
@@ -152,3 +212,39 @@ def get_clean_publication_plan(plan_id: str, business_date: date) -> dict[str, o
         if plan.plan_id == plan_id:
             return plan.model_dump(mode="json")
     raise HTTPException(status_code=404, detail="clean publication plan not found")
+
+
+@router.post("/runs")
+def run_clean_publication(request: CleanPublicationRunRequest) -> dict[str, object]:
+    plans = clean_publication_plans_for_date(request.business_date)
+    results = tuple(execute_clean_publication_plan(plan, request.mode) for plan in plans)
+    status = "ready" if request.mode == CleanPublicationRunMode.DRY_RUN else "completed"
+    run_id = f"clean-publication-{request.business_date.isoformat()}-{request.mode.value}"
+    event = record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="clean_publication_run",
+            actor=request.actor,
+            actor_role=request.actor_role,
+            object_type="clean_publication",
+            object_id=run_id,
+            action=f"run_{request.mode.value}",
+            reason=f"status={status}; plan_count={len(plans)}",
+            correlation_id=run_id,
+            payload={
+                "business_date": request.business_date.isoformat(),
+                "mode": request.mode.value,
+                "plan_count": len(plans),
+                "status": status,
+            },
+        )
+    )
+    response = CleanPublicationRunResponse(
+        run_id=run_id,
+        business_date=request.business_date,
+        mode=request.mode,
+        status=status,
+        plan_count=len(plans),
+        results=results,
+        audit_recorded=event is not None,
+    )
+    return response.model_dump(mode="json")

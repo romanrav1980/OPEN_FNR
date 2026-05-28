@@ -2,7 +2,11 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
-from open_fnr_api.clean_publication import clean_publication_plans_for_date
+from open_fnr_api.clean_publication import (
+    CleanPublicationRunMode,
+    clean_publication_plans_for_date,
+    execute_clean_publication_plan,
+)
 from open_fnr_api.main import app
 
 
@@ -55,3 +59,56 @@ def test_clean_publication_api_returns_404_for_unknown_plan() -> None:
         params={"business_date": "2026-05-28"},
     )
     assert response.status_code == 404
+
+
+def test_clean_publication_dry_run_validates_without_sql_execution() -> None:
+    plan = clean_publication_plans_for_date(date(2026, 5, 28))[0]
+    result = execute_clean_publication_plan(plan, CleanPublicationRunMode.DRY_RUN)
+
+    assert result.status == "validated"
+    assert result.executed_statements == ()
+    assert result.affected_rows == 0
+
+
+def test_clean_publication_mock_run_returns_delete_and_insert_statements() -> None:
+    plan = clean_publication_plans_for_date(date(2026, 5, 28))[0]
+    result = execute_clean_publication_plan(plan, CleanPublicationRunMode.MOCK_RUN)
+
+    assert result.status == "mock_executed"
+    assert result.executed_statements == (plan.delete_sql, plan.insert_sql)
+
+
+def test_clean_publication_run_api_supports_dry_run_with_audit() -> None:
+    response = client.post(
+        "/data/clean-publication/runs",
+        json={
+            "business_date": "2026-05-28",
+            "actor": "data.platform.owner@example.org",
+            "actor_role": "Data Platform Owner",
+            "mode": "dry_run",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["run_id"] == "clean-publication-2026-05-28-dry_run"
+    assert payload["status"] == "ready"
+    assert payload["plan_count"] == 6
+    assert payload["audit_recorded"] is True
+    assert all(result["status"] == "validated" for result in payload["results"])
+
+
+def test_clean_publication_run_api_supports_mock_run() -> None:
+    response = client.post(
+        "/data/clean-publication/runs",
+        json={
+            "business_date": "2026-05-28",
+            "actor": "data.platform.owner@example.org",
+            "mode": "mock_run",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "completed"
+    assert payload["results"][0]["executed_statements"]

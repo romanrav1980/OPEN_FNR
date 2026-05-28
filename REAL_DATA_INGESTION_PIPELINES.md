@@ -56,6 +56,14 @@ Every clean table carries `source_batch_id`, `quality_status` and `published_at`
 
 The API endpoint `/data/clean-publication/plans?business_date=YYYY-MM-DD` exposes ClickHouse publication SQL plans. The current idempotency strategy is `delete_by_source_batch_then_insert`: delete existing clean rows for the source batch, then insert normalized rows from raw tables.
 
+The API endpoint `/data/clean-publication/runs` executes the publication workflow in controlled modes:
+
+| Mode | Behavior |
+| --- | --- |
+| `dry_run` | validates plans and records audit without returning executable SQL as executed |
+| `mock_run` | returns delete/insert SQL statements as mock-executed evidence |
+| `clickhouse` | reserved for production ClickHouse execution after connection hardening |
+
 ## Canonical Contracts
 
 | Contract | Primary key | Required fields |
