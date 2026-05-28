@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 2 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 34px;
+        line-height: 1.15;
+      }
+
+      h2 {
+        margin-top: 34px;
+        color: #f0f0f0;
+      }
+
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      code {
+        color: #f6d6dc;
+      }
+
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+
+      .warn {
+        color: var(--warn);
+        font-weight: 700;
+      }
+
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 2 / Data Quality Console</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 2: видимость качества данных,
+          блокирующие инциденты, waiver-контроль и процессную логику DQ.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем Data Quality Console и связанные BPMN/DMN/CMMN артефакты,
+          потому что качество входных данных напрямую определяет возможность
+          публиковать прогноз и передавать результаты в пополнение. Метод
+          выбран комбинированный: API-тесты проверяют контракт, процессные тесты
+          проверяют исполнимые артефакты, UI-сборка и скриншот подтверждают, что
+          пользователь видит состояние DQ без ручного анализа логов.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, data, process и encoding тесты.</td>
+              <td>Проверить API, схемы, BPMN/DMN/CMMN и защиту от битой кодировки.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">21 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить TypeScript, JSX и production-сборку интерфейса.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI на <code>127.0.0.1:13000</code> и снимаем экран.</td>
+              <td>Зафиксировать визуальный результат тестового цикла.</td>
+              <td>Скриншот содержит Data Load Status и Data Quality Console.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем главную страницу Dev Control Tower.</td>
+              <td>Проверить, что пользователь попадает в рабочий экран, а не в пустую страницу.</td>
+              <td>Smoke-навигация ловит самые ранние поломки UI.</td>
+              <td>Отображаются модули Forecasting, Replenishment, Process.</td>
+              <td class="ok">Отображаются.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем блок Data Load Status.</td>
+              <td>Убедиться, что пользователь видит состояние загрузок по доменам.</td>
+              <td>Sprint 2 зависит от Sprint 1, поэтому DQ должен быть связан с batch status.</td>
+              <td>Видны Sales, Stock, Prices, Product MDM, Store MDM.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем Data Quality Console.</td>
+              <td>Показать блокирующие и предупреждающие DQ-инциденты.</td>
+              <td>Планировщику и Data Owner нужен единый экран для принятия решения.</td>
+              <td>Видны severity, incident id, affected rows, owner и message.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем действия Re-run, Waive, Export rows.</td>
+              <td>Подтвердить наличие ожидаемых пользовательских команд.</td>
+              <td>Пока действия статичны, но UI-контракт уже закрепляет будущую интеграцию.</td>
+              <td>Кнопки доступны в карточке выбранного инцидента.</td>
+              <td class="ok">Доступны.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>dq_check_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс после готовности clean batch.</td>
+              <td>Проверить входную точку DQ перед публикацией данных.</td>
+              <td>BPMN содержит start event и service task Run DQ rules.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>dq_check_process</code></td>
+              <td>2</td>
+              <td>Проверяем ветвление по blockingIncidentCount.</td>
+              <td>Блокирующие ошибки не должны проходить в публикацию.</td>
+              <td>Есть gateway и ветка Review blocking DQ incident.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>dq_check_process</code></td>
+              <td>3</td>
+              <td>Проверяем re-run после ручного review.</td>
+              <td>После исправления данных нужно повторно подтвердить качество.</td>
+              <td>Есть service task Re-run DQ rules.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>dq_severity_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN-таблицу severity.</td>
+              <td>Severity должна быть правилом, а не hardcode в UI.</td>
+              <td>DMN содержит decisionTable.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>publication_block_decision</code></td>
+              <td>1</td>
+              <td>Проверяем правило блокировки публикации.</td>
+              <td>Прогноз не должен публиковаться при blocker без waiver.</td>
+              <td>DMN содержит правило block_publication.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>data_quality_incident_case</code></td>
+              <td>1</td>
+              <td>Проверяем CMMN case с triage, fix source data и approve waiver.</td>
+              <td>Инциденты DQ требуют совместной работы Data Engineering и Data Owner.</td>
+              <td>CMMN содержит human tasks Triage DQ incident и Approve waiver.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/data-quality-console.png" alt="OPEN FNR Data Quality Console screenshot" />
+        <p class="caption">
+          Скриншот: Dev Control Tower с блоками Data Load Status и Data Quality Console.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 2 test cycle passed. UI показывает DQ-инциденты и действия,
+          API возвращает правила, инциденты и waiver-контроль, процессные
+          артефакты BPMN/DMN/CMMN валидируются автоматическими тестами.
+        </p>
+        <p class="warn">
+          Ограничение: UI пока использует статические данные; подключение к API
+          и интерактивные E2E-сценарии будут добавлены в последующих слоях.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

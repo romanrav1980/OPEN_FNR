@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 1 implementation is complete.
+Sprint 2 implementation is complete.
 
 ## Local Infrastructure
 
@@ -38,9 +38,18 @@ Known local URLs:
 - Dev SQL metadata/staging tables: `infra/dev/postgres/init/001_open_fnr.sql`, `infra/dev/clickhouse/init/001_open_fnr.sql`.
 - UI Data Load Status section: `apps/frontend/src/main.tsx`, `apps/frontend/src/styles.css`.
 
+## Sprint 2 Artifacts
+
+- DQ API and models: `apps/backend/open_fnr_api/data_quality.py`.
+- DQ tests: `tests/backend/test_data_quality.py`.
+- DQ process artifacts: `processes/data-quality`.
+- DQ storage structures: `open_fnr.dq_rules`, `open_fnr.dq_incidents`, `open_fnr.dq_error_rows`.
+- UI Data Quality Console: `apps/frontend/src/main.tsx`, `apps/frontend/src/styles.css`.
+- HTML test report with screenshot: `docs/test-reports/sprint-2-data-quality/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 14 passed.
+- `python -m pytest` -> 21 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -48,4 +57,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 1 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 2.
+Commit Sprint 2 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 3.

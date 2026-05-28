@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_publication_block_dmn"
+             name="OPEN FNR Publication Block"
+             namespace="https://open-fnr.local/decisions/data-quality">
+  <decision id="publication_block_decision" name="Publication Block Decision">
+    <decisionTable id="publication_block_table" hitPolicy="FIRST">
+      <input id="input_severity" label="severity">
+        <inputExpression id="input_severity_expression" typeRef="string"><text>severity</text></inputExpression>
+      </input>
+      <input id="input_waived" label="waived">
+        <inputExpression id="input_waived_expression" typeRef="boolean"><text>waived</text></inputExpression>
+      </input>
+      <output id="output_block_publication" name="block_publication" typeRef="boolean" />
+      <rule id="rule_blocker_not_waived">
+        <inputEntry id="rule_blocker_severity"><text>"blocker"</text></inputEntry>
+        <inputEntry id="rule_blocker_waived"><text>false</text></inputEntry>
+        <outputEntry id="rule_blocker_output"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_default">
+        <inputEntry id="rule_default_severity"><text>-</text></inputEntry>
+        <inputEntry id="rule_default_waived"><text>-</text></inputEntry>
+        <outputEntry id="rule_default_output"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

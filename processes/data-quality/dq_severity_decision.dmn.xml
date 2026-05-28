@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_dq_severity_dmn"
+             name="OPEN FNR DQ Severity"
+             namespace="https://open-fnr.local/decisions/data-quality">
+  <decision id="dq_severity_decision" name="DQ Severity Decision">
+    <decisionTable id="dq_severity_table" hitPolicy="FIRST">
+      <input id="input_dimension" label="dimension">
+        <inputExpression id="input_dimension_expression" typeRef="string"><text>dimension</text></inputExpression>
+      </input>
+      <input id="input_affected_rows" label="affected_rows">
+        <inputExpression id="input_affected_rows_expression" typeRef="number"><text>affected_rows</text></inputExpression>
+      </input>
+      <output id="output_severity" name="severity" typeRef="string" />
+      <rule id="rule_completeness_blocker">
+        <inputEntry id="rule_completeness_dimension"><text>"completeness"</text></inputEntry>
+        <inputEntry id="rule_completeness_rows"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_completeness_output"><text>"blocker"</text></outputEntry>
+      </rule>
+      <rule id="rule_freshness_warning">
+        <inputEntry id="rule_freshness_dimension"><text>"freshness"</text></inputEntry>
+        <inputEntry id="rule_freshness_rows"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_freshness_output"><text>"warning"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

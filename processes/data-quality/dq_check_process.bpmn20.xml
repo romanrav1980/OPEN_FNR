@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/data-quality">
+  <process id="dq_check_process" name="Data Quality Check Process" isExecutable="true">
+    <startEvent id="start_dq_check" name="Clean batch ready" />
+    <sequenceFlow id="flow_start_to_run" sourceRef="start_dq_check" targetRef="run_dq_rules" />
+    <serviceTask id="run_dq_rules"
+                 name="Run DQ rules"
+                 flowable:delegateExpression="${dqRuleRunnerDelegate}" />
+    <sequenceFlow id="flow_run_to_decision" sourceRef="run_dq_rules" targetRef="dq_result_gateway" />
+    <exclusiveGateway id="dq_result_gateway" name="Blocking incidents?" />
+    <sequenceFlow id="flow_decision_to_publish" sourceRef="dq_result_gateway" targetRef="mark_dq_passed">
+      <conditionExpression xsi:type="tFormalExpression">${blockingIncidentCount == 0}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_decision_to_review" sourceRef="dq_result_gateway" targetRef="review_dq_incident">
+      <conditionExpression xsi:type="tFormalExpression">${blockingIncidentCount &gt; 0}</conditionExpression>
+    </sequenceFlow>
+    <userTask id="review_dq_incident"
+              name="Review blocking DQ incident"
+              flowable:candidateGroups="data-engineering,data-owner" />
+    <sequenceFlow id="flow_review_to_recheck" sourceRef="review_dq_incident" targetRef="rerun_dq_rules" />
+    <serviceTask id="rerun_dq_rules"
+                 name="Re-run DQ rules"
+                 flowable:delegateExpression="${dqRuleRunnerDelegate}" />
+    <sequenceFlow id="flow_recheck_to_end" sourceRef="rerun_dq_rules" targetRef="end_dq_reviewed" />
+    <userTask id="mark_dq_passed"
+              name="Mark DQ passed"
+              flowable:candidateGroups="data-engineering" />
+    <sequenceFlow id="flow_passed_to_end" sourceRef="mark_dq_passed" targetRef="end_dq_passed" />
+    <endEvent id="end_dq_passed" name="DQ passed" />
+    <endEvent id="end_dq_reviewed" name="DQ reviewed" />
+  </process>
+</definitions>

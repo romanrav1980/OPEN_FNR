@@ -89,3 +89,19 @@ CREATE TABLE IF NOT EXISTS open_fnr.staging_prices_daily
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(business_date)
 ORDER BY (business_date, store_id, sku_id, batch_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.dq_error_rows
+(
+    incident_id String,
+    rule_id String,
+    batch_id String,
+    business_date Date,
+    domain String,
+    store_id String,
+    sku_id String,
+    error_payload String,
+    created_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, domain, incident_id, store_id, sku_id);

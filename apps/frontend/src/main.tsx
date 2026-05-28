@@ -16,6 +16,16 @@ type DataLoadStatus = {
   cutoff: string;
 };
 
+type DataQualityIncident = {
+  id: string;
+  domain: string;
+  severity: "blocker" | "warning";
+  status: "blocking" | "in_review";
+  affectedRows: string;
+  owner: string;
+  message: string;
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: "http://127.0.0.1:8000/docs", purpose: "OpenAPI" },
   { name: "Airflow", url: "http://127.0.0.1:18088", purpose: "Batch orchestration" },
@@ -31,6 +41,27 @@ const dataLoadStatuses: DataLoadStatus[] = [
   { domain: "Prices", source: "ERP", status: "waiting", rows: "-", cutoff: "03:00" },
   { domain: "Product MDM", source: "MDM", status: "loaded", rows: "5.5K", cutoff: "01:30" },
   { domain: "Store MDM", source: "MDM", status: "loaded", rows: "30K", cutoff: "01:30" },
+];
+
+const dataQualityIncidents: DataQualityIncident[] = [
+  {
+    id: "dq-20260528-sales-001",
+    domain: "Sales",
+    severity: "blocker",
+    status: "blocking",
+    affectedRows: "128",
+    owner: "Data Engineer",
+    message: "Missing store_id in inbound sales rows.",
+  },
+  {
+    id: "dq-20260528-prices-001",
+    domain: "Prices",
+    severity: "warning",
+    status: "in_review",
+    affectedRows: "5.4K",
+    owner: "Data Owner",
+    message: "Prices arrived after configured cutoff.",
+  },
 ];
 
 function App() {
@@ -104,6 +135,54 @@ function App() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Data quality console">
+        <div className="section-heading">
+          <h2>Data Quality Console</h2>
+          <p>Blocking incidents, waivers and re-checks</p>
+        </div>
+        <div className="dq-layout">
+          <div className="dq-list">
+            {dataQualityIncidents.map((incident) => (
+              <article className="dq-card" key={incident.id}>
+                <div>
+                  <span className={`status-dot severity-${incident.severity}`}>{incident.severity}</span>
+                  <span className="dq-domain">{incident.domain}</span>
+                </div>
+                <strong>{incident.id}</strong>
+                <p>{incident.message}</p>
+                <dl>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{incident.status}</dd>
+                  </div>
+                  <div>
+                    <dt>Rows</dt>
+                    <dd>{incident.affectedRows}</dd>
+                  </div>
+                  <div>
+                    <dt>Owner</dt>
+                    <dd>{incident.owner}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+          </div>
+          <aside className="dq-detail">
+            <span className="eyebrow">Selected Incident</span>
+            <h3>Waiver requires Data Owner or Admin</h3>
+            <p>
+              Blocking DQ incidents stop publication until source data is fixed,
+              checks are re-run or an audited waiver is approved.
+            </p>
+            <div className="action-row">
+              <button type="button">Re-run</button>
+              <button type="button">Waive</button>
+              <button type="button">Export rows</button>
+            </div>
+          </aside>
         </div>
       </section>
     </main>

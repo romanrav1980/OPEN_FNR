@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/data-quality">
+  <case id="data_quality_incident_case" name="Data Quality Incident Case">
+    <casePlanModel id="data_quality_incident_case_plan" name="Data Quality Incident">
+      <planItem id="plan_triage_dq_incident" definitionRef="triage_dq_incident" />
+      <planItem id="plan_fix_source_data" definitionRef="fix_source_data" />
+      <planItem id="plan_approve_waiver" definitionRef="approve_waiver" />
+      <humanTask id="triage_dq_incident"
+                 name="Triage DQ incident"
+                 flowable:candidateGroups="data-engineering" />
+      <humanTask id="fix_source_data"
+                 name="Fix source data"
+                 flowable:candidateGroups="data-owner" />
+      <humanTask id="approve_waiver"
+                 name="Approve waiver"
+                 flowable:candidateGroups="data-owner,admin" />
+    </casePlanModel>
+  </case>
+</definitions>
