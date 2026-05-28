@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/shelf-space" name="direct_to_shelf_decision">
+  <decision id="direct_to_shelf_decision" name="Direct-to-shelf decision">
+    <decisionTable id="direct_to_shelf_table" hitPolicy="FIRST">
+      <input id="input_direct_enabled" label="direct_to_shelf_enabled">
+        <inputExpression id="input_direct_expr" typeRef="boolean"><text>direct_to_shelf_enabled</text></inputExpression>
+      </input>
+      <input id="input_requested_qty" label="requested_qty">
+        <inputExpression id="input_requested_qty_expr" typeRef="number"><text>requested_qty</text></inputExpression>
+      </input>
+      <input id="input_shelf_capacity" label="shelf_capacity_qty">
+        <inputExpression id="input_shelf_capacity_expr" typeRef="number"><text>shelf_capacity_qty</text></inputExpression>
+      </input>
+      <output id="output_recommendation" label="recommendation" name="recommendation" typeRef="string" />
+      <rule id="rule_direct_to_shelf">
+        <inputEntry id="rule_direct_enabled"><text>true</text></inputEntry>
+        <inputEntry id="rule_direct_requested"><text>&lt;= shelf_capacity_qty</text></inputEntry>
+        <inputEntry id="rule_direct_capacity"><text>-</text></inputEntry>
+        <outputEntry id="rule_direct_output"><text>"direct_to_shelf"</text></outputEntry>
+      </rule>
+      <rule id="rule_keep_display">
+        <inputEntry id="rule_keep_enabled"><text>-</text></inputEntry>
+        <inputEntry id="rule_keep_requested"><text>-</text></inputEntry>
+        <inputEntry id="rule_keep_capacity"><text>-</text></inputEntry>
+        <outputEntry id="rule_keep_output"><text>"keep_display"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

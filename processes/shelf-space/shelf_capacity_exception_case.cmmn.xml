@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/shelf-space">
+  <case id="shelf_capacity_exception_case" name="Shelf capacity exception case">
+    <casePlanModel id="shelf_capacity_exception_plan" name="Shelf capacity exception plan">
+      <humanTask id="review_display_over_capacity" name="Review display over capacity" />
+      <humanTask id="adjust_display_location" name="Adjust display location" />
+      <humanTask id="approve_direct_to_shelf" name="Approve direct-to-shelf" />
+      <humanTask id="confirm_shelf_audit" name="Confirm shelf audit" />
+    </casePlanModel>
+  </case>
+</definitions>

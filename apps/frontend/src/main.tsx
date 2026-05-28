@@ -699,6 +699,32 @@ const purchaseProposalRows = [
   },
 ];
 
+const shelfPlanogramRows = [
+  { store: "S001", sku: "SKU001", zone: "front", shelf: 80, display: 120, direct: "yes" },
+  { store: "S001", sku: "SKU002", zone: "fresh-wall", shelf: 60, display: 90, direct: "no" },
+];
+
+const shelfValidationRows = [
+  {
+    store: "S001",
+    sku: "SKU001",
+    requested: 140,
+    capacity: 120,
+    status: "capacity_warning",
+    direct: "no",
+    warning: "requested display stock exceeds display capacity",
+  },
+  {
+    store: "S001",
+    sku: "SKU002",
+    requested: 50,
+    capacity: 90,
+    status: "valid",
+    direct: "no",
+    warning: "-",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -3251,6 +3277,101 @@ function App() {
             <h3>Idempotent supplier order</h3>
             <p>
               Supplier order export carries proposal id, selected supplier, quantity and idempotency key.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Shelf Space">
+        <div className="section-heading">
+          <h2>Shelf Space</h2>
+          <p>Planogram capacity, display warnings, store zones and direct-to-shelf recommendation</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Capacity Warning</span>
+            <strong>S001 / SKU001 requested 140, capacity 120</strong>
+            <p>Promo display over capacity opens shelf review before promo or order approval.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Direct-to-shelf</span>
+            <strong>Recommendation visible when shelf capacity fits</strong>
+            <p>Store Operations can approve direct-to-shelf and audit changed display values.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Store</th>
+                <th>SKU</th>
+                <th>Zone</th>
+                <th>Shelf capacity</th>
+                <th>Display capacity</th>
+                <th>Direct-to-shelf</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shelfPlanogramRows.map((row) => (
+                <tr key={`${row.store}-${row.sku}`}>
+                  <td>{row.store}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.zone}</td>
+                  <td>{row.shelf}</td>
+                  <td>{row.display}</td>
+                  <td>{row.direct}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Store</th>
+                <th>SKU</th>
+                <th>Requested</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th>Direct</th>
+                <th>Warning</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shelfValidationRows.map((row) => (
+                <tr key={`${row.store}-${row.sku}`}>
+                  <td>{row.store}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.requested}</td>
+                  <td>{row.capacity}</td>
+                  <td>{row.status}</td>
+                  <td>{row.direct}</td>
+                  <td>{row.warning}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Shelf Review</span>
+            <h3>Display over capacity</h3>
+            <p>
+              Category Manager or Store Operations reviews the capacity warning, adjusts location
+              or approves temporary exception with audit trail.
+            </p>
+            <div className="action-row">
+              <button type="button">Filter zone</button>
+              <button type="button">Review warning</button>
+              <button type="button">Approve</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Planogram Mock</span>
+            <h3>Store zone hierarchy</h3>
+            <p>
+              Planogram fields provide shelf capacity, display capacity, direct-to-shelf flag and zone filters.
             </p>
           </aside>
         </div>

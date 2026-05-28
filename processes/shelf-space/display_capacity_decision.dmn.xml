@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/shelf-space" name="display_capacity_decision">
+  <decision id="display_capacity_decision" name="Display capacity decision">
+    <decisionTable id="display_capacity_table" hitPolicy="FIRST">
+      <input id="input_requested" label="requested_display_qty">
+        <inputExpression id="input_requested_expr" typeRef="number"><text>requested_display_qty</text></inputExpression>
+      </input>
+      <input id="input_capacity" label="display_capacity_qty">
+        <inputExpression id="input_capacity_expr" typeRef="number"><text>display_capacity_qty</text></inputExpression>
+      </input>
+      <output id="output_status" label="status" name="status" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_capacity_warning">
+        <inputEntry id="rule_warning_requested"><text>&gt; display_capacity_qty</text></inputEntry>
+        <inputEntry id="rule_warning_capacity"><text>-</text></inputEntry>
+        <outputEntry id="rule_warning_status"><text>"capacity_warning"</text></outputEntry>
+        <outputEntry id="rule_warning_action"><text>"open shelf review"</text></outputEntry>
+      </rule>
+      <rule id="rule_capacity_valid">
+        <inputEntry id="rule_valid_requested"><text>-</text></inputEntry>
+        <inputEntry id="rule_valid_capacity"><text>-</text></inputEntry>
+        <outputEntry id="rule_valid_status"><text>"valid"</text></outputEntry>
+        <outputEntry id="rule_valid_action"><text>"approve shelf values"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

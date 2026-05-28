@@ -880,3 +880,31 @@ def test_supplier_constraint_case_has_terms_override_export_tasks() -> None:
     assert "Compare supplier terms" in human_task_names
     assert "Approve supplier override" in human_task_names
     assert "Confirm supplier order export" in human_task_names
+
+
+def test_display_capacity_and_direct_to_shelf_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/shelf-space/display_capacity_decision.dmn.xml", "display_capacity_decision"),
+        ("processes/shelf-space/direct_to_shelf_decision.dmn.xml", "direct_to_shelf_decision"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_shelf_capacity_exception_case_has_display_location_direct_shelf_and_audit_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/shelf-space/shelf_capacity_exception_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "shelf_capacity_exception_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review display over capacity" in human_task_names
+    assert "Adjust display location" in human_task_names
+    assert "Approve direct-to-shelf" in human_task_names
+    assert "Confirm shelf audit" in human_task_names

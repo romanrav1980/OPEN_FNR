@@ -35,6 +35,7 @@ PROCESS_CHANGE_MANAGEMENT_PROCESS_PATH = Path("processes/process-governance/proc
 INCIDENT_MANAGEMENT_PROCESS_PATH = Path("processes/observability/incident_management_process.bpmn20.xml")
 RELEASE_GO_NO_GO_PROCESS_PATH = Path("processes/release-gate/release_go_no_go_process.bpmn20.xml")
 PURCHASE_PROPOSAL_PROCESS_PATH = Path("processes/procurement/purchase_proposal_process.bpmn20.xml")
+SHELF_SPACE_REVIEW_PROCESS_PATH = Path("processes/shelf-space/shelf_space_review_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -858,3 +859,34 @@ def test_purchase_proposal_bpmn_covers_supplier_selection_share_exception_and_ex
     assert "Review supplier constraint" in user_task_names
     assert "Approve purchase proposal" in user_task_names
     assert "Supplier exception?" in gateway_names
+
+
+def test_shelf_space_review_bpmn_covers_capacity_direct_to_shelf_review_and_audit_paths() -> None:
+    tree = ElementTree.parse(SHELF_SPACE_REVIEW_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "shelf_space_review_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Load planogram capacity" in service_task_names
+    assert "Write shelf audit" in service_task_names
+    assert "Evaluate display capacity" in business_rule_names
+    assert "Evaluate direct-to-shelf" in business_rule_names
+    assert "Review shelf capacity warning" in user_task_names
+    assert "Approve shelf values" in user_task_names
+    assert "Shelf capacity warning?" in gateway_names

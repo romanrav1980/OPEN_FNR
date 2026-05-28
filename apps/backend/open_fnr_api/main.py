@@ -22,6 +22,7 @@ from .release_gate import router as release_gate_router
 from .replenishment import router as replenishment_router
 from .replenishment_scale import router as replenishment_scale_router
 from .security import router as security_router
+from .shelf_space import router as shelf_space_router
 from .stage import router as stage_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
@@ -58,6 +59,7 @@ app.include_router(replenishment_scale_router)
 app.include_router(kpi_router)
 app.include_router(lifecycle_router)
 app.include_router(security_router)
+app.include_router(shelf_space_router)
 app.include_router(stage_router)
 
 
@@ -100,6 +102,7 @@ def metadata() -> dict[str, object]:
             "performance",
             "business-pilot",
             "security",
+            "shelf-space",
             "stage-rehearsal",
             "process-engine",
             "process-governance",

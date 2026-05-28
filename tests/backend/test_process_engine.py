@@ -51,6 +51,10 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "supplier_selection_decision" for item in payload["items"])
     assert any(item["key"] == "supplier_share_exception_decision" for item in payload["items"])
     assert any(item["key"] == "supplier_constraint_case" for item in payload["items"])
+    assert any(item["key"] == "shelf_space_review_process" for item in payload["items"])
+    assert any(item["key"] == "display_capacity_decision" for item in payload["items"])
+    assert any(item["key"] == "direct_to_shelf_decision" for item in payload["items"])
+    assert any(item["key"] == "shelf_capacity_exception_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

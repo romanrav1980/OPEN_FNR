@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/shelf-space">
+  <process id="shelf_space_review_process" name="Shelf space review process" isExecutable="true">
+    <startEvent id="start_display_request" name="Display request created" />
+    <sequenceFlow id="flow_start_to_planogram" sourceRef="start_display_request" targetRef="load_planogram_capacity" />
+    <serviceTask id="load_planogram_capacity" name="Load planogram capacity" />
+    <sequenceFlow id="flow_planogram_to_display" sourceRef="load_planogram_capacity" targetRef="evaluate_display_capacity" />
+    <businessRuleTask id="evaluate_display_capacity" name="Evaluate display capacity" />
+    <sequenceFlow id="flow_display_to_direct" sourceRef="evaluate_display_capacity" targetRef="evaluate_direct_to_shelf" />
+    <businessRuleTask id="evaluate_direct_to_shelf" name="Evaluate direct-to-shelf" />
+    <sequenceFlow id="flow_direct_to_gateway" sourceRef="evaluate_direct_to_shelf" targetRef="shelf_warning_gateway" />
+    <exclusiveGateway id="shelf_warning_gateway" name="Shelf capacity warning?" />
+    <sequenceFlow id="flow_warning" sourceRef="shelf_warning_gateway" targetRef="review_shelf_capacity_warning" />
+    <sequenceFlow id="flow_valid" sourceRef="shelf_warning_gateway" targetRef="approve_shelf_values" />
+    <userTask id="review_shelf_capacity_warning" name="Review shelf capacity warning" />
+    <sequenceFlow id="flow_review_to_approve" sourceRef="review_shelf_capacity_warning" targetRef="approve_shelf_values" />
+    <userTask id="approve_shelf_values" name="Approve shelf values" />
+    <sequenceFlow id="flow_approve_to_audit" sourceRef="approve_shelf_values" targetRef="write_shelf_audit" />
+    <serviceTask id="write_shelf_audit" name="Write shelf audit" />
+    <sequenceFlow id="flow_audit_to_end" sourceRef="write_shelf_audit" targetRef="end_shelf_values_approved" />
+    <endEvent id="end_shelf_values_approved" name="Shelf values approved" />
+  </process>
+</definitions>

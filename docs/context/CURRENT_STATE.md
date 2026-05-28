@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 31 implementation is complete.
+Sprint 32 implementation is complete.
 
 ## Local Infrastructure
 
@@ -348,9 +348,21 @@ Known local URLs:
 - UI Purchase Proposal section with supplier comparison, target share warning and ERP mock export action.
 - HTML test report with screenshot: `docs/test-reports/sprint-31-procurement-optimization/index.html`.
 
+## Sprint 32 Artifacts
+
+- Shelf Space API: `apps/backend/open_fnr_api/shelf_space.py`.
+- Shelf Space tests: `tests/backend/test_shelf_space.py`.
+- Shelf Space process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Shelf space review BPMN: `processes/shelf-space/shelf_space_review_process.bpmn20.xml`.
+- Display capacity DMN: `processes/shelf-space/display_capacity_decision.dmn.xml`.
+- Direct-to-shelf DMN: `processes/shelf-space/direct_to_shelf_decision.dmn.xml`.
+- Shelf capacity exception CMMN: `processes/shelf-space/shelf_capacity_exception_case.cmmn.xml`.
+- UI Shelf Space section with planogram, zone filters, display warnings and direct-to-shelf recommendation.
+- HTML test report with screenshot: `docs/test-reports/sprint-32-shelf-space-optimization/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 252 passed.
+- `python -m pytest` -> 260 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -358,4 +370,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 31 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 32: Shelf Space Optimization.
+Commit Sprint 32 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 33: Capacity And Workload.
