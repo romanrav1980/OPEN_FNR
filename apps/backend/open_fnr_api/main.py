@@ -10,6 +10,7 @@ from .forecast import router as forecast_router
 from .ml_models import router as ml_models_router
 from .ml_governance import router as ml_governance_router
 from .multi_echelon import router as multi_echelon_router
+from .observability import router as observability_router
 from .performance import router as performance_router
 from .pilot import router as pilot_router
 from .process_engine import router as process_engine_router
@@ -41,6 +42,7 @@ app.include_router(forecast_router)
 app.include_router(ml_models_router)
 app.include_router(ml_governance_router)
 app.include_router(multi_echelon_router)
+app.include_router(observability_router)
 app.include_router(performance_router)
 app.include_router(pilot_router)
 app.include_router(promo_router)
@@ -88,6 +90,7 @@ def metadata() -> dict[str, object]:
             "replenishment",
             "replenishment-scale",
             "multi-echelon",
+            "observability",
             "performance",
             "business-pilot",
             "security",

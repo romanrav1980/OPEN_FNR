@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/observability" name="incident_severity_decision">
+  <decision id="incident_severity_decision" name="Incident severity decision">
+    <decisionTable id="incident_severity_table" hitPolicy="FIRST">
+      <input id="input_service_critical" label="service_critical">
+        <inputExpression id="input_service_critical_expr" typeRef="boolean"><text>service_critical</text></inputExpression>
+      </input>
+      <input id="input_export_failed" label="export_failed">
+        <inputExpression id="input_export_failed_expr" typeRef="boolean"><text>export_failed</text></inputExpression>
+      </input>
+      <output id="output_severity" label="severity" name="severity" typeRef="string" />
+      <output id="output_sla_minutes" label="sla_minutes" name="sla_minutes" typeRef="number" />
+      <rule id="rule_sev1_critical">
+        <inputEntry id="rule_sev1_critical_service"><text>true</text></inputEntry>
+        <inputEntry id="rule_sev1_export"><text>-</text></inputEntry>
+        <outputEntry id="rule_sev1_severity"><text>"sev1"</text></outputEntry>
+        <outputEntry id="rule_sev1_sla"><text>15</text></outputEntry>
+      </rule>
+      <rule id="rule_sev2_export">
+        <inputEntry id="rule_sev2_critical"><text>false</text></inputEntry>
+        <inputEntry id="rule_sev2_export"><text>true</text></inputEntry>
+        <outputEntry id="rule_sev2_severity"><text>"sev2"</text></outputEntry>
+        <outputEntry id="rule_sev2_sla"><text>60</text></outputEntry>
+      </rule>
+      <rule id="rule_sev3_default">
+        <inputEntry id="rule_sev3_critical"><text>-</text></inputEntry>
+        <inputEntry id="rule_sev3_export"><text>-</text></inputEntry>
+        <outputEntry id="rule_sev3_severity"><text>"sev3"</text></outputEntry>
+        <outputEntry id="rule_sev3_sla"><text>240</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

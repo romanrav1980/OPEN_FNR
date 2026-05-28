@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/observability">
+  <process id="incident_management_process" name="Incident management process" isExecutable="true">
+    <startEvent id="start_alert_fired" name="Alert fired" />
+    <sequenceFlow id="flow_start_to_severity" sourceRef="start_alert_fired" targetRef="classify_incident_severity" />
+    <businessRuleTask id="classify_incident_severity" name="Classify incident severity" />
+    <sequenceFlow id="flow_severity_to_create" sourceRef="classify_incident_severity" targetRef="create_incident" />
+    <serviceTask id="create_incident" name="Create incident" />
+    <sequenceFlow id="flow_create_to_ack" sourceRef="create_incident" targetRef="acknowledge_incident" />
+    <userTask id="acknowledge_incident" name="Acknowledge incident" />
+    <sequenceFlow id="flow_ack_to_runbook" sourceRef="acknowledge_incident" targetRef="open_runbook" />
+    <userTask id="open_runbook" name="Open runbook" />
+    <sequenceFlow id="flow_runbook_to_gateway" sourceRef="open_runbook" targetRef="incident_resolved_gateway" />
+    <exclusiveGateway id="incident_resolved_gateway" name="Incident resolved?" />
+    <sequenceFlow id="flow_not_resolved" sourceRef="incident_resolved_gateway" targetRef="escalate_incident" />
+    <sequenceFlow id="flow_resolved" sourceRef="incident_resolved_gateway" targetRef="resolve_incident" />
+    <userTask id="escalate_incident" name="Escalate incident" />
+    <sequenceFlow id="flow_escalate_to_runbook" sourceRef="escalate_incident" targetRef="open_runbook" />
+    <userTask id="resolve_incident" name="Resolve incident" />
+    <sequenceFlow id="flow_resolve_to_timeline" sourceRef="resolve_incident" targetRef="write_incident_timeline" />
+    <serviceTask id="write_incident_timeline" name="Write incident timeline" />
+    <sequenceFlow id="flow_timeline_to_end" sourceRef="write_incident_timeline" targetRef="end_incident_closed" />
+    <endEvent id="end_incident_closed" name="Incident closed" />
+  </process>
+</definitions>

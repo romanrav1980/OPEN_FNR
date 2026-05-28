@@ -645,6 +645,26 @@ const processDeployments = [
   },
 ];
 
+const opsAlerts = [
+  {
+    alert: "alert-export-20260528-001",
+    service: "publication-export",
+    severity: "sev2",
+    message: "ERP export failed for replenishment package.",
+    runbook: "publication-export-failure.md",
+  },
+];
+
+const opsIncidents = [
+  {
+    incident: "inc-20260528-001",
+    status: "open",
+    owner: "L2",
+    sla: "60 min",
+    timeline: "alert_created -> incident_opened",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2926,6 +2946,95 @@ function App() {
             <h3>Existing instances continue</h3>
             <p>
               Migration status and release notes are captured so running process instances remain safe.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Ops Dashboard">
+        <div className="section-heading">
+          <h2>Ops Dashboard</h2>
+          <p>Alerts, incidents, runbooks, traces, searchable logs and SLA-based escalation</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Alert</span>
+            <strong>ERP export failed</strong>
+            <p>SEV2 alert opens production incident with 60 minute SLA and linked runbook.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Trace</span>
+            <strong>trace-export-001</strong>
+            <p>OpenSearch log search links failed export, incident timeline and service traces.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Alert</th>
+                <th>Service</th>
+                <th>Severity</th>
+                <th>Message</th>
+                <th>Runbook</th>
+              </tr>
+            </thead>
+            <tbody>
+              {opsAlerts.map((row) => (
+                <tr key={row.alert}>
+                  <td>{row.alert}</td>
+                  <td>{row.service}</td>
+                  <td>{row.severity}</td>
+                  <td>{row.message}</td>
+                  <td>{row.runbook}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Incident</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>SLA</th>
+                <th>Timeline</th>
+              </tr>
+            </thead>
+            <tbody>
+              {opsIncidents.map((row) => (
+                <tr key={row.incident}>
+                  <td>{row.incident}</td>
+                  <td>{row.status}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.sla}</td>
+                  <td>{row.timeline}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Incident Flow</span>
+            <h3>Acknowledge, escalate, resolve</h3>
+            <p>
+              L1 acknowledges, L2 escalates after runbook execution, and Incident Manager resolves
+              after service recovery is confirmed.
+            </p>
+            <div className="action-row">
+              <button type="button">Acknowledge</button>
+              <button type="button">Escalate</button>
+              <button type="button">Resolve</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Logs</span>
+            <h3>Search failed export</h3>
+            <p>
+              Search query returns the failed export log with service name, message and trace id.
             </p>
           </aside>
         </div>

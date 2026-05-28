@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 28 implementation is complete.
+Sprint 29 implementation is complete.
 
 ## Local Infrastructure
 
@@ -314,9 +314,20 @@ Known local URLs:
 - UI Process Governance section with process versions, change request, deployment, migration and rollback actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-28-process-governance/index.html`.
 
+## Sprint 29 Artifacts
+
+- Observability API: `apps/backend/open_fnr_api/observability.py`.
+- Observability tests: `tests/backend/test_observability.py`.
+- Observability process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Incident management BPMN: `processes/observability/incident_management_process.bpmn20.xml`.
+- Incident severity DMN: `processes/observability/incident_severity_decision.dmn.xml`.
+- Production incident CMMN: `processes/observability/production_incident_case.cmmn.xml`.
+- UI Ops Dashboard section with alerts, incidents, runbooks, trace/log search and action panel.
+- HTML test report with screenshot: `docs/test-reports/sprint-29-observability-support/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 228 passed.
+- `python -m pytest` -> 236 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -324,4 +335,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 28 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 29: Observability And Support.
+Commit Sprint 29 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 30: Industrial Release Gate.

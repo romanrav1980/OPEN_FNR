@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/observability">
+  <case id="production_incident_case" name="Production incident case">
+    <casePlanModel id="production_incident_plan" name="Production incident plan">
+      <humanTask id="triage_alert" name="Triage alert" />
+      <humanTask id="execute_runbook" name="Execute runbook" />
+      <humanTask id="escalate_to_l3" name="Escalate to L3" />
+      <humanTask id="confirm_service_recovery" name="Confirm service recovery" />
+    </casePlanModel>
+  </case>
+</definitions>

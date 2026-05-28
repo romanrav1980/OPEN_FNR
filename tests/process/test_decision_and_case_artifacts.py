@@ -780,3 +780,37 @@ def test_process_incident_case_has_deployment_migration_rollback_and_recovery_ta
     assert "Review instance migration" in human_task_names
     assert "Approve process rollback" in human_task_names
     assert "Confirm process recovery" in human_task_names
+
+
+def test_incident_severity_decision_is_parseable_and_maps_severity_sla() -> None:
+    tree = ElementTree.parse(Path("processes/observability/incident_severity_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "incident_severity_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"severity", "sla_minutes"}
+    assert {"rule_sev1_critical", "rule_sev2_export", "rule_sev3_default"}.issubset(rule_ids)
+
+
+def test_production_incident_case_has_triage_runbook_escalation_and_recovery_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/observability/production_incident_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "production_incident_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage alert" in human_task_names
+    assert "Execute runbook" in human_task_names
+    assert "Escalate to L3" in human_task_names
+    assert "Confirm service recovery" in human_task_names
