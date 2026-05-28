@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 10 implementation is complete.
+Sprint 11 implementation is complete.
 
 ## Local Infrastructure
 
@@ -120,9 +120,20 @@ Known local URLs:
 - UI Promo Approval Process section with risk panel, decision actions, blocking errors, steps and timeline.
 - HTML test report with screenshot: `docs/test-reports/sprint-10-promo-approval-process/index.html`.
 
+## Sprint 11 Artifacts
+
+- Replenishment API and projection models: `apps/backend/open_fnr_api/replenishment.py`.
+- Replenishment tests: `tests/backend/test_replenishment.py`.
+- Replenishment process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Replenishment calculation BPMN: `processes/replenishment/replenishment_calculation_process.bpmn20.xml`.
+- Stock projection quality DMN: `processes/replenishment/stock_projection_quality_decision.dmn.xml`.
+- Stock projection issue CMMN: `processes/replenishment/stock_projection_issue_case.cmmn.xml`.
+- UI Inventory Projection section with projected stock graph, demand/open order/in-transit layers and stock-out warning.
+- HTML test report with screenshot: `docs/test-reports/sprint-11-replenishment-foundation/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 79 passed.
+- `python -m pytest` -> 87 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -130,4 +141,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 10 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 11: Replenishment Foundation.
+Commit Sprint 11 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 12: Order Proposal V1.

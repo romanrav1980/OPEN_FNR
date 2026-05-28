@@ -199,6 +199,13 @@ const promoApprovalTimeline = [
   { time: "12:20", event: "task_created", actor: "Flowable", text: "Supply review task created" },
 ];
 
+const inventoryProjectionDays = [
+  { date: "2026-05-29", opening: 200, demand: 52, openOrders: 0, inTransit: 0, projected: 148, risk: "none" },
+  { date: "2026-05-30", opening: 148, demand: 65, openOrders: 80, inTransit: 0, projected: 163, risk: "none" },
+  { date: "2026-05-31", opening: 163, demand: 88, openOrders: 0, inTransit: 60, projected: 135, risk: "none" },
+  { date: "2026-06-01", opening: 135, demand: 168, openOrders: 0, inTransit: 0, projected: -33, risk: "stock_out" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -552,7 +559,7 @@ function App() {
           </article>
           <article className="feature-summary">
             <span>Post-promo Stock</span>
-            <strong>340 → 290 units</strong>
+            <strong>340 -&gt; 290 units</strong>
             <p>Preview helps replenishment see stock pressure after promo demand uplift.</p>
           </article>
         </div>
@@ -801,6 +808,80 @@ function App() {
                   <td>{event.event}</td>
                   <td>{event.actor}</td>
                   <td>{event.text}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Inventory projection">
+        <div className="section-heading">
+          <h2>Inventory Projection</h2>
+          <p>Projected stock, demand projection, open orders, in-transit and safety threshold</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Projection</span>
+            <strong>projection-20260528-s001-sku001</strong>
+            <p>Store S001, SKU001, forecast regular-baseline-20260528-001, lead time 2 days.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Stock-out Warning</span>
+            <strong>2026-06-01 projected stock -33</strong>
+            <p>Demand projection consumes available stock before additional receipts are planned.</p>
+          </article>
+        </div>
+        <div className="filter-bar" aria-label="Inventory projection filters">
+          <label>
+            Store
+            <input value="S001" readOnly />
+          </label>
+          <label>
+            SKU
+            <input value="SKU001" readOnly />
+          </label>
+          <label>
+            Horizon
+            <input value="4 days" readOnly />
+          </label>
+          <label>
+            Safety
+            <input value="90 units" readOnly />
+          </label>
+        </div>
+        <div className="chart-panel" aria-label="Projected stock graph">
+          <div className="chart-bars projection-bars">
+            <span style={{ height: "72%" }} title="Projected stock day 1" />
+            <span style={{ height: "79%" }} title="Projected stock day 2" />
+            <span style={{ height: "66%" }} title="Projected stock day 3" />
+            <span style={{ height: "12%" }} title="Projected stock day 4 stock-out" />
+          </div>
+          <p>Projected stock with safety threshold 90 units; day 4 is below zero and requires planner review.</p>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Opening</th>
+                <th>Demand</th>
+                <th>Open orders</th>
+                <th>In-transit</th>
+                <th>Projected</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inventoryProjectionDays.map((day) => (
+                <tr key={day.date}>
+                  <td>{day.date}</td>
+                  <td>{day.opening}</td>
+                  <td>{day.demand}</td>
+                  <td>{day.openOrders}</td>
+                  <td>{day.inTransit}</td>
+                  <td>{day.projected}</td>
+                  <td>{day.risk}</td>
                 </tr>
               ))}
             </tbody>

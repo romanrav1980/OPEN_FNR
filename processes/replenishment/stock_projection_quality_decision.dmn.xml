@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/replenishment" name="stock_projection_quality_decision">
+  <decision id="stock_projection_quality_decision" name="Stock projection quality decision">
+    <decisionTable id="stock_projection_quality_table" hitPolicy="FIRST">
+      <input id="input_min_stock" label="min_projected_stock_qty">
+        <inputExpression id="input_min_stock_expr" typeRef="number">
+          <text>min_projected_stock_qty</text>
+        </inputExpression>
+      </input>
+      <input id="input_missing_receipts" label="missing_receipt_rows">
+        <inputExpression id="input_missing_receipts_expr" typeRef="number">
+          <text>missing_receipt_rows</text>
+        </inputExpression>
+      </input>
+      <output id="output_status" label="status" name="status" typeRef="string" />
+      <rule id="rule_failed">
+        <inputEntry id="rule_failed_stock"><text>-</text></inputEntry>
+        <inputEntry id="rule_failed_missing"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_failed_status"><text>"failed"</text></outputEntry>
+      </rule>
+      <rule id="rule_warning">
+        <inputEntry id="rule_warning_stock"><text>&lt; 0</text></inputEntry>
+        <inputEntry id="rule_warning_missing"><text>0</text></inputEntry>
+        <outputEntry id="rule_warning_status"><text>"projection_warning"</text></outputEntry>
+      </rule>
+      <rule id="rule_projected">
+        <inputEntry id="rule_projected_stock"><text>-</text></inputEntry>
+        <inputEntry id="rule_projected_missing"><text>0</text></inputEntry>
+        <outputEntry id="rule_projected_status"><text>"projected"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

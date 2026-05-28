@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="replenishment_calculation_process",
+        name="Replenishment calculation",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-004",
+        source_path="processes/replenishment/replenishment_calculation_process.bpmn20.xml",
+        owner_role="Replenishment Planner",
+    ),
+    ProcessDefinition(
+        key="stock_projection_quality_decision",
+        name="Stock projection quality decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-004",
+        source_path="processes/replenishment/stock_projection_quality_decision.dmn.xml",
+        owner_role="Replenishment Planner",
+    ),
+    ProcessDefinition(
+        key="stock_projection_issue_case",
+        name="Stock projection issue case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-004",
+        source_path="processes/replenishment/stock_projection_issue_case.cmmn.xml",
+        owner_role="Replenishment Planner",
+    ),
+    ProcessDefinition(
         key="promo_planning_process",
         name="Promo planning approval",
         artifact_type=ProcessArtifactType.BPMN,
@@ -178,6 +208,19 @@ PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
 )
 
 TASKS: tuple[ProcessTask, ...] = (
+    ProcessTask(
+        task_id="task-stock-projection-001",
+        process_instance_id="proc-stock-projection-20260528-001",
+        process_key="replenishment_calculation_process",
+        name="Review stock-out projection",
+        status=TaskStatus.OPEN,
+        assigned_role="Replenishment Planner",
+        candidate_roles=("Replenishment Planner", "Supply Chain Manager"),
+        available_actions=("acknowledge", "create_order_proposal", "comment", "escalate"),
+        sla_due_at=datetime(2026, 5, 28, 14, 30, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 13, 45, tzinfo=timezone.utc),
+        business_key="projection-20260528-s001-sku001",
+    ),
     ProcessTask(
         task_id="task-promo-approval-category-001",
         process_instance_id="proc-promo-approval-20260601-001",

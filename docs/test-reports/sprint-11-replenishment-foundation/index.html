@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 11 - Replenishment Foundation</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+      section {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        margin-top: 20px;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        margin-bottom: 12px;
+        color: var(--red-light);
+        font-size: 20px;
+      }
+      h3 {
+        margin: 16px 0 8px;
+        font-size: 16px;
+      }
+      p,
+      li,
+      td,
+      th {
+        line-height: 1.55;
+      }
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .shot {
+        width: 100%;
+        border: 1px solid var(--border);
+        margin-top: 12px;
+      }
+      code {
+        color: var(--red-light);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 11: Replenishment Foundation</h1>
+        <p class="subtitle">
+          Аннотация: тестируем основу пополнения запасов: загрузку current stock,
+          open orders, in-transit, lead time, demand projection и расчет projected stock
+          по дням с предупреждением stock-out.
+        </p>
+      </header>
+
+      <section>
+        <h2>Что тестируем</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Область</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Факт</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Inventory projection API</td>
+              <td>Открываем <code>/replenishment/inventory-projections/projection-20260528-s001-sku001</code>.</td>
+              <td>Проверяем слои расчета: stock, demand, open orders, in-transit.</td>
+              <td class="ok">Слои возвращаются.</td>
+            </tr>
+            <tr>
+              <td>Projected stock formula</td>
+              <td>Считаем opening + receipts - demand.</td>
+              <td>Это базовая формула demand projection для последующих order proposals.</td>
+              <td class="ok">Формула проверена.</td>
+            </tr>
+            <tr>
+              <td>Stock-out warning</td>
+              <td>Классифицируем projected stock против safety threshold.</td>
+              <td>Planner должен видеть риск до формирования заказа.</td>
+              <td class="ok">Stock-out на 2026-06-01 найден.</td>
+            </tr>
+            <tr>
+              <td>Data contract</td>
+              <td>Проверяем available stock = on-hand - reserved.</td>
+              <td>Ошибочные остатки ломают расчет пополнения.</td>
+              <td class="ok">Контракт валидируется.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем Dev Control Tower и находим блок <code>Inventory Projection</code>.</li>
+          <li>Проверяем карточку projection id, store, SKU, forecast version и lead time.</li>
+          <li>Проверяем stock-out warning для 2026-06-01.</li>
+          <li>Проверяем фильтры Store, SKU, Horizon, Safety.</li>
+          <li>Проверяем график projected stock и визуальное выделение последнего дня.</li>
+          <li>Проверяем таблицу слоев: opening, demand, open orders, in-transit, projected, risk.</li>
+        </ol>
+        <img class="shot" src="screenshots/inventory-projection.png" alt="Inventory Projection" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Почему</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>BPMN запускает <code>replenishment_calculation_process</code>.</td>
+              <td>Расчет должен быть управляемым процессом, а не скрытым batch.</td>
+              <td class="ok">Process artifact создан.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Загружается stock snapshot.</td>
+              <td>На нем фиксируется стартовая позиция склада/магазина.</td>
+              <td class="ok">Snapshot id доступен в projection.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Загружаются open orders и in-transit.</td>
+              <td>Будущие приходы меняют projected stock.</td>
+              <td class="ok">80 units open order и 60 units in-transit видны в API/UI.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Загружается demand projection.</td>
+              <td>Это спрос, который будет списывать запас.</td>
+              <td class="ok">Demand layer рассчитан по дням.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Считается projected stock.</td>
+              <td>Это основа order proposal в следующем спринте.</td>
+              <td class="ok">Projected stock по дням доступен.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>DMN оценивает качество и риск.</td>
+              <td>Stock-out или missing receipts должны открывать исключение.</td>
+              <td class="ok">DMN и CMMN artifacts созданы.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">87 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

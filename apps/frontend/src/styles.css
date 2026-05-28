@@ -383,6 +383,14 @@ button:hover {
   background: #7cc7ff;
 }
 
+.projection-bars {
+  grid-template-columns: repeat(4, 42px);
+}
+
+.projection-bars span:last-child {
+  background: #ff7d8a;
+}
+
 .chart-panel p {
   margin: 10px 0 0;
   color: var(--text-muted);

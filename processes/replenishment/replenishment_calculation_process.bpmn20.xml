@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment">
+  <process id="replenishment_calculation_process" name="Replenishment calculation process" isExecutable="true">
+    <startEvent id="start_projection_queued" name="Projection queued" />
+    <sequenceFlow id="flow_start_to_load_stock" sourceRef="start_projection_queued" targetRef="load_stock_snapshot" />
+    <serviceTask id="load_stock_snapshot" name="Load current stock snapshot" />
+    <sequenceFlow id="flow_stock_to_orders" sourceRef="load_stock_snapshot" targetRef="load_open_orders" />
+    <serviceTask id="load_open_orders" name="Load open orders and in-transit" />
+    <sequenceFlow id="flow_orders_to_demand" sourceRef="load_open_orders" targetRef="load_demand_projection" />
+    <serviceTask id="load_demand_projection" name="Load demand projection" />
+    <sequenceFlow id="flow_demand_to_calculate" sourceRef="load_demand_projection" targetRef="calculate_projected_stock" />
+    <serviceTask id="calculate_projected_stock" name="Calculate projected stock" />
+    <sequenceFlow id="flow_calculate_to_quality" sourceRef="calculate_projected_stock" targetRef="evaluate_projection_quality" />
+    <businessRuleTask id="evaluate_projection_quality" name="Evaluate projection quality" />
+    <sequenceFlow id="flow_quality_to_gateway" sourceRef="evaluate_projection_quality" targetRef="projection_quality_gateway" />
+    <exclusiveGateway id="projection_quality_gateway" name="Projection warning?" />
+    <sequenceFlow id="flow_quality_ok" sourceRef="projection_quality_gateway" targetRef="publish_inventory_projection" />
+    <sequenceFlow id="flow_quality_warning" sourceRef="projection_quality_gateway" targetRef="review_stock_projection_issue" />
+    <userTask id="review_stock_projection_issue" name="Review stock projection issue" />
+    <sequenceFlow id="flow_review_to_publish" sourceRef="review_stock_projection_issue" targetRef="publish_inventory_projection" />
+    <serviceTask id="publish_inventory_projection" name="Publish inventory projection" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_inventory_projection" targetRef="end_projected" />
+    <endEvent id="end_projected" name="Projection calculated" />
+  </process>
+</definitions>

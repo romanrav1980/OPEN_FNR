@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment">
+  <case id="stock_projection_issue_case" name="Stock projection issue case">
+    <casePlanModel id="stock_projection_issue_plan" name="Stock projection issue plan">
+      <humanTask id="review_stock_out_risk" name="Review stock-out risk" />
+      <humanTask id="verify_open_orders" name="Verify open orders and in-transit" />
+      <humanTask id="approve_projection_fallback" name="Approve projection fallback" />
+    </casePlanModel>
+  </case>
+</definitions>

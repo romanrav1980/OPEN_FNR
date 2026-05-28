@@ -243,3 +243,27 @@ def test_promo_shortage_case_is_parseable() -> None:
     assert "Review shortage risk" in human_task_names
     assert "Adjust promo volume" in human_task_names
     assert "Approve supply mitigation" in human_task_names
+
+
+def test_stock_projection_quality_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment/stock_projection_quality_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "stock_projection_quality_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_stock_projection_issue_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment/stock_projection_issue_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "stock_projection_issue_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review stock-out risk" in human_task_names
+    assert "Verify open orders and in-transit" in human_task_names
+    assert "Approve projection fallback" in human_task_names
