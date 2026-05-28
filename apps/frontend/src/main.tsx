@@ -588,6 +588,25 @@ const lineageRows = [
   { source: "clean.sales_daily", target: "mart.feature_store", rows: "164.82M", checksum: "sha256:feature-sales" },
 ];
 
+const mlGovernanceRows = [
+  {
+    model: "regular-demand-lgbm-v2",
+    status: "shadow",
+    wape: "14.9%",
+    baseline: "18.4%",
+    shadow: "15.2%",
+    bias: "-0.4%",
+    drift: "low",
+  },
+];
+
+const mlReleaseSteps = [
+  { step: "Backtesting", owner: "Data Scientist", status: "passed", evidence: "WAPE improved by 3.5 pp" },
+  { step: "Drift detection", owner: "Data Scientist", status: "passed", evidence: "low drift" },
+  { step: "Shadow run", owner: "Forecast Owner", status: "passed", evidence: "shadow WAPE below baseline" },
+  { step: "Release approval", owner: "Forecast Owner", status: "ready", evidence: "release gate allowed" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2615,6 +2634,97 @@ function App() {
             <p>
               Failed or late partitions open a case for triage, lineage review, reprocessing approval
               and cutoff recovery confirmation.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Model Monitoring V2">
+        <div className="section-heading">
+          <h2>Model Monitoring V2</h2>
+          <p>Retraining, drift detection, shadow comparison, release approval and rollback</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Candidate</span>
+            <strong>regular-demand-lgbm-v2</strong>
+            <p>Candidate improves WAPE versus baseline and passes shadow comparison with low drift.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Release Gate</span>
+            <strong>Allowed</strong>
+            <p>Forecast Owner can approve release. Rollback path is rehearsed and audited.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Status</th>
+                <th>WAPE</th>
+                <th>Baseline WAPE</th>
+                <th>Shadow WAPE</th>
+                <th>Bias</th>
+                <th>Drift</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mlGovernanceRows.map((row) => (
+                <tr key={row.model}>
+                  <td>{row.model}</td>
+                  <td>{row.status}</td>
+                  <td>{row.wape}</td>
+                  <td>{row.baseline}</td>
+                  <td>{row.shadow}</td>
+                  <td>{row.bias}</td>
+                  <td>{row.drift}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mlReleaseSteps.map((row) => (
+                <tr key={row.step}>
+                  <td>{row.step}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.status}</td>
+                  <td>{row.evidence}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Release Process</span>
+            <h3>Approve model release</h3>
+            <p>
+              Forecast Owner approves only after backtesting, drift detection and shadow comparison.
+              High drift opens a model drift case instead.
+            </p>
+            <div className="action-row">
+              <button type="button">Approve</button>
+              <button type="button">Release</button>
+              <button type="button">Rollback</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Drift Case</span>
+            <h3>Rollback rehearsed</h3>
+            <p>
+              Drift case covers triage, shadow comparison review, rollback approval and retraining plan confirmation.
             </p>
           </aside>
         </div>

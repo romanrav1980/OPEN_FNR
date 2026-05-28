@@ -678,3 +678,37 @@ def test_large_scale_data_incident_case_has_partition_lineage_and_cutoff_tasks()
     assert "Review lineage gap" in human_task_names
     assert "Approve reprocessing" in human_task_names
     assert "Confirm cutoff recovery" in human_task_names
+
+
+def test_model_release_gate_decision_is_parseable_and_has_approve_block_rollback_rules() -> None:
+    tree = ElementTree.parse(Path("processes/ml-governance/model_release_gate_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "model_release_gate_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"decision", "action"}
+    assert {"rule_block_high_drift", "rule_approve_candidate", "rule_rollback"}.issubset(rule_ids)
+
+
+def test_model_drift_case_has_drift_shadow_rollback_and_retraining_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/ml-governance/model_drift_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "model_drift_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage drift alert" in human_task_names
+    assert "Review shadow comparison" in human_task_names
+    assert "Approve model rollback" in human_task_names
+    assert "Confirm retraining plan" in human_task_names

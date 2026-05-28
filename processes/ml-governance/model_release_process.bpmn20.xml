@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/ml-governance">
+  <process id="model_release_process" name="Model release process" isExecutable="true">
+    <startEvent id="start_retraining_completed" name="Retraining completed" />
+    <sequenceFlow id="flow_start_to_backtest" sourceRef="start_retraining_completed" targetRef="run_backtesting" />
+    <serviceTask id="run_backtesting" name="Run backtesting" />
+    <sequenceFlow id="flow_backtest_to_drift" sourceRef="run_backtesting" targetRef="detect_model_drift" />
+    <serviceTask id="detect_model_drift" name="Detect model drift" />
+    <sequenceFlow id="flow_drift_to_shadow" sourceRef="detect_model_drift" targetRef="run_shadow_comparison" />
+    <serviceTask id="run_shadow_comparison" name="Run shadow comparison" />
+    <sequenceFlow id="flow_shadow_to_gate" sourceRef="run_shadow_comparison" targetRef="evaluate_model_release_gate" />
+    <businessRuleTask id="evaluate_model_release_gate" name="Evaluate model release gate" />
+    <sequenceFlow id="flow_gate_to_gateway" sourceRef="evaluate_model_release_gate" targetRef="model_release_gateway" />
+    <exclusiveGateway id="model_release_gateway" name="Model release allowed?" />
+    <sequenceFlow id="flow_allowed" sourceRef="model_release_gateway" targetRef="approve_model_release" />
+    <sequenceFlow id="flow_blocked" sourceRef="model_release_gateway" targetRef="review_model_drift" />
+    <userTask id="review_model_drift" name="Review model drift" />
+    <sequenceFlow id="flow_drift_to_rollback" sourceRef="review_model_drift" targetRef="rollback_model" />
+    <serviceTask id="rollback_model" name="Rollback model" />
+    <sequenceFlow id="flow_rollback_to_end" sourceRef="rollback_model" targetRef="end_model_rolled_back" />
+    <userTask id="approve_model_release" name="Approve model release" />
+    <sequenceFlow id="flow_approve_to_publish" sourceRef="approve_model_release" targetRef="publish_model_release" />
+    <serviceTask id="publish_model_release" name="Publish model release" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_model_release" targetRef="end_model_released" />
+    <endEvent id="end_model_released" name="Model released" />
+    <endEvent id="end_model_rolled_back" name="Model rolled back" />
+  </process>
+</definitions>

@@ -29,6 +29,7 @@ ACCESS_REQUEST_PROCESS_PATH = Path("processes/security/access_request_process.bp
 STAGE_DAILY_CYCLE_PROCESS_PATH = Path("processes/stage/stage_daily_cycle_process.bpmn20.xml")
 PILOT_OPERATIONAL_PROCESS_PATH = Path("processes/pilot/pilot_operational_process.bpmn20.xml")
 INDUSTRIAL_DATA_LOAD_PROCESS_PATH = Path("processes/data-scale/industrial_data_load_process.bpmn20.xml")
+MODEL_RELEASE_PROCESS_PATH = Path("processes/ml-governance/model_release_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -657,3 +658,36 @@ def test_industrial_data_load_bpmn_covers_partition_lineage_dq_and_reprocess_pat
     assert "Evaluate industrial DQ gate" in business_rule_names
     assert "Review large-scale data incident" in user_task_names
     assert "Industrial DQ passed?" in gateway_names
+
+
+def test_model_release_bpmn_covers_retraining_shadow_approval_and_rollback_paths() -> None:
+    tree = ElementTree.parse(MODEL_RELEASE_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "model_release_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    end_event_names = {
+        event.attrib["name"]
+        for event in tree.findall(".//bpmn:endEvent", BPMN_NS)
+    }
+    assert "Run backtesting" in service_task_names
+    assert "Detect model drift" in service_task_names
+    assert "Run shadow comparison" in service_task_names
+    assert "Rollback model" in service_task_names
+    assert "Publish model release" in service_task_names
+    assert "Evaluate model release gate" in business_rule_names
+    assert "Review model drift" in user_task_names
+    assert "Approve model release" in user_task_names
+    assert {"Model released", "Model rolled back"}.issubset(end_event_names)

@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 25 implementation is complete.
+Sprint 26 implementation is complete.
 
 ## Local Infrastructure
 
@@ -281,9 +281,20 @@ Known local URLs:
 - UI Production Data Scale section with industrial profile, partition health, lineage and DQ gate actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-25-production-data-scale/index.html`.
 
+## Sprint 26 Artifacts
+
+- ML Governance API: `apps/backend/open_fnr_api/ml_governance.py`.
+- ML Governance tests: `tests/backend/test_ml_governance.py`.
+- ML governance process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Model release BPMN: `processes/ml-governance/model_release_process.bpmn20.xml`.
+- Model release gate DMN: `processes/ml-governance/model_release_gate_decision.dmn.xml`.
+- Model drift CMMN: `processes/ml-governance/model_drift_case.cmmn.xml`.
+- UI Model Monitoring V2 section with drift panel, shadow comparison, release approval and rollback actions.
+- HTML test report with screenshot: `docs/test-reports/sprint-26-production-ml-retraining/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 203 passed.
+- `python -m pytest` -> 212 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -291,4 +302,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 25 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 26: Production ML And Retraining.
+Commit Sprint 26 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 27: Production Replenishment Scale.

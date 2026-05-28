@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/ml-governance">
+  <case id="model_drift_case" name="Model drift case">
+    <casePlanModel id="model_drift_plan" name="Model drift plan">
+      <humanTask id="triage_drift_alert" name="Triage drift alert" />
+      <humanTask id="review_shadow_comparison" name="Review shadow comparison" />
+      <humanTask id="approve_model_rollback" name="Approve model rollback" />
+      <humanTask id="confirm_retraining_plan" name="Confirm retraining plan" />
+    </casePlanModel>
+  </case>
+</definitions>

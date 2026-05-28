@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="model_release_process",
+        name="Model release process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-019",
+        source_path="processes/ml-governance/model_release_process.bpmn20.xml",
+        owner_role="Forecast Owner",
+    ),
+    ProcessDefinition(
+        key="model_release_gate_decision",
+        name="Model release gate decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-019",
+        source_path="processes/ml-governance/model_release_gate_decision.dmn.xml",
+        owner_role="Forecast Owner",
+    ),
+    ProcessDefinition(
+        key="model_drift_case",
+        name="Model drift case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-019",
+        source_path="processes/ml-governance/model_drift_case.cmmn.xml",
+        owner_role="Data Scientist",
+    ),
+    ProcessDefinition(
         key="industrial_data_load_process",
         name="Industrial data load process",
         artifact_type=ProcessArtifactType.BPMN,

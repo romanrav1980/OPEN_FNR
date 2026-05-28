@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/ml-governance" name="model_release_gate_decision">
+  <decision id="model_release_gate_decision" name="Model release gate decision">
+    <decisionTable id="model_release_gate_table" hitPolicy="FIRST">
+      <input id="input_wape_delta" label="wape_delta">
+        <inputExpression id="input_wape_delta_expr" typeRef="number"><text>wape_delta</text></inputExpression>
+      </input>
+      <input id="input_abs_bias" label="abs_bias">
+        <inputExpression id="input_abs_bias_expr" typeRef="number"><text>abs_bias</text></inputExpression>
+      </input>
+      <input id="input_drift" label="drift_severity">
+        <inputExpression id="input_drift_expr" typeRef="string"><text>drift_severity</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_block_high_drift">
+        <inputEntry id="rule_block_delta"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_drift"><text>"high"</text></inputEntry>
+        <outputEntry id="rule_block_decision"><text>"block"</text></outputEntry>
+        <outputEntry id="rule_block_action"><text>"open drift case"</text></outputEntry>
+      </rule>
+      <rule id="rule_approve_candidate">
+        <inputEntry id="rule_approve_delta"><text>&lt; 0</text></inputEntry>
+        <inputEntry id="rule_approve_bias"><text>&lt;= 2</text></inputEntry>
+        <inputEntry id="rule_approve_drift"><text>"low"</text></inputEntry>
+        <outputEntry id="rule_approve_decision"><text>"approve"</text></outputEntry>
+        <outputEntry id="rule_approve_action"><text>"release candidate"</text></outputEntry>
+      </rule>
+      <rule id="rule_rollback">
+        <inputEntry id="rule_rollback_delta"><text>&gt;= 0</text></inputEntry>
+        <inputEntry id="rule_rollback_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_rollback_drift"><text>-</text></inputEntry>
+        <outputEntry id="rule_rollback_decision"><text>"rollback"</text></outputEntry>
+        <outputEntry id="rule_rollback_action"><text>"restore previous model"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
