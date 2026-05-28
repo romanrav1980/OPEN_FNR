@@ -489,6 +489,29 @@ const dcAllocationRows = [
   },
 ];
 
+const performanceMetrics = [
+  { metric: "Batch runtime", value: "76", threshold: "120", unit: "minutes", status: "passed" },
+  { metric: "API p95 latency", value: "180", threshold: "500", unit: "ms", status: "passed" },
+  { metric: "UI LCP", value: "2100", threshold: "3000", unit: "ms", status: "passed" },
+  { metric: "ClickHouse read", value: "640", threshold: "1000", unit: "ms", status: "passed" },
+  { metric: "Airflow DAG runtime", value: "84", threshold: "120", unit: "minutes", status: "passed" },
+];
+
+const performanceBottlenecks = [
+  {
+    component: "Spark feature build",
+    severity: "medium",
+    finding: "Feature join dominates pilot runtime.",
+    recommendation: "Pre-partition sales and stock features by date, dc_id and category_id.",
+  },
+  {
+    component: "ClickHouse dashboard reads",
+    severity: "low",
+    finding: "KPI dashboard uses repeated segment scans.",
+    recommendation: "Add daily aggregate projection for WAPE and service-level slices.",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2015,6 +2038,104 @@ function App() {
             <p>
               Drill-down explains why S001 and S002 are covered first, while S003 remains unfilled
               due to the shortage after higher priority allocation.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Performance report">
+        <div className="section-heading">
+          <h2>Performance Gate 1</h2>
+          <p>Pilot-scale synthetic load, runtime baseline, bottlenecks and gate decision</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Pilot Profile</span>
+            <strong>3 000 stores x 5 500 SKU x 30 days</strong>
+            <p>495M synthetic forecast rows are distributed across 8 shards for the first capacity gate.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Gate Decision</span>
+            <strong>Passed</strong>
+            <p>Batch runtime, API latency, UI latency, ClickHouse reads and Airflow runtime are below thresholds.</p>
+          </article>
+        </div>
+        <div className="chart-panel" aria-label="Performance metric chart">
+          <div className="chart-bars">
+            <span style={{ height: "63%" }} title="Batch runtime" />
+            <span style={{ height: "36%" }} title="API latency" />
+            <span style={{ height: "70%" }} title="UI LCP" />
+            <span style={{ height: "64%" }} title="ClickHouse read" />
+            <span style={{ height: "70%" }} title="Airflow DAG" />
+          </div>
+          <p>Each bar shows actual value as a share of the configured Sprint 21 threshold.</p>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Actual</th>
+                <th>Threshold</th>
+                <th>Unit</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {performanceMetrics.map((row) => (
+                <tr key={row.metric}>
+                  <td>{row.metric}</td>
+                  <td>{row.value}</td>
+                  <td>{row.threshold}</td>
+                  <td>{row.unit}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Severity</th>
+                <th>Finding</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {performanceBottlenecks.map((row) => (
+                <tr key={row.component}>
+                  <td>{row.component}</td>
+                  <td>{row.severity}</td>
+                  <td>{row.finding}</td>
+                  <td>{row.recommendation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">BPMN Gate</span>
+            <h3>Evaluate performance gate</h3>
+            <p>
+              Performance Engineer runs synthetic load, batch benchmark, API latency benchmark and
+              UI baseline before the DMN decision publishes gate result.
+            </p>
+            <div className="action-row">
+              <button type="button">Open run</button>
+              <button type="button">Publish report</button>
+              <button type="button">Open regression</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Waiver Case</span>
+            <h3>Architect approval required</h3>
+            <p>
+              Failed blocking metrics open a regression case. Non-blocking latency regression can
+              be waived only by Architect with audit trail and bottleneck owner.
             </p>
           </aside>
         </div>

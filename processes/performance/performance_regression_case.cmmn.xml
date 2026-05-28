@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/performance">
+  <case id="performance_regression_case" name="Performance regression case">
+    <casePlanModel id="performance_regression_plan" name="Performance regression plan">
+      <humanTask id="triage_failed_metric" name="Triage failed metric" />
+      <humanTask id="assign_bottleneck_owner" name="Assign bottleneck owner" />
+      <humanTask id="approve_performance_waiver" name="Approve performance waiver" />
+      <humanTask id="confirm_gate_decision" name="Confirm gate decision" />
+    </casePlanModel>
+  </case>
+</definitions>

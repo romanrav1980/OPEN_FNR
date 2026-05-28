@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/performance">
+  <process id="performance_test_run_process" name="Performance test run process" isExecutable="true">
+    <startEvent id="start_performance_run_planned" name="Performance run planned" />
+    <sequenceFlow id="flow_start_to_generate" sourceRef="start_performance_run_planned" targetRef="generate_synthetic_load" />
+    <serviceTask id="generate_synthetic_load" name="Generate synthetic load" />
+    <sequenceFlow id="flow_generate_to_batch" sourceRef="generate_synthetic_load" targetRef="run_batch_benchmark" />
+    <serviceTask id="run_batch_benchmark" name="Run batch benchmark" />
+    <sequenceFlow id="flow_batch_to_api" sourceRef="run_batch_benchmark" targetRef="run_api_latency_benchmark" />
+    <serviceTask id="run_api_latency_benchmark" name="Run API latency benchmark" />
+    <sequenceFlow id="flow_api_to_ui" sourceRef="run_api_latency_benchmark" targetRef="run_ui_performance_benchmark" />
+    <serviceTask id="run_ui_performance_benchmark" name="Run UI performance benchmark" />
+    <sequenceFlow id="flow_ui_to_gate" sourceRef="run_ui_performance_benchmark" targetRef="evaluate_performance_gate" />
+    <businessRuleTask id="evaluate_performance_gate" name="Evaluate performance gate" />
+    <sequenceFlow id="flow_gate_to_gateway" sourceRef="evaluate_performance_gate" targetRef="performance_gate_gateway" />
+    <exclusiveGateway id="performance_gate_gateway" name="Performance gate passed?" />
+    <sequenceFlow id="flow_passed" sourceRef="performance_gate_gateway" targetRef="publish_performance_report" />
+    <sequenceFlow id="flow_failed" sourceRef="performance_gate_gateway" targetRef="review_performance_regression" />
+    <userTask id="review_performance_regression" name="Review performance regression" />
+    <sequenceFlow id="flow_review_to_waiver" sourceRef="review_performance_regression" targetRef="approve_or_reject_waiver" />
+    <userTask id="approve_or_reject_waiver" name="Approve or reject waiver" />
+    <sequenceFlow id="flow_waiver_to_report" sourceRef="approve_or_reject_waiver" targetRef="publish_performance_report" />
+    <serviceTask id="publish_performance_report" name="Publish performance report" />
+    <sequenceFlow id="flow_report_to_end" sourceRef="publish_performance_report" targetRef="end_performance_gate_recorded" />
+    <endEvent id="end_performance_gate_recorded" name="Performance gate recorded" />
+  </process>
+</definitions>

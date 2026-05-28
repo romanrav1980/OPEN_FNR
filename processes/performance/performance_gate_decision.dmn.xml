@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/performance" name="performance_gate_decision">
+  <decision id="performance_gate_decision" name="Performance gate decision">
+    <decisionTable id="performance_gate_table" hitPolicy="FIRST">
+      <input id="input_batch_runtime" label="batch_runtime_minutes">
+        <inputExpression id="input_batch_runtime_expr" typeRef="number"><text>batch_runtime_minutes</text></inputExpression>
+      </input>
+      <input id="input_api_p95" label="api_p95_latency_ms">
+        <inputExpression id="input_api_p95_expr" typeRef="number"><text>api_p95_latency_ms</text></inputExpression>
+      </input>
+      <input id="input_ui_lcp" label="ui_lcp_ms">
+        <inputExpression id="input_ui_lcp_expr" typeRef="number"><text>ui_lcp_ms</text></inputExpression>
+      </input>
+      <output id="output_gate_decision" label="gate_decision" name="gate_decision" typeRef="string" />
+      <output id="output_next_action" label="next_action" name="next_action" typeRef="string" />
+      <rule id="rule_fail_batch">
+        <inputEntry id="rule_fail_batch_runtime"><text>&gt; 120</text></inputEntry>
+        <inputEntry id="rule_fail_batch_api"><text>-</text></inputEntry>
+        <inputEntry id="rule_fail_batch_ui"><text>-</text></inputEntry>
+        <outputEntry id="rule_fail_batch_decision"><text>"fail"</text></outputEntry>
+        <outputEntry id="rule_fail_batch_action"><text>"open regression case"</text></outputEntry>
+      </rule>
+      <rule id="rule_waiver_latency">
+        <inputEntry id="rule_waiver_runtime"><text>-</text></inputEntry>
+        <inputEntry id="rule_waiver_api"><text>&gt; 500</text></inputEntry>
+        <inputEntry id="rule_waiver_ui"><text>&gt; 3000</text></inputEntry>
+        <outputEntry id="rule_waiver_decision"><text>"waiver_required"</text></outputEntry>
+        <outputEntry id="rule_waiver_action"><text>"architect waiver review"</text></outputEntry>
+      </rule>
+      <rule id="rule_pass">
+        <inputEntry id="rule_pass_runtime"><text>-</text></inputEntry>
+        <inputEntry id="rule_pass_api"><text>-</text></inputEntry>
+        <inputEntry id="rule_pass_ui"><text>-</text></inputEntry>
+        <outputEntry id="rule_pass_decision"><text>"pass"</text></outputEntry>
+        <outputEntry id="rule_pass_action"><text>"publish report"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="performance_test_run_process",
+        name="Performance test run process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-014",
+        source_path="processes/performance/performance_test_run_process.bpmn20.xml",
+        owner_role="Performance Engineer",
+    ),
+    ProcessDefinition(
+        key="performance_gate_decision",
+        name="Performance gate decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-014",
+        source_path="processes/performance/performance_gate_decision.dmn.xml",
+        owner_role="Architect",
+    ),
+    ProcessDefinition(
+        key="performance_regression_case",
+        name="Performance regression case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-014",
+        source_path="processes/performance/performance_regression_case.cmmn.xml",
+        owner_role="Performance Engineer",
+    ),
+    ProcessDefinition(
         key="dc_replenishment_process",
         name="DC replenishment process",
         artifact_type=ProcessArtifactType.BPMN,

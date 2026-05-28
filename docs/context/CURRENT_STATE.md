@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 20 implementation is complete.
+Sprint 21 implementation is complete.
 
 ## Local Infrastructure
 
@@ -225,9 +225,21 @@ Known local URLs:
 - UI Supply Chain Dashboard section with DC demand, shortage, allocation preview, drill-down and action panel.
 - HTML test report with screenshot: `docs/test-reports/sprint-20-multi-echelon-v1/index.html`.
 
+## Sprint 21 Artifacts
+
+- Performance API: `apps/backend/open_fnr_api/performance.py`.
+- Performance tests: `tests/backend/test_performance.py`.
+- Synthetic scale helper: `scripts/performance/generate-synthetic-scale.ps1`.
+- Performance process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Performance test run BPMN: `processes/performance/performance_test_run_process.bpmn20.xml`.
+- Performance gate DMN: `processes/performance/performance_gate_decision.dmn.xml`.
+- Performance regression CMMN: `processes/performance/performance_regression_case.cmmn.xml`.
+- UI Performance Gate 1 section with pilot-scale profile, metric table, bottlenecks, gate actions and waiver case.
+- HTML test report with screenshot: `docs/test-reports/sprint-21-performance-gate-1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 161 passed.
+- `python -m pytest` -> 171 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -235,4 +247,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 20 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 21: Performance Gate 1.
+Commit Sprint 21 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 22: Security And RBAC Hardening.

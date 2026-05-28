@@ -17,6 +17,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "dc_replenishment_process" for item in payload["items"])
     assert any(item["key"] == "dc_allocation_priority_decision" for item in payload["items"])
     assert any(item["key"] == "dc_shortage_case" for item in payload["items"])
+    assert any(item["key"] == "performance_test_run_process" for item in payload["items"])
+    assert any(item["key"] == "performance_gate_decision" for item in payload["items"])
+    assert any(item["key"] == "performance_regression_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:
