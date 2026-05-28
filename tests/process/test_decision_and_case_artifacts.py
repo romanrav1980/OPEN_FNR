@@ -575,3 +575,38 @@ def test_security_incident_case_has_required_lifecycle_tasks() -> None:
     assert "Review audit trail" in human_task_names
     assert "Revoke suspicious access" in human_task_names
     assert "Confirm incident closure" in human_task_names
+
+
+def test_stage_go_no_go_decision_is_parseable_and_has_ready_and_no_go_rules() -> None:
+    tree = ElementTree.parse(Path("processes/stage/stage_go_no_go_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "stage_go_no_go_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"decision", "next_action"}
+    assert {"rule_no_go_critical", "rule_no_go_failed_step", "rule_go_ready"}.issubset(rule_ids)
+
+
+def test_stage_uat_case_has_required_business_uat_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/stage/stage_uat_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "stage_uat_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Accept stage snapshot" in human_task_names
+    assert "Execute forecast UAT" in human_task_names
+    assert "Execute replenishment UAT" in human_task_names
+    assert "Validate export UAT" in human_task_names
+    assert "Confirm pilot go/no-go" in human_task_names

@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 22 implementation is complete.
+Sprint 23 implementation is complete.
 
 ## Local Infrastructure
 
@@ -248,9 +248,20 @@ Known local URLs:
 - UI Admin Console V1 section with roles, region/category scopes, access requests, audit viewer and denied-state explanation.
 - HTML test report with screenshot: `docs/test-reports/sprint-22-security-rbac/index.html`.
 
+## Sprint 23 Artifacts
+
+- Stage rehearsal API: `apps/backend/open_fnr_api/stage.py`.
+- Stage rehearsal tests: `tests/backend/test_stage.py`.
+- Stage process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Stage daily cycle BPMN: `processes/stage/stage_daily_cycle_process.bpmn20.xml`.
+- Stage go/no-go DMN: `processes/stage/stage_go_no_go_decision.dmn.xml`.
+- Stage UAT CMMN: `processes/stage/stage_uat_case.cmmn.xml`.
+- UI Stage Rehearsal section with full daily cycle, stage snapshot, UAT checklist and go/no-go readiness.
+- HTML test report with screenshot: `docs/test-reports/sprint-23-stage-rehearsal/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 181 passed.
+- `python -m pytest` -> 188 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -258,4 +269,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 22 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 23: Stage Rehearsal.
+Commit Sprint 23 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 24: Business Pilot Release.

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/stage">
+  <process id="stage_daily_cycle_process" name="Stage daily cycle process" isExecutable="true">
+    <startEvent id="start_stage_run" name="Stage run started" />
+    <sequenceFlow id="flow_start_to_dq" sourceRef="start_stage_run" targetRef="run_dq_checks" />
+    <serviceTask id="run_dq_checks" name="Run DQ checks" />
+    <sequenceFlow id="flow_dq_to_forecast" sourceRef="run_dq_checks" targetRef="run_regular_forecast" />
+    <serviceTask id="run_regular_forecast" name="Run regular forecast" />
+    <sequenceFlow id="flow_forecast_to_promo" sourceRef="run_regular_forecast" targetRef="run_promo_forecast" />
+    <serviceTask id="run_promo_forecast" name="Run promo forecast" />
+    <sequenceFlow id="flow_promo_to_replenishment" sourceRef="run_promo_forecast" targetRef="generate_order_proposals" />
+    <serviceTask id="generate_order_proposals" name="Generate order proposals" />
+    <sequenceFlow id="flow_replenishment_to_exceptions" sourceRef="generate_order_proposals" targetRef="review_stage_exceptions" />
+    <userTask id="review_stage_exceptions" name="Review stage exceptions" />
+    <sequenceFlow id="flow_exceptions_to_export" sourceRef="review_stage_exceptions" targetRef="publish_stage_exports" />
+    <serviceTask id="publish_stage_exports" name="Publish stage exports" />
+    <sequenceFlow id="flow_export_to_gate" sourceRef="publish_stage_exports" targetRef="evaluate_stage_go_no_go" />
+    <businessRuleTask id="evaluate_stage_go_no_go" name="Evaluate stage go/no-go" />
+    <sequenceFlow id="flow_gate_to_end" sourceRef="evaluate_stage_go_no_go" targetRef="end_stage_run_completed" />
+    <endEvent id="end_stage_run_completed" name="Stage run completed" />
+  </process>
+</definitions>

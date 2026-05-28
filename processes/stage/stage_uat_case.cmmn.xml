@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/stage">
+  <case id="stage_uat_case" name="Stage UAT case">
+    <casePlanModel id="stage_uat_plan" name="Stage UAT plan">
+      <humanTask id="accept_stage_snapshot" name="Accept stage snapshot" />
+      <humanTask id="execute_forecast_uat" name="Execute forecast UAT" />
+      <humanTask id="execute_replenishment_uat" name="Execute replenishment UAT" />
+      <humanTask id="validate_export_uat" name="Validate export UAT" />
+      <humanTask id="confirm_pilot_go_no_go" name="Confirm pilot go/no-go" />
+    </casePlanModel>
+  </case>
+</definitions>

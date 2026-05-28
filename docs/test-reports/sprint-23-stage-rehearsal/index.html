@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 23 - Stage Rehearsal</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      main { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+      section { border: 1px solid var(--border); background: var(--panel); margin-top: 20px; padding: 20px; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-bottom: 12px; color: var(--red-light); font-size: 20px; }
+      p, li, td, th { line-height: 1.55; }
+      .subtitle { margin-top: 8px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .shot { width: 100%; border: 1px solid var(--border); margin-top: 12px; }
+      code { color: var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 23: Stage Rehearsal</h1>
+        <p class="subtitle">
+          Аннотация: тестируем полный stage-прогон ежедневного цикла. Такой тест нужен, чтобы доказать,
+          что разрозненные модули MVP собираются в управляемый бизнес-процесс с UAT evidence и готовностью к pilot go/no-go.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем блок <code>Stage Rehearsal</code>.</li>
+          <li>Проверяем stage run banner: run go/no-go ready, snapshot stage-snapshot-20260528-001.</li>
+          <li>Проверяем таблицу daily cycle: DQ, forecast, promo, replenishment, exceptions, publication.</li>
+          <li>Проверяем UAT checklist: Data Owner, Forecast Planner, Supply Chain Manager, Integration Engineer.</li>
+          <li>Проверяем action panel: Open trace, Review UAT, Prepare go/no-go.</li>
+        </ol>
+        <img class="shot" src="screenshots/stage-rehearsal.png" alt="Stage Rehearsal" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Запускаем DQ checks.</td><td>Нельзя строить прогноз на плохом snapshot.</td><td>DQ blockers = 0.</td><td class="ok">Проверено trace API.</td></tr>
+            <tr><td>2</td><td>Запускаем regular forecast.</td><td>Это базовый спрос для replenishment.</td><td>WAPE smoke accepted.</td><td class="ok">Проверено stage order.</td></tr>
+            <tr><td>3</td><td>Запускаем promo forecast.</td><td>Promo uplift должен попасть в общий спрос.</td><td>Promo uplift exported.</td><td class="ok">Проверено stage order.</td></tr>
+            <tr><td>4</td><td>Генерируем order proposals.</td><td>Автозаказ проверяется на stage перед пилотом.</td><td>Proposal batch generated.</td><td class="ok">Проверено stage order.</td></tr>
+            <tr><td>5</td><td>Business Owner reviews exceptions.</td><td>Некритичные исключения можно принять, критичные блокируют pilot.</td><td>2 accepted non-blocking exceptions.</td><td class="ok">Проверено go/no-go helper.</td></tr>
+            <tr><td>6</td><td>Публикуем ERP/WMS/DWH export.</td><td>Нужно проверить idempotency и статусы интеграций.</td><td>Idempotency keys accepted.</td><td class="ok">Проверено trace API.</td></tr>
+            <tr><td>7</td><td>DMN принимает go/no-go decision.</td><td>Pilot нельзя начинать при failed step или critical defects.</td><td>critical defects = 0, failed steps = 0.</td><td class="ok">Проверено DMN и helper-тестом.</td></tr>
+            <tr><td>8</td><td>CMMN ведет UAT case.</td><td>Каждая роль должна дать evidence по своему сценарию.</td><td>Snapshot, forecast, replenishment и export UAT закрыты.</td><td class="ok">Проверено CMMN-тестом.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr><th>Тип</th><th>Проверка</th><th>Результат</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Backend</td><td><code>python -m pytest</code></td><td class="ok">188 passed</td></tr>
+            <tr><td>Frontend</td><td><code>npm.cmd run build</code> в <code>apps/frontend</code></td><td class="ok">Сборка успешна</td></tr>
+            <tr><td>UI screenshot</td><td>Playwright full-page screenshot</td><td class="ok">Скриншот сохранен</td></tr>
+            <tr><td>Process</td><td>BPMN daily cycle, DMN go/no-go, CMMN UAT lifecycle</td><td class="ok">Усиленные проверки пройдены</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

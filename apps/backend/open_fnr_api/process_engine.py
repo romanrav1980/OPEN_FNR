@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="stage_daily_cycle_process",
+        name="Stage daily cycle process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-016",
+        source_path="processes/stage/stage_daily_cycle_process.bpmn20.xml",
+        owner_role="Release Manager",
+    ),
+    ProcessDefinition(
+        key="stage_go_no_go_decision",
+        name="Stage go/no-go decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-016",
+        source_path="processes/stage/stage_go_no_go_decision.dmn.xml",
+        owner_role="Business Owner",
+    ),
+    ProcessDefinition(
+        key="stage_uat_case",
+        name="Stage UAT case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-016",
+        source_path="processes/stage/stage_uat_case.cmmn.xml",
+        owner_role="Business Owner",
+    ),
+    ProcessDefinition(
         key="access_request_process",
         name="Access request process",
         artifact_type=ProcessArtifactType.BPMN,

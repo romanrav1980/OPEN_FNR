@@ -534,6 +534,22 @@ const securityAuditRows = [
   { time: "13:35", event: "access_provision", actor: "user.manager@example.org", object: "access-20260528-001" },
 ];
 
+const stageSteps = [
+  { order: 1, step: "DQ checks", owner: "Data Engineer", status: "passed", evidence: "DQ blockers = 0" },
+  { order: 2, step: "Regular forecast", owner: "Forecast Planner", status: "passed", evidence: "WAPE smoke accepted" },
+  { order: 3, step: "Promo forecast", owner: "Promo Planner", status: "passed", evidence: "promo uplift exported" },
+  { order: 4, step: "Order proposals", owner: "Replenishment Planner", status: "passed", evidence: "proposal batch generated" },
+  { order: 5, step: "Exception review", owner: "Business Owner", status: "warning", evidence: "2 accepted exceptions" },
+  { order: 6, step: "ERP/WMS/DWH export", owner: "Integration Engineer", status: "passed", evidence: "idempotency keys accepted" },
+];
+
+const uatChecklist = [
+  { id: "uat-001", scenario: "Data owner accepts stage snapshot", role: "Data Owner", status: "passed" },
+  { id: "uat-002", scenario: "Planner reviews forecast and adjustment", role: "Forecast Planner", status: "passed" },
+  { id: "uat-003", scenario: "Supply manager approves shortage allocation", role: "Supply Chain Manager", status: "passed" },
+  { id: "uat-004", scenario: "Integration owner validates export status", role: "Integration Engineer", status: "passed" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2272,6 +2288,93 @@ function App() {
             <p>
               Viewer has access to north/fresh only. Requests outside that scope show denied state
               and are traceable in audit.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Stage Rehearsal">
+        <div className="section-heading">
+          <h2>Stage Rehearsal</h2>
+          <p>Full daily cycle, stage snapshot, UAT checklist and go/no-go readiness</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Stage Run</span>
+            <strong>stage-run-20260528-001 is go/no-go ready</strong>
+            <p>Full path DQ -&gt; forecast -&gt; promo -&gt; replenishment -&gt; exceptions -&gt; publication completed.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Snapshot</span>
+            <strong>stage-snapshot-20260528-001</strong>
+            <p>Critical defects are zero. Two non-blocking risks are accepted for pilot decision.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Step</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stageSteps.map((row) => (
+                <tr key={row.order}>
+                  <td>{row.order}</td>
+                  <td>{row.step}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.status}</td>
+                  <td>{row.evidence}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>UAT</th>
+                <th>Scenario</th>
+                <th>Role</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {uatChecklist.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.scenario}</td>
+                  <td>{row.role}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Daily Cycle</span>
+            <h3>End-to-end trace</h3>
+            <p>
+              Stage rehearsal links MVP workbenches into one traceable daily run and records evidence
+              for each business role before pilot go/no-go.
+            </p>
+            <div className="action-row">
+              <button type="button">Open trace</button>
+              <button type="button">Review UAT</button>
+              <button type="button">Prepare go/no-go</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Go/No-Go</span>
+            <h3>Critical defects = 0</h3>
+            <p>
+              DMN blocks pilot if any stage step fails or if critical defects remain unresolved.
             </p>
           </aside>
         </div>

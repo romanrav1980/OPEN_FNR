@@ -23,6 +23,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "access_request_process" for item in payload["items"])
     assert any(item["key"] == "role_assignment_decision" for item in payload["items"])
     assert any(item["key"] == "security_incident_case" for item in payload["items"])
+    assert any(item["key"] == "stage_daily_cycle_process" for item in payload["items"])
+    assert any(item["key"] == "stage_go_no_go_decision" for item in payload["items"])
+    assert any(item["key"] == "stage_uat_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/stage" name="stage_go_no_go_decision">
+  <decision id="stage_go_no_go_decision" name="Stage go/no-go decision">
+    <decisionTable id="stage_go_no_go_table" hitPolicy="FIRST">
+      <input id="input_critical_defects" label="critical_defects">
+        <inputExpression id="input_critical_defects_expr" typeRef="number"><text>critical_defects</text></inputExpression>
+      </input>
+      <input id="input_failed_steps" label="failed_steps">
+        <inputExpression id="input_failed_steps_expr" typeRef="number"><text>failed_steps</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_next_action" label="next_action" name="next_action" typeRef="string" />
+      <rule id="rule_no_go_critical">
+        <inputEntry id="rule_no_go_critical_defects"><text>&gt; 0</text></inputEntry>
+        <inputEntry id="rule_no_go_critical_failed"><text>-</text></inputEntry>
+        <outputEntry id="rule_no_go_critical_decision"><text>"no_go"</text></outputEntry>
+        <outputEntry id="rule_no_go_critical_action"><text>"fix critical defects"</text></outputEntry>
+      </rule>
+      <rule id="rule_no_go_failed_step">
+        <inputEntry id="rule_no_go_failed_defects"><text>-</text></inputEntry>
+        <inputEntry id="rule_no_go_failed_steps"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_no_go_failed_decision"><text>"no_go"</text></outputEntry>
+        <outputEntry id="rule_no_go_failed_action"><text>"rerun failed stage step"</text></outputEntry>
+      </rule>
+      <rule id="rule_go_ready">
+        <inputEntry id="rule_go_ready_defects"><text>0</text></inputEntry>
+        <inputEntry id="rule_go_ready_failed"><text>0</text></inputEntry>
+        <outputEntry id="rule_go_ready_decision"><text>"go_ready"</text></outputEntry>
+        <outputEntry id="rule_go_ready_action"><text>"prepare pilot decision"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
