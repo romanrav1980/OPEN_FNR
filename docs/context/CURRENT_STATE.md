@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 21 implementation is complete.
+Sprint 22 implementation is complete.
 
 ## Local Infrastructure
 
@@ -237,9 +237,20 @@ Known local URLs:
 - UI Performance Gate 1 section with pilot-scale profile, metric table, bottlenecks, gate actions and waiver case.
 - HTML test report with screenshot: `docs/test-reports/sprint-21-performance-gate-1/index.html`.
 
+## Sprint 22 Artifacts
+
+- Security API: `apps/backend/open_fnr_api/security.py`.
+- Security tests: `tests/backend/test_security.py`.
+- Security process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Access request BPMN: `processes/security/access_request_process.bpmn20.xml`.
+- Role assignment DMN: `processes/security/role_assignment_decision.dmn.xml`.
+- Security incident CMMN: `processes/security/security_incident_case.cmmn.xml`.
+- UI Admin Console V1 section with roles, region/category scopes, access requests, audit viewer and denied-state explanation.
+- HTML test report with screenshot: `docs/test-reports/sprint-22-security-rbac/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 171 passed.
+- `python -m pytest` -> 181 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -247,4 +258,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 21 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 22: Security And RBAC Hardening.
+Commit Sprint 22 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 23: Stage Rehearsal.

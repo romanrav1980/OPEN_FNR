@@ -25,6 +25,7 @@ SKU_PHASE_IN_PROCESS_PATH = Path("processes/lifecycle/sku_phase_in_process.bpmn2
 SKU_PHASE_OUT_PROCESS_PATH = Path("processes/lifecycle/sku_phase_out_process.bpmn20.xml")
 DC_REPLENISHMENT_PROCESS_PATH = Path("processes/multi-echelon/dc_replenishment_process.bpmn20.xml")
 PERFORMANCE_TEST_RUN_PROCESS_PATH = Path("processes/performance/performance_test_run_process.bpmn20.xml")
+ACCESS_REQUEST_PROCESS_PATH = Path("processes/security/access_request_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -527,3 +528,38 @@ def test_performance_test_run_bpmn_covers_gate_failure_waiver_and_report_paths()
     assert "Approve or reject waiver" in user_task_names
     assert "Performance gate passed?" in gateway_names
     assert "Performance gate recorded" in end_event_names
+
+
+def test_access_request_bpmn_covers_approve_reject_provision_and_audit_paths() -> None:
+    tree = ElementTree.parse(ACCESS_REQUEST_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "access_request_process"
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    end_event_names = {
+        event.attrib["name"]
+        for event in tree.findall(".//bpmn:endEvent", BPMN_NS)
+    }
+    assert "Classify role assignment" in business_rule_names
+    assert "Review access request" in user_task_names
+    assert "Provision role and scope" in user_task_names
+    assert "Record access rejection" in service_task_names
+    assert "Write access audit" in service_task_names
+    assert "Access approved?" in gateway_names
+    assert {"Access rejected", "Access provisioned"}.issubset(end_event_names)

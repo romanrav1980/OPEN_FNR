@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/security" name="role_assignment_decision">
+  <decision id="role_assignment_decision" name="Role assignment decision">
+    <decisionTable id="role_assignment_table" hitPolicy="FIRST">
+      <input id="input_requested_role" label="requested_role">
+        <inputExpression id="input_requested_role_expr" typeRef="string"><text>requested_role</text></inputExpression>
+      </input>
+      <input id="input_scope" label="scope">
+        <inputExpression id="input_scope_expr" typeRef="string"><text>scope</text></inputExpression>
+      </input>
+      <output id="output_required_approver" label="required_approver" name="required_approver" typeRef="string" />
+      <output id="output_risk" label="risk" name="risk" typeRef="string" />
+      <rule id="rule_admin_high_risk">
+        <inputEntry id="rule_admin_role"><text>"Admin"</text></inputEntry>
+        <inputEntry id="rule_admin_scope"><text>-</text></inputEntry>
+        <outputEntry id="rule_admin_approver"><text>"Security Owner"</text></outputEntry>
+        <outputEntry id="rule_admin_risk"><text>"high"</text></outputEntry>
+      </rule>
+      <rule id="rule_business_role_region_scope">
+        <inputEntry id="rule_business_role"><text>"Supply Chain Manager"</text></inputEntry>
+        <inputEntry id="rule_business_scope"><text>"region"</text></inputEntry>
+        <outputEntry id="rule_business_approver"><text>"Security Owner"</text></outputEntry>
+        <outputEntry id="rule_business_risk"><text>"medium"</text></outputEntry>
+      </rule>
+      <rule id="rule_viewer_low_risk">
+        <inputEntry id="rule_viewer_role"><text>"Viewer"</text></inputEntry>
+        <inputEntry id="rule_viewer_scope"><text>-</text></inputEntry>
+        <outputEntry id="rule_viewer_approver"><text>"User Manager"</text></outputEntry>
+        <outputEntry id="rule_viewer_risk"><text>"low"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/security">
+  <case id="security_incident_case" name="Security incident case">
+    <casePlanModel id="security_incident_plan" name="Security incident plan">
+      <humanTask id="triage_access_incident" name="Triage access incident" />
+      <humanTask id="review_audit_trail" name="Review audit trail" />
+      <humanTask id="revoke_suspicious_access" name="Revoke suspicious access" />
+      <humanTask id="confirm_incident_closure" name="Confirm incident closure" />
+    </casePlanModel>
+  </case>
+</definitions>

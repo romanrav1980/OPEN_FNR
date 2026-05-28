@@ -512,6 +512,28 @@ const performanceBottlenecks = [
   },
 ];
 
+const securityUsers = [
+  { user: "admin@example.org", roles: "Admin", regions: "all", categories: "all", status: "active" },
+  { user: "viewer@example.org", roles: "Viewer", regions: "north", categories: "fresh", status: "active" },
+];
+
+const accessRequests = [
+  {
+    id: "access-20260528-001",
+    user: "viewer@example.org",
+    role: "Supply Chain Manager",
+    regions: "north",
+    status: "requested",
+    approver: "Security Owner",
+  },
+];
+
+const securityAuditRows = [
+  { time: "13:00", event: "access_requested", actor: "viewer@example.org", object: "access-20260528-001" },
+  { time: "13:30", event: "access_approve", actor: "security.owner@example.org", object: "access-20260528-001" },
+  { time: "13:35", event: "access_provision", actor: "user.manager@example.org", object: "access-20260528-001" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2136,6 +2158,120 @@ function App() {
             <p>
               Failed blocking metrics open a regression case. Non-blocking latency regression can
               be waived only by Architect with audit trail and bottleneck owner.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Admin Console">
+        <div className="section-heading">
+          <h2>Admin Console V1</h2>
+          <p>RBAC, region/category scopes, service accounts, denied states and access audit</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Access Request</span>
+            <strong>viewer@example.org requests Supply Chain Manager</strong>
+            <p>Security Owner reviews risk, User Manager provisions role and every transition writes audit.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Denied State</span>
+            <strong>Viewer cannot open Admin users</strong>
+            <p>Admin console data is protected by Admin role, while object access checks region and category scopes.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Roles</th>
+                <th>Regions</th>
+                <th>Categories</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {securityUsers.map((row) => (
+                <tr key={row.user}>
+                  <td>{row.user}</td>
+                  <td>{row.roles}</td>
+                  <td>{row.regions}</td>
+                  <td>{row.categories}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Request</th>
+                <th>User</th>
+                <th>Requested role</th>
+                <th>Regions</th>
+                <th>Status</th>
+                <th>Approver</th>
+              </tr>
+            </thead>
+            <tbody>
+              {accessRequests.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.user}</td>
+                  <td>{row.role}</td>
+                  <td>{row.regions}</td>
+                  <td>{row.status}</td>
+                  <td>{row.approver}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Actor</th>
+                <th>Object</th>
+              </tr>
+            </thead>
+            <tbody>
+              {securityAuditRows.map((row) => (
+                <tr key={`${row.time}-${row.event}`}>
+                  <td>{row.time}</td>
+                  <td>{row.event}</td>
+                  <td>{row.actor}</td>
+                  <td>{row.object}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">BPMN Access</span>
+            <h3>Review access request</h3>
+            <p>
+              Security Owner reviews requested role and scope. Approved access goes to User Manager
+              for provisioning; rejected access is recorded with audit.
+            </p>
+            <div className="action-row">
+              <button type="button">Approve</button>
+              <button type="button">Reject</button>
+              <button type="button">Provision</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Scope Check</span>
+            <h3>Region and category guard</h3>
+            <p>
+              Viewer has access to north/fresh only. Requests outside that scope show denied state
+              and are traceable in audit.
             </p>
           </aside>
         </div>

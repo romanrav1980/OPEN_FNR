@@ -20,6 +20,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "performance_test_run_process" for item in payload["items"])
     assert any(item["key"] == "performance_gate_decision" for item in payload["items"])
     assert any(item["key"] == "performance_regression_case" for item in payload["items"])
+    assert any(item["key"] == "access_request_process" for item in payload["items"])
+    assert any(item["key"] == "role_assignment_decision" for item in payload["items"])
+    assert any(item["key"] == "security_incident_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

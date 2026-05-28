@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/security">
+  <process id="access_request_process" name="Access request process" isExecutable="true">
+    <startEvent id="start_access_requested" name="Access requested" />
+    <sequenceFlow id="flow_start_to_classify" sourceRef="start_access_requested" targetRef="classify_role_assignment" />
+    <businessRuleTask id="classify_role_assignment" name="Classify role assignment" />
+    <sequenceFlow id="flow_classify_to_review" sourceRef="classify_role_assignment" targetRef="review_access_request" />
+    <userTask id="review_access_request" name="Review access request" />
+    <sequenceFlow id="flow_review_to_gateway" sourceRef="review_access_request" targetRef="access_decision_gateway" />
+    <exclusiveGateway id="access_decision_gateway" name="Access approved?" />
+    <sequenceFlow id="flow_rejected" sourceRef="access_decision_gateway" targetRef="record_access_rejection" />
+    <sequenceFlow id="flow_approved" sourceRef="access_decision_gateway" targetRef="provision_role_scope" />
+    <serviceTask id="record_access_rejection" name="Record access rejection" />
+    <sequenceFlow id="flow_reject_to_end" sourceRef="record_access_rejection" targetRef="end_access_rejected" />
+    <userTask id="provision_role_scope" name="Provision role and scope" />
+    <sequenceFlow id="flow_provision_to_audit" sourceRef="provision_role_scope" targetRef="write_access_audit" />
+    <serviceTask id="write_access_audit" name="Write access audit" />
+    <sequenceFlow id="flow_audit_to_end" sourceRef="write_access_audit" targetRef="end_access_provisioned" />
+    <endEvent id="end_access_rejected" name="Access rejected" />
+    <endEvent id="end_access_provisioned" name="Access provisioned" />
+  </process>
+</definitions>

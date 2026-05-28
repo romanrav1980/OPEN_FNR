@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="access_request_process",
+        name="Access request process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-015",
+        source_path="processes/security/access_request_process.bpmn20.xml",
+        owner_role="Security Owner",
+    ),
+    ProcessDefinition(
+        key="role_assignment_decision",
+        name="Role assignment decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-015",
+        source_path="processes/security/role_assignment_decision.dmn.xml",
+        owner_role="Security Owner",
+    ),
+    ProcessDefinition(
+        key="security_incident_case",
+        name="Security incident case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-015",
+        source_path="processes/security/security_incident_case.cmmn.xml",
+        owner_role="Security Owner",
+    ),
+    ProcessDefinition(
         key="performance_test_run_process",
         name="Performance test run process",
         artifact_type=ProcessArtifactType.BPMN,

@@ -13,6 +13,7 @@ from .process_engine import router as process_engine_router
 from .promo import router as promo_router
 from .publication import router as publication_router
 from .replenishment import router as replenishment_router
+from .security import router as security_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
 from .kpi import router as kpi_router
@@ -39,6 +40,7 @@ app.include_router(process_engine_router)
 app.include_router(replenishment_router)
 app.include_router(kpi_router)
 app.include_router(lifecycle_router)
+app.include_router(security_router)
 
 
 @app.get("/health")
@@ -72,6 +74,7 @@ def metadata() -> dict[str, object]:
             "replenishment",
             "multi-echelon",
             "performance",
+            "security",
             "process-engine",
             "ui",
         ],
