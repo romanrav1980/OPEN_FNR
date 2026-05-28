@@ -682,6 +682,23 @@ const releaseRisks = [
   },
 ];
 
+const supplierRows = [
+  { supplier: "SUP_FAST", lead: "2 days", fill: "96%", cost: "101.50", target: "60%", current: "52%", cutoff: "16:00" },
+  { supplier: "SUP_CHEAP", lead: "5 days", fill: "90%", cost: "96.00", target: "40%", current: "48%", cutoff: "12:00" },
+];
+
+const purchaseProposalRows = [
+  {
+    proposal: "purchase-proposal-20260528-001",
+    sku: "SKU001",
+    dc: "DC001",
+    qty: "1 200",
+    supplier: "SUP_FAST",
+    status: "supplier_selected",
+    reason: "best fill-rate and lead-time score within target share",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -3137,6 +3154,103 @@ function App() {
             <h3>Support handover complete</h3>
             <p>
               Backup/restore smoke, runbooks and incident ownership are validated before industrial pilot.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Purchase Proposal">
+        <div className="section-heading">
+          <h2>Purchase Proposal</h2>
+          <p>Multi-supplier SKU, supplier comparison, target share warning and ERP supplier export</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Supplier Selection</span>
+            <strong>SUP_FAST selected for SKU001</strong>
+            <p>Best fill-rate and lead-time score wins while staying within target supplier share.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Purchase Proposal</span>
+            <strong>1 200 units to DC001</strong>
+            <p>Procurement Planner can approve before supplier order cutoff and export to ERP mock.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Lead time</th>
+                <th>Fill rate</th>
+                <th>Unit cost</th>
+                <th>Target share</th>
+                <th>Current share</th>
+                <th>Cutoff</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supplierRows.map((row) => (
+                <tr key={row.supplier}>
+                  <td>{row.supplier}</td>
+                  <td>{row.lead}</td>
+                  <td>{row.fill}</td>
+                  <td>{row.cost}</td>
+                  <td>{row.target}</td>
+                  <td>{row.current}</td>
+                  <td>{row.cutoff}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Proposal</th>
+                <th>SKU</th>
+                <th>DC</th>
+                <th>Qty</th>
+                <th>Supplier</th>
+                <th>Status</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {purchaseProposalRows.map((row) => (
+                <tr key={row.proposal}>
+                  <td>{row.proposal}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.dc}</td>
+                  <td>{row.qty}</td>
+                  <td>{row.supplier}</td>
+                  <td>{row.status}</td>
+                  <td>{row.reason}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Override</span>
+            <h3>Supplier constraint case</h3>
+            <p>
+              If selected supplier exceeds target share, Process Engine opens a case to compare terms,
+              approve override and confirm supplier order export.
+            </p>
+            <div className="action-row">
+              <button type="button">Compare</button>
+              <button type="button">Approve</button>
+              <button type="button">Export</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">ERP Mock</span>
+            <h3>Idempotent supplier order</h3>
+            <p>
+              Supplier order export carries proposal id, selected supplier, quantity and idempotency key.
             </p>
           </aside>
         </div>

@@ -848,3 +848,35 @@ def test_release_risk_case_has_risk_acceptance_handover_and_signoff_tasks() -> N
     assert "Accept known risk" in human_task_names
     assert "Confirm support handover risk" in human_task_names
     assert "Sign go/no-go" in human_task_names
+
+
+def test_supplier_selection_and_share_decisions_are_parseable() -> None:
+    for path, decision_id, outputs in (
+        ("processes/procurement/supplier_selection_decision.dmn.xml", "supplier_selection_decision", {"decision", "reason"}),
+        ("processes/procurement/supplier_share_exception_decision.dmn.xml", "supplier_share_exception_decision", {"exception", "action"}),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        actual_outputs = {
+            output.attrib["name"]
+            for output in tree.findall(".//dmn:output", DMN_NS)
+        }
+        assert actual_outputs == outputs
+
+
+def test_supplier_constraint_case_has_terms_override_export_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/procurement/supplier_constraint_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "supplier_constraint_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review target share warning" in human_task_names
+    assert "Compare supplier terms" in human_task_names
+    assert "Approve supplier override" in human_task_names
+    assert "Confirm supplier order export" in human_task_names

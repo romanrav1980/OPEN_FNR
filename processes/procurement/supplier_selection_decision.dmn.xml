@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/procurement" name="supplier_selection_decision">
+  <decision id="supplier_selection_decision" name="Supplier selection decision">
+    <decisionTable id="supplier_selection_table" hitPolicy="FIRST">
+      <input id="input_fill_rate" label="fill_rate">
+        <inputExpression id="input_fill_rate_expr" typeRef="number"><text>fill_rate</text></inputExpression>
+      </input>
+      <input id="input_lead_time" label="lead_time_days">
+        <inputExpression id="input_lead_time_expr" typeRef="number"><text>lead_time_days</text></inputExpression>
+      </input>
+      <input id="input_cost" label="unit_cost">
+        <inputExpression id="input_cost_expr" typeRef="number"><text>unit_cost</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_reason" label="reason" name="reason" typeRef="string" />
+      <rule id="rule_fast_reliable">
+        <inputEntry id="rule_fast_fill"><text>&gt;= 0.95</text></inputEntry>
+        <inputEntry id="rule_fast_lead"><text>&lt;= 3</text></inputEntry>
+        <inputEntry id="rule_fast_cost"><text>-</text></inputEntry>
+        <outputEntry id="rule_fast_decision"><text>"select"</text></outputEntry>
+        <outputEntry id="rule_fast_reason"><text>"best fill-rate and lead time"</text></outputEntry>
+      </rule>
+      <rule id="rule_low_cost_review">
+        <inputEntry id="rule_cost_fill"><text>&gt;= 0.90</text></inputEntry>
+        <inputEntry id="rule_cost_lead"><text>-</text></inputEntry>
+        <inputEntry id="rule_cost_cost"><text>&lt;= 100</text></inputEntry>
+        <outputEntry id="rule_cost_decision"><text>"review"</text></outputEntry>
+        <outputEntry id="rule_cost_reason"><text>"low cost but service tradeoff"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

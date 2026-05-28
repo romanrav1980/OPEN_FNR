@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/procurement">
+  <process id="purchase_proposal_process" name="Purchase proposal process" isExecutable="true">
+    <startEvent id="start_purchase_need_calculated" name="Purchase need calculated" />
+    <sequenceFlow id="flow_start_to_contracts" sourceRef="start_purchase_need_calculated" targetRef="load_supplier_contracts" />
+    <serviceTask id="load_supplier_contracts" name="Load supplier contracts" />
+    <sequenceFlow id="flow_contracts_to_select" sourceRef="load_supplier_contracts" targetRef="select_supplier" />
+    <businessRuleTask id="select_supplier" name="Select supplier" />
+    <sequenceFlow id="flow_select_to_share" sourceRef="select_supplier" targetRef="check_supplier_share_exception" />
+    <businessRuleTask id="check_supplier_share_exception" name="Check supplier share exception" />
+    <sequenceFlow id="flow_share_to_gateway" sourceRef="check_supplier_share_exception" targetRef="supplier_exception_gateway" />
+    <exclusiveGateway id="supplier_exception_gateway" name="Supplier exception?" />
+    <sequenceFlow id="flow_exception" sourceRef="supplier_exception_gateway" targetRef="review_supplier_constraint" />
+    <sequenceFlow id="flow_ok" sourceRef="supplier_exception_gateway" targetRef="approve_purchase_proposal" />
+    <userTask id="review_supplier_constraint" name="Review supplier constraint" />
+    <sequenceFlow id="flow_review_to_approve" sourceRef="review_supplier_constraint" targetRef="approve_purchase_proposal" />
+    <userTask id="approve_purchase_proposal" name="Approve purchase proposal" />
+    <sequenceFlow id="flow_approve_to_export" sourceRef="approve_purchase_proposal" targetRef="export_supplier_order" />
+    <serviceTask id="export_supplier_order" name="Export supplier order" />
+    <sequenceFlow id="flow_export_to_end" sourceRef="export_supplier_order" targetRef="end_purchase_proposal_approved" />
+    <endEvent id="end_purchase_proposal_approved" name="Purchase proposal approved" />
+  </process>
+</definitions>

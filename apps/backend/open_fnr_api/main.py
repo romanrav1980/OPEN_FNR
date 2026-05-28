@@ -16,6 +16,7 @@ from .pilot import router as pilot_router
 from .process_engine import router as process_engine_router
 from .process_governance import router as process_governance_router
 from .promo import router as promo_router
+from .procurement import router as procurement_router
 from .publication import router as publication_router
 from .release_gate import router as release_gate_router
 from .replenishment import router as replenishment_router
@@ -47,6 +48,7 @@ app.include_router(observability_router)
 app.include_router(performance_router)
 app.include_router(pilot_router)
 app.include_router(promo_router)
+app.include_router(procurement_router)
 app.include_router(publication_router)
 app.include_router(release_gate_router)
 app.include_router(process_engine_router)
@@ -89,6 +91,7 @@ def metadata() -> dict[str, object]:
             "ml-models",
             "ml-governance",
             "promo",
+            "procurement",
             "replenishment",
             "replenishment-scale",
             "release-gate",

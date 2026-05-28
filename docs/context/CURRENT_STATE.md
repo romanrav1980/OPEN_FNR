@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 30 implementation is complete.
+Sprint 31 implementation is complete.
 
 ## Local Infrastructure
 
@@ -336,9 +336,21 @@ Known local URLs:
 - UI Release Readiness Dashboard section with checklist, risks and go/no-go actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-30-industrial-release-gate/index.html`.
 
+## Sprint 31 Artifacts
+
+- Procurement API: `apps/backend/open_fnr_api/procurement.py`.
+- Procurement tests: `tests/backend/test_procurement.py`.
+- Procurement process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Purchase proposal BPMN: `processes/procurement/purchase_proposal_process.bpmn20.xml`.
+- Supplier selection DMN: `processes/procurement/supplier_selection_decision.dmn.xml`.
+- Supplier share exception DMN: `processes/procurement/supplier_share_exception_decision.dmn.xml`.
+- Supplier constraint CMMN: `processes/procurement/supplier_constraint_case.cmmn.xml`.
+- UI Purchase Proposal section with supplier comparison, target share warning and ERP mock export action.
+- HTML test report with screenshot: `docs/test-reports/sprint-31-procurement-optimization/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 243 passed.
+- `python -m pytest` -> 252 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -346,4 +358,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 30 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 31: Procurement Optimization.
+Commit Sprint 31 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 32: Shelf Space Optimization.

@@ -47,6 +47,10 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "release_go_no_go_process" for item in payload["items"])
     assert any(item["key"] == "release_readiness_decision" for item in payload["items"])
     assert any(item["key"] == "release_risk_case" for item in payload["items"])
+    assert any(item["key"] == "purchase_proposal_process" for item in payload["items"])
+    assert any(item["key"] == "supplier_selection_decision" for item in payload["items"])
+    assert any(item["key"] == "supplier_share_exception_decision" for item in payload["items"])
+    assert any(item["key"] == "supplier_constraint_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

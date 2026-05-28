@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/procurement">
+  <case id="supplier_constraint_case" name="Supplier constraint case">
+    <casePlanModel id="supplier_constraint_plan" name="Supplier constraint plan">
+      <humanTask id="review_target_share_warning" name="Review target share warning" />
+      <humanTask id="compare_supplier_terms" name="Compare supplier terms" />
+      <humanTask id="approve_supplier_override" name="Approve supplier override" />
+      <humanTask id="confirm_supplier_order_export" name="Confirm supplier order export" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/procurement" name="supplier_share_exception_decision">
+  <decision id="supplier_share_exception_decision" name="Supplier share exception decision">
+    <decisionTable id="supplier_share_exception_table" hitPolicy="FIRST">
+      <input id="input_current_share" label="current_share">
+        <inputExpression id="input_current_share_expr" typeRef="number"><text>current_share</text></inputExpression>
+      </input>
+      <input id="input_target_share" label="target_share">
+        <inputExpression id="input_target_share_expr" typeRef="number"><text>target_share</text></inputExpression>
+      </input>
+      <output id="output_exception" label="exception" name="exception" typeRef="boolean" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_share_warning">
+        <inputEntry id="rule_share_current"><text>&gt; target_share</text></inputEntry>
+        <inputEntry id="rule_share_target"><text>-</text></inputEntry>
+        <outputEntry id="rule_share_exception"><text>true</text></outputEntry>
+        <outputEntry id="rule_share_action"><text>"review target supplier share"</text></outputEntry>
+      </rule>
+      <rule id="rule_share_ok">
+        <inputEntry id="rule_ok_current"><text>-</text></inputEntry>
+        <inputEntry id="rule_ok_target"><text>-</text></inputEntry>
+        <outputEntry id="rule_ok_exception"><text>false</text></outputEntry>
+        <outputEntry id="rule_ok_action"><text>"approve supplier selection"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
