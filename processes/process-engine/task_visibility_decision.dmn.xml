@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/process-engine" name="task_visibility_decision">
+  <decision id="task_visibility_decision" name="Task visibility decision">
+    <decisionTable id="task_visibility_table" hitPolicy="FIRST">
+      <input id="input_assigned_role" label="assigned_role">
+        <inputExpression id="input_assigned_role_expr" typeRef="string">
+          <text>assigned_role</text>
+        </inputExpression>
+      </input>
+      <input id="input_user_role" label="user_role">
+        <inputExpression id="input_user_role_expr" typeRef="string">
+          <text>user_role</text>
+        </inputExpression>
+      </input>
+      <output id="output_visible" label="visible" name="visible" typeRef="boolean" />
+      <rule id="rule_same_role">
+        <inputEntry id="rule_same_role_assigned"><text>-</text></inputEntry>
+        <inputEntry id="rule_same_role_user"><text>-</text></inputEntry>
+        <outputEntry id="rule_same_role_visible"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_admin">
+        <inputEntry id="rule_admin_assigned"><text>-</text></inputEntry>
+        <inputEntry id="rule_admin_user"><text>"Admin"</text></inputEntry>
+        <outputEntry id="rule_admin_visible"><text>true</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

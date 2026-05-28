@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 9 - UI и бизнес-процессы</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+      section {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        margin-top: 20px;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        margin-bottom: 12px;
+        color: var(--red-light);
+        font-size: 20px;
+      }
+      h3 {
+        margin: 16px 0 8px;
+        font-size: 16px;
+      }
+      p,
+      li,
+      td,
+      th {
+        line-height: 1.55;
+      }
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .shot {
+        width: 100%;
+        border: 1px solid var(--border);
+        margin-top: 12px;
+      }
+      code {
+        color: var(--red-light);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 9: Process Engine Foundation</h1>
+        <p class="subtitle">
+          Аннотация: тестируем фундамент OPEN FNR Process Engine, чтобы бизнес-процессы
+          исполнялись через BPMN/DMN/CMMN-контракты, задачи приходили в UI из backend,
+          а действия пользователя оставляли проверяемый audit trail.
+        </p>
+      </header>
+
+      <section>
+        <h2>Что проверяем и зачем</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Область</th>
+              <th>Зачем тестируем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Process definitions</td>
+              <td>Убедиться, что BPMN/DMN/CMMN артефакты зарегистрированы и версионируются.</td>
+              <td>API возвращает deployed/draft definitions с типами bpmn, dmn, cmmn.</td>
+              <td class="ok">Получено.</td>
+            </tr>
+            <tr>
+              <td>Task Inbox</td>
+              <td>Проверить, что UI показывает задачи и действия, а не hardcode-переходы.</td>
+              <td>Видны task, process, business key, role, SLA, actions.</td>
+              <td class="ok">Получено.</td>
+            </tr>
+            <tr>
+              <td>RBAC</td>
+              <td>Проверить фильтрацию задач по роли участника процесса.</td>
+              <td>Promo Planner видит только promo-задачу.</td>
+              <td class="ok">Получено.</td>
+            </tr>
+            <tr>
+              <td>Audit</td>
+              <td>Проверить трассировку процесса и выполнения задачи.</td>
+              <td>Возвращаются process_started, task_created, comment_added, task_completed.</td>
+              <td class="ok">Получено.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <h3>Шаги</h3>
+        <ol>
+          <li>Открываем Dev Control Tower и находим блок <code>Process Engine Task Inbox</code>.</li>
+          <li>Проверяем фильтры Role, Status, Process, SLA. Они фиксируют рабочий контекст пользователя.</li>
+          <li>Проверяем таблицу задач: название, процесс, бизнес-ключ, роль, статус, SLA, доступные действия.</li>
+          <li>Выбираем задачу <code>Resolve promo data issue</code> и проверяем доступные кнопки Complete, Comment, Escalate.</li>
+          <li>Проверяем блок audit history, чтобы пользователь видел, что произошло с процессом.</li>
+        </ol>
+        <h3>Скриншот</h3>
+        <img class="shot" src="screenshots/process-engine-task-inbox.png" alt="Process Engine Task Inbox" />
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Что делаем</th>
+              <th>Почему</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Deployment pipeline</td>
+              <td>Вызываем <code>GET /process/definitions</code>.</td>
+              <td>Проверяем, что backend знает о BPMN/DMN/CMMN и их версиях.</td>
+              <td class="ok">Definitions доступны.</td>
+            </tr>
+            <tr>
+              <td>Task assignment</td>
+              <td>Вызываем <code>GET /process/tasks?role=Promo Planner</code>.</td>
+              <td>Проверяем роль участника процесса и видимость задач.</td>
+              <td class="ok">Возвращается только promo task.</td>
+            </tr>
+            <tr>
+              <td>Task completion</td>
+              <td>Вызываем <code>POST /process/tasks/task-promo-001/complete</code>.</td>
+              <td>Проверяем процессный переход и запись комментария.</td>
+              <td class="ok">Task completed, audit events созданы.</td>
+            </tr>
+            <tr>
+              <td>Error path</td>
+              <td>Пробуем выполнить недоступное действие <code>approve</code>.</td>
+              <td>Проверяем, что backend не разрешает переход вне process metadata.</td>
+              <td class="ok">Получен HTTP 400.</td>
+            </tr>
+            <tr>
+              <td>Process audit</td>
+              <td>Вызываем <code>GET /process/instances/proc-promo-20260601-001/audit</code>.</td>
+              <td>Проверяем восстановимость истории процесса.</td>
+              <td class="ok">История содержит старт процесса и создание задачи.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">71 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

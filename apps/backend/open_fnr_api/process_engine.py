@@ -1,0 +1,276 @@
+from datetime import datetime, timezone
+from enum import StrEnum
+
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
+
+
+router = APIRouter(prefix="/process", tags=["process-engine"])
+
+
+class ProcessArtifactType(StrEnum):
+    BPMN = "bpmn"
+    DMN = "dmn"
+    CMMN = "cmmn"
+
+
+class ProcessDefinitionStatus(StrEnum):
+    DEPLOYED = "deployed"
+    DRAFT = "draft"
+
+
+class TaskStatus(StrEnum):
+    OPEN = "open"
+    COMPLETED = "completed"
+    ESCALATED = "escalated"
+
+
+class AuditEventType(StrEnum):
+    PROCESS_STARTED = "process_started"
+    TASK_CREATED = "task_created"
+    TASK_COMPLETED = "task_completed"
+    COMMENT_ADDED = "comment_added"
+    SLA_ESCALATED = "sla_escalated"
+
+
+class ProcessDefinition(BaseModel):
+    key: str
+    name: str
+    artifact_type: ProcessArtifactType
+    version: int = Field(ge=1)
+    status: ProcessDefinitionStatus
+    deployment_id: str
+    source_path: str
+    owner_role: str
+
+
+class ProcessTask(BaseModel):
+    task_id: str
+    process_instance_id: str
+    process_key: str
+    name: str
+    status: TaskStatus
+    assigned_role: str
+    candidate_roles: tuple[str, ...]
+    available_actions: tuple[str, ...]
+    sla_due_at: datetime
+    created_at: datetime
+    business_key: str
+
+
+class AuditEvent(BaseModel):
+    event_id: str
+    process_instance_id: str
+    task_id: str | None
+    event_type: AuditEventType
+    actor: str
+    message: str
+    created_at: datetime
+
+
+class CompleteTaskRequest(BaseModel):
+    action: str
+    actor: str
+    comment: str = Field(min_length=1)
+
+
+class CompleteTaskResponse(BaseModel):
+    task: ProcessTask
+    audit_events: tuple[AuditEvent, ...]
+
+
+PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
+    ProcessDefinition(
+        key="promo_draft_validation_process",
+        name="Promo draft validation",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-001",
+        source_path="processes/promo/promo_draft_validation_process.bpmn20.xml",
+        owner_role="Promo Planner",
+    ),
+    ProcessDefinition(
+        key="forecast_review_process",
+        name="Forecast review",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-001",
+        source_path="processes/forecast/forecast_review_process.bpmn20.xml",
+        owner_role="Forecast Planner",
+    ),
+    ProcessDefinition(
+        key="replenishment_approval_process",
+        name="Replenishment approval",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DRAFT,
+        deployment_id="flowable-dev-deploy-20260528-002",
+        source_path="processes/process-engine/replenishment_approval_process.bpmn20.xml",
+        owner_role="Replenishment Planner",
+    ),
+    ProcessDefinition(
+        key="task_visibility_decision",
+        name="Task visibility decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-002",
+        source_path="processes/process-engine/task_visibility_decision.dmn.xml",
+        owner_role="Admin",
+    ),
+    ProcessDefinition(
+        key="process_exception_case",
+        name="Process exception case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-002",
+        source_path="processes/process-engine/process_exception_case.cmmn.xml",
+        owner_role="Admin",
+    ),
+)
+
+TASKS: tuple[ProcessTask, ...] = (
+    ProcessTask(
+        task_id="task-promo-001",
+        process_instance_id="proc-promo-20260601-001",
+        process_key="promo_draft_validation_process",
+        name="Resolve promo data issue",
+        status=TaskStatus.OPEN,
+        assigned_role="Promo Planner",
+        candidate_roles=("Promo Planner", "Category Manager"),
+        available_actions=("complete", "comment", "escalate"),
+        sla_due_at=datetime(2026, 5, 28, 12, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 9, 15, tzinfo=timezone.utc),
+        business_key="promo-20260605-grocery-002",
+    ),
+    ProcessTask(
+        task_id="task-forecast-001",
+        process_instance_id="proc-forecast-20260528-001",
+        process_key="forecast_review_process",
+        name="Review forecast anomaly",
+        status=TaskStatus.OPEN,
+        assigned_role="Forecast Planner",
+        candidate_roles=("Forecast Planner", "Forecast Owner"),
+        available_actions=("accept", "adjust", "comment"),
+        sla_due_at=datetime(2026, 5, 28, 15, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 10, 5, tzinfo=timezone.utc),
+        business_key="regular-baseline-20260528-001",
+    ),
+    ProcessTask(
+        task_id="task-replenishment-001",
+        process_instance_id="proc-repl-20260528-001",
+        process_key="replenishment_approval_process",
+        name="Approve replenishment exception",
+        status=TaskStatus.ESCALATED,
+        assigned_role="Replenishment Planner",
+        candidate_roles=("Replenishment Planner", "Supply Chain Manager"),
+        available_actions=("approve", "reject", "comment"),
+        sla_due_at=datetime(2026, 5, 28, 11, 30, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 8, 45, tzinfo=timezone.utc),
+        business_key="order-proposal-20260528-001",
+    ),
+)
+
+AUDIT_EVENTS: tuple[AuditEvent, ...] = (
+    AuditEvent(
+        event_id="audit-promo-001",
+        process_instance_id="proc-promo-20260601-001",
+        task_id=None,
+        event_type=AuditEventType.PROCESS_STARTED,
+        actor="Flowable",
+        message="Started promo draft validation for promo-20260605-grocery-002.",
+        created_at=datetime(2026, 5, 28, 9, 10, tzinfo=timezone.utc),
+    ),
+    AuditEvent(
+        event_id="audit-promo-002",
+        process_instance_id="proc-promo-20260601-001",
+        task_id="task-promo-001",
+        event_type=AuditEventType.TASK_CREATED,
+        actor="Flowable",
+        message="Created task Resolve promo data issue for Promo Planner.",
+        created_at=datetime(2026, 5, 28, 9, 15, tzinfo=timezone.utc),
+    ),
+    AuditEvent(
+        event_id="audit-repl-001",
+        process_instance_id="proc-repl-20260528-001",
+        task_id="task-replenishment-001",
+        event_type=AuditEventType.SLA_ESCALATED,
+        actor="Flowable",
+        message="Escalated replenishment exception after SLA breach.",
+        created_at=datetime(2026, 5, 28, 11, 31, tzinfo=timezone.utc),
+    ),
+)
+
+
+@router.get("/definitions")
+def list_process_definitions() -> dict[str, tuple[ProcessDefinition, ...]]:
+    return {"items": PROCESS_DEFINITIONS}
+
+
+@router.post("/deployments")
+def deploy_process_definitions() -> dict[str, object]:
+    return {
+        "deployment_id": "flowable-dev-deploy-20260528-002",
+        "status": "accepted",
+        "definitions": PROCESS_DEFINITIONS,
+    }
+
+
+@router.get("/tasks")
+def list_tasks(role: str | None = Query(default=None)) -> dict[str, tuple[ProcessTask, ...]]:
+    if role is None:
+        return {"items": TASKS}
+
+    visible_tasks = tuple(task for task in TASKS if role in task.candidate_roles or role == task.assigned_role)
+    return {"items": visible_tasks}
+
+
+@router.post("/tasks/{task_id}/complete")
+def complete_task(task_id: str, payload: CompleteTaskRequest) -> CompleteTaskResponse:
+    task = next((item for item in TASKS if item.task_id == task_id), None)
+    if task is None:
+        raise HTTPException(status_code=404, detail="process task not found")
+    if payload.action not in task.available_actions:
+        raise HTTPException(status_code=400, detail="action is not available for task")
+
+    completed_task = task.model_copy(update={"status": TaskStatus.COMPLETED})
+    now = datetime(2026, 5, 28, 12, 5, tzinfo=timezone.utc)
+    return CompleteTaskResponse(
+        task=completed_task,
+        audit_events=(
+            AuditEvent(
+                event_id=f"audit-{task_id}-comment",
+                process_instance_id=task.process_instance_id,
+                task_id=task.task_id,
+                event_type=AuditEventType.COMMENT_ADDED,
+                actor=payload.actor,
+                message=payload.comment,
+                created_at=now,
+            ),
+            AuditEvent(
+                event_id=f"audit-{task_id}-completed",
+                process_instance_id=task.process_instance_id,
+                task_id=task.task_id,
+                event_type=AuditEventType.TASK_COMPLETED,
+                actor=payload.actor,
+                message=f"Task completed with action {payload.action}.",
+                created_at=now,
+            ),
+        ),
+    )
+
+
+@router.get("/instances/{process_instance_id}/audit")
+def get_process_audit(process_instance_id: str) -> dict[str, tuple[AuditEvent, ...]]:
+    events = tuple(event for event in AUDIT_EVENTS if event.process_instance_id == process_instance_id)
+    if not events:
+        raise HTTPException(status_code=404, detail="process instance audit not found")
+    return {"items": events}
+
+
+@router.get("/audit")
+def list_audit_events() -> dict[str, tuple[AuditEvent, ...]]:
+    return {"items": AUDIT_EVENTS}

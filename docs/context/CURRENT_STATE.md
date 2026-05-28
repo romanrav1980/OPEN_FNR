@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 8 implementation is complete.
+Sprint 9 implementation is complete.
 
 ## Local Infrastructure
 
@@ -99,9 +99,19 @@ Known local URLs:
 - HTML test report with screenshot: `docs/test-reports/sprint-8-promo-uplift-forecast/index.html`.
 - Data integration specification for factual sales, stock, in-transit and open orders: `DATA_INTEGRATION_SPEC.md`.
 
+## Sprint 9 Artifacts
+
+- Process Engine backend API: `apps/backend/open_fnr_api/process_engine.py`.
+- Process Engine API tests: `tests/backend/test_process_engine.py`.
+- Replenishment approval BPMN skeleton: `processes/process-engine/replenishment_approval_process.bpmn20.xml`.
+- Task visibility DMN skeleton: `processes/process-engine/task_visibility_decision.dmn.xml`.
+- Process exception CMMN skeleton: `processes/process-engine/process_exception_case.cmmn.xml`.
+- UI Process Engine Task Inbox section with role filters, task actions and audit history.
+- HTML test report with screenshot: `docs/test-reports/sprint-9-process-engine-foundation/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 63 passed.
+- `python -m pytest` -> 71 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -109,4 +119,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 8 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 9: Process Engine Foundation.
+Commit Sprint 9 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 10: Promo Approval Process.

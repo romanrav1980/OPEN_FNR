@@ -191,3 +191,27 @@ def test_promo_forecast_anomaly_case_is_parseable() -> None:
     }
     assert "Review reference promos" in human_task_names
     assert "Adjust uplift draft" in human_task_names
+
+
+def test_process_engine_task_visibility_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/process-engine/task_visibility_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "task_visibility_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_process_engine_exception_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/process-engine/process_exception_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "process_exception_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage process exception" in human_task_names
+    assert "Repair process payload" in human_task_names
+    assert "Approve manual transition" in human_task_names

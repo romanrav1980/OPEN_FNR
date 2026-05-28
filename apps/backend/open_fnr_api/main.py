@@ -5,6 +5,7 @@ from .data_quality import router as data_quality_router
 from .feature_mart import router as feature_mart_router
 from .forecast import router as forecast_router
 from .ml_models import router as ml_models_router
+from .process_engine import router as process_engine_router
 from .promo import router as promo_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
@@ -21,6 +22,7 @@ app.include_router(feature_mart_router)
 app.include_router(forecast_router)
 app.include_router(ml_models_router)
 app.include_router(promo_router)
+app.include_router(process_engine_router)
 
 
 @app.get("/health")

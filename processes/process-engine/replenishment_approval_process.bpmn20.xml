@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/process-engine">
+  <process id="replenishment_approval_process" name="Replenishment approval process" isExecutable="true">
+    <startEvent id="start_order_exception" name="Order exception detected" />
+    <sequenceFlow id="flow_start_to_load" sourceRef="start_order_exception" targetRef="load_order_proposal" />
+    <serviceTask id="load_order_proposal" name="Load order proposal" />
+    <sequenceFlow id="flow_load_to_decision" sourceRef="load_order_proposal" targetRef="approval_required_gateway" />
+    <exclusiveGateway id="approval_required_gateway" name="Approval required?" />
+    <sequenceFlow id="flow_auto_publish" sourceRef="approval_required_gateway" targetRef="publish_approved_order" />
+    <sequenceFlow id="flow_manual_review" sourceRef="approval_required_gateway" targetRef="approve_replenishment_exception" />
+    <userTask id="approve_replenishment_exception" name="Approve replenishment exception" />
+    <sequenceFlow id="flow_review_to_publish" sourceRef="approve_replenishment_exception" targetRef="publish_approved_order" />
+    <serviceTask id="publish_approved_order" name="Publish approved order proposal" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_approved_order" targetRef="end_order_published" />
+    <endEvent id="end_order_published" name="Order proposal published" />
+  </process>
+</definitions>

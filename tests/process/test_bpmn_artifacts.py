@@ -12,6 +12,7 @@ FORECAST_REVIEW_PROCESS_PATH = Path("processes/forecast/forecast_review_process.
 MODEL_REVIEW_PROCESS_PATH = Path("processes/ml/model_candidate_review_process.bpmn20.xml")
 PROMO_VALIDATION_PROCESS_PATH = Path("processes/promo/promo_draft_validation_process.bpmn20.xml")
 PROMO_FORECAST_PROCESS_PATH = Path("processes/promo/promo_forecast_process.bpmn20.xml")
+REPLENISHMENT_APPROVAL_PROCESS_PATH = Path("processes/process-engine/replenishment_approval_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -154,3 +155,23 @@ def test_promo_forecast_bpmn_calculates_uplift_and_total() -> None:
     assert "Load regular baseline for promo period" in service_task_names
     assert "Calculate promo uplift" in service_task_names
     assert "Calculate total forecast" in service_task_names
+
+
+def test_replenishment_approval_bpmn_has_manual_and_publish_steps() -> None:
+    tree = ElementTree.parse(REPLENISHMENT_APPROVAL_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "replenishment_approval_process"
+    assert tree.find(".//bpmn:exclusiveGateway", BPMN_NS) is not None
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    assert "Load order proposal" in service_task_names
+    assert "Publish approved order proposal" in service_task_names
+    assert "Approve replenishment exception" in user_task_names

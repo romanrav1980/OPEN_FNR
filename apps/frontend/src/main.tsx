@@ -137,6 +137,45 @@ const referencePromos = [
   { id: "promo-ref-202504-fresh-007", similarity: "0.84", discount: "18%", uplift: "37%" },
 ];
 
+const processTasks = [
+  {
+    id: "task-promo-001",
+    process: "promo_draft_validation_process",
+    businessKey: "promo-20260605-grocery-002",
+    name: "Resolve promo data issue",
+    role: "Promo Planner",
+    status: "open",
+    sla: "12:00",
+    actions: "complete / comment / escalate",
+  },
+  {
+    id: "task-forecast-001",
+    process: "forecast_review_process",
+    businessKey: "regular-baseline-20260528-001",
+    name: "Review forecast anomaly",
+    role: "Forecast Planner",
+    status: "open",
+    sla: "15:00",
+    actions: "accept / adjust / comment",
+  },
+  {
+    id: "task-replenishment-001",
+    process: "replenishment_approval_process",
+    businessKey: "order-proposal-20260528-001",
+    name: "Approve replenishment exception",
+    role: "Replenishment Planner",
+    status: "escalated",
+    sla: "11:30",
+    actions: "approve / reject / comment",
+  },
+];
+
+const processHistory = [
+  { time: "09:10", event: "process_started", actor: "Flowable", text: "Promo validation started" },
+  { time: "09:15", event: "task_created", actor: "Flowable", text: "Task assigned to Promo Planner" },
+  { time: "11:31", event: "sla_escalated", actor: "Flowable", text: "Replenishment task escalated" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -547,6 +586,108 @@ function App() {
                     <td>{promo.similarity}</td>
                     <td>{promo.discount}</td>
                     <td>{promo.uplift}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Process engine task inbox">
+        <div className="section-heading">
+          <h2>Process Engine Task Inbox</h2>
+          <p>BPMN / DMN / CMMN tasks, actions and audit trail</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Deployment</span>
+            <strong>Flowable OSS process layer</strong>
+            <p>Definitions are versioned and deployed through backend contracts, with task transitions coming from process metadata.</p>
+          </article>
+          <article className="feature-summary">
+            <span>RBAC</span>
+            <strong>Role-based task visibility</strong>
+            <p>Promo, forecast and replenishment tasks are visible only to assigned or candidate roles, with Admin audit access.</p>
+          </article>
+        </div>
+        <div className="filter-bar" aria-label="Process filters">
+          <label>
+            Role
+            <input value="Promo Planner" readOnly />
+          </label>
+          <label>
+            Status
+            <input value="Open + escalated" readOnly />
+          </label>
+          <label>
+            Process
+            <input value="All deployed" readOnly />
+          </label>
+          <label>
+            SLA
+            <input value="Due today" readOnly />
+          </label>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Process</th>
+                <th>Business key</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>SLA</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {processTasks.map((task) => (
+                <tr key={task.id}>
+                  <td>{task.name}</td>
+                  <td>{task.process}</td>
+                  <td>{task.businessKey}</td>
+                  <td>{task.role}</td>
+                  <td>{task.status}</td>
+                  <td>{task.sla}</td>
+                  <td>{task.actions}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Selected Task</span>
+            <h3>Resolve promo data issue</h3>
+            <p>
+              The user reviews the process-generated task, adds a comment, completes the action,
+              and the backend writes comment and completion events to audit history.
+            </p>
+            <div className="action-row">
+              <button type="button">Complete</button>
+              <button type="button">Comment</button>
+              <button type="button">Escalate</button>
+            </div>
+          </aside>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Event</th>
+                  <th>Actor</th>
+                  <th>Audit message</th>
+                </tr>
+              </thead>
+              <tbody>
+                {processHistory.map((event) => (
+                  <tr key={`${event.time}-${event.event}`}>
+                    <td>{event.time}</td>
+                    <td>{event.event}</td>
+                    <td>{event.actor}</td>
+                    <td>{event.text}</td>
                   </tr>
                 ))}
               </tbody>

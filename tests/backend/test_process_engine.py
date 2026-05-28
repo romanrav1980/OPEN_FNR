@@ -1,0 +1,63 @@
+from fastapi.testclient import TestClient
+
+from open_fnr_api.main import app
+
+
+client = TestClient(app)
+
+
+def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
+    response = client.get("/process/definitions")
+    assert response.status_code == 200
+
+    payload = response.json()
+    artifact_types = {item["artifact_type"] for item in payload["items"]}
+    assert {"bpmn", "dmn", "cmmn"}.issubset(artifact_types)
+    assert any(item["key"] == "forecast_review_process" for item in payload["items"])
+
+
+def test_task_inbox_filters_by_candidate_role() -> None:
+    response = client.get("/process/tasks", params={"role": "Promo Planner"})
+    assert response.status_code == 200
+
+    tasks = response.json()["items"]
+    assert len(tasks) == 1
+    assert tasks[0]["task_id"] == "task-promo-001"
+    assert "complete" in tasks[0]["available_actions"]
+
+
+def test_task_completion_returns_audit_events() -> None:
+    response = client.post(
+        "/process/tasks/task-promo-001/complete",
+        json={
+            "action": "complete",
+            "actor": "promo.planner@example.org",
+            "comment": "Fixed display capacity and promo price.",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["task"]["status"] == "completed"
+    assert [event["event_type"] for event in payload["audit_events"]] == ["comment_added", "task_completed"]
+
+
+def test_task_completion_rejects_unavailable_action() -> None:
+    response = client.post(
+        "/process/tasks/task-promo-001/complete",
+        json={
+            "action": "approve",
+            "actor": "promo.planner@example.org",
+            "comment": "Trying a wrong transition.",
+        },
+    )
+    assert response.status_code == 400
+
+
+def test_process_audit_endpoint_returns_instance_history() -> None:
+    response = client.get("/process/instances/proc-promo-20260601-001/audit")
+    assert response.status_code == 200
+
+    events = response.json()["items"]
+    assert events[0]["event_type"] == "process_started"
+    assert events[1]["event_type"] == "task_created"

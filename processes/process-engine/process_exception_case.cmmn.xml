@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/process-engine">
+  <case id="process_exception_case" name="Process exception case">
+    <casePlanModel id="process_exception_plan" name="Process exception plan">
+      <humanTask id="triage_process_exception" name="Triage process exception" />
+      <humanTask id="repair_process_payload" name="Repair process payload" />
+      <humanTask id="approve_manual_transition" name="Approve manual transition" />
+    </casePlanModel>
+  </case>
+</definitions>
