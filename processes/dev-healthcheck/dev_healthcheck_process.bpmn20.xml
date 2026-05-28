@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/dev-healthcheck">
+  <process id="dev_healthcheck_process" name="OPEN FNR Dev Healthcheck" isExecutable="true">
+    <documentation>
+      Sprint 0 smoke process used to verify that BPMN artifacts are versioned and deployable.
+    </documentation>
+    <startEvent id="start_dev_healthcheck" name="Start dev healthcheck" />
+    <sequenceFlow id="flow_start_to_review" sourceRef="start_dev_healthcheck" targetRef="review_dev_healthcheck" />
+    <userTask id="review_dev_healthcheck"
+              name="Review development environment"
+              flowable:candidateGroups="platform-engineering" />
+    <sequenceFlow id="flow_review_to_end" sourceRef="review_dev_healthcheck" targetRef="end_dev_healthcheck" />
+    <endEvent id="end_dev_healthcheck" name="Dev healthcheck completed" />
+  </process>
+</definitions>

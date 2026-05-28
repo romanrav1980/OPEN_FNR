@@ -1,0 +1,16 @@
+[project]
+name = "open-fnr"
+version = "0.1.0"
+description = "OPEN FNR demand forecasting and replenishment platform"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.118.0",
+  "uvicorn>=0.30.0",
+  "pydantic>=2.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["apps/backend"]
+addopts = "-q"
+

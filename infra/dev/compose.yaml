@@ -1,0 +1,183 @@
+name: ${OPEN_FNR_PROJECT:-open-fnr-dev}
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: open-fnr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-open_fnr}
+      POSTGRES_USER: ${POSTGRES_USER:-open_fnr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-open_fnr_dev}
+    ports:
+      - "${POSTGRES_PORT:-15432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-open_fnr} -d ${POSTGRES_DB:-open_fnr}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.12
+    container_name: open-fnr-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-open_fnr}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-open_fnr}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-open_fnr_dev}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT:-18123}:8123"
+      - "${CLICKHOUSE_NATIVE_PORT:-19000}:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  flowable:
+    image: flowable/flowable-rest:7.1.0
+    container_name: open-fnr-flowable
+    restart: unless-stopped
+    ports:
+      - "${FLOWABLE_PORT:-18080}:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-open_fnr}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-open_fnr}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-open_fnr_dev}
+      FLOWABLE_DATABASE_SCHEMA_UPDATE: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --server-response --spider http://localhost:8080/flowable-rest/service/management/engine 2>&1 | grep -E 'HTTP/.* (200|401)'"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+
+  airflow-postgres:
+    image: postgres:16
+    container_name: open-fnr-airflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - airflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  airflow-init:
+    image: apache/airflow:2.10.5
+    container_name: open-fnr-airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USER:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD:-admin}
+    command: ["bash", "-c", "airflow db migrate && airflow users create --username \"$${_AIRFLOW_WWW_USER_USERNAME}\" --password \"$${_AIRFLOW_WWW_USER_PASSWORD}\" --firstname Admin --lastname User --role Admin --email admin@example.com || true"]
+    depends_on:
+      airflow-postgres:
+        condition: service_healthy
+
+  airflow-webserver:
+    image: apache/airflow:2.10.5
+    container_name: open-fnr-airflow-webserver
+    restart: unless-stopped
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    command: ["airflow", "webserver"]
+    ports:
+      - "${AIRFLOW_PORT:-18088}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request\nurllib.request.urlopen('http://localhost:8080/health', timeout=5)\nPY"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    image: apache/airflow:2.10.5
+    container_name: open-fnr-airflow-scheduler
+    restart: unless-stopped
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    command: ["airflow", "scheduler"]
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  opensearch:
+    image: opensearchproject/opensearch:2.18.0
+    container_name: open-fnr-opensearch
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD:-OpenFNR_dev_123!}
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "${OPENSEARCH_PORT:-19200}:9200"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200 >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.18.0
+    container_name: open-fnr-opensearch-dashboards
+    restart: unless-stopped
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+    ports:
+      - "${OPENSEARCH_DASHBOARDS_PORT:-15601}:5601"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+
+  superset:
+    image: apache/superset:4.1.1
+    container_name: open-fnr-superset
+    restart: unless-stopped
+    environment:
+      SUPERSET_SECRET_KEY: open_fnr_dev_secret_key_change_me
+    ports:
+      - "${SUPERSET_PORT:-18089}:8088"
+    volumes:
+      - superset-data:/app/superset_home
+    command: ["/bin/sh", "-c", "superset db upgrade && superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin || true && superset init && superset run -h 0.0.0.0 -p 8088"]
+
+volumes:
+  postgres-data:
+  clickhouse-data:
+  airflow-postgres-data:
+  opensearch-data:
+  superset-data:
