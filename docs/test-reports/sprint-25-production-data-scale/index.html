@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 25 - Production Data Scale</title>
+    <style>
+      :root { --bg:#1e1e1e; --panel:#252526; --red-light:#b83a4b; --text:#d4d4d4; --muted:#9da3ae; --border:#3a3a3a; --ok:#8fd19e; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,"Segoe UI",Arial,sans-serif; }
+      main { width:min(1180px, calc(100vw - 40px)); margin:0 auto; padding:32px 0 56px; }
+      section { border:1px solid var(--border); background:var(--panel); margin-top:20px; padding:20px; }
+      h1,h2,p { margin:0; }
+      h1 { font-size:30px; }
+      h2 { margin-bottom:12px; color:var(--red-light); font-size:20px; }
+      p,li,td,th { line-height:1.55; }
+      .subtitle { margin-top:8px; color:var(--muted); }
+      table { width:100%; border-collapse:collapse; margin-top:12px; }
+      th,td { border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+      th { color:var(--muted); font-size:12px; text-transform:uppercase; }
+      .ok { color:var(--ok); font-weight:700; }
+      .shot { width:100%; border:1px solid var(--border); margin-top:12px; }
+      code { color:var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 25: Production Data Scale</h1>
+        <p class="subtitle">
+          Аннотация: тестируем industrial data platform контур: объем 30 000 магазинов x 5 500 SKU,
+          большие historical loads, partition health, lineage completeness, DQ gate и incident path для срыва cutoff.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем <code>Production Data Scale</code>.</li>
+          <li>Проверяем industrial profile: 30 000 stores, 5 500 SKU, 730 history days, 120.45B rows.</li>
+          <li>Проверяем partition status: sales и stock partitions validated.</li>
+          <li>Проверяем lineage view: raw -> clean -> mart с checksum.</li>
+          <li>Проверяем actions: Open partitions, Review lineage, Publish mart.</li>
+        </ol>
+        <img class="shot" src="screenshots/production-data-scale.png" alt="Production Data Scale" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Фактический результат</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Load raw partitions.</td><td>Промышленный объем должен грузиться партициями.</td><td>BPMN содержит Load raw partitions.</td><td class="ok">Проверено BPMN.</td></tr>
+            <tr><td>2</td><td>Validate partition counts.</td><td>Нужно поймать недогрузки до публикации mart.</td><td>row_count >= expected_min_rows.</td><td class="ok">Проверено API-тестом.</td></tr>
+            <tr><td>3</td><td>Write lineage edges.</td><td>Любая витрина должна быть трассируема до source.</td><td>POS/WMS raw -> clean -> mart complete.</td><td class="ok">Проверено lineage helper.</td></tr>
+            <tr><td>4</td><td>DMN evaluates industrial DQ gate.</td><td>Публикация должна блокироваться при failed partitions.</td><td>Decisions: pass, warning, block.</td><td class="ok">Проверено DMN и helper-тестом.</td></tr>
+            <tr><td>5</td><td>Incident path opens for late/failed partitions.</td><td>Data Platform Owner должен триажить сбои cutoff.</td><td>CMMN содержит triage, lineage review, reprocess, cutoff recovery.</td><td class="ok">Проверено CMMN.</td></tr>
+            <tr><td>6</td><td>Publish industrial mart.</td><td>Forecast/replenishment получают только validated data.</td><td>DQ gate pass.</td><td class="ok">Проверено API.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead><tr><th>Тип</th><th>Проверка</th><th>Результат</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td><code>python -m pytest</code></td><td class="ok">203 passed</td></tr>
+            <tr><td>Frontend</td><td><code>npm.cmd run build</code> в <code>apps/frontend</code></td><td class="ok">Сборка успешна</td></tr>
+            <tr><td>UI screenshot</td><td>Playwright full-page screenshot</td><td class="ok">Скриншот сохранен</td></tr>
+            <tr><td>Process</td><td>BPMN industrial load, DMN DQ gate, CMMN large-scale incident</td><td class="ok">Усиленные проверки пройдены</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

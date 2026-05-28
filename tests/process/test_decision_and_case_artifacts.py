@@ -644,3 +644,37 @@ def test_pilot_exception_case_has_feedback_defect_and_acceptance_tasks() -> None
     assert "Assign defect owner" in human_task_names
     assert "Accept or resolve risk" in human_task_names
     assert "Confirm pilot acceptance" in human_task_names
+
+
+def test_industrial_dq_gate_decision_is_parseable_and_has_pass_warning_block_rules() -> None:
+    tree = ElementTree.parse(Path("processes/data-scale/industrial_dq_gate_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "industrial_dq_gate_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"decision", "action"}
+    assert {"rule_block_failed", "rule_warning_late", "rule_pass"}.issubset(rule_ids)
+
+
+def test_large_scale_data_incident_case_has_partition_lineage_and_cutoff_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/data-scale/large_scale_data_incident_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "large_scale_data_incident_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage failed partition" in human_task_names
+    assert "Review lineage gap" in human_task_names
+    assert "Approve reprocessing" in human_task_names
+    assert "Confirm cutoff recovery" in human_task_names

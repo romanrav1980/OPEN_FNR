@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 24 implementation is complete.
+Sprint 25 implementation is complete.
 
 ## Local Infrastructure
 
@@ -270,9 +270,20 @@ Known local URLs:
 - UI Business Pilot Dashboard section with pilot scope, KPI panel, feedback, known issues and acceptance action.
 - HTML test report with screenshot: `docs/test-reports/sprint-24-business-pilot/index.html`.
 
+## Sprint 25 Artifacts
+
+- Production Data Scale API: `apps/backend/open_fnr_api/data_scale.py`.
+- Production Data Scale tests: `tests/backend/test_data_scale.py`.
+- Data-scale process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Industrial data load BPMN: `processes/data-scale/industrial_data_load_process.bpmn20.xml`.
+- Industrial DQ gate DMN: `processes/data-scale/industrial_dq_gate_decision.dmn.xml`.
+- Large-scale data incident CMMN: `processes/data-scale/large_scale_data_incident_case.cmmn.xml`.
+- UI Production Data Scale section with industrial profile, partition health, lineage and DQ gate actions.
+- HTML test report with screenshot: `docs/test-reports/sprint-25-production-data-scale/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 195 passed.
+- `python -m pytest` -> 203 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -280,4 +291,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 24 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 25: Production Data Scale.
+Commit Sprint 25 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 26: Production ML And Retraining.

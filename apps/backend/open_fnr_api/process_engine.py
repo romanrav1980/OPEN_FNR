@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="industrial_data_load_process",
+        name="Industrial data load process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-018",
+        source_path="processes/data-scale/industrial_data_load_process.bpmn20.xml",
+        owner_role="Data Platform Owner",
+    ),
+    ProcessDefinition(
+        key="industrial_dq_gate_decision",
+        name="Industrial DQ gate decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-018",
+        source_path="processes/data-scale/industrial_dq_gate_decision.dmn.xml",
+        owner_role="Data Platform Owner",
+    ),
+    ProcessDefinition(
+        key="large_scale_data_incident_case",
+        name="Large-scale data incident case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-018",
+        source_path="processes/data-scale/large_scale_data_incident_case.cmmn.xml",
+        owner_role="Data Platform Owner",
+    ),
+    ProcessDefinition(
         key="pilot_operational_process",
         name="Pilot operational process",
         artifact_type=ProcessArtifactType.BPMN,

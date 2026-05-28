@@ -577,6 +577,17 @@ const pilotIssues = [
   },
 ];
 
+const dataScalePartitions = [
+  { partition: "sales_2026_05_28_p001", domain: "sales", rows: "164.82M", status: "validated", freshness: "38 min", source: "POS" },
+  { partition: "stock_2026_05_28_p001", domain: "stock", rows: "166.10M", status: "validated", freshness: "42 min", source: "WMS" },
+];
+
+const lineageRows = [
+  { source: "POS.raw_sales", target: "clean.sales_daily", rows: "164.82M", checksum: "sha256:sales-p001" },
+  { source: "WMS.raw_stock", target: "clean.stock_daily", rows: "166.10M", checksum: "sha256:stock-p001" },
+  { source: "clean.sales_daily", target: "mart.feature_store", rows: "164.82M", checksum: "sha256:feature-sales" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2514,6 +2525,96 @@ function App() {
             <p>
               Feedback is linked to module, triaged as usability, converted to a known issue and
               accepted as non-blocking pilot risk.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Production Data Scale">
+        <div className="section-heading">
+          <h2>Production Data Scale</h2>
+          <p>Industrial volumes, partition health, lineage, retention and DQ gate</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Industrial Profile</span>
+            <strong>30 000 stores x 5 500 SKU x 730 history days</strong>
+            <p>Expected fact volume reaches 120.45B rows with 48 daily partitions and 90-day forecast horizon.</p>
+          </article>
+          <article className="feature-summary">
+            <span>DQ Gate</span>
+            <strong>Pass</strong>
+            <p>Partitions are validated, lineage is complete and data remains within production cutoff.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Partition</th>
+                <th>Domain</th>
+                <th>Rows</th>
+                <th>Status</th>
+                <th>Freshness</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dataScalePartitions.map((row) => (
+                <tr key={row.partition}>
+                  <td>{row.partition}</td>
+                  <td>{row.domain}</td>
+                  <td>{row.rows}</td>
+                  <td>{row.status}</td>
+                  <td>{row.freshness}</td>
+                  <td>{row.source}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Target</th>
+                <th>Rows</th>
+                <th>Checksum</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lineageRows.map((row) => (
+                <tr key={`${row.source}-${row.target}`}>
+                  <td>{row.source}</td>
+                  <td>{row.target}</td>
+                  <td>{row.rows}</td>
+                  <td>{row.checksum}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Industrial Load</span>
+            <h3>Partition and lineage gate</h3>
+            <p>
+              Data Platform Owner validates row counts, lineage edges and DQ gate before publishing
+              the industrial mart to downstream forecast and replenishment jobs.
+            </p>
+            <div className="action-row">
+              <button type="button">Open partitions</button>
+              <button type="button">Review lineage</button>
+              <button type="button">Publish mart</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Incident Path</span>
+            <h3>Large-scale data incident</h3>
+            <p>
+              Failed or late partitions open a case for triage, lineage review, reprocessing approval
+              and cutoff recovery confirmation.
             </p>
           </aside>
         </div>

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from .adjustments import router as adjustments_router
 from .config import settings
 from .data_quality import router as data_quality_router
+from .data_scale import router as data_scale_router
 from .exceptions import router as exceptions_router
 from .feature_mart import router as feature_mart_router
 from .forecast import router as forecast_router
@@ -30,6 +31,7 @@ app = FastAPI(
 app.include_router(ingestion_router)
 app.include_router(adjustments_router)
 app.include_router(data_quality_router)
+app.include_router(data_scale_router)
 app.include_router(exceptions_router)
 app.include_router(feature_mart_router)
 app.include_router(forecast_router)
@@ -71,6 +73,7 @@ def metadata() -> dict[str, object]:
             "data-platform",
             "data-ingestion",
             "data-quality",
+            "production-data-scale",
             "feature-mart",
             "forecasting",
             "ml-models",

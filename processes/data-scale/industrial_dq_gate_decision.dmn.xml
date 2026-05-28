@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/data-scale" name="industrial_dq_gate_decision">
+  <decision id="industrial_dq_gate_decision" name="Industrial DQ gate decision">
+    <decisionTable id="industrial_dq_gate_table" hitPolicy="FIRST">
+      <input id="input_failed_partitions" label="failed_partitions">
+        <inputExpression id="input_failed_partitions_expr" typeRef="number"><text>failed_partitions</text></inputExpression>
+      </input>
+      <input id="input_late_partitions" label="late_partitions">
+        <inputExpression id="input_late_partitions_expr" typeRef="number"><text>late_partitions</text></inputExpression>
+      </input>
+      <input id="input_lineage_complete" label="lineage_complete">
+        <inputExpression id="input_lineage_complete_expr" typeRef="boolean"><text>lineage_complete</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_block_failed">
+        <inputEntry id="rule_block_failed_partitions"><text>&gt; 0</text></inputEntry>
+        <inputEntry id="rule_block_late"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_lineage"><text>-</text></inputEntry>
+        <outputEntry id="rule_block_decision"><text>"block"</text></outputEntry>
+        <outputEntry id="rule_block_action"><text>"open large-scale incident"</text></outputEntry>
+      </rule>
+      <rule id="rule_warning_late">
+        <inputEntry id="rule_warning_failed"><text>0</text></inputEntry>
+        <inputEntry id="rule_warning_late"><text>&gt; 0</text></inputEntry>
+        <inputEntry id="rule_warning_lineage"><text>true</text></inputEntry>
+        <outputEntry id="rule_warning_decision"><text>"warning"</text></outputEntry>
+        <outputEntry id="rule_warning_action"><text>"accept or reprocess late partition"</text></outputEntry>
+      </rule>
+      <rule id="rule_pass">
+        <inputEntry id="rule_pass_failed"><text>0</text></inputEntry>
+        <inputEntry id="rule_pass_late"><text>0</text></inputEntry>
+        <inputEntry id="rule_pass_lineage"><text>true</text></inputEntry>
+        <outputEntry id="rule_pass_decision"><text>"pass"</text></outputEntry>
+        <outputEntry id="rule_pass_action"><text>"publish industrial mart"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

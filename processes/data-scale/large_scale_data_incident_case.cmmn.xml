@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/data-scale">
+  <case id="large_scale_data_incident_case" name="Large-scale data incident case">
+    <casePlanModel id="large_scale_data_incident_plan" name="Large-scale data incident plan">
+      <humanTask id="triage_failed_partition" name="Triage failed partition" />
+      <humanTask id="review_lineage_gap" name="Review lineage gap" />
+      <humanTask id="approve_reprocessing" name="Approve reprocessing" />
+      <humanTask id="confirm_cutoff_recovery" name="Confirm cutoff recovery" />
+    </casePlanModel>
+  </case>
+</definitions>

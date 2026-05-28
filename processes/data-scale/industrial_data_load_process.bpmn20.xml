@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/data-scale">
+  <process id="industrial_data_load_process" name="Industrial data load process" isExecutable="true">
+    <startEvent id="start_industrial_load" name="Industrial load started" />
+    <sequenceFlow id="flow_start_to_raw" sourceRef="start_industrial_load" targetRef="load_raw_partitions" />
+    <serviceTask id="load_raw_partitions" name="Load raw partitions" />
+    <sequenceFlow id="flow_raw_to_validate" sourceRef="load_raw_partitions" targetRef="validate_partition_counts" />
+    <serviceTask id="validate_partition_counts" name="Validate partition counts" />
+    <sequenceFlow id="flow_validate_to_lineage" sourceRef="validate_partition_counts" targetRef="write_lineage_edges" />
+    <serviceTask id="write_lineage_edges" name="Write lineage edges" />
+    <sequenceFlow id="flow_lineage_to_gate" sourceRef="write_lineage_edges" targetRef="evaluate_industrial_dq_gate" />
+    <businessRuleTask id="evaluate_industrial_dq_gate" name="Evaluate industrial DQ gate" />
+    <sequenceFlow id="flow_gate_to_gateway" sourceRef="evaluate_industrial_dq_gate" targetRef="industrial_dq_gateway" />
+    <exclusiveGateway id="industrial_dq_gateway" name="Industrial DQ passed?" />
+    <sequenceFlow id="flow_pass" sourceRef="industrial_dq_gateway" targetRef="publish_industrial_mart" />
+    <sequenceFlow id="flow_issue" sourceRef="industrial_dq_gateway" targetRef="review_large_scale_data_incident" />
+    <userTask id="review_large_scale_data_incident" name="Review large-scale data incident" />
+    <sequenceFlow id="flow_issue_to_reprocess" sourceRef="review_large_scale_data_incident" targetRef="reprocess_failed_partitions" />
+    <serviceTask id="reprocess_failed_partitions" name="Reprocess failed partitions" />
+    <sequenceFlow id="flow_reprocess_to_gate" sourceRef="reprocess_failed_partitions" targetRef="evaluate_industrial_dq_gate" />
+    <serviceTask id="publish_industrial_mart" name="Publish industrial mart" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_industrial_mart" targetRef="end_industrial_load_completed" />
+    <endEvent id="end_industrial_load_completed" name="Industrial load completed" />
+  </process>
+</definitions>

@@ -28,6 +28,7 @@ PERFORMANCE_TEST_RUN_PROCESS_PATH = Path("processes/performance/performance_test
 ACCESS_REQUEST_PROCESS_PATH = Path("processes/security/access_request_process.bpmn20.xml")
 STAGE_DAILY_CYCLE_PROCESS_PATH = Path("processes/stage/stage_daily_cycle_process.bpmn20.xml")
 PILOT_OPERATIONAL_PROCESS_PATH = Path("processes/pilot/pilot_operational_process.bpmn20.xml")
+INDUSTRIAL_DATA_LOAD_PROCESS_PATH = Path("processes/data-scale/industrial_data_load_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -624,3 +625,35 @@ def test_pilot_operational_bpmn_covers_feedback_triage_and_acceptance_paths() ->
     assert "Evaluate pilot thresholds" in business_rule_names
     assert "Write pilot audit" in service_task_names
     assert "Pilot acceptance ready?" in gateway_names
+
+
+def test_industrial_data_load_bpmn_covers_partition_lineage_dq_and_reprocess_paths() -> None:
+    tree = ElementTree.parse(INDUSTRIAL_DATA_LOAD_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "industrial_data_load_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Load raw partitions" in service_task_names
+    assert "Validate partition counts" in service_task_names
+    assert "Write lineage edges" in service_task_names
+    assert "Reprocess failed partitions" in service_task_names
+    assert "Publish industrial mart" in service_task_names
+    assert "Evaluate industrial DQ gate" in business_rule_names
+    assert "Review large-scale data incident" in user_task_names
+    assert "Industrial DQ passed?" in gateway_names
