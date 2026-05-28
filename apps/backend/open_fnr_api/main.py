@@ -5,6 +5,7 @@ from .capacity import router as capacity_router
 from .config import settings
 from .data_quality import router as data_quality_router
 from .data_scale import router as data_scale_router
+from .diagnostics import router as diagnostics_router
 from .exceptions import router as exceptions_router
 from .feature_mart import router as feature_mart_router
 from .forecast import router as forecast_router
@@ -41,6 +42,7 @@ app.include_router(adjustments_router)
 app.include_router(capacity_router)
 app.include_router(data_quality_router)
 app.include_router(data_scale_router)
+app.include_router(diagnostics_router)
 app.include_router(exceptions_router)
 app.include_router(feature_mart_router)
 app.include_router(forecast_router)
@@ -91,6 +93,7 @@ def metadata() -> dict[str, object]:
             "data-ingestion",
             "data-quality",
             "production-data-scale",
+            "diagnostics",
             "feature-mart",
             "forecasting",
             "ml-models",

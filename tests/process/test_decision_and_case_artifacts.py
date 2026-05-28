@@ -937,3 +937,37 @@ def test_capacity_overload_case_has_calendar_preview_approval_and_export_tasks()
     assert "Review smoothing preview" in human_task_names
     assert "Approve order moves" in human_task_names
     assert "Confirm TMS export" in human_task_names
+
+
+def test_root_cause_classification_decision_is_parseable_and_explainable() -> None:
+    tree = ElementTree.parse(Path("processes/diagnostics/root_cause_classification_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "root_cause_classification_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"root_cause", "recommended_action"}
+    assert {"rule_late_delivery", "rule_forecast_underestimation", "rule_data_gap"}.issubset(rule_ids)
+
+
+def test_diagnostic_case_has_evidence_root_cause_exception_and_close_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/diagnostics/diagnostic_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "diagnostic_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review evidence" in human_task_names
+    assert "Confirm root cause" in human_task_names
+    assert "Create linked exception" in human_task_names
+    assert "Close diagnostic case" in human_task_names

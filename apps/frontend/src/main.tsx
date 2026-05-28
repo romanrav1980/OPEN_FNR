@@ -755,6 +755,32 @@ const capacityMoveRows = [
   },
 ];
 
+const diagnosticInsights = [
+  {
+    insight: "diagnostic-20260602-s001-sku001",
+    status: "classified",
+    rootCause: "late_delivery",
+    confidence: "0.88",
+    store: "S001",
+    sku: "SKU001",
+    symptom: "Projected stock-out on promo start",
+    action: "Create supply exception and expedite replacement delivery",
+  },
+];
+
+const diagnosticEvidenceRows = [
+  { source: "WMS", object: "inbound-po-001", severity: "critical", fact: "Delivery arrived 2 days late" },
+  { source: "Projected Stock", object: "projection-s001-sku001", severity: "critical", fact: "Projected stock turns negative" },
+  { source: "Forecast", object: "forecast-s001-sku001", severity: "info", fact: "Forecast bias within acceptance band" },
+];
+
+const diagnosticLinkedObjects = [
+  { type: "Forecast", object: "forecast-s001-sku001", state: "accepted" },
+  { type: "Order", object: "order-proposal-20260528-s001-sku001", state: "manual_review" },
+  { type: "Promo", object: "promo-20260601-fresh-001", state: "ready_for_forecast" },
+  { type: "Inbound", object: "inbound-po-001", state: "late" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -3495,6 +3521,119 @@ function App() {
             <h3>Idempotent capacity export</h3>
             <p>
               Export carries plan id, proposed delivery dates, moved quantities and idempotency key.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Supply Chain Diagnostics">
+        <div className="section-heading">
+          <h2>Supply Chain Diagnostics</h2>
+          <p>Root cause cards, evidence collection, linked objects and exception creation</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Root Cause</span>
+            <strong>Late delivery detected with 0.88 confidence</strong>
+            <p>Evidence links WMS inbound delay, projected stock-out and accepted forecast quality.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Recommended Action</span>
+            <strong>Create supply exception</strong>
+            <p>Supply Chain Manager can convert insight into exception with full evidence audit.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Insight</th>
+                <th>Status</th>
+                <th>Root cause</th>
+                <th>Confidence</th>
+                <th>Store</th>
+                <th>SKU</th>
+                <th>Symptom</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {diagnosticInsights.map((row) => (
+                <tr key={row.insight}>
+                  <td>{row.insight}</td>
+                  <td>{row.status}</td>
+                  <td>{row.rootCause}</td>
+                  <td>{row.confidence}</td>
+                  <td>{row.store}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.symptom}</td>
+                  <td>{row.action}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Object</th>
+                <th>Severity</th>
+                <th>Evidence fact</th>
+              </tr>
+            </thead>
+            <tbody>
+              {diagnosticEvidenceRows.map((row) => (
+                <tr key={row.object}>
+                  <td>{row.source}</td>
+                  <td>{row.object}</td>
+                  <td>{row.severity}</td>
+                  <td>{row.fact}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Linked object</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody>
+              {diagnosticLinkedObjects.map((row) => (
+                <tr key={row.object}>
+                  <td>{row.type}</td>
+                  <td>{row.object}</td>
+                  <td>{row.state}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Evidence Review</span>
+            <h3>Confirm root cause card</h3>
+            <p>
+              Planner checks WMS, projected stock and forecast facts before converting
+              the diagnostic insight into an operational exception.
+            </p>
+            <div className="action-row">
+              <button type="button">Open evidence</button>
+              <button type="button">Confirm root cause</button>
+              <button type="button">Create exception</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Audit</span>
+            <h3>Traceable decision</h3>
+            <p>
+              Audit stores actor, role, comment, evidence ids and linked forecast/order/promo/inbound objects.
             </p>
           </aside>
         </div>

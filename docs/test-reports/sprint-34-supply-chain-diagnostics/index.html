@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPEN FNR Sprint 34 - Supply Chain Diagnostics</title>
+  <style>
+    :root {
+      --bg: #1f1f1f;
+      --panel: #252526;
+      --panel-2: #2d2d30;
+      --text: #f3f3f3;
+      --muted: #b7b7b7;
+      --red: #b91c1c;
+      --line: #3c3c3c;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.55;
+    }
+    header, section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    header {
+      border-bottom: 4px solid var(--red);
+      background: linear-gradient(90deg, #252526, #1f1f1f);
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      font-weight: 650;
+    }
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+    .badge {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 4px 10px;
+      border: 1px solid var(--red);
+      color: #fecaca;
+      background: rgba(185, 28, 28, 0.14);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      color: #fecaca;
+      background: var(--panel-2);
+    }
+    .ok {
+      color: #86efac;
+      font-weight: 650;
+    }
+    img {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #111;
+    }
+    code {
+      color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Sprint 34 / Supply Chain Diagnostics</span>
+    <h1>OPEN FNR - отчет по диагностике цепочки поставок</h1>
+    <p>
+      Тестируем, что система не ограничивается сигналом shortage/overstock, а объясняет вероятную
+      первопричину, показывает доказательства, связывает forecast/order/promo/inbound объекты и
+      позволяет создать exception из диагностического insight.
+    </p>
+  </header>
+
+  <section>
+    <h2>Что и зачем тестируем</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Root Cause Card</h3>
+        <p>
+          Карточка должна показать причину late_delivery, confidence 0.88, симптом projected stock-out
+          и рекомендуемое действие для supply exception.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Evidence Trail</h3>
+        <p>
+          Проверяем, что решение объяснимо: WMS late inbound, projected stock fact, forecast quality
+          и связанные объекты доступны для аудита.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>UI-тестирование по шагам</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Шаг</th>
+          <th>Что делаем</th>
+          <th>Зачем</th>
+          <th>Ожидаемый результат</th>
+          <th>Полученный результат</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Открываем Supply Chain Diagnostics.</td>
+          <td>Проверить доступность диагностического рабочего места.</td>
+          <td>Видны root cause и recommended action.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Проверяем таблицу insights.</td>
+          <td>Планировщик должен видеть статус, affected store/SKU и symptom.</td>
+          <td>Insight classified, root cause late_delivery, confidence 0.88.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Проверяем evidence rows.</td>
+          <td>Root cause без доказательств нельзя использовать для операционного решения.</td>
+          <td>WMS, Projected Stock и Forecast evidence присутствуют.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Проверяем действия Open evidence, Confirm root cause, Create exception.</td>
+          <td>UI должен вести пользователя от анализа к управляемому процессному действию.</td>
+          <td>Action panel отображается.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Тестирование бизнес-процессов</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Процессный шаг</th>
+          <th>Что делаем</th>
+          <th>Почему</th>
+          <th>Ожидаемый результат</th>
+          <th>Факт</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Collect evidence</td>
+          <td>Собираем WMS, projected stock и forecast facts.</td>
+          <td>Диагностика должна быть проверяемой, а не черным ящиком.</td>
+          <td>BPMN содержит service task сбора evidence.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Classify root cause</td>
+          <td>Классифицируем первопричину через DMN.</td>
+          <td>Правила должны быть версионируемыми в Process Engine.</td>
+          <td>DMN содержит late_delivery, forecast_underestimation, data_gap rules.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Review root cause card</td>
+          <td>Пользователь подтверждает карточку причины.</td>
+          <td>Перед exception нужна бизнес-валидация.</td>
+          <td>BPMN user task и CMMN human task присутствуют.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Create exception from insight</td>
+          <td>Создаем exception из insight с comment и evidence ids.</td>
+          <td>Диагностика должна приводить к операционному действию.</td>
+          <td>Viewer получает 403, Supply Chain Manager создает exception.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+        <tr>
+          <td>Audit trail</td>
+          <td>Проверяем actor, role, comment и evidence list.</td>
+          <td>Решение влияет на поставки и должно быть проверяемым.</td>
+          <td>API возвращает audit payload.</td>
+          <td class="ok">Пройдено.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Автоматические проверки</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Проверка</th>
+          <th>Команда</th>
+          <th>Результат</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Backend, process, data, quality tests</td>
+          <td><code>python -m pytest</code></td>
+          <td class="ok">274 passed</td>
+        </tr>
+        <tr>
+          <td>Frontend production build</td>
+          <td><code>npm.cmd run build</code></td>
+          <td class="ok">completed</td>
+        </tr>
+        <tr>
+          <td>UI evidence screenshot</td>
+          <td><code>npx.cmd playwright screenshot</code></td>
+          <td class="ok">supply-chain-diagnostics.png создан</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Скриншот</h2>
+    <p>Скриншот показывает Supply Chain Diagnostics в общем UI OPEN FNR.</p>
+    <img src="screenshots/supply-chain-diagnostics.png" alt="Supply Chain Diagnostics screenshot">
+  </section>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/processes/diagnostics">
+  <case id="diagnostic_case" name="Diagnostic case">
+    <casePlanModel id="diagnostic_case_plan" name="Diagnostic case plan">
+      <humanTask id="review_evidence" name="Review evidence" />
+      <humanTask id="confirm_root_cause" name="Confirm root cause" />
+      <humanTask id="create_linked_exception" name="Create linked exception" />
+      <humanTask id="close_diagnostic_case" name="Close diagnostic case" />
+    </casePlanModel>
+  </case>
+</definitions>

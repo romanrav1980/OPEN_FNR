@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  id="root_cause_classification_definitions"
+  name="Root cause classification"
+  namespace="https://open-fnr.local/processes/diagnostics">
+  <decision id="root_cause_classification_decision" name="Root cause classification decision">
+    <decisionTable id="root_cause_classification_table" hitPolicy="FIRST">
+      <input id="input_late_delivery" label="Late delivery">
+        <inputExpression id="input_late_delivery_expr" typeRef="boolean">
+          <text>late_delivery</text>
+        </inputExpression>
+      </input>
+      <input id="input_forecast_bias" label="Forecast bias">
+        <inputExpression id="input_forecast_bias_expr" typeRef="number">
+          <text>forecast_bias</text>
+        </inputExpression>
+      </input>
+      <output id="output_root_cause" name="root_cause" typeRef="string" />
+      <output id="output_action" name="recommended_action" typeRef="string" />
+      <rule id="rule_late_delivery">
+        <inputEntry id="rule_late_delivery_input_1"><text>true</text></inputEntry>
+        <inputEntry id="rule_late_delivery_input_2"><text>-</text></inputEntry>
+        <outputEntry id="rule_late_delivery_output_1"><text>"late_delivery"</text></outputEntry>
+        <outputEntry id="rule_late_delivery_output_2"><text>"expedite_replacement_delivery"</text></outputEntry>
+      </rule>
+      <rule id="rule_forecast_underestimation">
+        <inputEntry id="rule_forecast_underestimation_input_1"><text>false</text></inputEntry>
+        <inputEntry id="rule_forecast_underestimation_input_2"><text>&lt; -0.05</text></inputEntry>
+        <outputEntry id="rule_forecast_underestimation_output_1"><text>"forecast_underestimation"</text></outputEntry>
+        <outputEntry id="rule_forecast_underestimation_output_2"><text>"review_forecast_adjustment"</text></outputEntry>
+      </rule>
+      <rule id="rule_data_gap">
+        <inputEntry id="rule_data_gap_input_1"><text>-</text></inputEntry>
+        <inputEntry id="rule_data_gap_input_2"><text>-</text></inputEntry>
+        <outputEntry id="rule_data_gap_output_1"><text>"data_quality_gap"</text></outputEntry>
+        <outputEntry id="rule_data_gap_output_2"><text>"open_data_quality_case"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

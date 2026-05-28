@@ -37,6 +37,7 @@ RELEASE_GO_NO_GO_PROCESS_PATH = Path("processes/release-gate/release_go_no_go_pr
 PURCHASE_PROPOSAL_PROCESS_PATH = Path("processes/procurement/purchase_proposal_process.bpmn20.xml")
 SHELF_SPACE_REVIEW_PROCESS_PATH = Path("processes/shelf-space/shelf_space_review_process.bpmn20.xml")
 CAPACITY_SMOOTHING_PROCESS_PATH = Path("processes/capacity/capacity_smoothing_process.bpmn20.xml")
+DIAGNOSTIC_INSIGHT_REVIEW_PROCESS_PATH = Path("processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -923,3 +924,33 @@ def test_capacity_smoothing_bpmn_covers_overload_preview_approval_and_publish_pa
     assert "Review capacity overload" in user_task_names
     assert "Approve order moves" in user_task_names
     assert "Capacity overload?" in gateway_names
+
+
+def test_diagnostic_insight_review_bpmn_covers_evidence_classification_exception_and_audit_paths() -> None:
+    tree = ElementTree.parse(DIAGNOSTIC_INSIGHT_REVIEW_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "diagnostic_insight_review_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Collect evidence" in service_task_names
+    assert "Link objects and audit decision" in service_task_names
+    assert "Classify root cause" in business_rule_names
+    assert "Review root cause card" in user_task_names
+    assert "Create exception from insight" in user_task_names
+    assert "Action required?" in gateway_names

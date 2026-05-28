@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="diagnostic_insight_review_process",
+        name="Diagnostic insight review process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-027",
+        source_path="processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
+        key="root_cause_classification_decision",
+        name="Root cause classification decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-027",
+        source_path="processes/diagnostics/root_cause_classification_decision.dmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
+        key="diagnostic_case",
+        name="Diagnostic case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-027",
+        source_path="processes/diagnostics/diagnostic_case.cmmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
         key="capacity_smoothing_process",
         name="Capacity smoothing process",
         artifact_type=ProcessArtifactType.BPMN,

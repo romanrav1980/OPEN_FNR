@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 33 implementation is complete.
+Sprint 34 implementation is complete.
 
 ## Local Infrastructure
 
@@ -372,9 +372,20 @@ Known local URLs:
 - UI Capacity Workbench section with overload calendar, smoothing preview, affected orders and TMS export action.
 - HTML test report with screenshot: `docs/test-reports/sprint-33-capacity-workload/index.html`.
 
+## Sprint 34 Artifacts
+
+- Supply Chain Diagnostics API: `apps/backend/open_fnr_api/diagnostics.py`.
+- Diagnostics tests: `tests/backend/test_diagnostics.py`.
+- Diagnostics process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Diagnostic insight review BPMN: `processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml`.
+- Root cause classification DMN: `processes/diagnostics/root_cause_classification_decision.dmn.xml`.
+- Diagnostic case CMMN: `processes/diagnostics/diagnostic_case.cmmn.xml`.
+- UI Supply Chain Diagnostics section with root cause card, evidence rows, linked objects and exception action.
+- HTML test report with screenshot: `docs/test-reports/sprint-34-supply-chain-diagnostics/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 267 passed.
+- `python -m pytest` -> 274 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -382,4 +393,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 33 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 34: Supply Chain Diagnostics.
+Commit Sprint 34 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 35: Supplier Collaboration.

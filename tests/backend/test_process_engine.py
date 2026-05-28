@@ -59,6 +59,9 @@ def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
     assert any(item["key"] == "capacity_overload_decision" for item in payload["items"])
     assert any(item["key"] == "order_shift_priority_decision" for item in payload["items"])
     assert any(item["key"] == "capacity_overload_case" for item in payload["items"])
+    assert any(item["key"] == "diagnostic_insight_review_process" for item in payload["items"])
+    assert any(item["key"] == "root_cause_classification_decision" for item in payload["items"])
+    assert any(item["key"] == "diagnostic_case" for item in payload["items"])
 
 
 def test_task_inbox_filters_by_candidate_role() -> None:

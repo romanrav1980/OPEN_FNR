@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  targetNamespace="https://open-fnr.local/processes/diagnostics">
+  <process id="diagnostic_insight_review_process" name="Diagnostic insight review process" isExecutable="true">
+    <startEvent id="start_diagnostic" name="Diagnostic insight detected" />
+    <serviceTask id="collect_evidence" name="Collect evidence" />
+    <businessRuleTask id="classify_root_cause" name="Classify root cause" />
+    <userTask id="review_root_cause_card" name="Review root cause card" />
+    <exclusiveGateway id="action_required_gateway" name="Action required?" />
+    <userTask id="create_exception_from_insight" name="Create exception from insight" />
+    <serviceTask id="link_objects_and_audit" name="Link objects and audit decision" />
+    <endEvent id="end_closed" name="Diagnostic insight closed" />
+    <sequenceFlow id="flow_1" sourceRef="start_diagnostic" targetRef="collect_evidence" />
+    <sequenceFlow id="flow_2" sourceRef="collect_evidence" targetRef="classify_root_cause" />
+    <sequenceFlow id="flow_3" sourceRef="classify_root_cause" targetRef="review_root_cause_card" />
+    <sequenceFlow id="flow_4" sourceRef="review_root_cause_card" targetRef="action_required_gateway" />
+    <sequenceFlow id="flow_5" sourceRef="action_required_gateway" targetRef="create_exception_from_insight" />
+    <sequenceFlow id="flow_6" sourceRef="create_exception_from_insight" targetRef="link_objects_and_audit" />
+    <sequenceFlow id="flow_7" sourceRef="link_objects_and_audit" targetRef="end_closed" />
+  </process>
+</definitions>
