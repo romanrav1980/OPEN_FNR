@@ -20,4 +20,4 @@ def test_metadata_endpoint_lists_core_modules() -> None:
     assert "forecasting" in payload["modules"]
     assert "replenishment" in payload["modules"]
     assert "process-engine" in payload["modules"]
-
+    assert "daily-pipeline" in payload["modules"]

@@ -6,6 +6,8 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
+Current backend regression status: 367 automated tests passed.
+
 ## Local Infrastructure
 
 Docker Compose development infrastructure is defined in `infra/dev/compose.yaml`.
@@ -70,6 +72,13 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Forecast version metadata SQL table in PostgreSQL init script.
 - UI Regular Forecast Baseline section.
 - HTML test report with screenshot: `docs/test-reports/sprint-4-regular-baseline/index.html`.
+
+## Daily Pipeline Gate Artifacts
+
+- Daily pipeline gate API: `apps/backend/open_fnr_api/daily_pipeline.py`.
+- Pipeline endpoint: `/pipeline/daily-gate/run`.
+- Pipeline stages: shadow-load source discovery, source contract DQ, clean canonical publication dry-run, feature mart build dry-run.
+- Pipeline tests: `tests/backend/test_daily_pipeline.py`.
 
 ## Sprint 5 Artifacts
 

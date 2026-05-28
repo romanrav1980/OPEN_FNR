@@ -8,6 +8,7 @@ from .config import settings
 from .clean_publication import router as clean_publication_router
 from .data_quality import router as data_quality_router
 from .data_scale import router as data_scale_router
+from .daily_pipeline import router as daily_pipeline_router
 from .diagnostics import router as diagnostics_router
 from .exceptions import router as exceptions_router
 from .feature_mart import router as feature_mart_router
@@ -59,6 +60,7 @@ app.include_router(audit_router)
 app.include_router(capacity_router)
 app.include_router(data_quality_router)
 app.include_router(data_scale_router)
+app.include_router(daily_pipeline_router)
 app.include_router(diagnostics_router)
 app.include_router(exceptions_router)
 app.include_router(feature_mart_router)
@@ -118,6 +120,7 @@ def metadata() -> dict[str, object]:
             "clean-publication",
             "data-ingestion",
             "data-quality",
+            "daily-pipeline",
             "production-data-scale",
             "diagnostics",
             "feature-mart",
