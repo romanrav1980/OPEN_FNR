@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/pilot">
+  <case id="pilot_exception_case" name="Pilot exception case">
+    <casePlanModel id="pilot_exception_plan" name="Pilot exception plan">
+      <humanTask id="triage_pilot_feedback" name="Triage pilot feedback" />
+      <humanTask id="assign_defect_owner" name="Assign defect owner" />
+      <humanTask id="accept_or_resolve_risk" name="Accept or resolve risk" />
+      <humanTask id="confirm_pilot_acceptance" name="Confirm pilot acceptance" />
+    </casePlanModel>
+  </case>
+</definitions>

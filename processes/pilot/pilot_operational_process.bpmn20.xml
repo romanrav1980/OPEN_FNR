@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/pilot">
+  <process id="pilot_operational_process" name="Pilot operational process" isExecutable="true">
+    <startEvent id="start_pilot_day" name="Pilot day started" />
+    <sequenceFlow id="flow_start_to_forecast" sourceRef="start_pilot_day" targetRef="review_pilot_forecast" />
+    <userTask id="review_pilot_forecast" name="Review pilot forecast" />
+    <sequenceFlow id="flow_forecast_to_order" sourceRef="review_pilot_forecast" targetRef="approve_pilot_order" />
+    <userTask id="approve_pilot_order" name="Approve pilot order" />
+    <sequenceFlow id="flow_order_to_feedback" sourceRef="approve_pilot_order" targetRef="collect_pilot_feedback" />
+    <userTask id="collect_pilot_feedback" name="Collect pilot feedback" />
+    <sequenceFlow id="flow_feedback_to_thresholds" sourceRef="collect_pilot_feedback" targetRef="evaluate_pilot_thresholds" />
+    <businessRuleTask id="evaluate_pilot_thresholds" name="Evaluate pilot thresholds" />
+    <sequenceFlow id="flow_thresholds_to_gateway" sourceRef="evaluate_pilot_thresholds" targetRef="pilot_acceptance_gateway" />
+    <exclusiveGateway id="pilot_acceptance_gateway" name="Pilot acceptance ready?" />
+    <sequenceFlow id="flow_not_ready" sourceRef="pilot_acceptance_gateway" targetRef="triage_pilot_issue" />
+    <sequenceFlow id="flow_ready" sourceRef="pilot_acceptance_gateway" targetRef="sign_pilot_acceptance" />
+    <userTask id="triage_pilot_issue" name="Triage pilot issue" />
+    <sequenceFlow id="flow_triage_to_feedback" sourceRef="triage_pilot_issue" targetRef="collect_pilot_feedback" />
+    <userTask id="sign_pilot_acceptance" name="Sign pilot acceptance" />
+    <sequenceFlow id="flow_sign_to_audit" sourceRef="sign_pilot_acceptance" targetRef="write_pilot_audit" />
+    <serviceTask id="write_pilot_audit" name="Write pilot audit" />
+    <sequenceFlow id="flow_audit_to_end" sourceRef="write_pilot_audit" targetRef="end_pilot_accepted" />
+    <endEvent id="end_pilot_accepted" name="Pilot accepted" />
+  </process>
+</definitions>

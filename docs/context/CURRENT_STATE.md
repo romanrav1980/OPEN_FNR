@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 23 implementation is complete.
+Sprint 24 implementation is complete.
 
 ## Local Infrastructure
 
@@ -259,9 +259,20 @@ Known local URLs:
 - UI Stage Rehearsal section with full daily cycle, stage snapshot, UAT checklist and go/no-go readiness.
 - HTML test report with screenshot: `docs/test-reports/sprint-23-stage-rehearsal/index.html`.
 
+## Sprint 24 Artifacts
+
+- Business Pilot API: `apps/backend/open_fnr_api/pilot.py`.
+- Business Pilot tests: `tests/backend/test_pilot.py`.
+- Pilot process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Pilot operational BPMN: `processes/pilot/pilot_operational_process.bpmn20.xml`.
+- Pilot acceptance DMN: `processes/pilot/pilot_acceptance_decision.dmn.xml`.
+- Pilot exception CMMN: `processes/pilot/pilot_exception_case.cmmn.xml`.
+- UI Business Pilot Dashboard section with pilot scope, KPI panel, feedback, known issues and acceptance action.
+- HTML test report with screenshot: `docs/test-reports/sprint-24-business-pilot/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 188 passed.
+- `python -m pytest` -> 195 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -269,4 +280,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 23 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 24: Business Pilot Release.
+Commit Sprint 24 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 25: Production Data Scale.

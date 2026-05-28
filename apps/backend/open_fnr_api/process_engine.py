@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="pilot_operational_process",
+        name="Pilot operational process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-017",
+        source_path="processes/pilot/pilot_operational_process.bpmn20.xml",
+        owner_role="Business Owner",
+    ),
+    ProcessDefinition(
+        key="pilot_acceptance_decision",
+        name="Pilot acceptance decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-017",
+        source_path="processes/pilot/pilot_acceptance_decision.dmn.xml",
+        owner_role="Business Owner",
+    ),
+    ProcessDefinition(
+        key="pilot_exception_case",
+        name="Pilot exception case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-017",
+        source_path="processes/pilot/pilot_exception_case.cmmn.xml",
+        owner_role="Product Owner",
+    ),
+    ProcessDefinition(
         key="stage_daily_cycle_process",
         name="Stage daily cycle process",
         artifact_type=ProcessArtifactType.BPMN,

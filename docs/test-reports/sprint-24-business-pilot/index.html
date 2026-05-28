@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 24 - Business Pilot Release</title>
+    <style>
+      :root { --bg:#1e1e1e; --panel:#252526; --red-light:#b83a4b; --text:#d4d4d4; --muted:#9da3ae; --border:#3a3a3a; --ok:#8fd19e; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,"Segoe UI",Arial,sans-serif; }
+      main { width:min(1180px, calc(100vw - 40px)); margin:0 auto; padding:32px 0 56px; }
+      section { border:1px solid var(--border); background:var(--panel); margin-top:20px; padding:20px; }
+      h1,h2,p { margin:0; }
+      h1 { font-size:30px; }
+      h2 { margin-bottom:12px; color:var(--red-light); font-size:20px; }
+      p,li,td,th { line-height:1.55; }
+      .subtitle { margin-top:8px; color:var(--muted); }
+      table { width:100%; border-collapse:collapse; margin-top:12px; }
+      th,td { border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+      th { color:var(--muted); font-size:12px; text-transform:uppercase; }
+      .ok { color:var(--ok); font-weight:700; }
+      .shot { width:100%; border:1px solid var(--border); margin-top:12px; }
+      code { color:var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 24: Business Pilot Release</h1>
+        <p class="subtitle">
+          Аннотация: тестируем бизнес-пилот на ограниченной зоне north / S001-S003 / fresh+grocery.
+          Такой тест нужен, чтобы проверить реальную работу пользователей: forecast review, order approval,
+          feedback collection, defect triage, KPI tracking и подпись пилотной приемки.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем <code>Business Pilot Dashboard</code>.</li>
+          <li>Проверяем pilot scope: регион north, магазины S001-S003, категории fresh и grocery.</li>
+          <li>Проверяем KPI panel: WAPE, service level, lost sales reduction, overstock reduction.</li>
+          <li>Проверяем feedback widget: feedback связан с forecast-workbench и переведен в triaged.</li>
+          <li>Проверяем known issues: medium issue принят как non-blocking risk.</li>
+          <li>Проверяем действия пользователя: Review forecast, Approve order, Sign acceptance.</li>
+        </ol>
+        <img class="shot" src="screenshots/business-pilot-dashboard.png" alt="Business Pilot Dashboard" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Фактический результат</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Pilot user reviews forecast.</td><td>Бизнес должен работать с реальным forecast review сценарием.</td><td>BPMN содержит Review pilot forecast.</td><td class="ok">Проверено BPMN-тестом.</td></tr>
+            <tr><td>2</td><td>Supply Chain Manager approves pilot order.</td><td>Проверяем production-like order approval.</td><td>BPMN содержит Approve pilot order.</td><td class="ok">Проверено BPMN-тестом.</td></tr>
+            <tr><td>3</td><td>Пользователь отправляет feedback.</td><td>Пилот обязан собирать обратную связь, а не терять ее в переписке.</td><td>Feedback связан с модулем и статусом triaged.</td><td class="ok">Проверено API-тестом.</td></tr>
+            <tr><td>4</td><td>Product Owner triages issue.</td><td>Нужно отделять блокеры от accepted risks.</td><td>Medium issue accepted_risk не блокирует приемку.</td><td class="ok">Проверено helper-тестом.</td></tr>
+            <tr><td>5</td><td>DMN evaluates pilot thresholds.</td><td>Приемка должна зависеть от KPI и critical issues.</td><td>Rules: blocked, acceptance_ready, continue_pilot.</td><td class="ok">Проверено DMN-тестом.</td></tr>
+            <tr><td>6</td><td>CMMN ведет pilot exception case.</td><td>Feedback и дефекты должны иметь владельца и решение.</td><td>Case содержит triage, owner, risk, acceptance tasks.</td><td class="ok">Проверено CMMN-тестом.</td></tr>
+            <tr><td>7</td><td>Business Owner signs acceptance.</td><td>Фиксируем формальное завершение пилота.</td><td>Только Business Owner может подписать acceptance.</td><td class="ok">Проверено RBAC API-тестом.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead><tr><th>Тип</th><th>Проверка</th><th>Результат</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td><code>python -m pytest</code></td><td class="ok">195 passed</td></tr>
+            <tr><td>Frontend</td><td><code>npm.cmd run build</code> в <code>apps/frontend</code></td><td class="ok">Сборка успешна</td></tr>
+            <tr><td>UI screenshot</td><td>Playwright full-page screenshot</td><td class="ok">Скриншот сохранен</td></tr>
+            <tr><td>Process</td><td>BPMN pilot flow, DMN acceptance, CMMN exception lifecycle</td><td class="ok">Усиленные проверки пройдены</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

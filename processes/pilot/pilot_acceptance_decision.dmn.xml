@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/pilot" name="pilot_acceptance_decision">
+  <decision id="pilot_acceptance_decision" name="Pilot acceptance decision">
+    <decisionTable id="pilot_acceptance_table" hitPolicy="FIRST">
+      <input id="input_wape" label="wape">
+        <inputExpression id="input_wape_expr" typeRef="number"><text>wape</text></inputExpression>
+      </input>
+      <input id="input_service_level" label="service_level">
+        <inputExpression id="input_service_level_expr" typeRef="number"><text>service_level</text></inputExpression>
+      </input>
+      <input id="input_critical_issues" label="critical_issues">
+        <inputExpression id="input_critical_issues_expr" typeRef="number"><text>critical_issues</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_block_critical_issue">
+        <inputEntry id="rule_block_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_service"><text>-</text></inputEntry>
+        <inputEntry id="rule_block_issues"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_block_decision"><text>"blocked"</text></outputEntry>
+        <outputEntry id="rule_block_action"><text>"resolve critical issue"</text></outputEntry>
+      </rule>
+      <rule id="rule_ready">
+        <inputEntry id="rule_ready_wape"><text>&lt;= 18</text></inputEntry>
+        <inputEntry id="rule_ready_service"><text>&gt;= 95</text></inputEntry>
+        <inputEntry id="rule_ready_issues"><text>0</text></inputEntry>
+        <outputEntry id="rule_ready_decision"><text>"acceptance_ready"</text></outputEntry>
+        <outputEntry id="rule_ready_action"><text>"sign acceptance"</text></outputEntry>
+      </rule>
+      <rule id="rule_continue_pilot">
+        <inputEntry id="rule_continue_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_continue_service"><text>-</text></inputEntry>
+        <inputEntry id="rule_continue_issues"><text>-</text></inputEntry>
+        <outputEntry id="rule_continue_decision"><text>"continue_pilot"</text></outputEntry>
+        <outputEntry id="rule_continue_action"><text>"triage feedback"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

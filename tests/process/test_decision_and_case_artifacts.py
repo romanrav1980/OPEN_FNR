@@ -610,3 +610,37 @@ def test_stage_uat_case_has_required_business_uat_tasks() -> None:
     assert "Execute replenishment UAT" in human_task_names
     assert "Validate export UAT" in human_task_names
     assert "Confirm pilot go/no-go" in human_task_names
+
+
+def test_pilot_acceptance_decision_is_parseable_and_has_block_ready_continue_rules() -> None:
+    tree = ElementTree.parse(Path("processes/pilot/pilot_acceptance_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "pilot_acceptance_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"decision", "action"}
+    assert {"rule_block_critical_issue", "rule_ready", "rule_continue_pilot"}.issubset(rule_ids)
+
+
+def test_pilot_exception_case_has_feedback_defect_and_acceptance_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/pilot/pilot_exception_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "pilot_exception_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Triage pilot feedback" in human_task_names
+    assert "Assign defect owner" in human_task_names
+    assert "Accept or resolve risk" in human_task_names
+    assert "Confirm pilot acceptance" in human_task_names

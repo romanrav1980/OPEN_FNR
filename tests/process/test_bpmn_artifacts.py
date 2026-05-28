@@ -27,6 +27,7 @@ DC_REPLENISHMENT_PROCESS_PATH = Path("processes/multi-echelon/dc_replenishment_p
 PERFORMANCE_TEST_RUN_PROCESS_PATH = Path("processes/performance/performance_test_run_process.bpmn20.xml")
 ACCESS_REQUEST_PROCESS_PATH = Path("processes/security/access_request_process.bpmn20.xml")
 STAGE_DAILY_CYCLE_PROCESS_PATH = Path("processes/stage/stage_daily_cycle_process.bpmn20.xml")
+PILOT_OPERATIONAL_PROCESS_PATH = Path("processes/pilot/pilot_operational_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -591,3 +592,35 @@ def test_stage_daily_cycle_bpmn_covers_end_to_end_rehearsal_path() -> None:
     assert "Publish stage exports" in service_task_names
     assert "Review stage exceptions" in user_task_names
     assert "Evaluate stage go/no-go" in business_rule_names
+
+
+def test_pilot_operational_bpmn_covers_feedback_triage_and_acceptance_paths() -> None:
+    tree = ElementTree.parse(PILOT_OPERATIONAL_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "pilot_operational_process"
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Review pilot forecast" in user_task_names
+    assert "Approve pilot order" in user_task_names
+    assert "Collect pilot feedback" in user_task_names
+    assert "Triage pilot issue" in user_task_names
+    assert "Sign pilot acceptance" in user_task_names
+    assert "Evaluate pilot thresholds" in business_rule_names
+    assert "Write pilot audit" in service_task_names
+    assert "Pilot acceptance ready?" in gateway_names

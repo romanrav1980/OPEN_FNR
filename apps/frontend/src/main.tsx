@@ -550,6 +550,33 @@ const uatChecklist = [
   { id: "uat-004", scenario: "Integration owner validates export status", role: "Integration Engineer", status: "passed" },
 ];
 
+const pilotKpis = [
+  { name: "WAPE", value: "15.7%", threshold: "<= 18.0%", status: "green" },
+  { name: "Service level", value: "96.2%", threshold: ">= 95.0%", status: "green" },
+  { name: "Lost sales reduction", value: "4.1 pp", threshold: ">= 3.0 pp", status: "green" },
+  { name: "Overstock reduction", value: "2.4 pp", threshold: ">= 2.0 pp", status: "green" },
+];
+
+const pilotFeedbackRows = [
+  {
+    id: "fb-20260528-001",
+    user: "forecast.planner@example.org",
+    type: "usability",
+    module: "forecast-workbench",
+    status: "triaged",
+  },
+];
+
+const pilotIssues = [
+  {
+    id: "pilot-issue-001",
+    severity: "medium",
+    status: "accepted_risk",
+    owner: "Product Owner",
+    summary: "Forecast KPI drill-down navigation improvement accepted after pilot.",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -2375,6 +2402,118 @@ function App() {
             <h3>Critical defects = 0</h3>
             <p>
               DMN blocks pilot if any stage step fails or if critical defects remain unresolved.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Business Pilot Dashboard">
+        <div className="section-heading">
+          <h2>Business Pilot Dashboard</h2>
+          <p>Pilot scope, real user scenarios, feedback, known issues and acceptance readiness</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Pilot Scope</span>
+            <strong>north / S001-S003 / fresh + grocery</strong>
+            <p>Forecast Planner, Supply Chain Manager and Business Owner operate production-like daily flow.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Acceptance</span>
+            <strong>Ready for signature</strong>
+            <p>All pilot KPIs are green, no critical defects remain, feedback is captured and triaged.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>KPI</th>
+                <th>Value</th>
+                <th>Threshold</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pilotKpis.map((row) => (
+                <tr key={row.name}>
+                  <td>{row.name}</td>
+                  <td>{row.value}</td>
+                  <td>{row.threshold}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Feedback</th>
+                <th>User</th>
+                <th>Type</th>
+                <th>Module</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pilotFeedbackRows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.user}</td>
+                  <td>{row.type}</td>
+                  <td>{row.module}</td>
+                  <td>{row.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pilotIssues.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.severity}</td>
+                  <td>{row.status}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Pilot Flow</span>
+            <h3>Forecast review and order approval</h3>
+            <p>
+              Pilot users review forecast, approve order proposals, submit feedback and sign acceptance
+              through Process Engine with audit trail.
+            </p>
+            <div className="action-row">
+              <button type="button">Review forecast</button>
+              <button type="button">Approve order</button>
+              <button type="button">Sign acceptance</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Support Channel</span>
+            <h3>Feedback captured</h3>
+            <p>
+              Feedback is linked to module, triaged as usability, converted to a known issue and
+              accepted as non-blocking pilot risk.
             </p>
           </aside>
         </div>
