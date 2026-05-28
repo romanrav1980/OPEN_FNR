@@ -58,6 +58,26 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(business_date)
 ORDER BY (business_date, store_id, sku_id, batch_id);
 
+CREATE TABLE IF NOT EXISTS open_fnr.raw_pos_sales_lines
+(
+    batch_id String,
+    receipt_id String,
+    line_id String,
+    business_date Date,
+    store_id String,
+    sku_id String,
+    sales_qty Float64,
+    gross_amount Float64,
+    net_amount Float64,
+    discount_amount Float64,
+    currency String,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(business_date)
+ORDER BY (business_date, store_id, sku_id, receipt_id, line_id);
+
 CREATE TABLE IF NOT EXISTS open_fnr.staging_stock_daily
 (
     batch_id String,

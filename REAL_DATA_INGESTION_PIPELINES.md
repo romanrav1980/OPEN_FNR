@@ -68,6 +68,16 @@ flowchart LR
 | 9 | Run shadow load on pilot data |
 | 10 | Enable daily production-like schedule |
 
+## Current Implementation Status
+
+| Pipeline | Status | Implemented artifacts |
+| --- | --- | --- |
+| POS sales | in progress | `PosSalesLine`, POS manifest API, Airflow DAG skeleton, ClickHouse raw POS sales table |
+| WMS stock/orders/in-transit | planned | source contracts and raw/clean tables to be added in I2 |
+| ERP prices/order statuses | planned | source contracts and export status reconciliation to be added after WMS |
+| MDM/PIM | planned | product/store hierarchy contract hardening to be added before pilot |
+| Promo system | planned | promo plan source contract and overlap DQ to be added before promo pilot |
+
 ## Acceptance Criteria
 
 - All source systems have signed contracts.

@@ -12,6 +12,8 @@ def test_contracts_endpoint_lists_core_domains() -> None:
 
     domains = {item["domain"] for item in response.json()["contracts"]}
     assert {"sales", "stock", "prices", "product_mdm", "store_mdm", "calendar"} <= domains
+    sales_contract = next(item for item in response.json()["contracts"] if item["domain"] == "sales")
+    assert sales_contract["model"] == "PosSalesLine"
 
 
 def test_ingestion_status_can_filter_by_domain() -> None:
@@ -26,3 +28,16 @@ def test_ingestion_status_can_filter_by_domain() -> None:
 def test_ingestion_status_returns_404_for_unknown_batch() -> None:
     response = client.get("/data/ingestion/status/missing-batch")
     assert response.status_code == 404
+
+
+def test_pos_sales_manifest_exposes_idempotency_checksum_and_landing_uri() -> None:
+    response = client.get("/data/ingestion/manifests/pos-sales")
+    assert response.status_code == 200
+
+    manifest = response.json()
+    assert manifest["source_system"] == "POS"
+    assert manifest["contract_name"] == "pos_sales_line"
+    assert manifest["contract_version"] == "v1"
+    assert manifest["idempotency_key"] == "POS:pos_sales_line:v1:2026-05-28"
+    assert manifest["checksum"].startswith("sha256:")
+    assert "business_date=2026-05-28" in manifest["landed_uri"]

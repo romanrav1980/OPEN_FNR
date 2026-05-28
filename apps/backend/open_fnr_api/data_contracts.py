@@ -114,8 +114,42 @@ class IngestionBatch(BaseModel):
     loaded_at: datetime
 
 
+class SourceBatchManifest(BaseModel):
+    batch_id: str = Field(min_length=1, max_length=128)
+    source_system: str = Field(min_length=1, max_length=64)
+    contract_name: str = Field(min_length=1, max_length=128)
+    contract_version: str = Field(min_length=1, max_length=32)
+    business_date: date
+    row_count: int = Field(ge=0)
+    checksum: str = Field(min_length=1, max_length=128)
+    idempotency_key: str = Field(min_length=1, max_length=256)
+    landed_uri: str = Field(min_length=1, max_length=512)
+
+
+class PosSalesLine(BaseModel):
+    receipt_id: str = Field(min_length=1, max_length=128)
+    line_id: str = Field(min_length=1, max_length=128)
+    business_date: date
+    store_id: str = Field(min_length=1, max_length=64)
+    sku_id: str = Field(min_length=1, max_length=64)
+    sales_qty: float
+    gross_amount: float = Field(ge=0)
+    net_amount: float = Field(ge=0)
+    discount_amount: float = Field(default=0, ge=0)
+    currency: str = Field(default="RUB", min_length=3, max_length=3)
+    source_system: str = Field(default="POS", min_length=1, max_length=64)
+
+    @field_validator("sales_qty")
+    @classmethod
+    def sales_qty_can_only_be_negative_for_returns(cls, value: float) -> float:
+        if value == 0:
+            msg = "sales_qty must be non-zero for POS line"
+            raise ValueError(msg)
+        return value
+
+
 SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
-    DataDomain.SALES: SalesRecord,
+    DataDomain.SALES: PosSalesLine,
     DataDomain.STOCK: StockRecord,
     DataDomain.PRICES: PriceRecord,
     DataDomain.PRODUCT_MDM: ProductMdmRecord,

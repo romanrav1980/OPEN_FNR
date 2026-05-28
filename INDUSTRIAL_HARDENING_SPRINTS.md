@@ -5,7 +5,7 @@ Phase: after functional prototype completion.
 
 ## H1. Config, CI And Persistence Boundary
 
-Status: in progress.
+Status: completed.
 
 ### Scope
 
@@ -27,7 +27,7 @@ Status: in progress.
 
 ## H2. PostgreSQL Persistence And Audit Store
 
-Status: in progress.
+Status: completed.
 
 ### Scope
 
@@ -47,7 +47,7 @@ Status: in progress.
 
 ## H3. ClickHouse Marts
 
-Status: in progress.
+Status: completed.
 
 ### Scope
 
@@ -64,6 +64,8 @@ Status: in progress.
 
 ## I1. POS Sales Ingestion
 
+Status: in progress.
+
 ### Scope
 
 - add POS landing contract;
@@ -71,6 +73,13 @@ Status: in progress.
 - add row count, checksum and schema validation;
 - load sales into clean canonical table;
 - route DQ failures to Process Engine.
+
+### Current Implementation
+
+- `PosSalesLine` defines POS receipt-line level contract with non-zero quantity validation.
+- `/data/ingestion/manifests/pos-sales` exposes the current POS batch manifest with checksum, landing URI and idempotency key.
+- `orchestration/airflow/dags/pos_sales_ingestion.py` defines the POS ingestion DAG skeleton: manifest, schema validation, DQ and clean publication.
+- ClickHouse raw landing DDL includes `open_fnr.raw_pos_sales_lines`.
 
 ## I2. WMS Stock, Open Orders And In-Transit
 

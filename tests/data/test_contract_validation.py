@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
-from open_fnr_api.data_contracts import PriceRecord, SalesRecord
+from open_fnr_api.data_contracts import PosSalesLine, PriceRecord, SalesRecord
 
 
 def test_sales_contract_rejects_negative_quantity() -> None:
@@ -14,6 +14,42 @@ def test_sales_contract_rejects_negative_quantity() -> None:
             sku_id="SKU001",
             sales_qty=-1,
             sales_amount=100,
+        )
+
+
+def test_pos_sales_line_accepts_returns_but_rejects_zero_quantity() -> None:
+    PosSalesLine(
+        receipt_id="R001",
+        line_id="1",
+        business_date=date(2026, 5, 28),
+        store_id="S001",
+        sku_id="SKU001",
+        sales_qty=1,
+        gross_amount=100,
+        net_amount=90,
+        discount_amount=10,
+    )
+    PosSalesLine(
+        receipt_id="R002",
+        line_id="1",
+        business_date=date(2026, 5, 28),
+        store_id="S001",
+        sku_id="SKU001",
+        sales_qty=-1,
+        gross_amount=100,
+        net_amount=100,
+    )
+
+    with pytest.raises(ValidationError):
+        PosSalesLine(
+            receipt_id="R003",
+            line_id="1",
+            business_date=date(2026, 5, 28),
+            store_id="S001",
+            sku_id="SKU001",
+            sales_qty=0,
+            gross_amount=100,
+            net_amount=100,
         )
 
 

@@ -1,10 +1,10 @@
 # OPEN FNR Current State
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening H3 is in progress after completion of H2 PostgreSQL audit repository.
+Industrial hardening I1 is in progress after completion of H1-H3 foundations. The current focus is real POS sales ingestion: source contract, manifest, raw landing table, orchestration skeleton and data tests.
 
 ## Local Infrastructure
 
@@ -421,7 +421,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Commit post-sprint documentation audit, environment strategy, real integration plan, security hardening plan, UI productization plan and pilot launch plan to `romanrav1980/OPEN_FNR`.
+Complete I1 verification, commit POS sales ingestion, then continue to I2 WMS stock, open orders and in-transit ingestion.
 
 ## Post-Sprint Planning Artifacts
 
@@ -457,6 +457,14 @@ Commit post-sprint documentation audit, environment strategy, real integration p
 - Mart metadata repository: `apps/backend/open_fnr_api/mart_repositories.py`.
 - Mart metadata API: `apps/backend/open_fnr_api/marts.py`.
 - Mart tests: `tests/backend/test_marts.py`, `tests/data/test_clickhouse_mart_schema.py`.
+
+## I1 Real Data Ingestion Artifacts
+
+- POS receipt-line contract: `PosSalesLine` in `apps/backend/open_fnr_api/data_contracts.py`.
+- POS manifest endpoint: `/data/ingestion/manifests/pos-sales`.
+- POS ingestion DAG skeleton: `orchestration/airflow/dags/pos_sales_ingestion.py`.
+- Raw ClickHouse landing table: `open_fnr.raw_pos_sales_lines`.
+- POS ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_contract_validation.py`, `tests/data/test_clickhouse_pos_sales_schema.py`, `tests/orchestration/test_pos_sales_ingestion.py`.
 
 ## Block Presentations
 
