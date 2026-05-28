@@ -5,7 +5,16 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from open_fnr_api.main import app
-from open_fnr_api.promo import PromoDisplayLocation, PromoMechanic, PromoPlan, PromoStatus, build_total_forecast, validate_promo
+from open_fnr_api.promo import (
+    PromoDisplayLocation,
+    PromoMechanic,
+    PromoPlan,
+    PromoRiskLevel,
+    PromoStatus,
+    build_total_forecast,
+    classify_promo_risk,
+    validate_promo,
+)
 
 
 client = TestClient(app)
@@ -90,3 +99,31 @@ def test_promo_forecast_endpoint_separates_regular_and_uplift() -> None:
 
 def test_total_forecast_formula() -> None:
     assert build_total_forecast(120, 48) == 168
+
+
+def test_promo_approval_endpoint_exposes_route_and_actions() -> None:
+    response = client.get("/promo/approvals/promo-20260601-fresh-001")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "category_review"
+    assert payload["risk_level"] == "medium"
+    assert payload["route"] == ["Category Manager", "Supply Chain Manager"]
+    assert payload["steps"][0]["allowed_actions"] == ["approve", "reject", "request_rework", "comment"]
+    assert payload["publication_ready"] is False
+
+
+def test_promo_approval_rework_contains_blocking_errors() -> None:
+    response = client.get("/promo/approvals/promo-20260605-grocery-002")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "rework"
+    assert payload["risk_level"] == "high"
+    assert payload["blocking_errors"] == ["overlaps with promo-20260601-fresh-001"]
+
+
+def test_promo_risk_classification() -> None:
+    assert classify_promo_risk(discount_percent=10, uplift_factor=0.2, post_promo_stock_qty=250) == PromoRiskLevel.LOW
+    assert classify_promo_risk(discount_percent=20, uplift_factor=0.2, post_promo_stock_qty=250) == PromoRiskLevel.MEDIUM
+    assert classify_promo_risk(discount_percent=10, uplift_factor=0.8, post_promo_stock_qty=250) == PromoRiskLevel.HIGH

@@ -31,6 +31,10 @@ class AuditEventType(StrEnum):
     TASK_COMPLETED = "task_completed"
     COMMENT_ADDED = "comment_added"
     SLA_ESCALATED = "sla_escalated"
+    APPROVAL_REQUESTED = "approval_requested"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    REWORK_REQUESTED = "rework_requested"
 
 
 class ProcessDefinition(BaseModel):
@@ -71,6 +75,7 @@ class AuditEvent(BaseModel):
 class CompleteTaskRequest(BaseModel):
     action: str
     actor: str
+    actor_role: str | None = None
     comment: str = Field(min_length=1)
 
 
@@ -80,6 +85,46 @@ class CompleteTaskResponse(BaseModel):
 
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
+    ProcessDefinition(
+        key="promo_planning_process",
+        name="Promo planning approval",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-003",
+        source_path="processes/promo/promo_planning_process.bpmn20.xml",
+        owner_role="Promo Planner",
+    ),
+    ProcessDefinition(
+        key="promo_risk_classification",
+        name="Promo risk classification",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-003",
+        source_path="processes/promo/promo_risk_classification.dmn.xml",
+        owner_role="Category Manager",
+    ),
+    ProcessDefinition(
+        key="promo_approval_route",
+        name="Promo approval route",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-003",
+        source_path="processes/promo/promo_approval_route.dmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
+        key="promo_shortage_case",
+        name="Promo shortage case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-003",
+        source_path="processes/promo/promo_shortage_case.cmmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
     ProcessDefinition(
         key="promo_draft_validation_process",
         name="Promo draft validation",
@@ -134,6 +179,32 @@ PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
 
 TASKS: tuple[ProcessTask, ...] = (
     ProcessTask(
+        task_id="task-promo-approval-category-001",
+        process_instance_id="proc-promo-approval-20260601-001",
+        process_key="promo_planning_process",
+        name="Approve promo commercial terms",
+        status=TaskStatus.OPEN,
+        assigned_role="Category Manager",
+        candidate_roles=("Category Manager",),
+        available_actions=("approve", "reject", "request_rework", "comment"),
+        sla_due_at=datetime(2026, 5, 29, 9, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 12, 10, tzinfo=timezone.utc),
+        business_key="promo-20260601-fresh-001",
+    ),
+    ProcessTask(
+        task_id="task-promo-approval-supply-001",
+        process_instance_id="proc-promo-approval-20260601-001",
+        process_key="promo_planning_process",
+        name="Approve promo supply readiness",
+        status=TaskStatus.OPEN,
+        assigned_role="Supply Chain Manager",
+        candidate_roles=("Supply Chain Manager",),
+        available_actions=("approve", "reject", "request_rework", "escalate", "comment"),
+        sla_due_at=datetime(2026, 5, 28, 17, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 5, 28, 12, 20, tzinfo=timezone.utc),
+        business_key="promo-20260601-fresh-001",
+    ),
+    ProcessTask(
         task_id="task-promo-001",
         process_instance_id="proc-promo-20260601-001",
         process_key="promo_draft_validation_process",
@@ -175,6 +246,24 @@ TASKS: tuple[ProcessTask, ...] = (
 )
 
 AUDIT_EVENTS: tuple[AuditEvent, ...] = (
+    AuditEvent(
+        event_id="audit-promo-approval-001",
+        process_instance_id="proc-promo-approval-20260601-001",
+        task_id=None,
+        event_type=AuditEventType.APPROVAL_REQUESTED,
+        actor="Promo Planner",
+        message="Requested category and supply approvals for promo-20260601-fresh-001.",
+        created_at=datetime(2026, 5, 28, 12, 0, tzinfo=timezone.utc),
+    ),
+    AuditEvent(
+        event_id="audit-promo-approval-002",
+        process_instance_id="proc-promo-approval-20260601-001",
+        task_id="task-promo-approval-category-001",
+        event_type=AuditEventType.TASK_CREATED,
+        actor="Flowable",
+        message="Created Category Manager approval task.",
+        created_at=datetime(2026, 5, 28, 12, 10, tzinfo=timezone.utc),
+    ),
     AuditEvent(
         event_id="audit-promo-001",
         process_instance_id="proc-promo-20260601-001",
@@ -235,6 +324,8 @@ def complete_task(task_id: str, payload: CompleteTaskRequest) -> CompleteTaskRes
         raise HTTPException(status_code=404, detail="process task not found")
     if payload.action not in task.available_actions:
         raise HTTPException(status_code=400, detail="action is not available for task")
+    if payload.actor_role is not None and payload.actor_role not in task.candidate_roles and payload.actor_role != task.assigned_role:
+        raise HTTPException(status_code=403, detail="actor role is not allowed to complete task")
 
     completed_task = task.model_copy(update={"status": TaskStatus.COMPLETED})
     now = datetime(2026, 5, 28, 12, 5, tzinfo=timezone.utc)

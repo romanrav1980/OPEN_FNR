@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/promo" name="promo_approval_route">
+  <decision id="promo_approval_route" name="Promo approval route">
+    <decisionTable id="promo_approval_route_table" hitPolicy="FIRST">
+      <input id="input_risk" label="risk_level">
+        <inputExpression id="input_risk_expr" typeRef="string">
+          <text>risk_level</text>
+        </inputExpression>
+      </input>
+      <output id="output_route" label="route" name="route" typeRef="string" />
+      <rule id="rule_high_route">
+        <inputEntry id="rule_high_route_risk"><text>"high"</text></inputEntry>
+        <outputEntry id="rule_high_route_roles"><text>"Category Manager,Supply Chain Manager"</text></outputEntry>
+      </rule>
+      <rule id="rule_medium_route">
+        <inputEntry id="rule_medium_route_risk"><text>"medium"</text></inputEntry>
+        <outputEntry id="rule_medium_route_roles"><text>"Category Manager,Supply Chain Manager"</text></outputEntry>
+      </rule>
+      <rule id="rule_low_route">
+        <inputEntry id="rule_low_route_risk"><text>"low"</text></inputEntry>
+        <outputEntry id="rule_low_route_roles"><text>"Category Manager"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

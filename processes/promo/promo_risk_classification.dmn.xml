@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/promo" name="promo_risk_classification">
+  <decision id="promo_risk_classification" name="Promo risk classification">
+    <decisionTable id="promo_risk_table" hitPolicy="FIRST">
+      <input id="input_discount" label="discount_percent">
+        <inputExpression id="input_discount_expr" typeRef="number">
+          <text>discount_percent</text>
+        </inputExpression>
+      </input>
+      <input id="input_uplift" label="uplift_factor">
+        <inputExpression id="input_uplift_expr" typeRef="number">
+          <text>uplift_factor</text>
+        </inputExpression>
+      </input>
+      <output id="output_risk" label="risk_level" name="risk_level" typeRef="string" />
+      <rule id="rule_high">
+        <inputEntry id="rule_high_discount"><text>&gt;= 30</text></inputEntry>
+        <inputEntry id="rule_high_uplift"><text>-</text></inputEntry>
+        <outputEntry id="rule_high_risk"><text>"high"</text></outputEntry>
+      </rule>
+      <rule id="rule_medium">
+        <inputEntry id="rule_medium_discount"><text>&gt;= 15</text></inputEntry>
+        <inputEntry id="rule_medium_uplift"><text>-</text></inputEntry>
+        <outputEntry id="rule_medium_risk"><text>"medium"</text></outputEntry>
+      </rule>
+      <rule id="rule_low">
+        <inputEntry id="rule_low_discount"><text>-</text></inputEntry>
+        <inputEntry id="rule_low_uplift"><text>-</text></inputEntry>
+        <outputEntry id="rule_low_risk"><text>"low"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

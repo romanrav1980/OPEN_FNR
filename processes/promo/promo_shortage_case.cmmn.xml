@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/promo">
+  <case id="promo_shortage_case" name="Promo shortage case">
+    <casePlanModel id="promo_shortage_plan" name="Promo shortage plan">
+      <humanTask id="review_shortage_risk" name="Review shortage risk" />
+      <humanTask id="adjust_promo_volume" name="Adjust promo volume" />
+      <humanTask id="approve_supply_mitigation" name="Approve supply mitigation" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -96,6 +96,42 @@ class PromoForecast(BaseModel):
     warning: str | None = None
 
 
+class PromoApprovalStatus(StrEnum):
+    CATEGORY_REVIEW = "category_review"
+    SUPPLY_REVIEW = "supply_review"
+    APPROVED = "approved"
+    REWORK = "rework"
+    REJECTED = "rejected"
+
+
+class PromoRiskLevel(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+class PromoApprovalStep(BaseModel):
+    step_id: str
+    role: str
+    status: PromoApprovalStatus
+    allowed_actions: list[str]
+    sla_due_at: datetime
+    decision_by: str | None = None
+    decision_comment: str | None = None
+
+
+class PromoApproval(BaseModel):
+    promo_id: str
+    process_instance_id: str
+    status: PromoApprovalStatus
+    risk_level: PromoRiskLevel
+    risk_reasons: list[str]
+    route: list[str]
+    blocking_errors: list[str]
+    steps: list[PromoApprovalStep]
+    publication_ready: bool
+
+
 router = APIRouter(prefix="/promo", tags=["promo"])
 
 
@@ -178,9 +214,65 @@ PROMO_FORECASTS: tuple[PromoForecast, ...] = (
     ),
 )
 
+PROMO_APPROVALS: tuple[PromoApproval, ...] = (
+    PromoApproval(
+        promo_id="promo-20260601-fresh-001",
+        process_instance_id="proc-promo-approval-20260601-001",
+        status=PromoApprovalStatus.CATEGORY_REVIEW,
+        risk_level=PromoRiskLevel.MEDIUM,
+        risk_reasons=["discount over 15%", "post-promo stock remains above safety threshold"],
+        route=["Category Manager", "Supply Chain Manager"],
+        blocking_errors=[],
+        steps=[
+            PromoApprovalStep(
+                step_id="category-review",
+                role="Category Manager",
+                status=PromoApprovalStatus.CATEGORY_REVIEW,
+                allowed_actions=["approve", "reject", "request_rework", "comment"],
+                sla_due_at=datetime(2026, 5, 29, 9, 0, tzinfo=timezone.utc),
+            ),
+            PromoApprovalStep(
+                step_id="supply-review",
+                role="Supply Chain Manager",
+                status=PromoApprovalStatus.SUPPLY_REVIEW,
+                allowed_actions=["approve", "reject", "request_rework", "escalate", "comment"],
+                sla_due_at=datetime(2026, 5, 28, 17, 0, tzinfo=timezone.utc),
+            ),
+        ],
+        publication_ready=False,
+    ),
+    PromoApproval(
+        promo_id="promo-20260605-grocery-002",
+        process_instance_id="proc-promo-approval-20260605-002",
+        status=PromoApprovalStatus.REWORK,
+        risk_level=PromoRiskLevel.HIGH,
+        risk_reasons=["overlapping promo", "display capacity below forecasted uplift"],
+        route=["Category Manager", "Supply Chain Manager"],
+        blocking_errors=["overlaps with promo-20260601-fresh-001"],
+        steps=[
+            PromoApprovalStep(
+                step_id="category-rework",
+                role="Promo Planner",
+                status=PromoApprovalStatus.REWORK,
+                allowed_actions=["resubmit", "cancel", "comment"],
+                sla_due_at=datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc),
+            ),
+        ],
+        publication_ready=False,
+    ),
+)
+
 
 def build_total_forecast(regular_forecast_qty: float, promo_uplift_qty: float) -> float:
     return regular_forecast_qty + promo_uplift_qty
+
+
+def classify_promo_risk(discount_percent: float, uplift_factor: float, post_promo_stock_qty: float) -> PromoRiskLevel:
+    if discount_percent >= 30 or uplift_factor >= 0.75 or post_promo_stock_qty < 50:
+        return PromoRiskLevel.HIGH
+    if discount_percent >= 15 or uplift_factor >= 0.35 or post_promo_stock_qty < 150:
+        return PromoRiskLevel.MEDIUM
+    return PromoRiskLevel.LOW
 
 
 def validate_promo(plan: PromoPlan) -> PromoValidationResult:
@@ -245,3 +337,16 @@ def get_promo_forecast(promo_id: str = Path(min_length=1)) -> dict[str, object]:
         if forecast.promo_id == promo_id:
             return forecast.model_dump(mode="json")
     raise HTTPException(status_code=404, detail="promo forecast not found")
+
+
+@router.get("/approvals")
+def list_promo_approvals() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in PROMO_APPROVALS], "total": len(PROMO_APPROVALS)}
+
+
+@router.get("/approvals/{promo_id}")
+def get_promo_approval(promo_id: str = Path(min_length=1)) -> dict[str, object]:
+    for approval in PROMO_APPROVALS:
+        if approval.promo_id == promo_id:
+            return approval.model_dump(mode="json")
+    raise HTTPException(status_code=404, detail="promo approval not found")

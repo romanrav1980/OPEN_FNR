@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 10 - Promo Approval Process</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red: #8b1e2d;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+      section {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        margin-top: 20px;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        margin-bottom: 12px;
+        color: var(--red-light);
+        font-size: 20px;
+      }
+      h3 {
+        margin: 16px 0 8px;
+        font-size: 16px;
+      }
+      p,
+      li,
+      td,
+      th {
+        line-height: 1.55;
+      }
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .shot {
+        width: 100%;
+        border: 1px solid var(--border);
+        margin-top: 12px;
+      }
+      code {
+        color: var(--red-light);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 10: Promo Approval Process</h1>
+        <p class="subtitle">
+          Аннотация: тестируем end-to-end согласование промо после расчета uplift:
+          риск-классификация, маршрут Category Manager + Supply Chain Manager,
+          rework/reject ветки, shortage case, RBAC и audit каждого решения.
+        </p>
+      </header>
+
+      <section>
+        <h2>Что тестируем</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Область</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Факт</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Promo approval API</td>
+              <td>Открываем <code>/promo/approvals/promo-20260601-fresh-001</code>.</td>
+              <td>Проверяем маршрут, статусы, SLA, действия и publication readiness.</td>
+              <td class="ok">Маршрут и действия получены.</td>
+            </tr>
+            <tr>
+              <td>Risk DMN</td>
+              <td>Проверяем low/medium/high классификацию по скидке, uplift и stock.</td>
+              <td>Риск должен управлять маршрутом согласования.</td>
+              <td class="ok">Классификация работает.</td>
+            </tr>
+            <tr>
+              <td>RBAC</td>
+              <td>Promo Planner пытается approve задачу Category Manager.</td>
+              <td>Проверяем запрет чужого решения.</td>
+              <td class="ok">Получен HTTP 403.</td>
+            </tr>
+            <tr>
+              <td>Audit</td>
+              <td>Category Manager делает approve с комментарием.</td>
+              <td>Решение должно быть восстановимо из истории.</td>
+              <td class="ok">Созданы audit events.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем экран и находим блок <code>Promo Approval Process</code>.</li>
+          <li>Проверяем карточку промо и process instance.</li>
+          <li>Проверяем risk panel: уровень Medium и причины риска.</li>
+          <li>Проверяем decision panel: Approve, Reject, Request rework, Comment.</li>
+          <li>Проверяем blocking errors: для выбранного промо блокеров нет.</li>
+          <li>Проверяем таблицу шагов: Category review и Supply review с ролями, SLA и действиями.</li>
+          <li>Проверяем timeline: approval_requested, task_created для category и supply.</li>
+        </ol>
+        <img class="shot" src="screenshots/promo-approval-process.png" alt="Promo Approval Process" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Почему</th>
+              <th>Ожидаемый/фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Promo forecasted запускает <code>promo_planning_process</code>.</td>
+              <td>Согласование начинается только после расчета uplift.</td>
+              <td class="ok">BPMN содержит start event Promo forecasted.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>DMN <code>promo_risk_classification</code> определяет риск.</td>
+              <td>Высокий риск требует расширенного маршрута.</td>
+              <td class="ok">Low/medium/high проверены тестами.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>DMN <code>promo_approval_route</code> выбирает роли.</td>
+              <td>UI и backend не должны hardcode-ить маршрут.</td>
+              <td class="ok">Route: Category Manager, Supply Chain Manager.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Category Manager принимает решение.</td>
+              <td>Проверяются коммерческие условия: SKU, скидка, цена, механика.</td>
+              <td class="ok">Approve разрешен только Category Manager.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Supply Chain Manager принимает решение.</td>
+              <td>Проверяются stock, capacity, shortage и возможность поставки.</td>
+              <td class="ok">Supply task и shortage case описаны.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Rework/reject ветки возвращают или отклоняют промо.</td>
+              <td>Нельзя публиковать промо с блокерами.</td>
+              <td class="ok">BPMN содержит rework и reject paths.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">79 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

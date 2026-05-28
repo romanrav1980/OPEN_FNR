@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/promo">
+  <process id="promo_planning_process" name="Promo planning approval process" isExecutable="true">
+    <startEvent id="start_promo_forecasted" name="Promo forecasted" />
+    <sequenceFlow id="flow_start_to_risk" sourceRef="start_promo_forecasted" targetRef="classify_promo_risk" />
+    <businessRuleTask id="classify_promo_risk" name="Classify promo risk" />
+    <sequenceFlow id="flow_risk_to_route" sourceRef="classify_promo_risk" targetRef="select_approval_route" />
+    <businessRuleTask id="select_approval_route" name="Select approval route" />
+    <sequenceFlow id="flow_route_to_category" sourceRef="select_approval_route" targetRef="category_manager_approval" />
+    <userTask id="category_manager_approval" name="Category Manager approval" />
+    <sequenceFlow id="flow_category_to_gateway" sourceRef="category_manager_approval" targetRef="category_decision_gateway" />
+    <exclusiveGateway id="category_decision_gateway" name="Category decision" />
+    <sequenceFlow id="flow_category_approved" sourceRef="category_decision_gateway" targetRef="supply_chain_approval" />
+    <sequenceFlow id="flow_category_rework" sourceRef="category_decision_gateway" targetRef="request_promo_rework" />
+    <sequenceFlow id="flow_category_reject" sourceRef="category_decision_gateway" targetRef="reject_promo" />
+    <userTask id="supply_chain_approval" name="Supply Chain approval" />
+    <sequenceFlow id="flow_supply_to_gateway" sourceRef="supply_chain_approval" targetRef="supply_decision_gateway" />
+    <exclusiveGateway id="supply_decision_gateway" name="Supply decision" />
+    <sequenceFlow id="flow_supply_approved" sourceRef="supply_decision_gateway" targetRef="mark_publication_ready" />
+    <sequenceFlow id="flow_supply_rework" sourceRef="supply_decision_gateway" targetRef="request_promo_rework" />
+    <sequenceFlow id="flow_supply_reject" sourceRef="supply_decision_gateway" targetRef="reject_promo" />
+    <userTask id="request_promo_rework" name="Request promo rework" />
+    <sequenceFlow id="flow_rework_to_end" sourceRef="request_promo_rework" targetRef="end_rework" />
+    <serviceTask id="reject_promo" name="Reject promo" />
+    <sequenceFlow id="flow_reject_to_end" sourceRef="reject_promo" targetRef="end_rejected" />
+    <serviceTask id="mark_publication_ready" name="Mark promo publication ready" />
+    <sequenceFlow id="flow_ready_to_end" sourceRef="mark_publication_ready" targetRef="end_approved" />
+    <endEvent id="end_approved" name="Promo approved" />
+    <endEvent id="end_rework" name="Promo returned to rework" />
+    <endEvent id="end_rejected" name="Promo rejected" />
+  </process>
+</definitions>

@@ -215,3 +215,31 @@ def test_process_engine_exception_case_is_parseable() -> None:
     assert "Triage process exception" in human_task_names
     assert "Repair process payload" in human_task_names
     assert "Approve manual transition" in human_task_names
+
+
+def test_promo_approval_decisions_are_parseable() -> None:
+    for path, decision_id in (
+        ("processes/promo/promo_risk_classification.dmn.xml", "promo_risk_classification"),
+        ("processes/promo/promo_approval_route.dmn.xml", "promo_approval_route"),
+    ):
+        tree = ElementTree.parse(Path(path))
+        decision = tree.find("dmn:decision", DMN_NS)
+
+        assert decision is not None
+        assert decision.attrib["id"] == decision_id
+        assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_promo_shortage_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/promo/promo_shortage_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "promo_shortage_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review shortage risk" in human_task_names
+    assert "Adjust promo volume" in human_task_names
+    assert "Approve supply mitigation" in human_task_names

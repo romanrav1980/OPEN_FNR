@@ -176,6 +176,29 @@ const processHistory = [
   { time: "11:31", event: "sla_escalated", actor: "Flowable", text: "Replenishment task escalated" },
 ];
 
+const promoApprovalSteps = [
+  {
+    step: "Category review",
+    role: "Category Manager",
+    status: "category_review",
+    sla: "2026-05-29 09:00",
+    actions: "approve / reject / request rework",
+  },
+  {
+    step: "Supply review",
+    role: "Supply Chain Manager",
+    status: "supply_review",
+    sla: "2026-05-28 17:00",
+    actions: "approve / reject / request rework / escalate",
+  },
+];
+
+const promoApprovalTimeline = [
+  { time: "12:00", event: "approval_requested", actor: "Promo Planner", text: "Approval route requested" },
+  { time: "12:10", event: "task_created", actor: "Flowable", text: "Category review task created" },
+  { time: "12:20", event: "task_created", actor: "Flowable", text: "Supply review task created" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -693,6 +716,95 @@ function App() {
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Promo approval process">
+        <div className="section-heading">
+          <h2>Promo Approval Process</h2>
+          <p>Category and supply approvals with risk route, rework and rejection paths</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Promo</span>
+            <strong>promo-20260601-fresh-001</strong>
+            <p>Status category_review, process instance proc-promo-approval-20260601-001.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Risk</span>
+            <strong>Medium</strong>
+            <p>Risk reasons: discount over 15%, post-promo stock remains above safety threshold.</p>
+          </article>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Decision Panel</span>
+            <h3>Category Manager approval</h3>
+            <p>
+              Decision buttons are provided by the process task. Every decision requires a user,
+              comment and reason before the promo can move to supply review or return to rework.
+            </p>
+            <div className="action-row">
+              <button type="button">Approve</button>
+              <button type="button">Reject</button>
+              <button type="button">Request rework</button>
+              <button type="button">Comment</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Blocking Errors</span>
+            <h3>No blockers for selected promo</h3>
+            <p>
+              A conflicting promo would block publication and create a rework task for Promo Planner
+              until SKU, dates, price or display capacity are fixed.
+            </p>
+          </aside>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>SLA</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {promoApprovalSteps.map((step) => (
+                <tr key={step.step}>
+                  <td>{step.step}</td>
+                  <td>{step.role}</td>
+                  <td>{step.status}</td>
+                  <td>{step.sla}</td>
+                  <td>{step.actions}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Actor</th>
+                <th>Timeline</th>
+              </tr>
+            </thead>
+            <tbody>
+              {promoApprovalTimeline.map((event) => (
+                <tr key={`${event.time}-${event.event}`}>
+                  <td>{event.time}</td>
+                  <td>{event.event}</td>
+                  <td>{event.actor}</td>
+                  <td>{event.text}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
     </main>

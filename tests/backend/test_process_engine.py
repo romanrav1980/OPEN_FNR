@@ -54,6 +54,36 @@ def test_task_completion_rejects_unavailable_action() -> None:
     assert response.status_code == 400
 
 
+def test_task_completion_rejects_wrong_actor_role() -> None:
+    response = client.post(
+        "/process/tasks/task-promo-approval-category-001/complete",
+        json={
+            "action": "approve",
+            "actor": "promo.planner@example.org",
+            "actor_role": "Promo Planner",
+            "comment": "Trying to approve outside assigned role.",
+        },
+    )
+    assert response.status_code == 403
+
+
+def test_category_manager_can_approve_category_task() -> None:
+    response = client.post(
+        "/process/tasks/task-promo-approval-category-001/complete",
+        json={
+            "action": "approve",
+            "actor": "category.manager@example.org",
+            "actor_role": "Category Manager",
+            "comment": "Commercial terms approved.",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["task"]["status"] == "completed"
+    assert payload["audit_events"][1]["event_type"] == "task_completed"
+
+
 def test_process_audit_endpoint_returns_instance_history() -> None:
     response = client.get("/process/instances/proc-promo-20260601-001/audit")
     assert response.status_code == 200

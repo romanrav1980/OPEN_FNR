@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 9 implementation is complete.
+Sprint 10 implementation is complete.
 
 ## Local Infrastructure
 
@@ -109,9 +109,20 @@ Known local URLs:
 - UI Process Engine Task Inbox section with role filters, task actions and audit history.
 - HTML test report with screenshot: `docs/test-reports/sprint-9-process-engine-foundation/index.html`.
 
+## Sprint 10 Artifacts
+
+- Promo approval API models and endpoints in `apps/backend/open_fnr_api/promo.py`.
+- Promo approval route and RBAC task completion extensions in `apps/backend/open_fnr_api/process_engine.py`.
+- Promo approval tests in `tests/backend/test_promo.py` and `tests/backend/test_process_engine.py`.
+- Promo planning BPMN process: `processes/promo/promo_planning_process.bpmn20.xml`.
+- Promo risk and route DMN rules: `processes/promo/promo_risk_classification.dmn.xml`, `processes/promo/promo_approval_route.dmn.xml`.
+- Promo shortage CMMN case: `processes/promo/promo_shortage_case.cmmn.xml`.
+- UI Promo Approval Process section with risk panel, decision actions, blocking errors, steps and timeline.
+- HTML test report with screenshot: `docs/test-reports/sprint-10-promo-approval-process/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 71 passed.
+- `python -m pytest` -> 79 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -119,4 +130,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 9 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 10: Promo Approval Process.
+Commit Sprint 10 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 11: Replenishment Foundation.
