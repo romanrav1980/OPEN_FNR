@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import base64
 from datetime import date
 from enum import StrEnum
+from urllib.error import URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
+from .config import settings
 
 
 router = APIRouter(prefix="/data/clean-publication", tags=["data-ingestion"])
@@ -46,6 +51,11 @@ class CleanPublicationPlanRunResult(BaseModel):
     status: str
     executed_statements: tuple[str, ...]
     affected_rows: int = Field(ge=0)
+
+
+class ClickHouseStatementResult(BaseModel):
+    statement: str
+    status_code: int = Field(ge=100, le=599)
 
 
 class CleanPublicationRunResponse(BaseModel):
@@ -175,6 +185,38 @@ def clean_publication_plans_for_date(business_date: date) -> tuple[CleanPublicat
     )
 
 
+def clickhouse_query_url() -> str:
+    query = urlencode({"database": settings.clickhouse_database})
+    return f"{settings.http_url(settings.clickhouse_host, settings.clickhouse_http_port)}?{query}"
+
+
+def clickhouse_auth_header() -> str | None:
+    if not settings.clickhouse_user:
+        return None
+    token = base64.b64encode(
+        f"{settings.clickhouse_user}:{settings.clickhouse_password}".encode("utf-8")
+    ).decode("ascii")
+    return f"Basic {token}"
+
+
+def execute_clickhouse_statement(statement: str) -> ClickHouseStatementResult:
+    headers = {"Content-Type": "text/plain; charset=utf-8"}
+    auth_header = clickhouse_auth_header()
+    if auth_header is not None:
+        headers["Authorization"] = auth_header
+    request = Request(
+        clickhouse_query_url(),
+        data=statement.encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=30) as response:
+            return ClickHouseStatementResult(statement=statement, status_code=response.status)
+    except URLError as exc:
+        raise HTTPException(status_code=503, detail=f"clickhouse execution failed: {exc}") from exc
+
+
 def execute_clean_publication_plan(
     plan: CleanPublicationPlan,
     mode: CleanPublicationRunMode,
@@ -197,7 +239,20 @@ def execute_clean_publication_plan(
             executed_statements=(plan.delete_sql, plan.insert_sql),
             affected_rows=0,
         )
-    raise HTTPException(status_code=501, detail="clickhouse execution is not implemented yet")
+    if mode == CleanPublicationRunMode.CLICKHOUSE:
+        executed = (
+            execute_clickhouse_statement(plan.delete_sql),
+            execute_clickhouse_statement(plan.insert_sql),
+        )
+        return CleanPublicationPlanRunResult(
+            plan_id=plan.plan_id,
+            source_batch_id=plan.source_batch_id,
+            clean_table=plan.clean_table,
+            status="clickhouse_executed",
+            executed_statements=tuple(result.statement for result in executed),
+            affected_rows=0,
+        )
+    raise HTTPException(status_code=400, detail="unsupported clean publication mode")
 
 
 @router.get("/plans")

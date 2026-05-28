@@ -78,6 +78,33 @@ def test_clean_publication_mock_run_returns_delete_and_insert_statements() -> No
     assert result.executed_statements == (plan.delete_sql, plan.insert_sql)
 
 
+def test_clean_publication_clickhouse_mode_posts_sql_statements(monkeypatch) -> None:
+    calls = []
+
+    class FakeClickHouseResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+    def fake_urlopen(request, timeout):
+        calls.append((request, timeout))
+        return FakeClickHouseResponse()
+
+    monkeypatch.setattr("open_fnr_api.clean_publication.urlopen", fake_urlopen)
+    plan = clean_publication_plans_for_date(date(2026, 5, 28))[0]
+    result = execute_clean_publication_plan(plan, CleanPublicationRunMode.CLICKHOUSE)
+
+    assert result.status == "clickhouse_executed"
+    assert result.executed_statements == (plan.delete_sql, plan.insert_sql)
+    assert len(calls) == 2
+    assert calls[0][0].get_method() == "POST"
+    assert calls[0][1] == 30
+
+
 def test_clean_publication_run_api_supports_dry_run_with_audit() -> None:
     response = client.post(
         "/data/clean-publication/runs",

@@ -66,3 +66,15 @@ def test_cors_origins_are_centralized_settings() -> None:
     settings = Settings(cors_allow_origins=("http://ui.local:13000",))
 
     assert settings.cors_allow_origins == ("http://ui.local:13000",)
+
+
+def test_clickhouse_credentials_are_centralized_settings() -> None:
+    settings = Settings(
+        clickhouse_user="ch_user",
+        clickhouse_password="ch_password",
+        clickhouse_database="ch_database",
+    )
+
+    assert settings.clickhouse_user == "ch_user"
+    assert settings.clickhouse_password == "ch_password"
+    assert settings.clickhouse_database == "ch_database"

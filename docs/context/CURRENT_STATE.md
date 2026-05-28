@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 367 automated tests passed.
+Current backend regression status: 369 automated tests passed.
 
 ## Local Infrastructure
 
@@ -527,7 +527,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - DEV/TEST/STAGE Docker Compose validation uses a shared compose file with per-contour env files; service ports and Superset secret are parameterized through environment settings.
 - Clean canonical ClickHouse tables for sales, stock, open orders, in-transit, prices and promo plans.
 - Clean publication plan API: `/data/clean-publication/plans`.
-- Clean publication run API: `/data/clean-publication/runs` with `dry_run` and `mock_run`.
+- Clean publication run API: `/data/clean-publication/runs` with `dry_run`, `mock_run` and ClickHouse HTTP execution mode.
 - Source batch publication BPMN/DMN/CMMN artifacts for Process Engine recovery and audit flow.
 - Process Engine clean publication confirmation task: `task-clean-publication-001`.
 - Pilot shadow load gate rules: `REAL_DATA_INGESTION_PIPELINES.md`.
