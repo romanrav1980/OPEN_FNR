@@ -9,6 +9,7 @@ from open_fnr_api.replenishment import (
     calculate_net_requirement,
     calculate_projected_stock,
     classify_stock_out_risk,
+    preview_projected_stock_after_order,
     round_order_qty,
 )
 
@@ -104,3 +105,67 @@ def test_order_rounding_uses_moq_and_order_multiple() -> None:
     assert round_order_qty(raw_order_qty=0, min_order_qty=24, order_multiple=12) == 0
     assert round_order_qty(raw_order_qty=13, min_order_qty=24, order_multiple=12) == 24
     assert round_order_qty(raw_order_qty=273, min_order_qty=24, order_multiple=12) == 276
+
+
+def test_replenishment_workbench_exposes_filters_final_orders_and_audit() -> None:
+    response = client.get("/replenishment/workbench")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["filters"]["suppliers"] == ["SUP001", "SUP002"]
+    assert payload["proposals"][0]["proposal_id"] == "order-proposal-20260528-s001-sku001"
+    assert payload["final_orders"][0]["status"] == "manual_review"
+    assert payload["audit_events"][0]["old_order_qty"] == 48
+
+
+def test_adjust_order_proposal_returns_final_order_and_audit_event() -> None:
+    response = client.post(
+        "/replenishment/order-proposals/order-proposal-20260528-s001-sku001/adjust",
+        json={
+            "final_order_qty": 300,
+            "actor": "replenishment.planner@example.org",
+            "actor_role": "Replenishment Planner",
+            "reason": "cover promo stock-out",
+            "comment": "Raised quantity after projected stock preview.",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["final_order"]["status"] == "adjusted"
+    assert payload["final_order"]["final_order_qty"] == 300
+    assert payload["final_order"]["projected_stock_after_order_qty"] == 267
+    assert payload["audit_event"]["old_order_qty"] == 276
+    assert payload["audit_event"]["new_order_qty"] == 300
+
+
+def test_viewer_cannot_adjust_order_proposal() -> None:
+    response = client.post(
+        "/replenishment/order-proposals/order-proposal-20260528-s001-sku001/adjust",
+        json={
+            "final_order_qty": 300,
+            "actor": "viewer@example.org",
+            "actor_role": "Viewer",
+            "reason": "read only attempt",
+            "comment": "Should be rejected.",
+        },
+    )
+    assert response.status_code == 403
+
+
+def test_approved_final_order_cannot_be_adjusted() -> None:
+    response = client.post(
+        "/replenishment/order-proposals/order-proposal-20260528-s001-sku002/adjust",
+        json={
+            "final_order_qty": 72,
+            "actor": "replenishment.planner@example.org",
+            "actor_role": "Replenishment Planner",
+            "reason": "late change",
+            "comment": "Should be rejected because order is approved.",
+        },
+    )
+    assert response.status_code == 409
+
+
+def test_projected_stock_preview_after_order() -> None:
+    assert preview_projected_stock_after_order(current_projected_stock_qty=-33, final_order_qty=300) == 267

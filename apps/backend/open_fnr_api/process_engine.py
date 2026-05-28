@@ -86,6 +86,26 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="manual_review_required_decision",
+        name="Manual review required decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-006",
+        source_path="processes/replenishment/manual_review_required_decision.dmn.xml",
+        owner_role="Replenishment Planner",
+    ),
+    ProcessDefinition(
+        key="order_exception_case",
+        name="Order exception case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-006",
+        source_path="processes/replenishment/order_exception_case.cmmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
         key="order_proposal_generation_process",
         name="Order proposal generation",
         artifact_type=ProcessArtifactType.BPMN,

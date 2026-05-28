@@ -295,3 +295,27 @@ def test_supplier_constraint_case_is_parseable() -> None:
     assert "Review supplier block" in human_task_names
     assert "Find alternative supplier" in human_task_names
     assert "Approve manual order release" in human_task_names
+
+
+def test_manual_review_required_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment/manual_review_required_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "manual_review_required_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_order_exception_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/replenishment/order_exception_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "order_exception_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review order exception" in human_task_names
+    assert "Approve large adjustment" in human_task_names
+    assert "Prepare async export" in human_task_names

@@ -28,6 +28,14 @@ class OrderProposalStatus(StrEnum):
     BLOCKED = "blocked"
 
 
+class FinalOrderStatus(StrEnum):
+    MANUAL_REVIEW = "manual_review"
+    ADJUSTED = "adjusted"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    BLOCKED = "blocked"
+
+
 class StockSnapshot(BaseModel):
     snapshot_id: str
     store_id: str
@@ -112,6 +120,47 @@ class OrderProposal(BaseModel):
     recommended_order_qty: float = Field(ge=0)
     explanation: OrderProposalExplanation
     created_at: datetime
+
+
+class OrderAdjustmentRequest(BaseModel):
+    final_order_qty: float = Field(ge=0)
+    actor: str = Field(min_length=1)
+    actor_role: str
+    reason: str = Field(min_length=1)
+    comment: str = Field(min_length=1)
+
+
+class FinalOrder(BaseModel):
+    final_order_id: str
+    proposal_id: str
+    store_id: str
+    sku_id: str
+    supplier_id: str
+    status: FinalOrderStatus
+    proposed_qty: float = Field(ge=0)
+    final_order_qty: float = Field(ge=0)
+    projected_stock_after_order_qty: float
+    export_ready: bool
+    updated_at: datetime
+
+
+class OrderAuditEvent(BaseModel):
+    event_id: str
+    proposal_id: str
+    actor: str
+    actor_role: str
+    old_order_qty: float = Field(ge=0)
+    new_order_qty: float = Field(ge=0)
+    reason: str
+    comment: str
+    created_at: datetime
+
+
+class ReplenishmentWorkbench(BaseModel):
+    filters: dict[str, list[str]]
+    proposals: list[OrderProposal]
+    final_orders: list[FinalOrder]
+    audit_events: list[OrderAuditEvent]
 
 
 def calculate_projected_stock(
@@ -321,6 +370,53 @@ ORDER_PROPOSALS: tuple[OrderProposal, ...] = (
     ),
 )
 
+FINAL_ORDERS: tuple[FinalOrder, ...] = (
+    FinalOrder(
+        final_order_id="final-order-20260528-s001-sku001",
+        proposal_id="order-proposal-20260528-s001-sku001",
+        store_id="S001",
+        sku_id="SKU001",
+        supplier_id="SUP001",
+        status=FinalOrderStatus.MANUAL_REVIEW,
+        proposed_qty=276,
+        final_order_qty=276,
+        projected_stock_after_order_qty=243,
+        export_ready=False,
+        updated_at=datetime(2026, 5, 28, 5, 5, tzinfo=timezone.utc),
+    ),
+    FinalOrder(
+        final_order_id="final-order-20260528-s001-sku002",
+        proposal_id="order-proposal-20260528-s001-sku002",
+        store_id="S001",
+        sku_id="SKU002",
+        supplier_id="SUP001",
+        status=FinalOrderStatus.APPROVED,
+        proposed_qty=48,
+        final_order_qty=48,
+        projected_stock_after_order_qty=103,
+        export_ready=True,
+        updated_at=datetime(2026, 5, 28, 5, 10, tzinfo=timezone.utc),
+    ),
+)
+
+ORDER_AUDIT_EVENTS: tuple[OrderAuditEvent, ...] = (
+    OrderAuditEvent(
+        event_id="order-audit-20260528-001",
+        proposal_id="order-proposal-20260528-s001-sku002",
+        actor="replenishment.planner@example.org",
+        actor_role="Replenishment Planner",
+        old_order_qty=48,
+        new_order_qty=48,
+        reason="auto approval accepted",
+        comment="No risk flags.",
+        created_at=datetime(2026, 5, 28, 5, 10, tzinfo=timezone.utc),
+    ),
+)
+
+
+def preview_projected_stock_after_order(current_projected_stock_qty: float, final_order_qty: float) -> float:
+    return current_projected_stock_qty + final_order_qty
+
 
 @router.get("/stock-snapshots")
 def list_stock_snapshots() -> dict[str, object]:
@@ -361,3 +457,53 @@ def get_order_proposal(proposal_id: str = Path(min_length=1)) -> dict[str, objec
         if proposal.proposal_id == proposal_id:
             return proposal.model_dump(mode="json")
     raise HTTPException(status_code=404, detail="order proposal not found")
+
+
+@router.get("/workbench")
+def get_replenishment_workbench() -> dict[str, object]:
+    workbench = ReplenishmentWorkbench(
+        filters={
+            "suppliers": ["SUP001", "SUP002"],
+            "distribution_centers": ["DC001"],
+            "stores": ["S001"],
+            "categories": ["fresh", "grocery"],
+        },
+        proposals=list(ORDER_PROPOSALS),
+        final_orders=list(FINAL_ORDERS),
+        audit_events=list(ORDER_AUDIT_EVENTS),
+    )
+    return workbench.model_dump(mode="json")
+
+
+@router.post("/order-proposals/{proposal_id}/adjust")
+def adjust_order_proposal(proposal_id: str, payload: OrderAdjustmentRequest) -> dict[str, object]:
+    if payload.actor_role != "Replenishment Planner":
+        raise HTTPException(status_code=403, detail="only Replenishment Planner can adjust final order")
+
+    final_order = next((item for item in FINAL_ORDERS if item.proposal_id == proposal_id), None)
+    if final_order is None:
+        raise HTTPException(status_code=404, detail="final order not found")
+    if final_order.status == FinalOrderStatus.APPROVED:
+        raise HTTPException(status_code=409, detail="approved final order cannot be adjusted")
+
+    adjusted_order = final_order.model_copy(
+        update={
+            "status": FinalOrderStatus.ADJUSTED,
+            "final_order_qty": payload.final_order_qty,
+            "projected_stock_after_order_qty": preview_projected_stock_after_order(-33, payload.final_order_qty),
+            "export_ready": False,
+            "updated_at": datetime(2026, 5, 28, 6, 0, tzinfo=timezone.utc),
+        }
+    )
+    audit_event = OrderAuditEvent(
+        event_id=f"order-audit-{proposal_id}-adjusted",
+        proposal_id=proposal_id,
+        actor=payload.actor,
+        actor_role=payload.actor_role,
+        old_order_qty=final_order.final_order_qty,
+        new_order_qty=payload.final_order_qty,
+        reason=payload.reason,
+        comment=payload.comment,
+        created_at=datetime(2026, 5, 28, 6, 0, tzinfo=timezone.utc),
+    )
+    return {"final_order": adjusted_order.model_dump(mode="json"), "audit_event": audit_event.model_dump(mode="json")}

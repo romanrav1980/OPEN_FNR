@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 12 implementation is complete.
+Sprint 13 implementation is complete.
 
 ## Local Infrastructure
 
@@ -143,9 +143,18 @@ Known local URLs:
 - UI Order Proposal V1 section with formula breakdown, raw vs rounded order, statuses and constraint flags.
 - HTML test report with screenshot: `docs/test-reports/sprint-12-order-proposal-v1/index.html`.
 
+## Sprint 13 Artifacts
+
+- Replenishment Workbench API and adjustment endpoint in `apps/backend/open_fnr_api/replenishment.py`.
+- Workbench tests in `tests/backend/test_replenishment.py`.
+- Manual review DMN: `processes/replenishment/manual_review_required_decision.dmn.xml`.
+- Order exception CMMN: `processes/replenishment/order_exception_case.cmmn.xml`.
+- UI Replenishment Workbench section with filters, final orders, adjustment preview, actions and audit trail.
+- HTML test report with screenshot: `docs/test-reports/sprint-13-replenishment-workbench-v1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 94 passed.
+- `python -m pytest` -> 101 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -153,4 +162,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 12 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 13: Replenishment Workbench V1.
+Commit Sprint 13 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 14: Exception Center V1.

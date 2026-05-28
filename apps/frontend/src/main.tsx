@@ -242,6 +242,16 @@ const orderProposals = [
   },
 ];
 
+const finalOrders = [
+  { id: "final-order-20260528-s001-sku001", proposal: "SKU001", status: "manual_review", proposed: 276, final: 276, impact: 243 },
+  { id: "final-order-20260528-s001-sku002", proposal: "SKU002", status: "approved", proposed: 48, final: 48, impact: 103 },
+];
+
+const orderAudit = [
+  { time: "05:10", actor: "Replenishment Planner", event: "approved", oldQty: 48, newQty: 48, reason: "auto approval accepted" },
+  { time: "06:00", actor: "Replenishment Planner", event: "adjusted", oldQty: 276, newQty: 300, reason: "cover promo stock-out" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -997,6 +1007,111 @@ function App() {
               <button type="button">Block</button>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Replenishment workbench">
+        <div className="section-heading">
+          <h2>Replenishment Workbench</h2>
+          <p>Planner workspace for final order review, adjustment, approval and audit</p>
+        </div>
+        <div className="filter-bar" aria-label="Replenishment workbench filters">
+          <label>
+            Supplier
+            <input value="SUP001" readOnly />
+          </label>
+          <label>
+            DC
+            <input value="DC001" readOnly />
+          </label>
+          <label>
+            Store
+            <input value="S001" readOnly />
+          </label>
+          <label>
+            Category
+            <input value="fresh" readOnly />
+          </label>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Mass Action</span>
+            <strong>1 auto-approved order ready</strong>
+            <p>Mass approval prepares async export only for approved final orders.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Preview Impact</span>
+            <strong>-33 + 300 = 267 projected stock</strong>
+            <p>Manual adjustment keeps the original proposal and writes old/new quantities to audit.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Final order</th>
+                <th>SKU</th>
+                <th>Status</th>
+                <th>Proposed</th>
+                <th>Final</th>
+                <th>Projected after order</th>
+              </tr>
+            </thead>
+            <tbody>
+              {finalOrders.map((order) => (
+                <tr key={order.id}>
+                  <td>{order.id}</td>
+                  <td>{order.proposal}</td>
+                  <td>{order.status}</td>
+                  <td>{order.proposed}</td>
+                  <td>{order.final}</td>
+                  <td>{order.impact}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Adjustment Modal</span>
+            <h3>Change final order to 300</h3>
+            <p>
+              Planner enters final quantity, reason and comment. The proposal quantity remains unchanged,
+              while the final order and projected stock impact are recalculated.
+            </p>
+            <div className="action-row">
+              <button type="button">Preview</button>
+              <button type="button">Approve</button>
+              <button type="button">Reject</button>
+              <button type="button">Escalate</button>
+            </div>
+          </aside>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Actor</th>
+                  <th>Event</th>
+                  <th>Old</th>
+                  <th>New</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderAudit.map((event) => (
+                  <tr key={`${event.time}-${event.event}`}>
+                    <td>{event.time}</td>
+                    <td>{event.actor}</td>
+                    <td>{event.event}</td>
+                    <td>{event.oldQty}</td>
+                    <td>{event.newQty}</td>
+                    <td>{event.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>

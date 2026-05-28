@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/replenishment">
+  <case id="order_exception_case" name="Order exception case">
+    <casePlanModel id="order_exception_plan" name="Order exception plan">
+      <humanTask id="review_order_exception" name="Review order exception" />
+      <humanTask id="approve_large_adjustment" name="Approve large adjustment" />
+      <humanTask id="prepare_async_export" name="Prepare async export" />
+    </casePlanModel>
+  </case>
+</definitions>

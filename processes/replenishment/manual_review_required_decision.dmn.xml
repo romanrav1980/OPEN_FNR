@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/replenishment" name="manual_review_required_decision">
+  <decision id="manual_review_required_decision" name="Manual review required decision">
+    <decisionTable id="manual_review_required_table" hitPolicy="FIRST">
+      <input id="input_status" label="proposal_status">
+        <inputExpression id="input_status_expr" typeRef="string">
+          <text>proposal_status</text>
+        </inputExpression>
+      </input>
+      <input id="input_adjustment" label="adjustment_percent">
+        <inputExpression id="input_adjustment_expr" typeRef="number">
+          <text>adjustment_percent</text>
+        </inputExpression>
+      </input>
+      <output id="output_required" label="manual_review_required" name="manual_review_required" typeRef="boolean" />
+      <rule id="rule_blocked">
+        <inputEntry id="rule_blocked_status"><text>"blocked"</text></inputEntry>
+        <inputEntry id="rule_blocked_adjustment"><text>-</text></inputEntry>
+        <outputEntry id="rule_blocked_required"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_large_adjustment">
+        <inputEntry id="rule_large_adjustment_status"><text>-</text></inputEntry>
+        <inputEntry id="rule_large_adjustment_percent"><text>&gt; 20</text></inputEntry>
+        <outputEntry id="rule_large_adjustment_required"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_no_review">
+        <inputEntry id="rule_no_review_status"><text>-</text></inputEntry>
+        <inputEntry id="rule_no_review_adjustment"><text>-</text></inputEntry>
+        <outputEntry id="rule_no_review_required"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

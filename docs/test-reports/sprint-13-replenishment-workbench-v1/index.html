@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 13 - Replenishment Workbench V1</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      main { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+      section { border: 1px solid var(--border); background: var(--panel); margin-top: 20px; padding: 20px; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-bottom: 12px; color: var(--red-light); font-size: 20px; }
+      h3 { margin: 16px 0 8px; font-size: 16px; }
+      p, li, td, th { line-height: 1.55; }
+      .subtitle { margin-top: 8px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .shot { width: 100%; border: 1px solid var(--border); margin-top: 12px; }
+      code { color: var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 13: Replenishment Workbench V1</h1>
+        <p class="subtitle">
+          Аннотация: тестируем рабочее место планировщика пополнения: фильтры,
+          final order отдельно от proposal, ручную корректировку, preview projected stock,
+          mass approval readiness и audit old/new order.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем блок <code>Replenishment Workbench</code>.</li>
+          <li>Проверяем фильтры Supplier, DC, Store, Category.</li>
+          <li>Проверяем final orders: status, proposed quantity, final quantity, projected impact.</li>
+          <li>Открываем adjustment modal и проверяем действия Preview, Approve, Reject, Escalate.</li>
+          <li>Проверяем audit trail: old quantity, new quantity, reason.</li>
+          <li>Проверяем, что approved order готов к async export, а manual_review требует решения.</li>
+        </ol>
+        <img class="shot" src="screenshots/replenishment-workbench-v1.png" alt="Replenishment Workbench V1" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Зачем</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Planner открывает workbench и фильтрует proposals.</td>
+              <td>Рабочий поток начинается с отбора поставщика, РЦ, магазина и категории.</td>
+              <td class="ok">Фильтры доступны.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Planner сравнивает proposal и final order.</td>
+              <td>Исходное предложение нельзя перетирать ручной правкой.</td>
+              <td class="ok">Final order хранится отдельно.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Planner меняет final order 276 -> 300.</td>
+              <td>Коррекция покрывает promo stock-out.</td>
+              <td class="ok">Preview projected stock: -33 + 300 = 267.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Backend записывает audit event.</td>
+              <td>Решение должно быть объяснимо и восстанавливаемо.</td>
+              <td class="ok">Audit содержит old/new, reason, comment.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Viewer пытается изменить order.</td>
+              <td>Проверяем разделение просмотра и изменения.</td>
+              <td class="ok">HTTP 403.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Approved order пытаются изменить.</td>
+              <td>Нельзя менять заказ после approval без нового процесса.</td>
+              <td class="ok">HTTP 409.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">101 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
