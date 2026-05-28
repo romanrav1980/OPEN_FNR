@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/ml">
+  <process id="model_candidate_review_process" name="Model Candidate Review Process" isExecutable="true">
+    <startEvent id="start_model_candidate_review" name="Model registered" />
+    <sequenceFlow id="flow_start_to_backtest" sourceRef="start_model_candidate_review" targetRef="run_backtesting" />
+    <serviceTask id="run_backtesting"
+                 name="Run model backtesting"
+                 flowable:delegateExpression="${modelBacktestingDelegate}" />
+    <sequenceFlow id="flow_backtest_to_decision" sourceRef="run_backtesting" targetRef="model_approval_gateway" />
+    <exclusiveGateway id="model_approval_gateway" name="Model approval decision" />
+    <sequenceFlow id="flow_gateway_to_approval" sourceRef="model_approval_gateway" targetRef="approve_model_candidate">
+      <conditionExpression xsi:type="tFormalExpression">${modelApprovalDecision == 'review_required'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_gateway_to_reject" sourceRef="model_approval_gateway" targetRef="reject_model_candidate">
+      <conditionExpression xsi:type="tFormalExpression">${modelApprovalDecision == 'reject'}</conditionExpression>
+    </sequenceFlow>
+    <userTask id="approve_model_candidate"
+              name="Approve model candidate"
+              flowable:candidateGroups="forecast-owner,ml-owner" />
+    <sequenceFlow id="flow_approval_to_promote" sourceRef="approve_model_candidate" targetRef="promote_model_candidate" />
+    <serviceTask id="promote_model_candidate"
+                 name="Promote model candidate"
+                 flowable:delegateExpression="${modelPromotionDelegate}" />
+    <sequenceFlow id="flow_promote_to_end" sourceRef="promote_model_candidate" targetRef="end_model_promoted" />
+    <userTask id="reject_model_candidate"
+              name="Reject model candidate"
+              flowable:candidateGroups="forecast-owner,ml-owner" />
+    <sequenceFlow id="flow_reject_to_end" sourceRef="reject_model_candidate" targetRef="end_model_rejected" />
+    <endEvent id="end_model_promoted" name="Model promoted" />
+    <endEvent id="end_model_rejected" name="Model rejected" />
+  </process>
+</definitions>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_model_approval_dmn"
+             name="OPEN FNR Model Approval"
+             namespace="https://open-fnr.local/decisions/ml">
+  <decision id="model_approval_decision" name="Model Approval Decision">
+    <decisionTable id="model_approval_table" hitPolicy="FIRST">
+      <input id="input_wape_delta" label="wape_delta">
+        <inputExpression id="input_wape_delta_expression" typeRef="number"><text>wape_delta</text></inputExpression>
+      </input>
+      <input id="input_abs_bias_delta" label="abs_bias_delta">
+        <inputExpression id="input_abs_bias_delta_expression" typeRef="number"><text>abs_bias_delta</text></inputExpression>
+      </input>
+      <input id="input_fallback_available" label="fallback_available">
+        <inputExpression id="input_fallback_available_expression" typeRef="boolean"><text>fallback_available</text></inputExpression>
+      </input>
+      <output id="output_decision" name="decision" typeRef="string" />
+      <rule id="rule_review_required">
+        <inputEntry id="rule_review_wape"><text>&lt; 0</text></inputEntry>
+        <inputEntry id="rule_review_bias"><text>&lt;= 0</text></inputEntry>
+        <inputEntry id="rule_review_fallback"><text>true</text></inputEntry>
+        <outputEntry id="rule_review_output"><text>"review_required"</text></outputEntry>
+      </rule>
+      <rule id="rule_reject">
+        <inputEntry id="rule_reject_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_reject_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_reject_fallback"><text>-</text></inputEntry>
+        <outputEntry id="rule_reject_output"><text>"reject"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

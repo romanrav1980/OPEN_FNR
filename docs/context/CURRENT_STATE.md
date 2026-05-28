@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 5 implementation is complete.
+Sprint 6 implementation is complete.
 
 ## Local Infrastructure
 
@@ -73,9 +73,17 @@ Known local URLs:
 - Forecast Workbench UI filters and chart panel.
 - HTML test report with screenshot: `docs/test-reports/sprint-5-forecast-workbench/index.html`.
 
+## Sprint 6 Artifacts
+
+- ML model metadata API: `apps/backend/open_fnr_api/ml_models.py`.
+- ML model tests: `tests/backend/test_ml_models.py`.
+- Model candidate review BPMN/DMN/CMMN artifacts in `processes/ml`.
+- UI Model Monitoring V1 section.
+- HTML test report with screenshot: `docs/test-reports/sprint-6-ml-regular-model/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 43 passed.
+- `python -m pytest` -> 51 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -83,4 +91,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 5 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 6.
+Commit Sprint 6 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 7.

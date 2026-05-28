@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 6 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      h1, h2, p { margin-top: 0; }
+      h1 { font-size: 34px; line-height: 1.15; }
+      h2 { margin-top: 34px; }
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      code { color: #f6d6dc; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .warn { color: var(--warn); font-weight: 700; }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 6 / ML Regular Model V1</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 6: candidate ML-модель регулярного спроса,
+          сравнение с baseline, approval/promotion и fallback на baseline.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем ML Regular Model V1, потому что после baseline forecast система
+          должна показать управляемое улучшение качества, а не просто новую модель.
+          Метод проверки объединяет API-контракты модели, comparison metrics,
+          approval rules, BPMN/DMN/CMMN artifacts, UI screenshot и regression tests.
+          Такой способ нужен, чтобы доказать: ML-кандидат лучше baseline, имеет fallback,
+          а promotion требует роли Forecast Owner или ML Owner.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, ML, process, data и encoding тесты.</td>
+              <td>Проверить model metadata, comparison, approval, fallback и process artifacts.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">51 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить Model Monitoring V1 и approval actions.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI и снимаем full-page screenshot.</td>
+              <td>Зафиксировать визуальный результат ML monitoring.</td>
+              <td>Скриншот содержит candidate, baseline, WAPE/Bias и fallback.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Model Monitoring V1.</td>
+              <td>Проверить, что пользователь видит ML-кандидат рядом с baseline.</td>
+              <td>Forecast Owner должен принимать решение на сравнении, а не на имени модели.</td>
+              <td>Отображаются candidate и baseline model versions.</td>
+              <td class="ok">Отображаются.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем WAPE/Bias и delta.</td>
+              <td>Понять, действительно ли ML лучше baseline.</td>
+              <td>WAPE является основной метрикой приёмки, Bias контролирует систематическое смещение.</td>
+              <td>Видны WAPE 15.8%, Bias -0.6%, delta -2.6 pp.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем approval actions.</td>
+              <td>Подтвердить пользовательский workflow approve/reject/fallback.</td>
+              <td>Promotion модели должен быть управляемым действием с ролью и audit.</td>
+              <td>Видны Approve, Reject, Activate fallback.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем fallback.</td>
+              <td>Убедиться, что при деградации можно вернуться к baseline.</td>
+              <td>Fallback снижает риск промышленных запусков ML.</td>
+              <td>Candidate показывает fallback seasonal-naive-v1.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>model_candidate_review_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс после регистрации модели.</td>
+              <td>Каждый ML-кандидат должен проходить управляемый lifecycle.</td>
+              <td>BPMN содержит start event Model registered.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>model_candidate_review_process</code></td>
+              <td>2</td>
+              <td>Запускаем backtesting.</td>
+              <td>Решение approval должно опираться на воспроизводимые метрики.</td>
+              <td>BPMN содержит Run model backtesting.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>model_candidate_review_process</code></td>
+              <td>3</td>
+              <td>Отправляем модель на approval или reject.</td>
+              <td>Promotion не должен быть автоматическим без владельца.</td>
+              <td>BPMN содержит Approve model candidate и Reject model candidate.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>model_approval_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN approval rule.</td>
+              <td>Критерии promotion должны быть вынесены из кода.</td>
+              <td>DMN требует улучшения WAPE, Bias threshold и fallback.</td>
+              <td class="ok">Подтверждено XML-тестом и API comparison.</td>
+            </tr>
+            <tr>
+              <td><code>model_degradation_case</code></td>
+              <td>1</td>
+              <td>Проверяем CMMN degradation case.</td>
+              <td>При деградации нужны investigation, fallback и retraining.</td>
+              <td>CMMN содержит Investigate model degradation и Activate baseline fallback.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/model-monitoring-v1.png" alt="OPEN FNR Model Monitoring V1 screenshot" />
+        <p class="caption">Скриншот: Model Monitoring V1 после Sprint 6.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 6 test cycle passed. ML-кандидат регулярного спроса зарегистрирован,
+          сравнивается с baseline, имеет fallback, approval role gate и процесс
+          promotion/degradation.
+        </p>
+        <p class="warn">
+          Ограничение: модель представлена metadata и backtesting contract; физический
+          training/inference job и MLflow integration будут расширяться в следующем ML-инкременте.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

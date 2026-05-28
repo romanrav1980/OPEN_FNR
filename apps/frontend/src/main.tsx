@@ -83,6 +83,27 @@ const forecastRows = [
   { date: "2026-05-29", store: "S001", sku: "SKU002", regular: "4.8", total: "4.8", flag: "low_history" },
 ];
 
+const modelVersions = [
+  {
+    version: "lgbm-regular-v1-candidate",
+    status: "backtested",
+    algorithm: "LightGBM",
+    wape: "15.8%",
+    bias: "-0.6%",
+    delta: "-2.6 pp",
+    fallback: "seasonal-naive-v1",
+  },
+  {
+    version: "seasonal-naive-v1",
+    status: "promoted",
+    algorithm: "Seasonal naive",
+    wape: "18.4%",
+    bias: "-1.2%",
+    delta: "baseline",
+    fallback: "-",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -315,6 +336,58 @@ function App() {
                   <td>{row.regular}</td>
                   <td>{row.total}</td>
                   <td>{row.flag}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Model monitoring">
+        <div className="section-heading">
+          <h2>Model Monitoring V1</h2>
+          <p>ML candidate vs baseline, approval and fallback</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Candidate</span>
+            <strong>lgbm-regular-v1-candidate</strong>
+            <p>Backtested on feature version fm-20260528-001 and ready for Forecast Owner review.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Approval Gate</span>
+            <strong>WAPE improved / Bias within threshold</strong>
+            <p>Promotion requires Forecast Owner or ML Owner approval and keeps baseline fallback active.</p>
+          </article>
+        </div>
+        <div className="model-actions" aria-label="Model approval actions">
+          <button type="button">Approve</button>
+          <button type="button">Reject</button>
+          <button type="button">Activate fallback</button>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Algorithm</th>
+                <th>WAPE</th>
+                <th>Bias</th>
+                <th>Delta</th>
+                <th>Fallback</th>
+              </tr>
+            </thead>
+            <tbody>
+              {modelVersions.map((model) => (
+                <tr key={model.version}>
+                  <td>{model.version}</td>
+                  <td>{model.status}</td>
+                  <td>{model.algorithm}</td>
+                  <td>{model.wape}</td>
+                  <td>{model.bias}</td>
+                  <td>{model.delta}</td>
+                  <td>{model.fallback}</td>
                 </tr>
               ))}
             </tbody>

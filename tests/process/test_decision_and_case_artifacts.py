@@ -118,3 +118,26 @@ def test_forecast_anomaly_case_is_parseable() -> None:
     }
     assert "Investigate forecast anomaly" in human_task_names
     assert "Accept forecast anomaly" in human_task_names
+
+
+def test_model_approval_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/ml/model_approval_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "model_approval_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_model_degradation_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/ml/model_degradation_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "model_degradation_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Investigate model degradation" in human_task_names
+    assert "Activate baseline fallback" in human_task_names

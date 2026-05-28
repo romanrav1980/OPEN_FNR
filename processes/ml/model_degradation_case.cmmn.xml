@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/ml">
+  <case id="model_degradation_case" name="Model Degradation Case">
+    <casePlanModel id="model_degradation_case_plan" name="Model Degradation">
+      <planItem id="plan_investigate_model_degradation" definitionRef="investigate_model_degradation" />
+      <planItem id="plan_activate_baseline_fallback" definitionRef="activate_baseline_fallback" />
+      <planItem id="plan_schedule_retraining" definitionRef="schedule_retraining" />
+      <humanTask id="investigate_model_degradation"
+                 name="Investigate model degradation"
+                 flowable:candidateGroups="ml-owner,data-science" />
+      <humanTask id="activate_baseline_fallback"
+                 name="Activate baseline fallback"
+                 flowable:candidateGroups="forecast-owner" />
+      <humanTask id="schedule_retraining"
+                 name="Schedule model retraining"
+                 flowable:candidateGroups="data-science" />
+    </casePlanModel>
+  </case>
+</definitions>
