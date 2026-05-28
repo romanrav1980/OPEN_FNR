@@ -105,6 +105,14 @@ Every clean table carries `source_batch_id`, `quality_status` and `published_at`
 | Display capacity | promo display capacity is present when required by mechanics | create Shelf Space review task |
 | Export reconciliation | ERP order status returns accepted/failed state for exported proposals | create Integration Owner exception |
 
+Local pilot discovery can be run with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/run-shadow-load.ps1 -BusinessDate 2026-05-28
+```
+
+The runner uses `OPEN_FNR_LANDING_ROOT_PATH` unless `-LandingRootPath` is provided. It checks that every registered source contract has at least one supported source file before the validation stage begins.
+
 ## Process Engine Coverage
 
 | Artifact | Purpose |

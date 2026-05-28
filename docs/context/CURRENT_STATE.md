@@ -503,6 +503,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Source readiness endpoint: `/data/ingestion/readiness`.
 - Configurable local file source adapter: `apps/backend/open_fnr_api/source_adapters.py`.
 - Local file discovery endpoint: `/data/source-adapters/local-files/discover`.
+- Pilot shadow-load discovery runner: `apps/backend/open_fnr_api/shadow_load.py`, `scripts/dev/run-shadow-load.ps1`.
 - Clean canonical ClickHouse tables for sales, stock, open orders, in-transit, prices and promo plans.
 - Source batch publication BPMN/DMN/CMMN artifacts for Process Engine recovery and audit flow.
 - Pilot shadow load gate rules: `REAL_DATA_INGESTION_PIPELINES.md`.
