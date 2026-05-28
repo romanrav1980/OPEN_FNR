@@ -505,6 +505,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Shadow-load gate creates recovery tasks for missing files and source-contract DQ blockers.
 - Configurable local file source adapter: `apps/backend/open_fnr_api/source_adapters.py`.
 - Local file discovery endpoint: `/data/source-adapters/local-files/discover`.
+- Local file manifest sidecar support: `manifest.json` beside source files.
 - Pilot shadow-load discovery runner: `apps/backend/open_fnr_api/shadow_load.py`, `scripts/dev/run-shadow-load.ps1`.
 - Source contract DQ plans: `/data-quality/source-contract-plans`.
 - Source contract DQ execution API: `/data-quality/source-contract-runs`.

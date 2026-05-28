@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import date
 from pathlib import Path
 from typing import Protocol
@@ -19,6 +20,16 @@ class SourceFile(BaseModel):
     file_name: str = Field(min_length=1, max_length=255)
     file_uri: str = Field(min_length=1, max_length=1024)
     size_bytes: int = Field(ge=0)
+
+
+class SourceManifestSidecar(BaseModel):
+    source_system: str = Field(min_length=1, max_length=64)
+    contract_name: str = Field(min_length=1, max_length=128)
+    business_date: date
+    row_count: int = Field(ge=0)
+    checksum: str = Field(min_length=1, max_length=128)
+    idempotency_key: str = Field(min_length=1, max_length=256)
+    files: tuple[str, ...] = ()
 
 
 class SourceAdapter(Protocol):
@@ -55,3 +66,21 @@ class LocalFileDropAdapter:
                 )
             )
         return tuple(files)
+
+    def load_manifest_sidecar(
+        self,
+        source_system: str,
+        contract_name: str,
+        business_date: date,
+    ) -> SourceManifestSidecar | None:
+        source_dir = (
+            self.landing_root_path
+            / source_system.lower()
+            / contract_name
+            / f"business_date={business_date.isoformat()}"
+        )
+        manifest_path = source_dir / "manifest.json"
+        if not manifest_path.exists():
+            return None
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        return SourceManifestSidecar.model_validate(payload)

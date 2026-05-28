@@ -260,13 +260,16 @@ def get_ingestion_readiness() -> dict[str, object]:
 
 @router.get("/source-adapters/local-files/discover")
 def discover_local_source_files(source_system: str, contract_name: str, business_date: date) -> dict[str, object]:
-    files = LocalFileDropAdapter().discover(source_system, contract_name, business_date)
+    adapter = LocalFileDropAdapter()
+    files = adapter.discover(source_system, contract_name, business_date)
+    manifest = adapter.load_manifest_sidecar(source_system, contract_name, business_date)
     return {
         "source_system": source_system.upper(),
         "contract_name": contract_name,
         "business_date": business_date.isoformat(),
         "total": len(files),
         "items": [file.model_dump(mode="json") for file in files],
+        "manifest": manifest.model_dump(mode="json") if manifest is not None else None,
     }
 
 
