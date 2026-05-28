@@ -51,6 +51,20 @@ type FeatureMartStatus = {
   quality: string;
 };
 
+type FeatureBuildDependency = {
+  name: string;
+  table: string;
+  status: "published" | "missing" | "stale";
+  freshness: "fresh" | "late";
+  minRows: string;
+};
+
+type FeatureBuildRule = {
+  rule: string;
+  purpose: string;
+  status: "passed" | "ready";
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -119,6 +133,22 @@ const featureMartStatuses: FeatureMartStatus[] = [
   { version: "fm-20260528-001", status: "published", activePairs: "2.14M", features: 42, quality: "accepted" },
   { version: "fm-20260528-002", status: "validated", activePairs: "0.82M", features: 42, quality: "pilot shard" },
   { version: "fm-20260528-003", status: "failed", activePairs: "0.31M", features: 39, quality: "partition error" },
+];
+
+const featureBuildDependencies: FeatureBuildDependency[] = [
+  { name: "sales_clean_daily", table: "clean_sales_daily", status: "published", freshness: "fresh", minRows: ">= 1" },
+  { name: "stock_snapshot_daily", table: "clean_stock_snapshot_daily", status: "published", freshness: "fresh", minRows: ">= 1" },
+  { name: "open_orders", table: "clean_open_orders", status: "published", freshness: "fresh", minRows: ">= 0" },
+  { name: "in_transit", table: "clean_in_transit", status: "published", freshness: "fresh", minRows: ">= 0" },
+  { name: "prices", table: "clean_prices", status: "published", freshness: "fresh", minRows: ">= 1" },
+  { name: "promo_plans", table: "clean_promo_plans", status: "published", freshness: "fresh", minRows: ">= 0" },
+];
+
+const featureBuildRules: FeatureBuildRule[] = [
+  { rule: "all_required_clean_dependencies_published", purpose: "Block forecast input if clean data is absent", status: "passed" },
+  { rule: "active_matrix_non_empty", purpose: "Protect ML from empty store x SKU scope", status: "passed" },
+  { rule: "no_future_fact_leakage", purpose: "Keep forecast features point-in-time safe", status: "passed" },
+  { rule: "feature_version_idempotent_for_business_date", purpose: "Re-run must publish the same controlled version", status: "ready" },
 ];
 
 const forecastRows = [
@@ -1155,6 +1185,73 @@ function App() {
                   <td>{item.activePairs}</td>
                   <td>{item.features}</td>
                   <td>{item.quality}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Build Plan</span>
+            <h3>fm-20260528-001</h3>
+            <p>
+              Data Science Owner validates clean dependencies, active matrix and leakage checks
+              before publishing the feature version used by forecast and replenishment.
+            </p>
+            <div className="action-row">
+              <button type="button">Dry run</button>
+              <button type="button">Publish</button>
+              <button type="button">Request rebuild</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Process Task</span>
+            <h3>task-feature-build-001</h3>
+            <p>
+              BPMN task validates feature mart build after clean canonical publication.
+              SLA is controlled by Process Engine audit and role assignment.
+            </p>
+          </aside>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Dependency</th>
+                <th>Clean table</th>
+                <th>Status</th>
+                <th>Freshness</th>
+                <th>Min rows</th>
+              </tr>
+            </thead>
+            <tbody>
+              {featureBuildDependencies.map((dependency) => (
+                <tr key={dependency.name}>
+                  <td>{dependency.name}</td>
+                  <td>{dependency.table}</td>
+                  <td>{dependency.status}</td>
+                  <td>{dependency.freshness}</td>
+                  <td>{dependency.minRows}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Validation rule</th>
+                <th>Purpose</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {featureBuildRules.map((rule) => (
+                <tr key={rule.rule}>
+                  <td>{rule.rule}</td>
+                  <td>{rule.purpose}</td>
+                  <td>{rule.status}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Feature Build Plan Test Report</title>
+    <style>
+      body { margin: 0; background: #1e1e1e; color: #d4d4d4; font-family: Arial, sans-serif; }
+      main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 32px 0; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-top: 28px; color: #f0f0f0; }
+      h3 { margin-top: 18px; color: #f0f0f0; }
+      p { color: #aeb4bf; line-height: 1.55; margin-top: 8px; }
+      .eyebrow { color: #b83a4b; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+      .card, table { border: 1px solid #3a3a3a; background: #252526; }
+      .card { padding: 16px; }
+      .card strong { display: block; margin-top: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+      th, td { border-bottom: 1px solid #3a3a3a; padding: 12px; text-align: left; vertical-align: top; }
+      th { color: #9da3ae; font-size: 12px; text-transform: uppercase; }
+      tr:last-child td { border-bottom: 0; }
+      .ok { color: #8fd19e; font-weight: 700; }
+      .warn { color: #ffcf70; font-weight: 700; }
+      img { display: block; width: 100%; margin-top: 16px; border: 1px solid #3a3a3a; }
+      code { color: #ffcf70; }
+      @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">UI и бизнес-процесс тест</p>
+      <h1>Feature Mart Build Plan</h1>
+      <p>
+        Аннотация: этим тестом проверяем, что после публикации clean canonical слоя пользователь видит
+        управляемый процесс сборки feature mart: зависимости, правила валидации, BPMN-задачу,
+        действия Data Science Owner и связь с будущим прогнозом.
+      </p>
+
+      <section class="grid" aria-label="Summary">
+        <article class="card"><span>UI</span><strong class="ok">Экран отображает build plan</strong></article>
+        <article class="card"><span>Process</span><strong class="ok">task-feature-build-001 видна Data Science Owner</strong></article>
+        <article class="card"><span>Backend</span><strong class="ok">363 pytest passed</strong></article>
+      </section>
+
+      <h2>Скриншот</h2>
+      <p>
+        Скриншот снят с локального control tower на <code>127.0.0.1:13000</code>.
+        Адрес используется из конфигурации dev-окружения, не из application code.
+      </p>
+      <img src="screenshots/feature-build-plan.png" alt="Feature mart build plan in OPEN FNR Control Tower" />
+
+      <h2>UI-тестирование</h2>
+      <table>
+        <thead>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Открываем control tower.</td>
+            <td>Проверяем доступность пользовательского рабочего места.</td>
+            <td>Страница загружается без ошибок сборки.</td>
+            <td class="ok">Пройдено: frontend build successful.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Находим секцию Feature Mart Status.</td>
+            <td>Проверяем, что Data Science Owner видит версии feature mart.</td>
+            <td>Отображается <code>fm-20260528-001</code> и статус published.</td>
+            <td class="ok">Пройдено.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Проверяем блок Build Plan.</td>
+            <td>Пользователь должен понимать, какую версию он валидирует и публикует.</td>
+            <td>Видны version, dry run, publish, request rebuild.</td>
+            <td class="ok">Пройдено.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Проверяем таблицу clean-зависимостей.</td>
+            <td>Forecast нельзя запускать без чистых sales, stock, prices, promo inputs.</td>
+            <td>Все 6 зависимостей имеют status published и freshness fresh.</td>
+            <td class="ok">Пройдено.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Проверяем правила валидации.</td>
+            <td>Нужно защититься от leakage, пустой active matrix и неидемпотентных перезапусков.</td>
+            <td>Правила отображаются с понятным назначением.</td>
+            <td class="ok">Пройдено.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Тестирование бизнес-процесса</h2>
+      <table>
+        <thead>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Проверяем BPMN <code>feature_build_process</code>.</td>
+            <td>Feature mart должен запускаться после accepted DQ/clean publication.</td>
+            <td>Процесс содержит build active matrix, build feature mart, validate, publish.</td>
+            <td class="ok">Покрыто существующими процессными тестами.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Проверяем inbox роли Data Science Owner.</td>
+            <td>Владелец ML должен видеть задачу перед публикацией feature version.</td>
+            <td><code>task-feature-build-001</code> доступна роли Data Science Owner.</td>
+            <td class="ok">Пройдено backend-тестом.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Запускаем dry run build-run API.</td>
+            <td>Dry run проверяет зависимости и правила без публикации.</td>
+            <td>Статус <code>validated</code>, validation_status <code>accepted</code>.</td>
+            <td class="ok">Пройдено backend-тестом.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Запускаем mock publish build-run API.</td>
+            <td>Проверяем happy path публикации feature version.</td>
+            <td>Статус <code>published</code>.</td>
+            <td class="ok">Пройдено backend-тестом.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Проверяем audit flag.</td>
+            <td>Решение публикации должно быть трассируемым.</td>
+            <td>При включенном аудите <code>audit_recorded=true</code>.</td>
+            <td class="ok">Пройдено.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Нагрузочный и data-контроль</h2>
+      <table>
+        <thead>
+          <tr><th>Контроль</th><th>Проверка</th><th>Результат</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Backend regression</td><td><code>python -m pytest</code></td><td class="ok">363 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Data rules</td><td>Published clean dependencies, freshness, no leakage</td><td class="ok">passed</td></tr>
+          <tr><td>Performance smoke</td><td>UI screenshot and build artifact generation</td><td class="ok">passed</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Итог</h2>
+      <p>
+        Feature mart build теперь виден как управляемый процесс с API, UI evidence,
+        тестами зависимостей и audit-ready действием публикации. Ограничение: UI пока использует
+        демонстрационные данные; подключение к live API остается частью следующего hardening-блока.
+      </p>
+    </main>
+  </body>
+</html>
