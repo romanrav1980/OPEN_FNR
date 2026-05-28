@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import config
 from open_fnr_api.main import app
 
 
@@ -117,3 +118,28 @@ def test_ingestion_readiness_summarizes_all_real_sources() -> None:
     promo = next(pipeline for pipeline in payload["pipelines"] if pipeline["source_system"] == "PROMO")
     assert "overlap_dq" in promo["blocking_gates"]
     assert "display_capacity_dq" in promo["blocking_gates"]
+
+
+def test_local_source_file_discovery_uses_configured_landing_path(tmp_path) -> None:
+    source_dir = tmp_path / "pos" / "pos_sales_line" / "business_date=2026-05-28"
+    source_dir.mkdir(parents=True)
+    (source_dir / "sales.csv").write_text("receipt_id,line_id\nr1,1\n", encoding="utf-8")
+
+    original_path = config.settings.landing_root_path
+    config.settings.landing_root_path = str(tmp_path)
+    try:
+        response = client.get(
+            "/data/source-adapters/local-files/discover",
+            params={
+                "source_system": "POS",
+                "contract_name": "pos_sales_line",
+                "business_date": "2026-05-28",
+            },
+        )
+    finally:
+        config.settings.landing_root_path = original_path
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["file_name"] == "sales.csv"

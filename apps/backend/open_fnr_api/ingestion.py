@@ -5,6 +5,7 @@ from datetime import date, datetime, timezone
 from fastapi import APIRouter, HTTPException, Path
 
 from .data_contracts import BatchStatus, DataDomain, DqSeverity, IngestionBatch, SourceBatchManifest, contract_summaries
+from .source_adapters import LocalFileDropAdapter
 
 
 router = APIRouter(prefix="/data", tags=["data-ingestion"])
@@ -254,6 +255,18 @@ def get_ingestion_readiness() -> dict[str, object]:
         "total": len(pipelines),
         "pipelines": pipelines,
         "next_gate": "pilot_shadow_load",
+    }
+
+
+@router.get("/source-adapters/local-files/discover")
+def discover_local_source_files(source_system: str, contract_name: str, business_date: date) -> dict[str, object]:
+    files = LocalFileDropAdapter().discover(source_system, contract_name, business_date)
+    return {
+        "source_system": source_system.upper(),
+        "contract_name": contract_name,
+        "business_date": business_date.isoformat(),
+        "total": len(files),
+        "items": [file.model_dump(mode="json") for file in files],
     }
 
 

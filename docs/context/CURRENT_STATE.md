@@ -501,6 +501,8 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 ## Real Ingestion Gate Artifacts
 
 - Source readiness endpoint: `/data/ingestion/readiness`.
+- Configurable local file source adapter: `apps/backend/open_fnr_api/source_adapters.py`.
+- Local file discovery endpoint: `/data/source-adapters/local-files/discover`.
 - Pilot shadow load gate rules: `REAL_DATA_INGESTION_PIPELINES.md`.
 - Developer/user presentation: `docs/presentations/real-ingestion-sprints-i1-i5/index.html`.
 

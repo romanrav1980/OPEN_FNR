@@ -15,6 +15,7 @@ Define the transition from mock data to real ingestion pipelines for POS, ERP, W
 - Rejected rows are stored and visible to Data Owner.
 - DQ blockers prevent downstream publication.
 - All source contracts are versioned.
+- File-drop pilot sources are discovered through configured `OPEN_FNR_LANDING_ROOT_PATH`; source paths are not hardcoded in application code.
 
 ## Source Pipelines
 

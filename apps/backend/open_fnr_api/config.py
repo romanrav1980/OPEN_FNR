@@ -40,6 +40,7 @@ class Settings(BaseModel):
     postgres_user: str = Field(default_factory=lambda: env_str("POSTGRES_USER", "open_fnr"))
     postgres_password: str = Field(default_factory=lambda: env_str("POSTGRES_PASSWORD", "open_fnr_dev"))
     postgres_database: str = Field(default_factory=lambda: env_str("POSTGRES_DATABASE", "open_fnr"))
+    landing_root_path: str = Field(default_factory=lambda: env_str("LANDING_ROOT_PATH", "data/landing"))
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
