@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from .data_contracts import DataDomain, DqSeverity
+from .shadow_load import ShadowLoadContractResult, ShadowLoadReport, run_shadow_load_discovery
 
 
 class DqDimension(StrEnum):
@@ -65,6 +66,32 @@ class DqIncident(BaseModel):
 class DqWaiverRequest(BaseModel):
     reason: str = Field(min_length=10, max_length=512)
     approver_role: str = Field(min_length=1, max_length=64)
+
+
+class SourceContractDqCheckResult(BaseModel):
+    source_system: str
+    contract_name: str
+    status: str
+    severity: DqSeverity
+    blocking_rules_checked: tuple[str, ...]
+    warning_rules_checked: tuple[str, ...]
+    blocker_count: int = Field(ge=0)
+    warning_count: int = Field(ge=0)
+    message: str
+
+
+class SourceContractDqRunRequest(BaseModel):
+    business_date: date
+    landing_root_path: str | None = Field(default=None, max_length=512)
+
+
+class SourceContractDqRunResponse(BaseModel):
+    business_date: date
+    status: str
+    total_contracts: int = Field(ge=0)
+    blocker_count: int = Field(ge=0)
+    warning_count: int = Field(ge=0)
+    results: tuple[SourceContractDqCheckResult, ...]
 
 
 router = APIRouter(prefix="/data-quality", tags=["data-quality"])
@@ -203,6 +230,59 @@ SOURCE_CONTRACT_DQ_PLANS: tuple[SourceContractDqPlan, ...] = (
 )
 
 
+def source_contract_plan_map() -> dict[tuple[str, str], SourceContractDqPlan]:
+    return {(plan.source_system, plan.contract_name): plan for plan in SOURCE_CONTRACT_DQ_PLANS}
+
+
+def evaluate_source_contract_dq_result(
+    contract: ShadowLoadContractResult,
+    plan: SourceContractDqPlan,
+) -> SourceContractDqCheckResult:
+    if contract.status == "missing_files":
+        return SourceContractDqCheckResult(
+            source_system=contract.source_system,
+            contract_name=contract.contract_name,
+            status="blocked",
+            severity=DqSeverity.BLOCKER,
+            blocking_rules_checked=plan.blocking_rules,
+            warning_rules_checked=plan.warning_rules,
+            blocker_count=1,
+            warning_count=0,
+            message="Source files are missing; DQ execution cannot continue.",
+        )
+    warning_count = 1 if contract.discovered_size_bytes == 0 else 0
+    return SourceContractDqCheckResult(
+        source_system=contract.source_system,
+        contract_name=contract.contract_name,
+        status="warning" if warning_count else "passed",
+        severity=DqSeverity.WARNING if warning_count else DqSeverity.INFO,
+        blocking_rules_checked=plan.blocking_rules,
+        warning_rules_checked=plan.warning_rules,
+        blocker_count=0,
+        warning_count=warning_count,
+        message="Source file discovered and contract DQ plan executed.",
+    )
+
+
+def run_source_contract_dq(report: ShadowLoadReport) -> SourceContractDqRunResponse:
+    plans = source_contract_plan_map()
+    results: list[SourceContractDqCheckResult] = []
+    for contract in report.results:
+        plan = plans[(contract.source_system, contract.contract_name)]
+        results.append(evaluate_source_contract_dq_result(contract, plan))
+
+    blocker_count = sum(result.blocker_count for result in results)
+    warning_count = sum(result.warning_count for result in results)
+    return SourceContractDqRunResponse(
+        business_date=report.business_date,
+        status="blocked" if blocker_count else "passed_with_warnings" if warning_count else "passed",
+        total_contracts=len(results),
+        blocker_count=blocker_count,
+        warning_count=warning_count,
+        results=tuple(results),
+    )
+
+
 @router.get("/rules")
 def list_dq_rules(domain: DataDomain | None = None) -> dict[str, object]:
     rules = list(RULES)
@@ -217,6 +297,13 @@ def list_source_contract_dq_plans(source_system: str | None = None) -> dict[str,
     if source_system is not None:
         plans = [plan for plan in plans if plan.source_system == source_system.upper()]
     return {"items": [plan.model_dump(mode="json") for plan in plans], "total": len(plans)}
+
+
+@router.post("/source-contract-runs")
+def run_source_contract_dq_checks(request: SourceContractDqRunRequest) -> dict[str, object]:
+    report = run_shadow_load_discovery(request.business_date, request.landing_root_path)
+    result = run_source_contract_dq(report)
+    return result.model_dump(mode="json")
 
 
 @router.get("/incidents")

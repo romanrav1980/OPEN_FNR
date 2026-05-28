@@ -145,6 +145,8 @@ After source discovery and DQ gates pass, the Process Engine task `Confirm clean
 
 The API endpoint `/data-quality/source-contract-plans` exposes required blocker and warning checks for each pilot source contract. These plans are the bridge between source discovery, DQ execution and Process Engine recovery tasks.
 
+The API endpoint `/data-quality/source-contract-runs` executes source-contract DQ checks against the configured or supplied landing root. Missing files produce blocker results; discovered files execute the contract DQ plan and can produce warnings before clean publication.
+
 ## Acceptance Criteria
 
 - All source systems have signed contracts.
