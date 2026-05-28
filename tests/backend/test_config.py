@@ -24,3 +24,8 @@ def test_settings_expose_runtime_mode_and_mock_mode() -> None:
     assert settings.runtime_mode == "test"
     assert settings.mock_mode is False
     assert settings.audit_enabled is True
+
+
+def test_audit_is_enabled_by_default_and_can_be_disabled() -> None:
+    assert Settings().audit_enabled is True
+    assert Settings(audit_enabled=False).audit_enabled is False

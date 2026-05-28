@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import audit
 from open_fnr_api.main import app
 from open_fnr_api.publication import PUBLICATION_PACKAGES, all_items_approved, find_duplicate_export
 
@@ -76,14 +77,19 @@ def test_retry_failed_publication_package_increments_retry_count() -> None:
 
 def test_send_publication_package_does_not_auto_record_audit_when_disabled() -> None:
     before = client.get("/audit/events", params={"limit": 500}).json()
-    response = client.post(
-        "/publication/packages/pub-wms-orders-20260528-001/send",
-        json={
-            "actor": "integration.owner@example.org",
-            "service_account": "svc-open-fnr-export",
-            "idempotency_key": "wms:orders:20260528:new",
-        },
-    )
+    original_value = audit.settings.audit_enabled
+    audit.settings.audit_enabled = False
+    try:
+        response = client.post(
+            "/publication/packages/pub-wms-orders-20260528-001/send",
+            json={
+                "actor": "integration.owner@example.org",
+                "service_account": "svc-open-fnr-export",
+                "idempotency_key": "wms:orders:20260528:new",
+            },
+        )
+    finally:
+        audit.settings.audit_enabled = original_value
     assert response.status_code == 200
 
     after = client.get("/audit/events", params={"limit": 500}).json()

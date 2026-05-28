@@ -4,7 +4,7 @@ Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening I4 is in progress after completion of I3 ERP ingestion. The current focus is MDM/PIM product and store reference ingestion for active matrix, lifecycle, fresh and replenishment routing.
+Industrial hardening I5 is in progress after completion of I4 MDM/PIM ingestion. The current focus is promo source ingestion with SKU, store scope, discount, price and display attributes.
 
 ## Local Infrastructure
 
@@ -421,7 +421,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Complete I4 verification, commit MDM/PIM ingestion, then continue to promo source hardening.
+Complete I5 verification, commit promo ingestion, then prepare a compact real-ingestion block presentation and continue to pilot ingestion gate.
 
 ## Post-Sprint Planning Artifacts
 
@@ -437,7 +437,7 @@ Complete I4 verification, commit MDM/PIM ingestion, then continue to promo sourc
 ## H1 Industrial Hardening Artifacts
 
 - Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
-- Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=false` by default.
+- Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=true` by default.
 - Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Audit API: `apps/backend/open_fnr_api/audit.py`.
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.
@@ -489,6 +489,14 @@ Complete I4 verification, commit MDM/PIM ingestion, then continue to promo sourc
 - MDM reference DAG skeleton: `orchestration/airflow/dags/mdm_reference_ingestion.py`.
 - Raw ClickHouse landing tables: `open_fnr.raw_mdm_products`, `open_fnr.raw_mdm_stores`.
 - MDM ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_clickhouse_mdm_schema.py`, `tests/orchestration/test_mdm_reference_ingestion.py`.
+
+## I5 Real Data Ingestion Artifacts
+
+- Promo plan contract: `apps/backend/open_fnr_api/data_contracts.py`.
+- Promo manifest endpoint: `/data/ingestion/manifests/promo-plan`.
+- Promo plan DAG skeleton: `orchestration/airflow/dags/promo_plan_ingestion.py`.
+- Raw ClickHouse landing table: `open_fnr.raw_promo_plans`.
+- Promo ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_clickhouse_promo_schema.py`, `tests/orchestration/test_promo_plan_ingestion.py`.
 
 ## Block Presentations
 

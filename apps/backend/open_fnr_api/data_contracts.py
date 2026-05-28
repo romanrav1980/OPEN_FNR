@@ -264,6 +264,33 @@ class MdmStoreLine(BaseModel):
     source_system: str = Field(default="MDM", min_length=1, max_length=64)
 
 
+class PromoPlanLine(BaseModel):
+    promo_id: str = Field(min_length=1, max_length=128)
+    promo_name: str = Field(min_length=1, max_length=255)
+    sku_id: str = Field(min_length=1, max_length=64)
+    store_scope_id: str = Field(min_length=1, max_length=128)
+    date_from: date
+    date_to: date
+    regular_price: float = Field(gt=0)
+    promo_price: float = Field(gt=0)
+    discount_pct: float = Field(ge=0, le=1)
+    display_type: str | None = Field(default=None, max_length=64)
+    display_location: str | None = Field(default=None, max_length=128)
+    display_capacity_units: float | None = Field(default=None, ge=0)
+    mechanics: str | None = Field(default=None, max_length=128)
+    forecast_lock: bool = False
+    source_system: str = Field(default="PROMO", min_length=1, max_length=64)
+
+    @field_validator("promo_price")
+    @classmethod
+    def promo_price_cannot_exceed_regular_price(cls, value: float, info: Any) -> float:
+        regular_price = info.data.get("regular_price")
+        if regular_price is not None and value > regular_price:
+            msg = "promo_price must not exceed regular_price"
+            raise ValueError(msg)
+        return value
+
+
 SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
     DataDomain.SALES: PosSalesLine,
     DataDomain.STOCK: WmsStockSnapshotLine,

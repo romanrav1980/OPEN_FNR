@@ -42,7 +42,7 @@ class Settings(BaseModel):
     postgres_database: str = Field(default_factory=lambda: env_str("POSTGRES_DATABASE", "open_fnr"))
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
-    audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", False))
+    audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
 
     def http_url(self, port: int, path: str = "") -> str:
         normalized_path = path if path.startswith("/") or path == "" else f"/{path}"

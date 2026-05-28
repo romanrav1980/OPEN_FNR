@@ -9,6 +9,7 @@ from open_fnr_api.data_contracts import (
     MdmStoreLine,
     PosSalesLine,
     PriceRecord,
+    PromoPlanLine,
     SalesRecord,
     WmsStockSnapshotLine,
 )
@@ -123,3 +124,36 @@ def test_mdm_product_and_store_lines_capture_lifecycle_and_replenishment_keys() 
     assert product.is_fresh is True
     assert store.replenishment_calendar_id == "CAL001"
     assert store.warehouse_id == "DC001"
+
+
+def test_promo_plan_line_rejects_price_above_regular_and_captures_display() -> None:
+    promo = PromoPlanLine(
+        promo_id="PROMO001",
+        promo_name="Weekend milk discount",
+        sku_id="SKU001",
+        store_scope_id="REG001",
+        date_from=date(2026, 6, 1),
+        date_to=date(2026, 6, 7),
+        regular_price=100,
+        promo_price=90,
+        discount_pct=0.1,
+        display_type="endcap",
+        display_location="entrance",
+        display_capacity_units=120,
+    )
+
+    assert promo.display_type == "endcap"
+    assert promo.display_capacity_units == 120
+
+    with pytest.raises(ValidationError):
+        PromoPlanLine(
+            promo_id="PROMO002",
+            promo_name="Invalid promo",
+            sku_id="SKU001",
+            store_scope_id="REG001",
+            date_from=date(2026, 6, 1),
+            date_to=date(2026, 6, 7),
+            regular_price=100,
+            promo_price=101,
+            discount_pct=0,
+        )

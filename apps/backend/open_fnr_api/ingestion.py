@@ -133,6 +133,18 @@ MDM_STORES_MANIFEST = SourceBatchManifest(
     landed_uri="s3-compatible://open-fnr-landing/mdm/stores/business_date=2026-05-28/mdm-stores.parquet",
 )
 
+PROMO_PLAN_MANIFEST = SourceBatchManifest(
+    batch_id="promo-plan-2026-05-28-v1",
+    source_system="PROMO",
+    contract_name="promo_plan_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=84_000,
+    checksum="sha256:promo-plan-20260528-v1",
+    idempotency_key="PROMO:promo_plan_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/promo/plans/business_date=2026-05-28/promo-plan.parquet",
+)
+
 
 @router.get("/contracts")
 def list_contracts() -> dict[str, object]:
@@ -177,6 +189,11 @@ def get_mdm_products_manifest() -> dict[str, object]:
 @router.get("/ingestion/manifests/mdm-stores")
 def get_mdm_stores_manifest() -> dict[str, object]:
     return MDM_STORES_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/promo-plan")
+def get_promo_plan_manifest() -> dict[str, object]:
+    return PROMO_PLAN_MANIFEST.model_dump(mode="json")
 
 
 @router.get("/ingestion/status")

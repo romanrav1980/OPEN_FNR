@@ -92,3 +92,14 @@ def test_mdm_manifests_expose_product_and_store_reference_sources() -> None:
         assert manifest["source_system"] == "MDM"
         assert manifest["contract_name"] == contract_name
         assert manifest["idempotency_key"] == f"MDM:{contract_name}:v1:2026-05-28"
+
+
+def test_promo_manifest_exposes_plan_source() -> None:
+    response = client.get("/data/ingestion/manifests/promo-plan")
+    assert response.status_code == 200
+
+    manifest = response.json()
+    assert manifest["source_system"] == "PROMO"
+    assert manifest["contract_name"] == "promo_plan_line"
+    assert manifest["contract_version"] == "v1"
+    assert manifest["idempotency_key"] == "PROMO:promo_plan_line:v1:2026-05-28"

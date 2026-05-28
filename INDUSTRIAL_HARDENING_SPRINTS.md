@@ -42,7 +42,7 @@ Status: completed.
 - `apps/backend/open_fnr_api/database.py` provides lazy PostgreSQL connection management.
 - `PostgresAuditEventRepository` writes to and reads from `open_fnr.audit_events`.
 - `build_audit_event_repository(...)` selects in-memory repository for `mock_mode=true` and PostgreSQL repository for `mock_mode=false`.
-- Business action audit recording is controlled by `OPEN_FNR_AUDIT_ENABLED`; default is `false`.
+- Business action audit recording is controlled by `OPEN_FNR_AUDIT_ENABLED`; default is `true`.
 - `open_fnr.schema_migrations` tracks schema baseline.
 
 ## H3. ClickHouse Marts
@@ -136,6 +136,25 @@ Status: in progress.
 - MDM manifest endpoints expose product and store source batches.
 - `orchestration/airflow/dags/mdm_reference_ingestion.py` defines the MDM reference ingestion DAG skeleton.
 - ClickHouse raw landing DDL includes product and store MDM tables.
+
+## I5. Promo Source Ingestion
+
+Status: in progress.
+
+### Scope
+
+- add promo plan source contract;
+- include SKU, store scope, period, price, discount, display location and display capacity;
+- add raw ClickHouse landing table;
+- add Airflow DAG skeleton for promo plan ingestion;
+- expose idempotent manifest for promo plan source.
+
+### Current Implementation
+
+- Promo contract captures price, discount, mechanics, display place and display capacity.
+- Promo manifest endpoint exposes source batch metadata and idempotency key.
+- `orchestration/airflow/dags/promo_plan_ingestion.py` defines the promo plan ingestion DAG skeleton.
+- ClickHouse raw landing DDL includes promo plan table.
 
 ## S1. Production Security Foundation
 

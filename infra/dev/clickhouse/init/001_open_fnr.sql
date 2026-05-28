@@ -266,6 +266,30 @@ ENGINE = MergeTree
 PARTITION BY tuple()
 ORDER BY (region_id, format_id, store_id, batch_id);
 
+CREATE TABLE IF NOT EXISTS open_fnr.raw_promo_plans
+(
+    batch_id String,
+    promo_id String,
+    promo_name String,
+    sku_id String,
+    store_scope_id String,
+    date_from Date,
+    date_to Date,
+    regular_price Float64,
+    promo_price Float64,
+    discount_pct Float64,
+    display_type Nullable(String),
+    display_location Nullable(String),
+    display_capacity_units Nullable(Float64),
+    mechanics Nullable(String),
+    forecast_lock UInt8,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(date_from)
+ORDER BY (date_from, date_to, store_scope_id, sku_id, promo_id);
+
 CREATE TABLE IF NOT EXISTS open_fnr.active_matrix_daily
 (
     business_date Date,

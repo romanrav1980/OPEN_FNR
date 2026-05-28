@@ -76,7 +76,7 @@ flowchart LR
 | WMS stock/orders/in-transit | in progress | WMS stock/open order/in-transit contracts, manifest APIs, Airflow DAG skeleton, ClickHouse raw WMS tables |
 | ERP prices/order statuses | in progress | ERP price/export-status contracts, manifest APIs, Airflow DAG skeleton, ClickHouse raw ERP tables |
 | MDM/PIM | in progress | MDM product/store contracts, manifest APIs, Airflow DAG skeleton, ClickHouse raw MDM tables |
-| Promo system | planned | promo plan source contract and overlap DQ to be added before promo pilot |
+| Promo system | in progress | Promo plan contract, manifest API, Airflow DAG skeleton, ClickHouse raw promo table |
 
 ## Acceptance Criteria
 
