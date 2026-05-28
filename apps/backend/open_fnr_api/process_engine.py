@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="fresh_order_review_process",
+        name="Fresh order review process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-011",
+        source_path="processes/fresh/fresh_order_review_process.bpmn20.xml",
+        owner_role="Fresh Manager",
+    ),
+    ProcessDefinition(
+        key="fresh_spoilage_risk_decision",
+        name="Fresh spoilage risk decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-011",
+        source_path="processes/fresh/fresh_spoilage_risk_decision.dmn.xml",
+        owner_role="Fresh Manager",
+    ),
+    ProcessDefinition(
+        key="high_spoilage_risk_case",
+        name="High spoilage risk case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-011",
+        source_path="processes/fresh/high_spoilage_risk_case.cmmn.xml",
+        owner_role="Fresh Manager",
+    ),
+    ProcessDefinition(
         key="weekly_kpi_review_process",
         name="Weekly KPI review process",
         artifact_type=ProcessArtifactType.BPMN,

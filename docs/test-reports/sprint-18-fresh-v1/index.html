@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 18 - Fresh V1</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      main { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+      section { border: 1px solid var(--border); background: var(--panel); margin-top: 20px; padding: 20px; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-bottom: 12px; color: var(--red-light); font-size: 20px; }
+      p, li, td, th { line-height: 1.55; }
+      .subtitle { margin-top: 8px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .shot { width: 100%; border: 1px solid var(--border); margin-top: 12px; }
+      code { color: var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 18: Fresh V1</h1>
+        <p class="subtitle">
+          Аннотация: тестируем базовую поддержку fresh и shelf-life:
+          партии, expiration dates, FEFO, expected waste, spoilage risk,
+          availability-vs-waste preview и корректировку fresh order.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем блок <code>Fresh Workbench</code>.</li>
+          <li>Проверяем свежий SKU, статус spoilage risk и recommended/adjusted order.</li>
+          <li>Проверяем waste-service trade-off: waste 34 -> 14, service 97% -> 95%.</li>
+          <li>Проверяем batch/shelf-life table и FEFO ordering.</li>
+          <li>Проверяем expected waste graph.</li>
+          <li>Проверяем действия Fresh Manager: Review, Adjust, Approve.</li>
+        </ol>
+        <img class="shot" src="screenshots/fresh-workbench.png" alt="Fresh Workbench" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Действие</th>
+              <th>Зачем</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>System loads FEFO batches.</td>
+              <td>Fresh расходуется по ближайшему сроку годности.</td>
+              <td class="ok">FEFO ordering tested.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>System estimates expected waste.</td>
+              <td>Заказ должен учитывать не только service, но и списания.</td>
+              <td class="ok">Waste formula tested.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>DMN decides spoilage risk.</td>
+              <td>High waste ratio должен открывать review case.</td>
+              <td class="ok">High/medium/low risk tested.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Fresh Manager adjusts order 96 -> 72.</td>
+              <td>Снижаем waste при допустимом service impact.</td>
+              <td class="ok">Waste 34 -> 14, service 97% -> 95%.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>CMMN opens high spoilage risk case.</td>
+              <td>Решение должно быть управляемым и аудируемым.</td>
+              <td class="ok">Case artifact created.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Команда</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td class="ok">140 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Frontend build completed</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

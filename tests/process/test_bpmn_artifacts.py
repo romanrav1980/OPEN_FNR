@@ -20,6 +20,7 @@ EXCEPTION_ESCALATION_PROCESS_PATH = Path("processes/exceptions/exception_escalat
 MANUAL_ADJUSTMENT_PROCESS_PATH = Path("processes/adjustments/manual_adjustment_process.bpmn20.xml")
 PUBLICATION_PROCESS_PATH = Path("processes/publication/publication_process.bpmn20.xml")
 KPI_REVIEW_PROCESS_PATH = Path("processes/kpi/weekly_kpi_review_process.bpmn20.xml")
+FRESH_ORDER_REVIEW_PROCESS_PATH = Path("processes/fresh/fresh_order_review_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -364,3 +365,29 @@ def test_weekly_kpi_review_bpmn_creates_action_on_threshold_breach() -> None:
     assert "Evaluate KPI alert" in business_rule_names
     assert "Review KPI degradation" in user_task_names
     assert "Create KPI action" in service_task_names
+
+
+def test_fresh_order_review_bpmn_handles_spoilage_risk() -> None:
+    tree = ElementTree.parse(FRESH_ORDER_REVIEW_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "fresh_order_review_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    assert "Load FEFO batches" in service_task_names
+    assert "Estimate expected waste" in service_task_names
+    assert "Adjust fresh order" in service_task_names
+    assert "Approve fresh order" in service_task_names
+    assert "Decide spoilage risk" in business_rule_names
+    assert "Review fresh spoilage risk" in user_task_names

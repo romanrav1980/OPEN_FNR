@@ -6,12 +6,16 @@ from open_fnr_api.main import app
 from open_fnr_api.replenishment import (
     StockOutRisk,
     StockSnapshot,
+    classify_spoilage_risk,
     calculate_net_requirement,
     calculate_projected_stock,
     classify_stock_out_risk,
+    estimate_expected_waste,
+    order_batches_fefo,
     preview_projected_stock_after_order,
     round_order_qty,
 )
+from open_fnr_api.replenishment import FreshBatch, SpoilageRisk
 
 
 client = TestClient(app)
@@ -169,3 +173,35 @@ def test_approved_final_order_cannot_be_adjusted() -> None:
 
 def test_projected_stock_preview_after_order() -> None:
     assert preview_projected_stock_after_order(current_projected_stock_qty=-33, final_order_qty=300) == 267
+
+
+def test_fresh_workbench_exposes_batches_waste_and_availability_tradeoff() -> None:
+    response = client.get("/replenishment/fresh/workbench/fresh-s001-sku001-20260528")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["status"] == "spoilage_risk"
+    assert payload["spoilage_risk"] == "high"
+    assert payload["recommended_order_qty"] == 96
+    assert payload["adjusted_order_qty"] == 72
+    assert payload["expected_waste_before_qty"] == 34
+    assert payload["expected_waste_after_qty"] == 14
+    assert payload["service_level_before"] == 0.97
+    assert payload["service_level_after"] == 0.95
+    assert payload["batches"][0]["expiration_date"] == "2026-05-30"
+
+
+def test_fefo_orders_batches_by_expiration_date() -> None:
+    batches = [
+        FreshBatch(batch_id="b2", store_id="S001", sku_id="SKU001", received_date="2026-05-27", expiration_date="2026-06-01", qty=10, remaining_shelf_life_days=4),
+        FreshBatch(batch_id="b1", store_id="S001", sku_id="SKU001", received_date="2026-05-26", expiration_date="2026-05-30", qty=10, remaining_shelf_life_days=2),
+    ]
+
+    assert [batch.batch_id for batch in order_batches_fefo(batches)] == ["b1", "b2"]
+
+
+def test_fresh_waste_estimation_and_spoilage_risk() -> None:
+    assert estimate_expected_waste(available_qty=100, demand_qty=76) == 24
+    assert classify_spoilage_risk(expected_waste_qty=30, available_qty=100) == SpoilageRisk.HIGH
+    assert classify_spoilage_risk(expected_waste_qty=15, available_qty=100) == SpoilageRisk.MEDIUM
+    assert classify_spoilage_risk(expected_waste_qty=5, available_qty=100) == SpoilageRisk.LOW

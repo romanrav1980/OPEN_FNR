@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/fresh">
+  <process id="fresh_order_review_process" name="Fresh order review process" isExecutable="true">
+    <startEvent id="start_fresh_calculated" name="Fresh projection calculated" />
+    <sequenceFlow id="flow_start_to_fefo" sourceRef="start_fresh_calculated" targetRef="load_fefo_batches" />
+    <serviceTask id="load_fefo_batches" name="Load FEFO batches" />
+    <sequenceFlow id="flow_fefo_to_waste" sourceRef="load_fefo_batches" targetRef="estimate_expected_waste" />
+    <serviceTask id="estimate_expected_waste" name="Estimate expected waste" />
+    <sequenceFlow id="flow_waste_to_risk" sourceRef="estimate_expected_waste" targetRef="decide_spoilage_risk" />
+    <businessRuleTask id="decide_spoilage_risk" name="Decide spoilage risk" />
+    <sequenceFlow id="flow_risk_to_gateway" sourceRef="decide_spoilage_risk" targetRef="spoilage_risk_gateway" />
+    <exclusiveGateway id="spoilage_risk_gateway" name="High spoilage risk?" />
+    <sequenceFlow id="flow_low_risk" sourceRef="spoilage_risk_gateway" targetRef="approve_fresh_order" />
+    <sequenceFlow id="flow_high_risk" sourceRef="spoilage_risk_gateway" targetRef="review_fresh_spoilage_risk" />
+    <userTask id="review_fresh_spoilage_risk" name="Review fresh spoilage risk" />
+    <sequenceFlow id="flow_review_to_adjust" sourceRef="review_fresh_spoilage_risk" targetRef="adjust_fresh_order" />
+    <serviceTask id="adjust_fresh_order" name="Adjust fresh order" />
+    <sequenceFlow id="flow_adjust_to_approve" sourceRef="adjust_fresh_order" targetRef="approve_fresh_order" />
+    <serviceTask id="approve_fresh_order" name="Approve fresh order" />
+    <sequenceFlow id="flow_approve_to_end" sourceRef="approve_fresh_order" targetRef="end_approved" />
+    <endEvent id="end_approved" name="Fresh order approved" />
+  </process>
+</definitions>

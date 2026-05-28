@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/fresh" name="fresh_spoilage_risk_decision">
+  <decision id="fresh_spoilage_risk_decision" name="Fresh spoilage risk decision">
+    <decisionTable id="fresh_spoilage_risk_table" hitPolicy="FIRST">
+      <input id="input_waste_ratio" label="waste_ratio">
+        <inputExpression id="input_waste_ratio_expr" typeRef="number"><text>waste_ratio</text></inputExpression>
+      </input>
+      <output id="output_risk" label="risk" name="risk" typeRef="string" />
+      <rule id="rule_high">
+        <inputEntry id="rule_high_ratio"><text>&gt;= 0.25</text></inputEntry>
+        <outputEntry id="rule_high_risk"><text>"high"</text></outputEntry>
+      </rule>
+      <rule id="rule_medium">
+        <inputEntry id="rule_medium_ratio"><text>&gt;= 0.10</text></inputEntry>
+        <outputEntry id="rule_medium_risk"><text>"medium"</text></outputEntry>
+      </rule>
+      <rule id="rule_low">
+        <inputEntry id="rule_low_ratio"><text>-</text></inputEntry>
+        <outputEntry id="rule_low_risk"><text>"low"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

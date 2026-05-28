@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/fresh">
+  <case id="high_spoilage_risk_case" name="High spoilage risk case">
+    <casePlanModel id="high_spoilage_risk_plan" name="High spoilage risk plan">
+      <humanTask id="review_shelf_life_batches" name="Review shelf-life batches" />
+      <humanTask id="adjust_fresh_order_quantity" name="Adjust fresh order quantity" />
+      <humanTask id="approve_waste_service_tradeoff" name="Approve waste-service tradeoff" />
+    </casePlanModel>
+  </case>
+</definitions>

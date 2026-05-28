@@ -36,6 +36,20 @@ class FinalOrderStatus(StrEnum):
     BLOCKED = "blocked"
 
 
+class FreshStatus(StrEnum):
+    CALCULATED = "calculated"
+    SPOILAGE_RISK = "spoilage_risk"
+    REVIEWED = "reviewed"
+    APPROVED = "approved"
+    ADJUSTED = "adjusted"
+
+
+class SpoilageRisk(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 class StockSnapshot(BaseModel):
     snapshot_id: str
     store_id: str
@@ -163,6 +177,40 @@ class ReplenishmentWorkbench(BaseModel):
     audit_events: list[OrderAuditEvent]
 
 
+class FreshBatch(BaseModel):
+    batch_id: str
+    store_id: str
+    sku_id: str
+    received_date: date
+    expiration_date: date
+    qty: float = Field(ge=0)
+    remaining_shelf_life_days: int = Field(ge=0)
+
+
+class FreshProjectionDay(BaseModel):
+    projection_date: date
+    demand_qty: float = Field(ge=0)
+    available_qty: float = Field(ge=0)
+    expected_waste_qty: float = Field(ge=0)
+    service_level: float = Field(ge=0, le=1)
+
+
+class FreshWorkbenchItem(BaseModel):
+    item_id: str
+    store_id: str
+    sku_id: str
+    status: FreshStatus
+    spoilage_risk: SpoilageRisk
+    recommended_order_qty: float = Field(ge=0)
+    adjusted_order_qty: float = Field(ge=0)
+    expected_waste_before_qty: float = Field(ge=0)
+    expected_waste_after_qty: float = Field(ge=0)
+    service_level_before: float = Field(ge=0, le=1)
+    service_level_after: float = Field(ge=0, le=1)
+    batches: list[FreshBatch]
+    projection: list[FreshProjectionDay]
+
+
 def calculate_projected_stock(
     opening_stock_qty: float,
     demand_projection_qty: float,
@@ -195,6 +243,25 @@ def round_order_qty(raw_order_qty: float, min_order_qty: float, order_multiple: 
         return 0
     constrained_qty = max(raw_order_qty, min_order_qty)
     return ((constrained_qty + order_multiple - 1) // order_multiple) * order_multiple
+
+
+def order_batches_fefo(batches: list[FreshBatch]) -> list[FreshBatch]:
+    return sorted(batches, key=lambda batch: (batch.expiration_date, batch.received_date, batch.batch_id))
+
+
+def estimate_expected_waste(available_qty: float, demand_qty: float) -> float:
+    return max(0, available_qty - demand_qty)
+
+
+def classify_spoilage_risk(expected_waste_qty: float, available_qty: float) -> SpoilageRisk:
+    if available_qty == 0:
+        return SpoilageRisk.LOW
+    waste_ratio = expected_waste_qty / available_qty
+    if waste_ratio >= 0.25:
+        return SpoilageRisk.HIGH
+    if waste_ratio >= 0.1:
+        return SpoilageRisk.MEDIUM
+    return SpoilageRisk.LOW
 
 
 STOCK_SNAPSHOTS: tuple[StockSnapshot, ...] = (
@@ -413,6 +480,65 @@ ORDER_AUDIT_EVENTS: tuple[OrderAuditEvent, ...] = (
     ),
 )
 
+FRESH_WORKBENCH_ITEMS: tuple[FreshWorkbenchItem, ...] = (
+    FreshWorkbenchItem(
+        item_id="fresh-s001-sku001-20260528",
+        store_id="S001",
+        sku_id="SKU001",
+        status=FreshStatus.SPOILAGE_RISK,
+        spoilage_risk=SpoilageRisk.HIGH,
+        recommended_order_qty=96,
+        adjusted_order_qty=72,
+        expected_waste_before_qty=34,
+        expected_waste_after_qty=14,
+        service_level_before=0.97,
+        service_level_after=0.95,
+        batches=[
+            FreshBatch(
+                batch_id="batch-s001-sku001-001",
+                store_id="S001",
+                sku_id="SKU001",
+                received_date=date(2026, 5, 26),
+                expiration_date=date(2026, 5, 30),
+                qty=42,
+                remaining_shelf_life_days=2,
+            ),
+            FreshBatch(
+                batch_id="batch-s001-sku001-002",
+                store_id="S001",
+                sku_id="SKU001",
+                received_date=date(2026, 5, 27),
+                expiration_date=date(2026, 6, 1),
+                qty=58,
+                remaining_shelf_life_days=4,
+            ),
+        ],
+        projection=[
+            FreshProjectionDay(
+                projection_date=date(2026, 5, 29),
+                demand_qty=38,
+                available_qty=100,
+                expected_waste_qty=0,
+                service_level=0.98,
+            ),
+            FreshProjectionDay(
+                projection_date=date(2026, 5, 30),
+                demand_qty=44,
+                available_qty=62,
+                expected_waste_qty=18,
+                service_level=0.97,
+            ),
+            FreshProjectionDay(
+                projection_date=date(2026, 5, 31),
+                demand_qty=48,
+                available_qty=38,
+                expected_waste_qty=16,
+                service_level=0.95,
+            ),
+        ],
+    ),
+)
+
 
 def preview_projected_stock_after_order(current_projected_stock_qty: float, final_order_qty: float) -> float:
     return current_projected_stock_qty + final_order_qty
@@ -507,3 +633,16 @@ def adjust_order_proposal(proposal_id: str, payload: OrderAdjustmentRequest) -> 
         created_at=datetime(2026, 5, 28, 6, 0, tzinfo=timezone.utc),
     )
     return {"final_order": adjusted_order.model_dump(mode="json"), "audit_event": audit_event.model_dump(mode="json")}
+
+
+@router.get("/fresh/workbench")
+def get_fresh_workbench() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in FRESH_WORKBENCH_ITEMS], "total": len(FRESH_WORKBENCH_ITEMS)}
+
+
+@router.get("/fresh/workbench/{item_id}")
+def get_fresh_workbench_item(item_id: str) -> dict[str, object]:
+    item = next((fresh_item for fresh_item in FRESH_WORKBENCH_ITEMS if fresh_item.item_id == item_id), None)
+    if item is None:
+        raise HTTPException(status_code=404, detail="fresh item not found")
+    return item.model_dump(mode="json")

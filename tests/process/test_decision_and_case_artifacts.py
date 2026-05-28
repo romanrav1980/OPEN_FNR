@@ -421,3 +421,27 @@ def test_kpi_degradation_case_is_parseable() -> None:
     assert "Review accuracy drop" in human_task_names
     assert "Assign corrective action" in human_task_names
     assert "Confirm business impact" in human_task_names
+
+
+def test_fresh_spoilage_risk_decision_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/fresh/fresh_spoilage_risk_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "fresh_spoilage_risk_decision"
+    assert tree.find(".//dmn:decisionTable", DMN_NS) is not None
+
+
+def test_high_spoilage_risk_case_is_parseable() -> None:
+    tree = ElementTree.parse(Path("processes/fresh/high_spoilage_risk_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "high_spoilage_risk_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review shelf-life batches" in human_task_names
+    assert "Adjust fresh order quantity" in human_task_names
+    assert "Approve waste-service tradeoff" in human_task_names

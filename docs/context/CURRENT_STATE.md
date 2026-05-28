@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 17 implementation is complete.
+Sprint 18 implementation is complete.
 
 ## Local Infrastructure
 
@@ -193,9 +193,19 @@ Known local URLs:
 - UI Accuracy And KPI Dashboard section with filters, trend visual, KPI table, review task and SKU drill-down.
 - HTML test report with screenshot: `docs/test-reports/sprint-17-accuracy-kpi-dashboards/index.html`.
 
+## Sprint 18 Artifacts
+
+- Fresh replenishment models and endpoints in `apps/backend/open_fnr_api/replenishment.py`.
+- Fresh tests in `tests/backend/test_replenishment.py`.
+- Fresh order review BPMN: `processes/fresh/fresh_order_review_process.bpmn20.xml`.
+- Fresh spoilage risk DMN: `processes/fresh/fresh_spoilage_risk_decision.dmn.xml`.
+- High spoilage risk CMMN: `processes/fresh/high_spoilage_risk_case.cmmn.xml`.
+- UI Fresh Workbench section with shelf-life batches, FEFO, waste graph, availability-vs-waste preview and fresh adjustment.
+- HTML test report with screenshot: `docs/test-reports/sprint-18-fresh-v1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 134 passed.
+- `python -m pytest` -> 140 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -203,4 +213,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 17 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 18: Fresh V1.
+Commit Sprint 18 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 19: Lifecycle SKU V1.

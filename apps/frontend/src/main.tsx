@@ -408,6 +408,17 @@ const kpiRows = [
   },
 ];
 
+const freshBatches = [
+  { batch: "batch-s001-sku001-001", received: "2026-05-26", expires: "2026-05-30", qty: 42, shelfLife: 2 },
+  { batch: "batch-s001-sku001-002", received: "2026-05-27", expires: "2026-06-01", qty: 58, shelfLife: 4 },
+];
+
+const freshProjection = [
+  { date: "2026-05-29", demand: 38, available: 100, waste: 0, service: "98%" },
+  { date: "2026-05-30", demand: 44, available: 62, waste: 18, service: "97%" },
+  { date: "2026-05-31", demand: 48, available: 38, waste: 16, service: "95%" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1655,6 +1666,97 @@ function App() {
               and whether proposal acceptance improved replenishment outcomes.
             </p>
           </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Fresh workbench">
+        <div className="section-heading">
+          <h2>Fresh Workbench</h2>
+          <p>Shelf-life, FEFO batches, expected waste and availability-vs-waste preview</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Fresh SKU</span>
+            <strong>S001 / SKU001 spoilage risk high</strong>
+            <p>Recommended order 96 adjusted to 72 to reduce projected waste before fresh cutoff.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Waste-Service Trade-off</span>
+            <strong>Waste 34 -&gt; 14, service 97% -&gt; 95%</strong>
+            <p>Fresh Manager approves lower waste while keeping service above the configured threshold.</p>
+          </article>
+        </div>
+        <div className="chart-panel" aria-label="Expected waste graph">
+          <div className="chart-bars">
+            <span style={{ height: "12%" }} title="Waste day 1" />
+            <span style={{ height: "54%" }} title="Waste day 2" />
+            <span style={{ height: "48%" }} title="Waste day 3" />
+            <span style={{ height: "42%" }} title="Waste after adjustment" />
+          </div>
+          <p>Expected waste before/after fresh order adjustment with service-level preview.</p>
+        </div>
+        <div className="feature-grid">
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Batch</th>
+                  <th>Received</th>
+                  <th>Expires</th>
+                  <th>Qty</th>
+                  <th>Shelf-life days</th>
+                </tr>
+              </thead>
+              <tbody>
+                {freshBatches.map((batch) => (
+                  <tr key={batch.batch}>
+                    <td>{batch.batch}</td>
+                    <td>{batch.received}</td>
+                    <td>{batch.expires}</td>
+                    <td>{batch.qty}</td>
+                    <td>{batch.shelfLife}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Demand</th>
+                  <th>Available</th>
+                  <th>Waste</th>
+                  <th>Service</th>
+                </tr>
+              </thead>
+              <tbody>
+                {freshProjection.map((day) => (
+                  <tr key={day.date}>
+                    <td>{day.date}</td>
+                    <td>{day.demand}</td>
+                    <td>{day.available}</td>
+                    <td>{day.waste}</td>
+                    <td>{day.service}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="dq-detail">
+          <span className="eyebrow">Fresh Adjustment</span>
+          <h3>Reduce order 96 to 72</h3>
+          <p>
+            FEFO batches with the nearest expiration are consumed first. High spoilage risk opens
+            a case where Fresh Manager reviews expected waste and approves the service trade-off.
+          </p>
+          <div className="action-row">
+            <button type="button">Review</button>
+            <button type="button">Adjust</button>
+            <button type="button">Approve</button>
+          </div>
         </div>
       </section>
     </main>
