@@ -76,3 +76,19 @@ def test_erp_manifests_expose_prices_and_order_export_statuses() -> None:
         assert manifest["source_system"] == "ERP"
         assert manifest["contract_name"] == contract_name
         assert manifest["idempotency_key"] == f"ERP:{contract_name}:v1:2026-05-28"
+
+
+def test_mdm_manifests_expose_product_and_store_reference_sources() -> None:
+    endpoints = {
+        "mdm-products": "mdm_product_line",
+        "mdm-stores": "mdm_store_line",
+    }
+
+    for endpoint, contract_name in endpoints.items():
+        response = client.get(f"/data/ingestion/manifests/{endpoint}")
+        assert response.status_code == 200
+
+        manifest = response.json()
+        assert manifest["source_system"] == "MDM"
+        assert manifest["contract_name"] == contract_name
+        assert manifest["idempotency_key"] == f"MDM:{contract_name}:v1:2026-05-28"

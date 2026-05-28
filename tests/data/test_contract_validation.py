@@ -3,7 +3,15 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
-from open_fnr_api.data_contracts import ErpPriceLine, PosSalesLine, PriceRecord, SalesRecord, WmsStockSnapshotLine
+from open_fnr_api.data_contracts import (
+    ErpPriceLine,
+    MdmProductLine,
+    MdmStoreLine,
+    PosSalesLine,
+    PriceRecord,
+    SalesRecord,
+    WmsStockSnapshotLine,
+)
 
 
 def test_sales_contract_rejects_negative_quantity() -> None:
@@ -89,3 +97,29 @@ def test_erp_price_line_rejects_extreme_selling_price() -> None:
             regular_price=100,
             selling_price=1001,
         )
+
+
+def test_mdm_product_and_store_lines_capture_lifecycle_and_replenishment_keys() -> None:
+    product = MdmProductLine(
+        sku_id="SKU001",
+        product_name="Milk",
+        category_id="DAIRY",
+        category_path="Food/Dairy/Milk",
+        supplier_id="SUP001",
+        shelf_life_days=7,
+        lifecycle_status="active",
+        is_fresh=True,
+    )
+    store = MdmStoreLine(
+        store_id="STORE001",
+        store_name="Central Store",
+        region_id="REG001",
+        format_id="SMALL",
+        replenishment_calendar_id="CAL001",
+        warehouse_id="DC001",
+    )
+
+    assert product.lifecycle_status == "active"
+    assert product.is_fresh is True
+    assert store.replenishment_calendar_id == "CAL001"
+    assert store.warehouse_id == "DC001"

@@ -224,6 +224,48 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(business_date)
 ORDER BY (business_date, domain, incident_id, store_id, sku_id);
 
+CREATE TABLE IF NOT EXISTS open_fnr.raw_mdm_products
+(
+    batch_id String,
+    sku_id String,
+    product_name String,
+    category_id String,
+    category_path String,
+    brand_id Nullable(String),
+    supplier_id Nullable(String),
+    uom String,
+    shelf_life_days Nullable(UInt32),
+    lifecycle_status String,
+    replacement_sku_id Nullable(String),
+    is_fresh UInt8,
+    is_active UInt8,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY tuple()
+ORDER BY (category_id, sku_id, batch_id);
+
+CREATE TABLE IF NOT EXISTS open_fnr.raw_mdm_stores
+(
+    batch_id String,
+    store_id String,
+    store_name String,
+    region_id String,
+    format_id String,
+    timezone String,
+    opening_date Nullable(Date),
+    closing_date Nullable(Date),
+    replenishment_calendar_id Nullable(String),
+    warehouse_id Nullable(String),
+    is_active UInt8,
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY tuple()
+ORDER BY (region_id, format_id, store_id, batch_id);
+
 CREATE TABLE IF NOT EXISTS open_fnr.active_matrix_daily
 (
     business_date Date,

@@ -118,6 +118,25 @@ Status: in progress.
 - `orchestration/airflow/dags/erp_commercial_ingestion.py` defines the ERP commercial ingestion DAG skeleton.
 - ClickHouse raw landing DDL includes ERP price and order export status tables.
 
+## I4. MDM And PIM Reference Data
+
+Status: in progress.
+
+### Scope
+
+- add product and store MDM source contracts;
+- include lifecycle, shelf-life, supplier, replenishment calendar and warehouse keys;
+- add raw ClickHouse landing tables;
+- add Airflow DAG skeleton for reference data ingestion;
+- expose idempotent manifests for product and store sources.
+
+### Current Implementation
+
+- MDM contracts cover product lifecycle/fresh attributes and store replenishment routing keys.
+- MDM manifest endpoints expose product and store source batches.
+- `orchestration/airflow/dags/mdm_reference_ingestion.py` defines the MDM reference ingestion DAG skeleton.
+- ClickHouse raw landing DDL includes product and store MDM tables.
+
 ## S1. Production Security Foundation
 
 ### Scope

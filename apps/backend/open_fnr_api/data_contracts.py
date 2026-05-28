@@ -234,12 +234,42 @@ class ErpOrderExportStatusLine(BaseModel):
     source_system: str = Field(default="ERP", min_length=1, max_length=64)
 
 
+class MdmProductLine(BaseModel):
+    sku_id: str = Field(min_length=1, max_length=64)
+    product_name: str = Field(min_length=1, max_length=255)
+    category_id: str = Field(min_length=1, max_length=64)
+    category_path: str = Field(min_length=1, max_length=512)
+    brand_id: str | None = Field(default=None, max_length=64)
+    supplier_id: str | None = Field(default=None, max_length=64)
+    uom: str = Field(default="pcs", min_length=1, max_length=16)
+    shelf_life_days: int | None = Field(default=None, ge=0)
+    lifecycle_status: str = Field(default="active", min_length=1, max_length=64)
+    replacement_sku_id: str | None = Field(default=None, max_length=64)
+    is_fresh: bool = False
+    is_active: bool = True
+    source_system: str = Field(default="MDM", min_length=1, max_length=64)
+
+
+class MdmStoreLine(BaseModel):
+    store_id: str = Field(min_length=1, max_length=64)
+    store_name: str = Field(min_length=1, max_length=255)
+    region_id: str = Field(min_length=1, max_length=64)
+    format_id: str = Field(min_length=1, max_length=64)
+    timezone: str = Field(default="Europe/Moscow", min_length=1, max_length=64)
+    opening_date: date | None = None
+    closing_date: date | None = None
+    replenishment_calendar_id: str | None = Field(default=None, max_length=64)
+    warehouse_id: str | None = Field(default=None, max_length=64)
+    is_active: bool = True
+    source_system: str = Field(default="MDM", min_length=1, max_length=64)
+
+
 SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
     DataDomain.SALES: PosSalesLine,
     DataDomain.STOCK: WmsStockSnapshotLine,
     DataDomain.PRICES: ErpPriceLine,
-    DataDomain.PRODUCT_MDM: ProductMdmRecord,
-    DataDomain.STORE_MDM: StoreMdmRecord,
+    DataDomain.PRODUCT_MDM: MdmProductLine,
+    DataDomain.STORE_MDM: MdmStoreLine,
     DataDomain.CALENDAR: CalendarDayRecord,
 }
 

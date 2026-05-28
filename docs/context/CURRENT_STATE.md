@@ -4,7 +4,7 @@ Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening I3 is in progress after completion of I2 WMS ingestion. The current focus is ERP price and order export status ingestion for commercial inputs and export reconciliation.
+Industrial hardening I4 is in progress after completion of I3 ERP ingestion. The current focus is MDM/PIM product and store reference ingestion for active matrix, lifecycle, fresh and replenishment routing.
 
 ## Local Infrastructure
 
@@ -421,7 +421,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Complete I3 verification, commit ERP ingestion, then continue to MDM/PIM and promo source hardening.
+Complete I4 verification, commit MDM/PIM ingestion, then continue to promo source hardening.
 
 ## Post-Sprint Planning Artifacts
 
@@ -481,6 +481,14 @@ Complete I3 verification, commit ERP ingestion, then continue to MDM/PIM and pro
 - ERP commercial DAG skeleton: `orchestration/airflow/dags/erp_commercial_ingestion.py`.
 - Raw ClickHouse landing tables: `open_fnr.raw_erp_prices`, `open_fnr.raw_erp_order_export_statuses`.
 - ERP ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_clickhouse_erp_schema.py`, `tests/orchestration/test_erp_commercial_ingestion.py`.
+
+## I4 Real Data Ingestion Artifacts
+
+- MDM product and store contracts: `apps/backend/open_fnr_api/data_contracts.py`.
+- MDM manifest endpoints: `/data/ingestion/manifests/mdm-products`, `/data/ingestion/manifests/mdm-stores`.
+- MDM reference DAG skeleton: `orchestration/airflow/dags/mdm_reference_ingestion.py`.
+- Raw ClickHouse landing tables: `open_fnr.raw_mdm_products`, `open_fnr.raw_mdm_stores`.
+- MDM ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_clickhouse_mdm_schema.py`, `tests/orchestration/test_mdm_reference_ingestion.py`.
 
 ## Block Presentations
 
