@@ -33,6 +33,7 @@ MODEL_RELEASE_PROCESS_PATH = Path("processes/ml-governance/model_release_process
 INDUSTRIAL_REPLENISHMENT_PROCESS_PATH = Path("processes/replenishment-scale/industrial_replenishment_process.bpmn20.xml")
 PROCESS_CHANGE_MANAGEMENT_PROCESS_PATH = Path("processes/process-governance/process_change_management_process.bpmn20.xml")
 INCIDENT_MANAGEMENT_PROCESS_PATH = Path("processes/observability/incident_management_process.bpmn20.xml")
+RELEASE_GO_NO_GO_PROCESS_PATH = Path("processes/release-gate/release_go_no_go_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -792,3 +793,36 @@ def test_incident_management_bpmn_covers_alert_ack_runbook_escalation_and_closur
     assert "Escalate incident" in user_task_names
     assert "Resolve incident" in user_task_names
     assert "Incident resolved?" in gateway_names
+
+
+def test_release_go_no_go_bpmn_covers_regression_dr_handover_risk_approval_and_decision_paths() -> None:
+    tree = ElementTree.parse(RELEASE_GO_NO_GO_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "release_go_no_go_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    end_event_names = {
+        event.attrib["name"]
+        for event in tree.findall(".//bpmn:endEvent", BPMN_NS)
+    }
+    assert "Run full regression" in service_task_names
+    assert "Run DR smoke" in service_task_names
+    assert "Publish release decision" in service_task_names
+    assert "Record no-go decision" in service_task_names
+    assert "Evaluate release readiness" in business_rule_names
+    assert "Confirm support handover" in user_task_names
+    assert "Accept release risks" in user_task_names
+    assert "Collect go/no-go approvals" in user_task_names
+    assert {"Release go", "Release no-go"}.issubset(end_event_names)

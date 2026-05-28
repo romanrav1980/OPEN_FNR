@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Sprint 30 - Industrial Release Gate</title>
+    <style>
+      :root { --bg:#1e1e1e; --panel:#252526; --red-light:#b83a4b; --text:#d4d4d4; --muted:#9da3ae; --border:#3a3a3a; --ok:#8fd19e; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,"Segoe UI",Arial,sans-serif; }
+      main { width:min(1180px, calc(100vw - 40px)); margin:0 auto; padding:32px 0 56px; }
+      section { border:1px solid var(--border); background:var(--panel); margin-top:20px; padding:20px; }
+      h1,h2,p { margin:0; }
+      h1 { font-size:30px; }
+      h2 { margin-bottom:12px; color:var(--red-light); font-size:20px; }
+      p,li,td,th { line-height:1.55; }
+      .subtitle { margin-top:8px; color:var(--muted); }
+      table { width:100%; border-collapse:collapse; margin-top:12px; }
+      th,td { border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+      th { color:var(--muted); font-size:12px; text-transform:uppercase; }
+      .ok { color:var(--ok); font-weight:700; }
+      .shot { width:100%; border:1px solid var(--border); margin-top:12px; }
+      code { color:var(--red-light); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>OPEN FNR Sprint 30: Industrial Release Gate</h1>
+        <p class="subtitle">
+          Аннотация: тестируем industrial acceptance: release candidate, full regression,
+          readiness checklist, DR smoke, support handover, risk acceptance and go/no-go approvals.
+        </p>
+      </header>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <ol>
+          <li>Открываем <code>Release Readiness Dashboard</code>.</li>
+          <li>Проверяем release candidate 0.30.0-rc1.</li>
+          <li>Проверяем checklist: full regression, performance, data, DR smoke, support handover.</li>
+          <li>Проверяем accepted medium risk.</li>
+          <li>Проверяем actions: Accept risk, Approve gate, Publish decision.</li>
+        </ol>
+        <img class="shot" src="screenshots/release-readiness.png" alt="Release Readiness Dashboard" />
+      </section>
+
+      <section>
+        <h2>Бизнес-процесс по шагам</h2>
+        <table>
+          <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Фактический результат</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Run full regression.</td><td>Release candidate должен пройти полный набор проверок.</td><td>243 automated tests passed.</td><td class="ok">Проверено pytest.</td></tr>
+            <tr><td>2</td><td>Run DR smoke.</td><td>Industrial pilot требует проверенного restore path.</td><td>DR smoke checklist passed.</td><td class="ok">Проверено API checklist.</td></tr>
+            <tr><td>3</td><td>Confirm support handover.</td><td>Ops должны принять runbooks и ownership.</td><td>Support handover passed.</td><td class="ok">Проверено UI/API.</td></tr>
+            <tr><td>4</td><td>DMN evaluates release readiness.</td><td>Go/no-go должен быть правилом.</td><td>go, conditional_go, no_go rules.</td><td class="ok">Проверено DMN.</td></tr>
+            <tr><td>5</td><td>Accept known risks.</td><td>Known risk должен иметь владельца и статус.</td><td>Medium risk accepted.</td><td class="ok">Проверено API.</td></tr>
+            <tr><td>6</td><td>Collect go/no-go approvals.</td><td>Решение подписывается только допустимыми ролями.</td><td>Viewer gets 403, Product Owner approves.</td><td class="ok">Проверено RBAC API.</td></tr>
+            <tr><td>7</td><td>CMMN release risk case.</td><td>Risk acceptance и sign-off должны быть управляемым кейсом.</td><td>Все release risk tasks есть.</td><td class="ok">Проверено CMMN.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead><tr><th>Тип</th><th>Проверка</th><th>Результат</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td><code>python -m pytest</code></td><td class="ok">243 passed</td></tr>
+            <tr><td>Frontend</td><td><code>npm.cmd run build</code> в <code>apps/frontend</code></td><td class="ok">Сборка успешна</td></tr>
+            <tr><td>UI screenshot</td><td>Playwright full-page screenshot</td><td class="ok">Скриншот сохранен</td></tr>
+            <tr><td>Process</td><td>BPMN go/no-go, DMN readiness, CMMN risk case</td><td class="ok">Усиленные проверки пройдены</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

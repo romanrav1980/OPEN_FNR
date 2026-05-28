@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 29 implementation is complete.
+Sprint 30 implementation is complete.
 
 ## Local Infrastructure
 
@@ -325,9 +325,20 @@ Known local URLs:
 - UI Ops Dashboard section with alerts, incidents, runbooks, trace/log search and action panel.
 - HTML test report with screenshot: `docs/test-reports/sprint-29-observability-support/index.html`.
 
+## Sprint 30 Artifacts
+
+- Release Gate API: `apps/backend/open_fnr_api/release_gate.py`.
+- Release Gate tests: `tests/backend/test_release_gate.py`.
+- Release gate process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Release go/no-go BPMN: `processes/release-gate/release_go_no_go_process.bpmn20.xml`.
+- Release readiness DMN: `processes/release-gate/release_readiness_decision.dmn.xml`.
+- Release risk CMMN: `processes/release-gate/release_risk_case.cmmn.xml`.
+- UI Release Readiness Dashboard section with checklist, risks and go/no-go actions.
+- HTML test report with screenshot: `docs/test-reports/sprint-30-industrial-release-gate/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 236 passed.
+- `python -m pytest` -> 243 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -335,4 +346,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 29 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 30: Industrial Release Gate.
+Commit Sprint 30 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 31: Procurement Optimization.

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/release-gate" name="release_readiness_decision">
+  <decision id="release_readiness_decision" name="Release readiness decision">
+    <decisionTable id="release_readiness_table" hitPolicy="FIRST">
+      <input id="input_critical_defects" label="critical_defects">
+        <inputExpression id="input_defects_expr" typeRef="number"><text>critical_defects</text></inputExpression>
+      </input>
+      <input id="input_failed_checks" label="failed_checks">
+        <inputExpression id="input_failed_expr" typeRef="number"><text>failed_checks</text></inputExpression>
+      </input>
+      <input id="input_accepted_risks" label="accepted_risks">
+        <inputExpression id="input_risks_expr" typeRef="number"><text>accepted_risks</text></inputExpression>
+      </input>
+      <output id="output_decision" label="decision" name="decision" typeRef="string" />
+      <output id="output_action" label="action" name="action" typeRef="string" />
+      <rule id="rule_no_go_defects">
+        <inputEntry id="rule_defects"><text>&gt; 0</text></inputEntry>
+        <inputEntry id="rule_defects_failed"><text>-</text></inputEntry>
+        <inputEntry id="rule_defects_risks"><text>-</text></inputEntry>
+        <outputEntry id="rule_defects_decision"><text>"no_go"</text></outputEntry>
+        <outputEntry id="rule_defects_action"><text>"fix critical defects"</text></outputEntry>
+      </rule>
+      <rule id="rule_conditional_go">
+        <inputEntry id="rule_cond_defects"><text>0</text></inputEntry>
+        <inputEntry id="rule_cond_failed"><text>0</text></inputEntry>
+        <inputEntry id="rule_cond_risks"><text>&gt; 0</text></inputEntry>
+        <outputEntry id="rule_cond_decision"><text>"conditional_go"</text></outputEntry>
+        <outputEntry id="rule_cond_action"><text>"collect risk acceptance"</text></outputEntry>
+      </rule>
+      <rule id="rule_go">
+        <inputEntry id="rule_go_defects"><text>0</text></inputEntry>
+        <inputEntry id="rule_go_failed"><text>0</text></inputEntry>
+        <inputEntry id="rule_go_risks"><text>0</text></inputEntry>
+        <outputEntry id="rule_go_decision"><text>"go"</text></outputEntry>
+        <outputEntry id="rule_go_action"><text>"publish release decision"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

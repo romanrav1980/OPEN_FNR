@@ -665,6 +665,23 @@ const opsIncidents = [
   },
 ];
 
+const releaseChecklist = [
+  { item: "Full regression", status: "passed", evidence: "236 automated tests passed", owner: "Product Owner" },
+  { item: "Performance", status: "passed", evidence: "Industrial projection within target", owner: "Architecture" },
+  { item: "Data", status: "passed", evidence: "Industrial DQ gate pass", owner: "Business Owners" },
+  { item: "DR smoke", status: "passed", evidence: "Backup/restore smoke accepted", owner: "IT Ops" },
+  { item: "Support handover", status: "passed", evidence: "Runbooks and roles assigned", owner: "IT Ops" },
+];
+
+const releaseRisks = [
+  {
+    risk: "risk-20260528-001",
+    severity: "medium",
+    status: "accepted_risk",
+    summary: "KPI drill-down navigation improvement deferred after pilot.",
+  },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -3035,6 +3052,91 @@ function App() {
             <h3>Search failed export</h3>
             <p>
               Search query returns the failed export log with service name, message and trace id.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Release Readiness Dashboard">
+        <div className="section-heading">
+          <h2>Release Readiness Dashboard</h2>
+          <p>Release candidate, readiness checklist, defects, accepted risks and go/no-go decision</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Release Candidate</span>
+            <strong>0.30.0-rc1</strong>
+            <p>Critical defects are zero. All readiness checks pass, with one accepted medium risk.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Decision</span>
+            <strong>Conditional go</strong>
+            <p>Industrial pilot can proceed after known risk acceptance and approval collection.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Checklist</th>
+                <th>Status</th>
+                <th>Evidence</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {releaseChecklist.map((row) => (
+                <tr key={row.item}>
+                  <td>{row.item}</td>
+                  <td>{row.status}</td>
+                  <td>{row.evidence}</td>
+                  <td>{row.owner}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Risk</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {releaseRisks.map((row) => (
+                <tr key={row.risk}>
+                  <td>{row.risk}</td>
+                  <td>{row.severity}</td>
+                  <td>{row.status}</td>
+                  <td>{row.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Go/No-Go</span>
+            <h3>Collect approvals</h3>
+            <p>
+              Product Owner, Architecture, Business Owners and IT Ops review readiness evidence,
+              accept known risks and sign conditional go decision.
+            </p>
+            <div className="action-row">
+              <button type="button">Accept risk</button>
+              <button type="button">Approve gate</button>
+              <button type="button">Publish decision</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">DR Smoke</span>
+            <h3>Support handover complete</h3>
+            <p>
+              Backup/restore smoke, runbooks and incident ownership are validated before industrial pilot.
             </p>
           </aside>
         </div>

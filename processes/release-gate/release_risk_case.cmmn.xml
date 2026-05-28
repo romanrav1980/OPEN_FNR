@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/release-gate">
+  <case id="release_risk_case" name="Release risk case">
+    <casePlanModel id="release_risk_plan" name="Release risk plan">
+      <humanTask id="review_release_risk" name="Review release risk" />
+      <humanTask id="accept_known_risk" name="Accept known risk" />
+      <humanTask id="confirm_support_handover_risk" name="Confirm support handover risk" />
+      <humanTask id="sign_go_no_go" name="Sign go/no-go" />
+    </casePlanModel>
+  </case>
+</definitions>

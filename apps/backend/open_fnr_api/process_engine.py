@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="release_go_no_go_process",
+        name="Release go/no-go process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-023",
+        source_path="processes/release-gate/release_go_no_go_process.bpmn20.xml",
+        owner_role="Product Owner",
+    ),
+    ProcessDefinition(
+        key="release_readiness_decision",
+        name="Release readiness decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-023",
+        source_path="processes/release-gate/release_readiness_decision.dmn.xml",
+        owner_role="Architecture",
+    ),
+    ProcessDefinition(
+        key="release_risk_case",
+        name="Release risk case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-023",
+        source_path="processes/release-gate/release_risk_case.cmmn.xml",
+        owner_role="Product Owner",
+    ),
+    ProcessDefinition(
         key="incident_management_process",
         name="Incident management process",
         artifact_type=ProcessArtifactType.BPMN,

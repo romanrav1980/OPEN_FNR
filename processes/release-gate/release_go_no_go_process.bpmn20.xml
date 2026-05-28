@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/release-gate">
+  <process id="release_go_no_go_process" name="Release go/no-go process" isExecutable="true">
+    <startEvent id="start_release_candidate_ready" name="Release candidate ready" />
+    <sequenceFlow id="flow_start_to_regression" sourceRef="start_release_candidate_ready" targetRef="run_full_regression" />
+    <serviceTask id="run_full_regression" name="Run full regression" />
+    <sequenceFlow id="flow_regression_to_dr" sourceRef="run_full_regression" targetRef="run_dr_smoke" />
+    <serviceTask id="run_dr_smoke" name="Run DR smoke" />
+    <sequenceFlow id="flow_dr_to_handover" sourceRef="run_dr_smoke" targetRef="confirm_support_handover" />
+    <userTask id="confirm_support_handover" name="Confirm support handover" />
+    <sequenceFlow id="flow_handover_to_readiness" sourceRef="confirm_support_handover" targetRef="evaluate_release_readiness" />
+    <businessRuleTask id="evaluate_release_readiness" name="Evaluate release readiness" />
+    <sequenceFlow id="flow_readiness_to_risk" sourceRef="evaluate_release_readiness" targetRef="accept_release_risks" />
+    <userTask id="accept_release_risks" name="Accept release risks" />
+    <sequenceFlow id="flow_risk_to_approval" sourceRef="accept_release_risks" targetRef="collect_go_no_go_approvals" />
+    <userTask id="collect_go_no_go_approvals" name="Collect go/no-go approvals" />
+    <sequenceFlow id="flow_approval_to_gateway" sourceRef="collect_go_no_go_approvals" targetRef="release_decision_gateway" />
+    <exclusiveGateway id="release_decision_gateway" name="Release go?" />
+    <sequenceFlow id="flow_go" sourceRef="release_decision_gateway" targetRef="publish_release_decision" />
+    <sequenceFlow id="flow_no_go" sourceRef="release_decision_gateway" targetRef="record_no_go_decision" />
+    <serviceTask id="record_no_go_decision" name="Record no-go decision" />
+    <sequenceFlow id="flow_no_go_to_end" sourceRef="record_no_go_decision" targetRef="end_release_no_go" />
+    <serviceTask id="publish_release_decision" name="Publish release decision" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_release_decision" targetRef="end_release_go" />
+    <endEvent id="end_release_go" name="Release go" />
+    <endEvent id="end_release_no_go" name="Release no-go" />
+  </process>
+</definitions>
