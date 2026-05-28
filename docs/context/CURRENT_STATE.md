@@ -418,4 +418,8 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Commit Sprint 36 checkpoint to `romanrav1980/OPEN_FNR`, then prepare final block presentation for extended coverage sprints.
+Commit final block presentation to `romanrav1980/OPEN_FNR`, then review residual documentation consistency and decide next delivery block.
+
+## Block Presentations
+
+- Extended coverage sprints 31-36: `docs/presentations/extended-coverage-sprints-31-36/index.html`.

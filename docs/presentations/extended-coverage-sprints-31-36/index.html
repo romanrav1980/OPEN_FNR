@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPEN FNR - Extended Coverage Sprints 31-36</title>
+  <style>
+    :root { --bg:#1f1f1f; --panel:#252526; --panel2:#2d2d30; --text:#f3f3f3; --muted:#b7b7b7; --red:#b91c1c; --line:#3c3c3c; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:"Segoe UI", Arial, sans-serif; line-height:1.55; }
+    header, section { max-width:1240px; margin:0 auto; padding:30px; }
+    header { min-height:52vh; display:flex; flex-direction:column; justify-content:center; border-bottom:4px solid var(--red); background:linear-gradient(120deg,#2d2d30,#1f1f1f 65%); }
+    h1 { font-size:44px; margin:0 0 14px; }
+    h2 { font-size:30px; margin:0 0 14px; }
+    h3 { margin:0 0 10px; }
+    p { color:var(--muted); margin:0 0 14px; }
+    .badge { display:inline-block; width:max-content; margin-bottom:18px; padding:5px 12px; border:1px solid var(--red); color:#fecaca; background:rgba(185,28,28,.14); border-radius:6px; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px; }
+    .card strong { display:block; color:#fff; margin-bottom:8px; }
+    table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); margin-top:14px; }
+    th,td { padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; font-size:14px; }
+    th { color:#fecaca; background:var(--panel2); }
+    img { width:100%; border:1px solid var(--line); border-radius:8px; background:#111; margin-top:12px; }
+    code { color:#fecaca; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">OPEN FNR / Sprints 31-36</span>
+    <h1>Расширенное покрытие прогнозирования и пополнения</h1>
+    <p>
+      Итоговый блок закрывает procurement optimization, shelf space, capacity/workload,
+      supply chain diagnostics, supplier collaboration, true inventory и store management.
+      Все процессы заведены через OPEN FNR Process Engine: BPMN, DMN и CMMN.
+    </p>
+  </header>
+
+  <section>
+    <h2>Что добавлено</h2>
+    <div class="grid">
+      <div class="card"><strong>Procurement Optimization</strong><p>Выбор поставщика, target share, supplier order export и supplier constraint case.</p></div>
+      <div class="card"><strong>Shelf Space</strong><p>Планограмма, display capacity, direct-to-shelf и shelf capacity exception.</p></div>
+      <div class="card"><strong>Capacity And Workload</strong><p>Перегрузка РЦ/транспорта/приемки, smoothing preview и TMS export.</p></div>
+      <div class="card"><strong>Supply Chain Diagnostics</strong><p>Root cause card, evidence trail, linked objects и exception from insight.</p></div>
+      <div class="card"><strong>Supplier Collaboration</strong><p>Forecast sharing, supplier confirmation, performance и shortage risk.</p></div>
+      <div class="card"><strong>True Inventory</strong><p>Virtual stock, confidence, store tasks, promo display confirmation и store feedback.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Архитектурная структура блока</h2>
+    <table>
+      <thead><tr><th>Слой</th><th>Реализация</th><th>Назначение</th></tr></thead>
+      <tbody>
+        <tr><td>API</td><td><code>procurement.py</code>, <code>shelf_space.py</code>, <code>capacity.py</code>, <code>diagnostics.py</code>, <code>supplier_collaboration.py</code>, <code>store_management.py</code></td><td>Контракты бизнес-функций, RBAC checks, audit payloads, integration mocks.</td></tr>
+        <tr><td>Process Engine</td><td>BPMN/DMN/CMMN under <code>processes/*</code></td><td>Исполнение и версионирование бизнес-процессов без hardcode.</td></tr>
+        <tr><td>UI</td><td><code>apps/frontend/src/main.tsx</code></td><td>Единая control tower с рабочими местами пользователей.</td></tr>
+        <tr><td>Configuration</td><td><code>CONFIGURATION_MANIFEST.md</code>, <code>config.py</code>, <code>app_config.ts</code></td><td>Централизация IP/port settings и запрет хардкода сетевых адресов.</td></tr>
+        <tr><td>Tests</td><td><code>tests/backend</code>, <code>tests/process</code>, <code>tests/quality</code></td><td>API, process artifacts, UI build, network config quality gate.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Карта бизнес-процессов</h2>
+    <table>
+      <thead><tr><th>Модуль</th><th>BPMN</th><th>DMN</th><th>CMMN</th><th>Ключевой сценарий</th></tr></thead>
+      <tbody>
+        <tr><td>Procurement</td><td>purchase_proposal_process</td><td>supplier_selection_decision, supplier_share_exception_decision</td><td>supplier_constraint_case</td><td>Выбрать поставщика и экспортировать заказ.</td></tr>
+        <tr><td>Shelf Space</td><td>shelf_space_review_process</td><td>display_capacity_decision, direct_to_shelf_decision</td><td>shelf_capacity_exception_case</td><td>Проверить capacity промо-выкладки.</td></tr>
+        <tr><td>Capacity</td><td>capacity_smoothing_process</td><td>capacity_overload_decision, order_shift_priority_decision</td><td>capacity_overload_case</td><td>Сгладить перегрузку РЦ и перенести заказы.</td></tr>
+        <tr><td>Diagnostics</td><td>diagnostic_insight_review_process</td><td>root_cause_classification_decision</td><td>diagnostic_case</td><td>Объяснить shortage и создать exception.</td></tr>
+        <tr><td>Supplier Collaboration</td><td>supplier_collaboration_process</td><td>supplier_risk_decision</td><td>supplier_shortage_case</td><td>Получить shortage response от поставщика.</td></tr>
+        <tr><td>Store Management</td><td>store_task_process</td><td>true_inventory_confidence_decision, store_task_priority_decision</td><td>inventory_mismatch_case</td><td>Проверить остаток в магазине и закрыть feedback loop.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>UI-скриншоты</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>Procurement</h3>
+        <img src="../../test-reports/sprint-31-procurement-optimization/screenshots/purchase-proposal.png" alt="Procurement screenshot">
+      </div>
+      <div class="card">
+        <h3>Shelf Space</h3>
+        <img src="../../test-reports/sprint-32-shelf-space-optimization/screenshots/shelf-space.png" alt="Shelf space screenshot">
+      </div>
+      <div class="card">
+        <h3>Capacity And Workload</h3>
+        <img src="../../test-reports/sprint-33-capacity-workload/screenshots/capacity-workbench.png" alt="Capacity screenshot">
+      </div>
+      <div class="card">
+        <h3>Supply Chain Diagnostics</h3>
+        <img src="../../test-reports/sprint-34-supply-chain-diagnostics/screenshots/supply-chain-diagnostics.png" alt="Diagnostics screenshot">
+      </div>
+      <div class="card">
+        <h3>Supplier Collaboration</h3>
+        <img src="../../test-reports/sprint-35-supplier-collaboration/screenshots/supplier-collaboration.png" alt="Supplier screenshot">
+      </div>
+      <div class="card">
+        <h3>True Inventory</h3>
+        <img src="../../test-reports/sprint-36-true-inventory-store-management/screenshots/true-inventory-store-management.png" alt="True inventory screenshot">
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Проверка готовности</h2>
+    <table>
+      <thead><tr><th>Проверка</th><th>Результат</th></tr></thead>
+      <tbody>
+        <tr><td>Всего спринтов выполнено</td><td>37 из 37</td></tr>
+        <tr><td>Автотесты</td><td><code>python -m pytest</code> -> 290 passed</td></tr>
+        <tr><td>Frontend build</td><td><code>npm.cmd run build</code> -> completed</td></tr>
+        <tr><td>Network config gate</td><td>IP/ports вынесены в общую конфигурацию, quality gate включен.</td></tr>
+        <tr><td>Документальные отчеты</td><td>HTML reports with screenshots for every sprint checkpoint.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>
