@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/publication">
+  <case id="export_failure_case" name="Export failure case">
+    <casePlanModel id="export_failure_plan" name="Export failure plan">
+      <humanTask id="review_export_error" name="Review export error" />
+      <humanTask id="retry_export" name="Retry export" />
+      <humanTask id="create_export_failure_exception" name="Create export failure exception" />
+    </casePlanModel>
+  </case>
+</definitions>

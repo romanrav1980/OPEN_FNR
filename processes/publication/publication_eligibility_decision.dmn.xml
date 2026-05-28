@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  namespace="https://open-fnr.local/publication" name="publication_eligibility_decision">
+  <decision id="publication_eligibility_decision" name="Publication eligibility decision">
+    <decisionTable id="publication_eligibility_table" hitPolicy="FIRST">
+      <input id="input_all_approved" label="all_items_approved">
+        <inputExpression id="input_all_approved_expr" typeRef="boolean"><text>all_items_approved</text></inputExpression>
+      </input>
+      <input id="input_idempotency_exists" label="idempotency_exists">
+        <inputExpression id="input_idempotency_exists_expr" typeRef="boolean"><text>idempotency_exists</text></inputExpression>
+      </input>
+      <output id="output_status" label="eligibility" name="eligibility" typeRef="string" />
+      <rule id="rule_duplicate">
+        <inputEntry id="rule_duplicate_approved"><text>true</text></inputEntry>
+        <inputEntry id="rule_duplicate_idempotency"><text>true</text></inputEntry>
+        <outputEntry id="rule_duplicate_status"><text>"duplicate"</text></outputEntry>
+      </rule>
+      <rule id="rule_rejected">
+        <inputEntry id="rule_rejected_approved"><text>false</text></inputEntry>
+        <inputEntry id="rule_rejected_idempotency"><text>-</text></inputEntry>
+        <outputEntry id="rule_rejected_status"><text>"rejected"</text></outputEntry>
+      </rule>
+      <rule id="rule_eligible">
+        <inputEntry id="rule_eligible_approved"><text>true</text></inputEntry>
+        <inputEntry id="rule_eligible_idempotency"><text>false</text></inputEntry>
+        <outputEntry id="rule_eligible_status"><text>"eligible"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

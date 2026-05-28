@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="publication_process",
+        name="Publication process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-009",
+        source_path="processes/publication/publication_process.bpmn20.xml",
+        owner_role="Integration Owner",
+    ),
+    ProcessDefinition(
+        key="publication_eligibility_decision",
+        name="Publication eligibility decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-009",
+        source_path="processes/publication/publication_eligibility_decision.dmn.xml",
+        owner_role="Integration Owner",
+    ),
+    ProcessDefinition(
+        key="export_failure_case",
+        name="Export failure case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-009",
+        source_path="processes/publication/export_failure_case.cmmn.xml",
+        owner_role="Integration Owner",
+    ),
+    ProcessDefinition(
         key="manual_adjustment_process",
         name="Manual adjustment process",
         artifact_type=ProcessArtifactType.BPMN,

@@ -320,6 +320,55 @@ const adjustmentAudit = [
   { time: "06:10", actor: "Replenishment Planner", action: "apply", oldValue: 276, newValue: 300, reason: "supply_constraint" },
 ];
 
+const publicationPackages = [
+  {
+    id: "pub-wms-orders-20260528-001",
+    target: "wms",
+    status: "prepared",
+    key: "wms:orders:20260528:001",
+    object: "final-order-20260528-s001-sku002",
+    response: "-",
+    retry: 0,
+    exception: "-",
+  },
+  {
+    id: "pub-dwh-forecast-20260528-001",
+    target: "dwh",
+    status: "accepted",
+    key: "dwh:forecast:20260528:001",
+    object: "regular-baseline-20260528-001",
+    response: "200 accepted",
+    retry: 0,
+    exception: "-",
+  },
+  {
+    id: "pub-erp-orders-20260528-001",
+    target: "erp",
+    status: "failed",
+    key: "erp:orders:20260528:001",
+    object: "final-order-20260528-s001-sku003",
+    response: "ERP_TIMEOUT",
+    retry: 1,
+    exception: "exc-export-20260528-001",
+  },
+  {
+    id: "pub-wms-orders-20260528-002",
+    target: "wms",
+    status: "rejected",
+    key: "wms:orders:20260528:002",
+    object: "final-order-20260528-s001-sku001",
+    response: "NOT_APPROVED",
+    retry: 0,
+    exception: "-",
+  },
+];
+
+const publicationAudit = [
+  { time: "05:40", target: "dwh", event: "accepted", key: "dwh:forecast:20260528:001", response: "200 accepted" },
+  { time: "06:40", target: "erp", event: "failed", key: "erp:orders:20260528:001", response: "ERP_TIMEOUT" },
+  { time: "07:05", target: "erp", event: "retry_sent", key: "erp:orders:20260528:001", response: "202 retry sent" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -1371,6 +1420,94 @@ function App() {
                     <td>{event.oldValue}</td>
                     <td>{event.newValue}</td>
                     <td>{event.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Publication console">
+        <div className="section-heading">
+          <h2>Publication Console</h2>
+          <p>Controlled export of forecasts and orders with idempotency, retry and audit</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Ready Package</span>
+            <strong>pub-wms-orders-20260528-001</strong>
+            <p>Final order export to WMS mock uses idempotency key wms:orders:20260528:001.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Failed Export</span>
+            <strong>ERP_TIMEOUT linked to exc-export-20260528-001</strong>
+            <p>Failure opens export failure case and allows controlled retry by Integration Owner.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Target</th>
+                <th>Status</th>
+                <th>Idempotency key</th>
+                <th>Object</th>
+                <th>Response</th>
+                <th>Retry</th>
+                <th>Exception</th>
+              </tr>
+            </thead>
+            <tbody>
+              {publicationPackages.map((pkg) => (
+                <tr key={pkg.id}>
+                  <td>{pkg.id}</td>
+                  <td>{pkg.target}</td>
+                  <td>{pkg.status}</td>
+                  <td>{pkg.key}</td>
+                  <td>{pkg.object}</td>
+                  <td>{pkg.response}</td>
+                  <td>{pkg.retry}</td>
+                  <td>{pkg.exception}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Retry Action</span>
+            <h3>Retry failed ERP export</h3>
+            <p>
+              Retry keeps the same idempotency key, increments retry count, and stores target
+              response for audit. Unapproved final orders are rejected before send.
+            </p>
+            <div className="action-row">
+              <button type="button">Send</button>
+              <button type="button">Retry</button>
+              <button type="button">Open exception</button>
+            </div>
+          </aside>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Target</th>
+                  <th>Event</th>
+                  <th>Key</th>
+                  <th>Response</th>
+                </tr>
+              </thead>
+              <tbody>
+                {publicationAudit.map((event) => (
+                  <tr key={`${event.time}-${event.event}`}>
+                    <td>{event.time}</td>
+                    <td>{event.target}</td>
+                    <td>{event.event}</td>
+                    <td>{event.key}</td>
+                    <td>{event.response}</td>
                   </tr>
                 ))}
               </tbody>

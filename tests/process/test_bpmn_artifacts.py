@@ -18,6 +18,7 @@ REPLENISHMENT_CALCULATION_PROCESS_PATH = Path("processes/replenishment/replenish
 ORDER_PROPOSAL_PROCESS_PATH = Path("processes/replenishment/order_proposal_generation_process.bpmn20.xml")
 EXCEPTION_ESCALATION_PROCESS_PATH = Path("processes/exceptions/exception_escalation_process.bpmn20.xml")
 MANUAL_ADJUSTMENT_PROCESS_PATH = Path("processes/adjustments/manual_adjustment_process.bpmn20.xml")
+PUBLICATION_PROCESS_PATH = Path("processes/publication/publication_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -312,3 +313,30 @@ def test_manual_adjustment_bpmn_previews_approves_and_applies_overlay() -> None:
     assert "Apply adjustment overlay" in service_task_names
     assert "Decide approval required" in business_rule_names
     assert "Approve adjustment" in user_task_names
+
+
+def test_publication_bpmn_handles_accept_reject_fail_paths() -> None:
+    tree = ElementTree.parse(PUBLICATION_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "publication_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    assert "Prepare publication package" in service_task_names
+    assert "Send export to target" in service_task_names
+    assert "Handle target response" in service_task_names
+    assert "Store accepted status" in service_task_names
+    assert "Reject publication package" in service_task_names
+    assert "Check publication eligibility" in business_rule_names
+    assert "Open export failure case" in user_task_names

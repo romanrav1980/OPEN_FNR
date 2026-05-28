@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/publication">
+  <process id="publication_process" name="Publication process" isExecutable="true">
+    <startEvent id="start_publication_requested" name="Publication requested" />
+    <sequenceFlow id="flow_start_to_prepare" sourceRef="start_publication_requested" targetRef="prepare_publication_package" />
+    <serviceTask id="prepare_publication_package" name="Prepare publication package" />
+    <sequenceFlow id="flow_prepare_to_eligibility" sourceRef="prepare_publication_package" targetRef="check_publication_eligibility" />
+    <businessRuleTask id="check_publication_eligibility" name="Check publication eligibility" />
+    <sequenceFlow id="flow_eligibility_to_gateway" sourceRef="check_publication_eligibility" targetRef="eligible_gateway" />
+    <exclusiveGateway id="eligible_gateway" name="Eligible for export?" />
+    <sequenceFlow id="flow_eligible_to_send" sourceRef="eligible_gateway" targetRef="send_export_to_target" />
+    <sequenceFlow id="flow_not_eligible_to_reject" sourceRef="eligible_gateway" targetRef="reject_publication_package" />
+    <serviceTask id="send_export_to_target" name="Send export to target" />
+    <sequenceFlow id="flow_send_to_response" sourceRef="send_export_to_target" targetRef="handle_target_response" />
+    <serviceTask id="handle_target_response" name="Handle target response" />
+    <sequenceFlow id="flow_response_to_status" sourceRef="handle_target_response" targetRef="export_status_gateway" />
+    <exclusiveGateway id="export_status_gateway" name="Export status" />
+    <sequenceFlow id="flow_accepted" sourceRef="export_status_gateway" targetRef="store_accepted_status" />
+    <sequenceFlow id="flow_failed" sourceRef="export_status_gateway" targetRef="open_export_failure_case" />
+    <serviceTask id="store_accepted_status" name="Store accepted status" />
+    <userTask id="open_export_failure_case" name="Open export failure case" />
+    <serviceTask id="reject_publication_package" name="Reject publication package" />
+    <sequenceFlow id="flow_accepted_to_end" sourceRef="store_accepted_status" targetRef="end_accepted" />
+    <sequenceFlow id="flow_failed_to_end" sourceRef="open_export_failure_case" targetRef="end_failed" />
+    <sequenceFlow id="flow_reject_to_end" sourceRef="reject_publication_package" targetRef="end_rejected" />
+    <endEvent id="end_accepted" name="Export accepted" />
+    <endEvent id="end_failed" name="Export failed" />
+    <endEvent id="end_rejected" name="Export rejected" />
+  </process>
+</definitions>

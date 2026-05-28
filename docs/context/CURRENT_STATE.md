@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 15 implementation is complete.
+Sprint 16 implementation is complete.
 
 ## Local Infrastructure
 
@@ -173,9 +173,19 @@ Known local URLs:
 - UI Manual Adjustments section with reason, validity, preview impact, apply/cancel actions and audit timeline.
 - HTML test report with screenshot: `docs/test-reports/sprint-15-manual-adjustments/index.html`.
 
+## Sprint 16 Artifacts
+
+- Publication API: `apps/backend/open_fnr_api/publication.py`.
+- Publication tests: `tests/backend/test_publication.py`.
+- Publication BPMN: `processes/publication/publication_process.bpmn20.xml`.
+- Publication eligibility DMN: `processes/publication/publication_eligibility_decision.dmn.xml`.
+- Export failure CMMN: `processes/publication/export_failure_case.cmmn.xml`.
+- UI Publication Console section with package list, statuses, idempotency keys, retry action, error details and linked exceptions.
+- HTML test report with screenshot: `docs/test-reports/sprint-16-publication-export-v1/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 117 passed.
+- `python -m pytest` -> 126 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -183,4 +193,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 15 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 16: Publication And Export V1.
+Commit Sprint 16 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 17: Accuracy And KPI Dashboards.
