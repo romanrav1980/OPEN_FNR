@@ -4,7 +4,7 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 3 implementation is complete.
+Sprint 4 implementation is complete.
 
 ## Local Infrastructure
 
@@ -57,9 +57,18 @@ Known local URLs:
 - UI Feature Mart Status section.
 - HTML test report with screenshot: `docs/test-reports/sprint-3-feature-mart/index.html`.
 
+## Sprint 4 Artifacts
+
+- Forecast API and metrics: `apps/backend/open_fnr_api/forecast.py`.
+- Forecast tests: `tests/backend/test_forecast.py`.
+- Regular forecast process artifacts: `processes/forecast`.
+- Forecast version metadata SQL table in PostgreSQL init script.
+- UI Regular Forecast Baseline section.
+- HTML test report with screenshot: `docs/test-reports/sprint-4-regular-baseline/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 30 passed.
+- `python -m pytest` -> 38 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -67,4 +76,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 3 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 4.
+Commit Sprint 4 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 5.

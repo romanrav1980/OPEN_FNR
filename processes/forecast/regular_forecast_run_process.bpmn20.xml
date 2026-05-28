@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://open-fnr.local/processes/forecast">
+  <process id="regular_forecast_run_process" name="Regular Forecast Run Process" isExecutable="true">
+    <startEvent id="start_regular_forecast" name="Feature version published" />
+    <sequenceFlow id="flow_start_to_score" sourceRef="start_regular_forecast" targetRef="score_regular_baseline" />
+    <serviceTask id="score_regular_baseline"
+                 name="Score regular baseline"
+                 flowable:delegateExpression="${regularBaselineScoringDelegate}" />
+    <sequenceFlow id="flow_score_to_validate" sourceRef="score_regular_baseline" targetRef="validate_forecast_metrics" />
+    <serviceTask id="validate_forecast_metrics"
+                 name="Validate WAPE and Bias"
+                 flowable:delegateExpression="${forecastMetricValidationDelegate}" />
+    <sequenceFlow id="flow_validate_to_gateway" sourceRef="validate_forecast_metrics" targetRef="forecast_publish_gateway" />
+    <exclusiveGateway id="forecast_publish_gateway" name="Eligible to publish?" />
+    <sequenceFlow id="flow_gateway_to_publish" sourceRef="forecast_publish_gateway" targetRef="publish_forecast_version">
+      <conditionExpression xsi:type="tFormalExpression">${publishEligible == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_gateway_to_review" sourceRef="forecast_publish_gateway" targetRef="review_forecast_failure">
+      <conditionExpression xsi:type="tFormalExpression">${publishEligible == false}</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="publish_forecast_version"
+                 name="Publish forecast version"
+                 flowable:delegateExpression="${forecastPublisherDelegate}" />
+    <sequenceFlow id="flow_publish_to_end" sourceRef="publish_forecast_version" targetRef="end_forecast_published" />
+    <userTask id="review_forecast_failure"
+              name="Review forecast run failure"
+              flowable:candidateGroups="data-science,forecast-planner" />
+    <sequenceFlow id="flow_review_to_end" sourceRef="review_forecast_failure" targetRef="end_forecast_failed" />
+    <endEvent id="end_forecast_published" name="Forecast published" />
+    <endEvent id="end_forecast_failed" name="Forecast failed" />
+  </process>
+</definitions>

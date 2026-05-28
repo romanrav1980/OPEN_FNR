@@ -78,6 +78,11 @@ const featureMartStatuses: FeatureMartStatus[] = [
   { version: "fm-20260528-003", status: "failed", activePairs: "0.31M", features: 39, quality: "partition error" },
 ];
 
+const forecastRows = [
+  { date: "2026-05-29", store: "S001", sku: "SKU001", regular: "12.4", total: "12.4", flag: "ok" },
+  { date: "2026-05-29", store: "S001", sku: "SKU002", regular: "4.8", total: "4.8", flag: "low_history" },
+];
+
 function App() {
   return (
     <main className="app-shell">
@@ -238,6 +243,51 @@ function App() {
                   <td>{item.activePairs}</td>
                   <td>{item.features}</td>
                   <td>{item.quality}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Forecast baseline">
+        <div className="section-heading">
+          <h2>Regular Forecast Baseline</h2>
+          <p>Latest published seasonal naive forecast</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Version</span>
+            <strong>regular-baseline-20260528-001</strong>
+            <p>Model seasonal-naive-v1, feature version fm-20260528-001, horizon 30 days.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Quality</span>
+            <strong>WAPE 18.4% / Bias -1.2%</strong>
+            <p>Baseline is published and available for read-only review before ML model replacement.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Store</th>
+                <th>SKU</th>
+                <th>Regular</th>
+                <th>Total</th>
+                <th>Flag</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forecastRows.map((row) => (
+                <tr key={`${row.date}-${row.store}-${row.sku}`}>
+                  <td>{row.date}</td>
+                  <td>{row.store}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.regular}</td>
+                  <td>{row.total}</td>
+                  <td>{row.flag}</td>
                 </tr>
               ))}
             </tbody>

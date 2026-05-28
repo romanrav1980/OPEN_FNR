@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="https://open-fnr.local/cases/forecast">
+  <case id="forecast_run_failure_case" name="Forecast Run Failure Case">
+    <casePlanModel id="forecast_run_failure_case_plan" name="Forecast Run Failure">
+      <planItem id="plan_triage_forecast_failure" definitionRef="triage_forecast_failure" />
+      <planItem id="plan_approve_baseline_publication" definitionRef="approve_baseline_publication" />
+      <humanTask id="triage_forecast_failure"
+                 name="Triage forecast failure"
+                 flowable:candidateGroups="data-science" />
+      <humanTask id="approve_baseline_publication"
+                 name="Approve baseline publication"
+                 flowable:candidateGroups="forecast-planner" />
+    </casePlanModel>
+  </case>
+</definitions>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="open_fnr_forecast_publish_dmn"
+             name="OPEN FNR Forecast Publish Eligibility"
+             namespace="https://open-fnr.local/decisions/forecast">
+  <decision id="forecast_publish_eligibility_decision" name="Forecast Publish Eligibility Decision">
+    <decisionTable id="forecast_publish_eligibility_table" hitPolicy="FIRST">
+      <input id="input_wape" label="wape">
+        <inputExpression id="input_wape_expression" typeRef="number"><text>wape</text></inputExpression>
+      </input>
+      <input id="input_abs_bias" label="abs_bias">
+        <inputExpression id="input_abs_bias_expression" typeRef="number"><text>abs_bias</text></inputExpression>
+      </input>
+      <input id="input_blocking_dq" label="blocking_dq">
+        <inputExpression id="input_blocking_dq_expression" typeRef="boolean"><text>blocking_dq</text></inputExpression>
+      </input>
+      <output id="output_publish_eligible" name="publish_eligible" typeRef="boolean" />
+      <rule id="rule_blocked_by_dq">
+        <inputEntry id="rule_dq_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_dq_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_dq_flag"><text>true</text></inputEntry>
+        <outputEntry id="rule_dq_output"><text>false</text></outputEntry>
+      </rule>
+      <rule id="rule_publish_ok">
+        <inputEntry id="rule_ok_wape"><text>&lt;= 0.25</text></inputEntry>
+        <inputEntry id="rule_ok_bias"><text>&lt;= 0.05</text></inputEntry>
+        <inputEntry id="rule_ok_dq"><text>false</text></inputEntry>
+        <outputEntry id="rule_ok_output"><text>true</text></outputEntry>
+      </rule>
+      <rule id="rule_default_review">
+        <inputEntry id="rule_default_wape"><text>-</text></inputEntry>
+        <inputEntry id="rule_default_bias"><text>-</text></inputEntry>
+        <inputEntry id="rule_default_dq"><text>-</text></inputEntry>
+        <outputEntry id="rule_default_output"><text>false</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

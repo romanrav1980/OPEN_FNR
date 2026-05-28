@@ -82,3 +82,22 @@ CREATE TABLE IF NOT EXISTS open_fnr.feature_mart_versions
 
 CREATE INDEX IF NOT EXISTS ix_feature_mart_versions_business_date
     ON open_fnr.feature_mart_versions (business_date, status);
+
+CREATE TABLE IF NOT EXISTS open_fnr.forecast_versions
+(
+    forecast_version text PRIMARY KEY,
+    run_date date NOT NULL,
+    horizon_days integer NOT NULL CHECK (horizon_days > 0),
+    status text NOT NULL,
+    model_version text NOT NULL,
+    data_version text NOT NULL,
+    feature_version text NOT NULL,
+    rows bigint NOT NULL CHECK (rows >= 0),
+    wape numeric(12, 6) NOT NULL CHECK (wape >= 0),
+    bias numeric(12, 6) NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    published_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS ix_forecast_versions_run_date
+    ON open_fnr.forecast_versions (run_date, status);

@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPEN FNR Sprint 4 Test Report</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --red-light: #b83a4b;
+        --text: #d4d4d4;
+        --muted: #9da3ae;
+        --border: #3a3a3a;
+        --ok: #8fd19e;
+        --warn: #ffcf70;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      h1, h2, p { margin-top: 0; }
+      h1 { font-size: 34px; line-height: 1.15; }
+      h2 { margin-top: 34px; }
+      .eyebrow {
+        color: var(--red-light);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+        margin: 14px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      code { color: #f6d6dc; }
+      .ok { color: var(--ok); font-weight: 700; }
+      .warn { color: var(--warn); font-weight: 700; }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .caption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OPEN FNR / Sprint 4 / Regular Forecast Baseline</p>
+        <h1>Отчёт по UI-тестированию и тестированию бизнес-процессов</h1>
+        <p>
+          Отчёт фиксирует тестовый цикл Sprint 4: первый регулярный baseline
+          forecast, WAPE/Bias, forecast version API и процесс публикации прогноза.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем baseline forecast, потому что это первая версия прогноза,
+          которую можно показать бизнесу и дальше сравнивать с ML-моделью.
+          Метод проверки объединяет формулы метрик, API latest forecast,
+          процессные артефакты и UI screenshot. Такой способ нужен, чтобы
+          убедиться: прогноз воспроизводим, метрики считаются корректно, а
+          публикация управляется правилами, а не ручным обходом.
+        </p>
+      </section>
+
+      <section>
+        <h2>Автоматические проверки</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Проверка</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>python -m pytest</code></td>
+              <td>Запускаем backend, ML metric, data, process и encoding тесты.</td>
+              <td>Проверить WAPE/Bias, forecast API и BPMN/DMN/CMMN.</td>
+              <td>Все тесты проходят.</td>
+              <td class="ok">38 passed</td>
+            </tr>
+            <tr>
+              <td><code>npm.cmd run build</code></td>
+              <td>Собираем React/Vite UI.</td>
+              <td>Проверить read-only Forecast Baseline экран.</td>
+              <td>Сборка завершается без ошибок.</td>
+              <td class="ok">vite build completed</td>
+            </tr>
+            <tr>
+              <td>Playwright screenshot</td>
+              <td>Открываем UI и снимаем full-page screenshot.</td>
+              <td>Зафиксировать визуальный результат Sprint 4.</td>
+              <td>Скриншот содержит Regular Forecast Baseline.</td>
+              <td class="ok">Скриншот сохранён</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Почему именно так</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Dev Control Tower.</td>
+              <td>Проверить, что прогноз встроен в общий operational UI.</td>
+              <td>Бизнесу нужен путь от данных и DQ к прогнозу на одном экране.</td>
+              <td>Страница отображается без ошибок.</td>
+              <td class="ok">Отображается.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем карточку forecast version.</td>
+              <td>Убедиться, что пользователь видит модель, data version, feature version и горизонт.</td>
+              <td>Прогноз должен быть воспроизводим и трассируем.</td>
+              <td>Видна версия regular-baseline-20260528-001.</td>
+              <td class="ok">Видна.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем WAPE/Bias.</td>
+              <td>Показать качество baseline до ML-улучшений.</td>
+              <td>WAPE зафиксирована как основная метрика приёмки.</td>
+              <td>Видны WAPE 18.4% и Bias -1.2%.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем forecast table.</td>
+              <td>Убедиться, что строки прогноза доступны для read-only review.</td>
+              <td>Это основа будущего Forecast Workbench.</td>
+              <td>Видны date, store, SKU, regular, total, quality flag.</td>
+              <td class="ok">Видны.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>regular_forecast_run_process</code></td>
+              <td>1</td>
+              <td>Стартуем процесс после публикации feature version.</td>
+              <td>Forecast должен использовать утверждённый feature mart.</td>
+              <td>BPMN содержит start event Feature version published.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>regular_forecast_run_process</code></td>
+              <td>2</td>
+              <td>Считаем baseline forecast.</td>
+              <td>Получить первый регулярный прогноз без промо.</td>
+              <td>BPMN содержит Score regular baseline.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>regular_forecast_run_process</code></td>
+              <td>3</td>
+              <td>Валидируем WAPE и Bias.</td>
+              <td>Не публиковать прогноз без контроля качества.</td>
+              <td>BPMN содержит Validate WAPE and Bias.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>forecast_publish_eligibility_decision</code></td>
+              <td>1</td>
+              <td>Проверяем DMN eligibility.</td>
+              <td>Публикация должна зависеть от WAPE, Bias и blocking DQ.</td>
+              <td>DMN содержит decisionTable publish_eligible.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+            <tr>
+              <td><code>forecast_run_failure_case</code></td>
+              <td>1</td>
+              <td>Проверяем CMMN case для сбоя run.</td>
+              <td>При плохих метриках нужен triage или approval baseline publication.</td>
+              <td>CMMN содержит triage и approval tasks.</td>
+              <td class="ok">Подтверждено XML-тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншоты</h2>
+        <img src="screenshots/regular-forecast-baseline.png" alt="OPEN FNR Regular Forecast Baseline screenshot" />
+        <p class="caption">
+          Скриншот: Dev Control Tower с Regular Forecast Baseline после Sprint 4.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Вывод</h2>
+        <p>
+          Sprint 4 test cycle passed. Первый baseline forecast доступен через
+          API/UI, WAPE и Bias проверяются тестами, публикация прогноза описана
+          через BPMN/DMN/CMMN.
+        </p>
+        <p class="warn">
+          Ограничение: расчёт baseline пока представлен контрактом и sample
+          результатом; физический batch scoring на Spark/Polars будет расширяться
+          в следующих спринтах.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
