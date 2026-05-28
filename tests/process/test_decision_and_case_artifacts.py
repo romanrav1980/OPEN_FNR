@@ -971,3 +971,37 @@ def test_diagnostic_case_has_evidence_root_cause_exception_and_close_tasks() -> 
     assert "Confirm root cause" in human_task_names
     assert "Create linked exception" in human_task_names
     assert "Close diagnostic case" in human_task_names
+
+
+def test_supplier_risk_decision_is_parseable_and_routes_confirmation_shortage_and_escalation() -> None:
+    tree = ElementTree.parse(Path("processes/supplier-collaboration/supplier_risk_decision.dmn.xml"))
+    decision = tree.find("dmn:decision", DMN_NS)
+
+    assert decision is not None
+    assert decision.attrib["id"] == "supplier_risk_decision"
+    outputs = {
+        output.attrib["name"]
+        for output in tree.findall(".//dmn:output", DMN_NS)
+    }
+    rule_ids = {
+        rule.attrib["id"]
+        for rule in tree.findall(".//dmn:rule", DMN_NS)
+    }
+    assert outputs == {"status", "action"}
+    assert {"rule_confirmed", "rule_risk_reported", "rule_escalated"}.issubset(rule_ids)
+
+
+def test_supplier_shortage_case_has_confirmation_mitigation_and_resolution_tasks() -> None:
+    tree = ElementTree.parse(Path("processes/supplier-collaboration/supplier_shortage_case.cmmn.xml"))
+    case = tree.find("cmmn:case", CMMN_NS)
+
+    assert case is not None
+    assert case.attrib["id"] == "supplier_shortage_case"
+    human_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//cmmn:humanTask", CMMN_NS)
+    }
+    assert "Review supplier shortage" in human_task_names
+    assert "Request supplier reconfirmation" in human_task_names
+    assert "Approve supply mitigation" in human_task_names
+    assert "Confirm supplier resolution" in human_task_names

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPEN FNR Sprint 35 - Supplier Collaboration</title>
+  <style>
+    :root { --bg:#1f1f1f; --panel:#252526; --panel2:#2d2d30; --text:#f3f3f3; --muted:#b7b7b7; --red:#b91c1c; --line:#3c3c3c; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:"Segoe UI", Arial, sans-serif; line-height:1.55; }
+    header, section { max-width:1180px; margin:0 auto; padding:28px; }
+    header { border-bottom:4px solid var(--red); background:linear-gradient(90deg,#252526,#1f1f1f); }
+    h1,h2,h3 { margin:0 0 12px; font-weight:650; }
+    p { margin:0 0 14px; color:var(--muted); }
+    .badge { display:inline-block; margin-bottom:14px; padding:4px 10px; border:1px solid var(--red); color:#fecaca; background:rgba(185,28,28,.14); border-radius:6px; font-size:13px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px; }
+    table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); margin-top:12px; }
+    th,td { padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; font-size:14px; }
+    th { color:#fecaca; background:var(--panel2); }
+    .ok { color:#86efac; font-weight:650; }
+    img { width:100%; border:1px solid var(--line); border-radius:8px; background:#111; }
+    code { color:#fecaca; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Sprint 35 / Supplier Collaboration</span>
+    <h1>OPEN FNR - отчет по взаимодействию с поставщиками</h1>
+    <p>
+      Тестируем отправку forecast/order forecast поставщику, подтверждение объема до cutoff,
+      расчет supplier risk, видимость KPI поставщика и создание supply exception при shortage response.
+    </p>
+  </header>
+
+  <section>
+    <h2>Что и зачем тестируем</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Forecast Sharing</h3>
+        <p>Пакет должен содержать supplier, SKU, DC, horizon, forecast qty, order forecast qty, cutoff и idempotency key.</p>
+      </div>
+      <div class="card">
+        <h3>Supplier Confirmation</h3>
+        <p>Подтверждение меньшего количества должно менять статус риска и запускать процесс shortage review.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>UI-тестирование по шагам</h2>
+    <table>
+      <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Открываем Supplier Collaboration.</td><td>Проверяем доступность supplier dashboard.</td><td>Видны forecast share и supplier response.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>2</td><td>Проверяем forecast package.</td><td>Поставщик должен видеть forecast и order forecast до cutoff.</td><td>SUP_FAST, SKU001, DC001, 18 400 / 12 000.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>3</td><td>Проверяем performance table.</td><td>Риск должен интерпретироваться вместе с fill rate и on-time.</td><td>Fill rate, on-time, confirmation и exceptions отображаются.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>4</td><td>Проверяем confirmation и actions.</td><td>Пользователь должен перейти от sharing к confirmation и exception review.</td><td>Кнопки Share forecast, Confirm qty, Review exception видны.</td><td class="ok">Пройдено.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Тестирование бизнес-процессов</h2>
+    <table>
+      <thead><tr><th>Процессный шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+      <tbody>
+        <tr><td>Prepare forecast share</td><td>Формируем пакет forecast/order forecast.</td><td>Поставщик должен получить единый управляемый payload.</td><td>BPMN service task присутствует.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Send forecast to supplier</td><td>Отправляем через API/CSV mock.</td><td>Интеграция должна быть идемпотентной и воспроизводимой.</td><td>API возвращает idempotency key.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Supplier confirm forecast</td><td>Поставщик подтверждает 9 000 из 12 000.</td><td>Недоподтверждение влияет на supply risk.</td><td>Статус escalated, supply_exception=true.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Evaluate supplier risk</td><td>DMN классифицирует confirmed/risk/escalated.</td><td>Правила должны версионироваться в Process Engine.</td><td>DMN содержит три правила.</td><td class="ok">Пройдено.</td></tr>
+        <tr><td>Supplier shortage case</td><td>CMMN ведет review, reconfirmation, mitigation, resolution.</td><td>Shortage требует управляемого кейса до cutoff.</td><td>CMMN human tasks присутствуют.</td><td class="ok">Пройдено.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Автоматические проверки</h2>
+    <table>
+      <thead><tr><th>Проверка</th><th>Команда</th><th>Результат</th></tr></thead>
+      <tbody>
+        <tr><td>Backend, process, data, quality tests</td><td><code>python -m pytest</code></td><td class="ok">283 passed</td></tr>
+        <tr><td>Frontend production build</td><td><code>npm.cmd run build</code></td><td class="ok">completed</td></tr>
+        <tr><td>UI screenshot</td><td><code>npx.cmd playwright screenshot</code></td><td class="ok">supplier-collaboration.png создан</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Скриншот</h2>
+    <p>Скриншот показывает Supplier Collaboration в общем UI OPEN FNR.</p>
+    <img src="screenshots/supplier-collaboration.png" alt="Supplier Collaboration screenshot">
+  </section>
+</body>
+</html>

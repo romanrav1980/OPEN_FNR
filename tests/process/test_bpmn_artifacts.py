@@ -38,6 +38,7 @@ PURCHASE_PROPOSAL_PROCESS_PATH = Path("processes/procurement/purchase_proposal_p
 SHELF_SPACE_REVIEW_PROCESS_PATH = Path("processes/shelf-space/shelf_space_review_process.bpmn20.xml")
 CAPACITY_SMOOTHING_PROCESS_PATH = Path("processes/capacity/capacity_smoothing_process.bpmn20.xml")
 DIAGNOSTIC_INSIGHT_REVIEW_PROCESS_PATH = Path("processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml")
+SUPPLIER_COLLABORATION_PROCESS_PATH = Path("processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml")
 
 
 def test_dev_healthcheck_bpmn_is_parseable() -> None:
@@ -954,3 +955,34 @@ def test_diagnostic_insight_review_bpmn_covers_evidence_classification_exception
     assert "Review root cause card" in user_task_names
     assert "Create exception from insight" in user_task_names
     assert "Action required?" in gateway_names
+
+
+def test_supplier_collaboration_bpmn_covers_forecast_share_confirmation_risk_and_exception_paths() -> None:
+    tree = ElementTree.parse(SUPPLIER_COLLABORATION_PROCESS_PATH)
+    process = tree.find("bpmn:process", BPMN_NS)
+
+    assert process is not None
+    assert process.attrib["id"] == "supplier_collaboration_process"
+    service_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:serviceTask", BPMN_NS)
+    }
+    business_rule_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:businessRuleTask", BPMN_NS)
+    }
+    user_task_names = {
+        task.attrib["name"]
+        for task in tree.findall(".//bpmn:userTask", BPMN_NS)
+    }
+    gateway_names = {
+        gateway.attrib["name"]
+        for gateway in tree.findall(".//bpmn:exclusiveGateway", BPMN_NS)
+    }
+    assert "Prepare forecast share package" in service_task_names
+    assert "Send forecast to supplier" in service_task_names
+    assert "Write supplier audit" in service_task_names
+    assert "Evaluate supplier risk" in business_rule_names
+    assert "Supplier confirm forecast" in user_task_names
+    assert "Review supply exception" in user_task_names
+    assert "Supplier risk reported?" in gateway_names

@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { localServiceUrl, serviceConfig } from "./app_config";
 import "./styles.css";
 
 type ServiceLink = {
@@ -35,12 +36,12 @@ type FeatureMartStatus = {
 };
 
 const serviceLinks: ServiceLink[] = [
-  { name: "API", url: "http://127.0.0.1:8000/docs", purpose: "OpenAPI" },
-  { name: "Airflow", url: "http://127.0.0.1:18088", purpose: "Batch orchestration" },
-  { name: "Flowable", url: "http://127.0.0.1:18080", purpose: "Process engine" },
-  { name: "ClickHouse", url: "http://127.0.0.1:18123/play", purpose: "Forecast store" },
-  { name: "OpenSearch", url: "http://127.0.0.1:15601", purpose: "Logs" },
-  { name: "Superset", url: "http://127.0.0.1:18089", purpose: "BI" },
+  { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
+  { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
+  { name: "Flowable", url: localServiceUrl(serviceConfig.flowablePort), purpose: "Process engine" },
+  { name: "ClickHouse", url: localServiceUrl(serviceConfig.clickhouseHttpPort, "/play"), purpose: "Forecast store" },
+  { name: "OpenSearch", url: localServiceUrl(serviceConfig.opensearchDashboardsPort), purpose: "Logs" },
+  { name: "Superset", url: localServiceUrl(serviceConfig.supersetPort), purpose: "BI" },
 ];
 
 const dataLoadStatuses: DataLoadStatus[] = [
@@ -779,6 +780,34 @@ const diagnosticLinkedObjects = [
   { type: "Order", object: "order-proposal-20260528-s001-sku001", state: "manual_review" },
   { type: "Promo", object: "promo-20260601-fresh-001", state: "ready_for_forecast" },
   { type: "Inbound", object: "inbound-po-001", state: "late" },
+];
+
+const supplierShareRows = [
+  {
+    package: "supplier-share-20260602-sup-fast",
+    supplier: "SUP_FAST",
+    sku: "SKU001",
+    dc: "DC001",
+    forecast: "18 400",
+    orderForecast: "12 000",
+    status: "forecast_sent",
+    cutoff: "2026-06-02 16:00",
+  },
+];
+
+const supplierPerformanceRows = [
+  { supplier: "SUP_FAST", fill: "96%", onTime: "91%", confirmation: "88%", exceptions: 1 },
+  { supplier: "SUP_CHEAP", fill: "90%", onTime: "84%", confirmation: "76%", exceptions: 3 },
+];
+
+const supplierConfirmationRows = [
+  {
+    supplier: "SUP_FAST",
+    requested: "12 000",
+    confirmed: "9 000",
+    status: "escalated",
+    comment: "Can confirm only 9000 units before cutoff",
+  },
 ];
 
 function App() {
@@ -3634,6 +3663,125 @@ function App() {
             <h3>Traceable decision</h3>
             <p>
               Audit stores actor, role, comment, evidence ids and linked forecast/order/promo/inbound objects.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Supplier Collaboration">
+        <div className="section-heading">
+          <h2>Supplier Collaboration</h2>
+          <p>Forecast sharing, supplier confirmation, performance and supply exception workflow</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>Forecast Share</span>
+            <strong>SUP_FAST forecast package sent</strong>
+            <p>30-day forecast and order forecast are exported through API/CSV mock with idempotency key.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Supplier Response</span>
+            <strong>9 000 of 12 000 confirmed</strong>
+            <p>Short confirmation escalates supply risk before cutoff and opens exception review.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Supplier</th>
+                <th>SKU</th>
+                <th>DC</th>
+                <th>Forecast</th>
+                <th>Order forecast</th>
+                <th>Status</th>
+                <th>Cutoff</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supplierShareRows.map((row) => (
+                <tr key={row.package}>
+                  <td>{row.package}</td>
+                  <td>{row.supplier}</td>
+                  <td>{row.sku}</td>
+                  <td>{row.dc}</td>
+                  <td>{row.forecast}</td>
+                  <td>{row.orderForecast}</td>
+                  <td>{row.status}</td>
+                  <td>{row.cutoff}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Fill rate</th>
+                <th>On-time</th>
+                <th>Confirmation</th>
+                <th>Open exceptions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supplierPerformanceRows.map((row) => (
+                <tr key={row.supplier}>
+                  <td>{row.supplier}</td>
+                  <td>{row.fill}</td>
+                  <td>{row.onTime}</td>
+                  <td>{row.confirmation}</td>
+                  <td>{row.exceptions}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Requested</th>
+                <th>Confirmed</th>
+                <th>Status</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supplierConfirmationRows.map((row) => (
+                <tr key={`${row.supplier}-${row.status}`}>
+                  <td>{row.supplier}</td>
+                  <td>{row.requested}</td>
+                  <td>{row.confirmed}</td>
+                  <td>{row.status}</td>
+                  <td>{row.comment}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Confirmation</span>
+            <h3>Supplier confirms before cutoff</h3>
+            <p>
+              Supplier User or Internal Supplier Coordinator enters confirmed quantity.
+              Short confirmation changes supply risk and creates an auditable exception path.
+            </p>
+            <div className="action-row">
+              <button type="button">Share forecast</button>
+              <button type="button">Confirm qty</button>
+              <button type="button">Review exception</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Integration Mock</span>
+            <h3>API/CSV package</h3>
+            <p>
+              Export package contains supplier, SKU, DC, horizon, order forecast, cutoff and idempotency key.
             </p>
           </aside>
         </div>

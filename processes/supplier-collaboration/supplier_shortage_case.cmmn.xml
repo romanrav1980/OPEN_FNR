@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+  targetNamespace="https://open-fnr.local/processes/supplier-collaboration">
+  <case id="supplier_shortage_case" name="Supplier shortage case">
+    <casePlanModel id="supplier_shortage_case_plan" name="Supplier shortage case plan">
+      <humanTask id="review_supplier_shortage" name="Review supplier shortage" />
+      <humanTask id="request_supplier_reconfirmation" name="Request supplier reconfirmation" />
+      <humanTask id="approve_supply_mitigation" name="Approve supply mitigation" />
+      <humanTask id="confirm_supplier_resolution" name="Confirm supplier resolution" />
+    </casePlanModel>
+  </case>
+</definitions>

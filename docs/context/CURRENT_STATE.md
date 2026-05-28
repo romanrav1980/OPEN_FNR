@@ -4,22 +4,24 @@ Last updated: 2026-05-28
 
 ## Active Work
 
-Sprint 34 implementation is complete.
+Sprint 35 implementation is complete.
 
 ## Local Infrastructure
 
 Docker Compose development infrastructure is defined in `infra/dev/compose.yaml`.
 
-Known local URLs:
+Known local URLs are derived from central configuration, not hardcoded in application code:
 
 | Service | URL |
 | --- | --- |
-| Airflow | `http://127.0.0.1:18088` |
-| Flowable | `http://127.0.0.1:18080` |
-| ClickHouse HTTP | `http://127.0.0.1:18123` |
-| OpenSearch | `http://127.0.0.1:19200` |
-| OpenSearch Dashboards | `http://127.0.0.1:15601` |
-| Superset | `http://127.0.0.1:18089` |
+| Airflow | `OPEN_FNR_SERVICE_HOST` + `OPEN_FNR_AIRFLOW_PORT` |
+| Flowable | `OPEN_FNR_SERVICE_HOST` + `OPEN_FNR_FLOWABLE_PORT` |
+| ClickHouse HTTP | `OPEN_FNR_SERVICE_HOST` + `OPEN_FNR_CLICKHOUSE_HTTP_PORT` |
+| OpenSearch | `OPEN_FNR_SERVICE_HOST` + `OPEN_FNR_OPENSEARCH_PORT` |
+| OpenSearch Dashboards | `OPEN_FNR_SERVICE_HOST` + `OPEN_FNR_OPENSEARCH_DASHBOARDS_PORT` |
+| Superset | `OPEN_FNR_SERVICE_HOST` + `OPEN_FNR_SUPERSET_PORT` |
+
+Network configuration rule: IP addresses, host names and port numbers are centralized in `CONFIGURATION_MANIFEST.md`, `.env.example`, `apps/frontend/.env.example`, `apps/backend/open_fnr_api/config.py` and `apps/frontend/src/app_config.ts`.
 
 ## Sprint 0 Artifacts
 
@@ -383,9 +385,20 @@ Known local URLs:
 - UI Supply Chain Diagnostics section with root cause card, evidence rows, linked objects and exception action.
 - HTML test report with screenshot: `docs/test-reports/sprint-34-supply-chain-diagnostics/index.html`.
 
+## Sprint 35 Artifacts
+
+- Supplier Collaboration API: `apps/backend/open_fnr_api/supplier_collaboration.py`.
+- Supplier Collaboration tests: `tests/backend/test_supplier_collaboration.py`.
+- Supplier collaboration process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
+- Supplier collaboration BPMN: `processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml`.
+- Supplier risk DMN: `processes/supplier-collaboration/supplier_risk_decision.dmn.xml`.
+- Supplier shortage CMMN: `processes/supplier-collaboration/supplier_shortage_case.cmmn.xml`.
+- UI Supplier Collaboration section with forecast share, supplier confirmation, performance and exception actions.
+- HTML test report with screenshot: `docs/test-reports/sprint-35-supplier-collaboration/index.html`.
+
 ## Verification
 
-- `python -m pytest` -> 274 passed.
+- `python -m pytest` -> 283 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `powershell -ExecutionPolicy Bypass -File scripts/dev/health.ps1` -> all dev services OK.
@@ -393,4 +406,4 @@ Known local URLs:
 
 ## Next Step
 
-Commit Sprint 34 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 35: Supplier Collaboration.
+Commit Sprint 35 checkpoint to `romanrav1980/OPEN_FNR`, then start Sprint 36: True Inventory And Store Management.

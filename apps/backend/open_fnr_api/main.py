@@ -26,6 +26,7 @@ from .replenishment_scale import router as replenishment_scale_router
 from .security import router as security_router
 from .shelf_space import router as shelf_space_router
 from .stage import router as stage_router
+from .supplier_collaboration import router as supplier_collaboration_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
 from .kpi import router as kpi_router
@@ -65,6 +66,7 @@ app.include_router(lifecycle_router)
 app.include_router(security_router)
 app.include_router(shelf_space_router)
 app.include_router(stage_router)
+app.include_router(supplier_collaboration_router)
 
 
 @app.get("/health")
@@ -110,6 +112,7 @@ def metadata() -> dict[str, object]:
             "security",
             "shelf-space",
             "stage-rehearsal",
+            "supplier-collaboration",
             "process-engine",
             "process-governance",
             "ui",

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/processes/supplier-collaboration">
+  <process id="supplier_collaboration_process" name="Supplier collaboration process" isExecutable="true">
+    <startEvent id="start_supplier_share" name="Supplier forecast ready" />
+    <serviceTask id="prepare_forecast_share" name="Prepare forecast share package" />
+    <serviceTask id="send_forecast_to_supplier" name="Send forecast to supplier" />
+    <userTask id="supplier_confirm_forecast" name="Supplier confirm forecast" />
+    <businessRuleTask id="evaluate_supplier_risk" name="Evaluate supplier risk" />
+    <exclusiveGateway id="supplier_risk_gateway" name="Supplier risk reported?" />
+    <userTask id="review_supply_exception" name="Review supply exception" />
+    <serviceTask id="write_supplier_audit" name="Write supplier audit" />
+    <endEvent id="end_supplier_collaboration" name="Supplier collaboration closed" />
+    <sequenceFlow id="flow_1" sourceRef="start_supplier_share" targetRef="prepare_forecast_share" />
+    <sequenceFlow id="flow_2" sourceRef="prepare_forecast_share" targetRef="send_forecast_to_supplier" />
+    <sequenceFlow id="flow_3" sourceRef="send_forecast_to_supplier" targetRef="supplier_confirm_forecast" />
+    <sequenceFlow id="flow_4" sourceRef="supplier_confirm_forecast" targetRef="evaluate_supplier_risk" />
+    <sequenceFlow id="flow_5" sourceRef="evaluate_supplier_risk" targetRef="supplier_risk_gateway" />
+    <sequenceFlow id="flow_6" sourceRef="supplier_risk_gateway" targetRef="review_supply_exception" />
+    <sequenceFlow id="flow_7" sourceRef="review_supply_exception" targetRef="write_supplier_audit" />
+    <sequenceFlow id="flow_8" sourceRef="write_supplier_audit" targetRef="end_supplier_collaboration" />
+  </process>
+</definitions>

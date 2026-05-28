@@ -86,6 +86,36 @@ class CompleteTaskResponse(BaseModel):
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
     ProcessDefinition(
+        key="supplier_collaboration_process",
+        name="Supplier collaboration process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-028",
+        source_path="processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
+        key="supplier_risk_decision",
+        name="Supplier risk decision",
+        artifact_type=ProcessArtifactType.DMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-028",
+        source_path="processes/supplier-collaboration/supplier_risk_decision.dmn.xml",
+        owner_role="Internal Supplier Coordinator",
+    ),
+    ProcessDefinition(
+        key="supplier_shortage_case",
+        name="Supplier shortage case",
+        artifact_type=ProcessArtifactType.CMMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260528-028",
+        source_path="processes/supplier-collaboration/supplier_shortage_case.cmmn.xml",
+        owner_role="Supply Chain Manager",
+    ),
+    ProcessDefinition(
         key="diagnostic_insight_review_process",
         name="Diagnostic insight review process",
         artifact_type=ProcessArtifactType.BPMN,

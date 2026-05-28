@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+  id="supplier_risk_definitions"
+  name="Supplier risk"
+  namespace="https://open-fnr.local/processes/supplier-collaboration">
+  <decision id="supplier_risk_decision" name="Supplier risk decision">
+    <decisionTable id="supplier_risk_table" hitPolicy="FIRST">
+      <input id="input_confirmed_ratio" label="Confirmed ratio">
+        <inputExpression id="input_confirmed_ratio_expr" typeRef="number">
+          <text>confirmed_ratio</text>
+        </inputExpression>
+      </input>
+      <output id="output_status" name="status" typeRef="string" />
+      <output id="output_action" name="action" typeRef="string" />
+      <rule id="rule_confirmed">
+        <inputEntry id="rule_confirmed_input"><text>&gt;= 1.0</text></inputEntry>
+        <outputEntry id="rule_confirmed_output_1"><text>"confirmed"</text></outputEntry>
+        <outputEntry id="rule_confirmed_output_2"><text>"close"</text></outputEntry>
+      </rule>
+      <rule id="rule_risk_reported">
+        <inputEntry id="rule_risk_reported_input"><text>[0.8..1.0)</text></inputEntry>
+        <outputEntry id="rule_risk_reported_output_1"><text>"risk_reported"</text></outputEntry>
+        <outputEntry id="rule_risk_reported_output_2"><text>"review_supply_exception"</text></outputEntry>
+      </rule>
+      <rule id="rule_escalated">
+        <inputEntry id="rule_escalated_input"><text>&lt; 0.8</text></inputEntry>
+        <outputEntry id="rule_escalated_output_1"><text>"escalated"</text></outputEntry>
+        <outputEntry id="rule_escalated_output_2"><text>"escalate_before_cutoff"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
