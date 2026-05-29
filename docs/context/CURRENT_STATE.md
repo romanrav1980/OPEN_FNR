@@ -867,3 +867,31 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/backend/test_ingestion.py tests/data/test_contract_validation.py tests/data/test_source_contract_freeze.py tests/data/test_clickhouse_pos_sales_schema.py tests/orchestration/test_pos_sales_ingestion.py tests/orchestration/test_dwh_sales_history_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 33 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 496 passed, 1 warning about `.pytest_cache` permissions.
+
+## RI-3 WMS Stock, In-Transit And Open Orders
+
+- RI-3 completed as ingestion foundation.
+- Completion note: `docs/context/RI3_COMPLETION.md`.
+- WMS ingestion specification added: `WMS_INVENTORY_INGESTION_SPEC.md`.
+- WMS contracts remain frozen in `SOURCE_CONTRACT_REGISTRY`:
+  - `wms_stock_snapshot_line`;
+  - `wms_open_order_line`;
+  - `wms_in_transit_line`.
+- Raw ClickHouse schemas are present:
+  - `open_fnr.raw_wms_stock_snapshots`;
+  - `open_fnr.raw_wms_open_orders`;
+  - `open_fnr.raw_wms_in_transit`.
+- WMS Airflow DAG now includes:
+  - idempotent manifest creation;
+  - schema validation;
+  - DQ step;
+  - reconciliation plan step;
+  - clean publication placeholder.
+- `build_wms_reconciliation_plan()` defines:
+  - reconciliation keys;
+  - downstream blockers;
+  - SLA label `before_replenishment_cutoff`;
+  - failure action for Supply Chain Data Owner recovery.
+- Verification:
+  - `pytest tests/orchestration/test_wms_inventory_ingestion.py tests/data/test_clickhouse_wms_schema.py tests/data/test_source_contract_freeze.py tests/backend/test_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 24 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 497 passed, 1 warning about `.pytest_cache` permissions.
