@@ -1142,3 +1142,22 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 542 passed, 1 warning about `.pytest_cache` permissions.
 - R4 UI productization status: completed foundation.
 - Remaining focused sprint count after UI-5: 13 sprints (`ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## ML-1 Training Data Mart And Backtesting
+
+- ML-1 completed as training data/backtesting foundation.
+- Completion note: `docs/context/ML1_COMPLETION.md`.
+- Specification added: `ML_TRAINING_BACKTESTING_SPEC.md`.
+- Backend added:
+  - `apps/backend/open_fnr_api/ml_training.py`;
+  - `/ml/training-data/datasets`;
+  - `/ml/training-data/datasets/{dataset_id}`;
+  - `/ml/training-data/datasets/{dataset_id}/leakage-check`;
+  - `/ml/training-data/backtests`;
+  - `/ml/training-data/backtests/{backtest_id}`.
+- Tests added:
+  - `tests/backend/test_ml_training.py`.
+- Verification:
+  - `pytest tests/backend/test_ml_training.py tests/backend/test_ml_models.py tests/backend/test_ml_governance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 18 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 546 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after ML-1: 12 sprints (`ML-2..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).

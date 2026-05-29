@@ -54,7 +54,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | Completed foundation |
 | UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | Completed foundation |
 | UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | Completed foundation |
-| ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | RI-6 |
+| ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | Completed foundation |
 | ML-2 | Forecast Training And Retraining | Regular/promo model training and scheduled retraining | ML-1 |
 | ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | ML-2 |
 | ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | ML-2, RI-6 |
@@ -554,6 +554,12 @@ Acceptance criteria:
 
 - 12-24 months of pilot history can be used for backtesting;
 - training data is versioned.
+
+Completion checkpoint:
+
+- ML-1 foundation scope is fixed in `ML_TRAINING_BACKTESTING_SPEC.md`;
+- backend exposes training dataset snapshot, input source contracts, leakage check and backtest result APIs;
+- automated tests cover source contracts, point-in-time leakage and baseline comparison.
 
 ### ML-2. Forecast Training And Retraining
 
