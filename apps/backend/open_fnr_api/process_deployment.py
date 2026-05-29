@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import base64
 from datetime import datetime, timezone
 from enum import StrEnum
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -38,6 +42,22 @@ class ProcessDeploymentPackage(BaseModel):
     deploy_channel: str
     created_at: datetime
     artifacts: tuple[ProcessArtifactManifest, ...]
+
+
+class ProcessDeploymentRequest(BaseModel):
+    execute: bool = False
+    deployment_name: str = "OPEN_FNR_PROCESS_ARTIFACTS"
+
+
+class ProcessDeploymentResult(BaseModel):
+    package_id: str
+    status: str
+    execution_mode: str
+    deployment_url: str
+    deployment_id: str | None = None
+    deployed_artifacts: int = Field(ge=0)
+    http_status: int | None = None
+    message: str
 
 
 def artifact_type_for_path(path: Path) -> ProcessArtifactType | None:
@@ -92,6 +112,89 @@ def build_process_deployment_package(root_path: str | Path | None = None) -> Pro
     )
 
 
+def build_multipart_deployment_body(
+    package: ProcessDeploymentPackage,
+    deployment_name: str,
+    boundary: str = "open-fnr-flowable-boundary",
+) -> bytes:
+    body = bytearray()
+
+    def add_field(name: str, value: str) -> None:
+        body.extend(f"--{boundary}\r\n".encode("utf-8"))
+        body.extend(f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8"))
+        body.extend(value.encode("utf-8"))
+        body.extend(b"\r\n")
+
+    def add_file(field_name: str, file_path: Path) -> None:
+        body.extend(f"--{boundary}\r\n".encode("utf-8"))
+        body.extend(
+            (
+                f'Content-Disposition: form-data; name="{field_name}"; '
+                f'filename="{file_path.name}"\r\n'
+                "Content-Type: text/xml\r\n\r\n"
+            ).encode("utf-8")
+        )
+        body.extend(file_path.read_bytes())
+        body.extend(b"\r\n")
+
+    add_field("deploymentName", deployment_name)
+    add_field("tenantId", "open-fnr")
+    for artifact in package.artifacts:
+        add_file("file", Path(artifact.path))
+    body.extend(f"--{boundary}--\r\n".encode("utf-8"))
+    return bytes(body)
+
+
+def deploy_process_package_to_flowable(
+    package: ProcessDeploymentPackage,
+    deployment_name: str,
+    opener=urlopen,
+) -> ProcessDeploymentResult:
+    boundary = "open-fnr-flowable-boundary"
+    body = build_multipart_deployment_body(package, deployment_name=deployment_name, boundary=boundary)
+    request = Request(
+        package.deployment_url,
+        data=body,
+        method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    if settings.flowable_rest_username or settings.flowable_rest_password:
+        token = f"{settings.flowable_rest_username}:{settings.flowable_rest_password}".encode("utf-8")
+        request.add_header("Authorization", f"Basic {base64.b64encode(token).decode('ascii')}")
+    try:
+        with opener(request, timeout=settings.flowable_http_timeout_seconds) as response:
+            payload = json.loads(response.read().decode("utf-8") or "{}")
+            return ProcessDeploymentResult(
+                package_id=package.package_id,
+                status="deployed",
+                execution_mode="execute",
+                deployment_url=package.deployment_url,
+                deployment_id=payload.get("id"),
+                deployed_artifacts=package.artifact_count,
+                http_status=getattr(response, "status", None),
+                message="Flowable deployment accepted the artifact package.",
+            )
+    except HTTPError as error:
+        return ProcessDeploymentResult(
+            package_id=package.package_id,
+            status="failed",
+            execution_mode="execute",
+            deployment_url=package.deployment_url,
+            deployed_artifacts=0,
+            http_status=error.code,
+            message=f"Flowable deployment rejected the package: HTTP {error.code}.",
+        )
+    except URLError as error:
+        return ProcessDeploymentResult(
+            package_id=package.package_id,
+            status="failed",
+            execution_mode="execute",
+            deployment_url=package.deployment_url,
+            deployed_artifacts=0,
+            message=f"Flowable deployment unavailable: {error.reason}.",
+        )
+
+
 @router.get("/packages/current", response_model=ProcessDeploymentPackage)
 def get_current_process_deployment_package() -> ProcessDeploymentPackage:
     return build_process_deployment_package()
@@ -100,3 +203,21 @@ def get_current_process_deployment_package() -> ProcessDeploymentPackage:
 @router.post("/packages/current/validate", response_model=ProcessDeploymentPackage)
 def validate_current_process_deployment_package() -> ProcessDeploymentPackage:
     return build_process_deployment_package()
+
+
+@router.post("/packages/current/deploy", response_model=ProcessDeploymentResult)
+def deploy_current_process_deployment_package(request: ProcessDeploymentRequest) -> ProcessDeploymentResult:
+    package = build_process_deployment_package()
+    if not request.execute:
+        return ProcessDeploymentResult(
+            package_id=package.package_id,
+            status="validated",
+            execution_mode="dry_run",
+            deployment_url=package.deployment_url,
+            deployed_artifacts=0,
+            message=(
+                f"Dry run validated {package.artifact_count} artifacts. "
+                "Set execute=true to upload BPMN/DMN/CMMN artifacts to Flowable."
+            ),
+        )
+    return deploy_process_package_to_flowable(package, deployment_name=request.deployment_name)

@@ -267,6 +267,25 @@ Status: completed for package manifest and checksum gate.
 - Process artifacts root is configured by `OPEN_FNR_PROCESS_ARTIFACTS_ROOT_PATH`.
 - Test evidence: `docs/test-reports/sprint-flowable-deployment-package/index.html`.
 
+## PROC-DEPLOY-2. Flowable REST Upload Gate
+
+Status: completed for configurable dry run and execute path.
+
+### Scope
+
+- expose deployment dry run that validates the package without mutating Flowable;
+- build multipart payload for BPMN/DMN/CMMN artifact upload;
+- execute Flowable REST upload only when `execute=true`;
+- keep Flowable URL, credentials and timeout in shared project configuration;
+- surface upload gate status in Admin workspace.
+
+### Current Implementation
+
+- API endpoint: `/process-deployment/packages/current/deploy`.
+- Default mode: `execute=false` returns `validated / dry_run`.
+- Runtime upload uses `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_FLOWABLE_PORT`, `OPEN_FNR_FLOWABLE_HTTP_TIMEOUT_SECONDS`, `OPEN_FNR_FLOWABLE_REST_USERNAME` and `OPEN_FNR_FLOWABLE_REST_PASSWORD`.
+- Test evidence: `docs/test-reports/sprint-flowable-rest-upload/index.html`.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.

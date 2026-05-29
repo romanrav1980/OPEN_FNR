@@ -56,6 +56,8 @@ class Settings(BaseModel):
     clickhouse_user: str = Field(default_factory=lambda: env_str("CLICKHOUSE_USER", "open_fnr"))
     clickhouse_password: str = Field(default_factory=lambda: env_str("CLICKHOUSE_PASSWORD", "open_fnr_dev"))
     clickhouse_database: str = Field(default_factory=lambda: env_str("CLICKHOUSE_DATABASE", "open_fnr"))
+    flowable_rest_username: str = Field(default_factory=lambda: env_str("FLOWABLE_REST_USERNAME", ""))
+    flowable_rest_password: str = Field(default_factory=lambda: env_str("FLOWABLE_REST_PASSWORD", ""))
     erp_export_url: str = Field(default_factory=lambda: env_str("ERP_EXPORT_URL", ""))
     wms_export_url: str = Field(default_factory=lambda: env_str("WMS_EXPORT_URL", ""))
     dwh_export_url: str = Field(default_factory=lambda: env_str("DWH_EXPORT_URL", ""))
@@ -68,6 +70,11 @@ class Settings(BaseModel):
     idp_provisioning_url: str = Field(default_factory=lambda: env_str("IDP_PROVISIONING_URL", ""))
     publication_http_timeout_seconds: int = Field(
         default_factory=lambda: env_int("PUBLICATION_HTTP_TIMEOUT_SECONDS", 30),
+        ge=1,
+        le=300,
+    )
+    flowable_http_timeout_seconds: int = Field(
+        default_factory=lambda: env_int("FLOWABLE_HTTP_TIMEOUT_SECONDS", 30),
         ge=1,
         le=300,
     )

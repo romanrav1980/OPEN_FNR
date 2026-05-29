@@ -139,6 +139,13 @@ type ProcessDeploymentPackageApiResponse = {
   deploy_channel: string;
 };
 
+type ProcessDeploymentResultApiResponse = {
+  status: string;
+  execution_mode: string;
+  deployed_artifacts: number;
+  message: string;
+};
+
 type PilotShadowPackApiResponse = {
   pack_id: string;
   mode: string;
@@ -1353,6 +1360,7 @@ function App() {
   const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
   const [policyCheckStatus, setPolicyCheckStatus] = React.useState("loading");
   const [processDeploymentStatus, setProcessDeploymentStatus] = React.useState("loading");
+  const [processDeploymentDryRunStatus, setProcessDeploymentDryRunStatus] = React.useState("loading");
   const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
@@ -1582,23 +1590,36 @@ function App() {
 
   React.useEffect(() => {
     const controller = new AbortController();
-    fetch(apiUrl("/process-deployment/packages/current"), { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Process deployment API returned ${response.status}`);
-        }
-        return response.json() as Promise<ProcessDeploymentPackageApiResponse>;
+    Promise.all([
+      fetch(apiUrl("/process-deployment/packages/current"), { signal: controller.signal }),
+      fetch(apiUrl("/process-deployment/packages/current/deploy"), {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ execute: false, deployment_name: "OPEN_FNR_UI_DRY_RUN" }),
       })
-      .then((payload) => {
+    ])
+      .then(([packageResponse, dryRunResponse]) => {
+        if (!packageResponse.ok || !dryRunResponse.ok) {
+          throw new Error("Process deployment API returned an error");
+        }
+        return Promise.all([
+          packageResponse.json() as Promise<ProcessDeploymentPackageApiResponse>,
+          dryRunResponse.json() as Promise<ProcessDeploymentResultApiResponse>,
+        ]);
+      })
+      .then(([payload, dryRun]) => {
         setProcessDeploymentStatus(
           `${payload.artifact_count} artifacts / ${payload.bpmn_count} BPMN / ${payload.dmn_count} DMN / ${payload.cmmn_count} CMMN`,
         );
+        setProcessDeploymentDryRunStatus(`${dryRun.status} / ${dryRun.execution_mode}`);
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
         }
         setProcessDeploymentStatus("fallback");
+        setProcessDeploymentDryRunStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3759,6 +3780,11 @@ function App() {
             <span>Process Deployment</span>
             <strong>{processDeploymentStatus}</strong>
             <p>BPMN, DMN and CMMN artifacts are packaged with SHA-256 checksums for Flowable deployment.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Flowable Upload Gate</span>
+            <strong>{processDeploymentDryRunStatus}</strong>
+            <p>Runtime upload uses configured Flowable REST endpoint, credentials and timeout; UI calls dry run by default.</p>
           </article>
         </div>
         <div className="table-shell">

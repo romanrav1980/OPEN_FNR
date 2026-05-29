@@ -1,7 +1,7 @@
 # OPEN FNR Pilot-Ready Remaining Work
 
 Date: 2026-05-29
-Status: handoff after real source landing wiring checkpoint.
+Status: handoff after Flowable REST upload gate checkpoint.
 
 ## What Is Now Closed
 
@@ -21,8 +21,9 @@ Status: handoff after real source landing wiring checkpoint.
 | Shared policy layer | closed for first RBAC/ABAC gate | `docs/test-reports/sprint-shared-policy-layer/index.html` |
 | Routed UI shell | closed for first navigation foundation | `docs/test-reports/sprint-routed-ui-shell/index.html` |
 | Flowable deployment package | closed for deployment manifest/checksum gate | `docs/test-reports/sprint-flowable-deployment-package/index.html` |
+| Flowable REST upload gate | closed for configurable dry run and execute path | `docs/test-reports/sprint-flowable-rest-upload/index.html` |
 | Pilot shadow pack | closed for first runbook/rollback package | `docs/test-reports/sprint-pilot-shadow-pack/index.html` |
-| Backend regression | green | `python -m pytest` -> 411 passed |
+| Backend regression | green | `python -m pytest` -> 414 passed |
 | Frontend build | green | `npm.cmd run build` |
 | DEV/STAGE compose config | green | `docker compose ... config --quiet` |
 
@@ -34,7 +35,7 @@ Status: handoff after real source landing wiring checkpoint.
 | OIDC/JWT middleware | Authenticate real users and service clients | First FastAPI JWT boundary implemented; next add signature/JWKS verification details | Unauthorized calls rejected, valid token maps to user/roles |
 | Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | First `policy.py` implemented for Security API; next migrate remaining domain endpoints | Security tests cover positive/negative object-level access |
 | Routed UI productization | Move from single Control Tower to operational pages | First hash-route shell implemented; next split modules into route-specific pages | E2E smoke covers forecast, replenishment, exceptions, admin |
-| Process deployment pipeline | Deploy BPMN/DMN/CMMN into Flowable, not only validate XML | Deployment package API implemented; next add actual REST upload execution | DEV Flowable receives process definitions with version evidence |
+| Process deployment pipeline | Deploy BPMN/DMN/CMMN into Flowable, not only validate XML | REST upload gate implemented; next execute against live Flowable credentials | DEV Flowable receives process definitions with version evidence |
 | Production deployment decision | Choose Kubernetes or hardened production Compose | Deployment topology doc and environment matrix | PROD-like dry run has rollback and health checks |
 | Pilot rehearsal | Run a limited real-data shadow pilot | Shadow pack implemented; next run with actual source files/API credentials | KPI baseline vs OPEN FNR report signed by business |
 
@@ -45,24 +46,24 @@ Status: handoff after real source landing wiring checkpoint.
    - run `/data/ingestion/pilot-shadow-load/plan`;
    - run clean publication and daily gate on the real business date.
 
-2. `PROC-DEPLOY-2 Flowable REST Upload`
-   - send deployment package to Flowable REST;
-   - save deployment id/version response;
-   - add retry/error handling for Flowable unavailable.
+2. `PROC-DEPLOY-3 Live Flowable Deployment Evidence`
+   - run `/process-deployment/packages/current/deploy` with `execute=true` against DEV Flowable;
+   - save deployment id/version response from the live runtime;
+   - add retry/error handling evidence for Flowable unavailable.
 
 ## Current Risk Register
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| No real source samples yet | Inbound pipeline cannot be proven end to end | Request POS/WMS/ERP/MDM/promo samples or API specs before RDI-1 |
-| OIDC details unknown | Security middleware cannot be production-final | Use standards-based JWT config and document required issuer/audience/JWKS |
-| UI is still one large file | Productization velocity and test isolation suffer | Start UI-1 with route split and API client, then move module by module |
-| Flowable not yet deployment-backed | BPMN/DMN/CMMN are tested as artifacts but not runtime-deployed | Implement deployment script and version evidence |
+| No real source samples yet | Real-data rehearsal cannot be proven end to end | Provide POS/WMS/ERP/MDM/promo files or API specs for `REAL-PILOT-1` |
+| OIDC details unknown | Security middleware cannot be production-final | Fill issuer/audience/JWKS env values and add cryptographic signature validation |
+| UI still keeps most modules in one file | Productization velocity and test isolation suffer | Continue route split module by module after pilot source wiring |
+| Live Flowable deployment not yet executed | BPMN/DMN/CMMN are package-ready but not proven in live runtime | Run `PROC-DEPLOY-3` with credentials and capture deployment id evidence |
 | Performance still synthetic/smoke | EPYC sizing not proven on real data | Run pilot-scale synthetic plus first real-data profile before controlled export |
 
 ## Saved Context For Resume
 
-- Latest pushed hardening commit at previous checkpoint: `87bdc09`.
-- Backend regression count after PILOT-1: 411 tests passed.
+- Latest pushed hardening commit before this checkpoint: `4b5a9f1`; current checkpoint is the `Add Flowable REST upload gate` commit in git history.
+- Backend regression count after PROC-DEPLOY-2: 414 tests passed.
 - Target adapter reports are under `docs/test-reports`.
 - The next autonomous implementation should start with `REAL-PILOT-1 Actual Source Connection` when real source files or API credentials are available.

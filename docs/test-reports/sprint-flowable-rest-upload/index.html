@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Flowable REST Upload Gate</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      .warn { color: #ffd166; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Flowable REST Upload Gate</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем, что OPEN FNR не только собирает BPMN/DMN/CMMN-артефакты с checksum, но и имеет управляемый
+          gateway для runtime-загрузки в Flowable. Такой тест нужен, чтобы отделить безопасный dry run от реального
+          upload и подтвердить, что URL, credentials и timeout берутся из общей конфигурации проекта.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/flowable-rest-upload-gate.png" alt="Flowable REST upload gate in Admin Console" />
+      </section>
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем <code>http://127.0.0.1:13000/#/admin</code>.</td>
+              <td>Проверить доступность Admin Console после добавления нового runtime-gate.</td>
+              <td>Страница загружается без ошибок React/TypeScript.</td>
+              <td class="ok">Скриншот создан.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем карточку <code>Process Deployment</code>.</td>
+              <td>Убедиться, что UI видит package manifest с BPMN/DMN/CMMN.</td>
+              <td>Показаны количества артефактов и типы процессов.</td>
+              <td class="ok">Карточка отображается.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем карточку <code>Flowable Upload Gate</code>.</td>
+              <td>Убедиться, что UI вызывает dry run, а не выполняет upload без явного решения.</td>
+              <td>Статус <code>validated / dry_run</code> либо fallback при недоступном backend.</td>
+              <td class="ok">Dry-run gate добавлен в UI.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процесса</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Собираем manifest текущих BPMN/DMN/CMMN.</td>
+              <td>Зафиксировать состав версии процессов перед деплоем.</td>
+              <td>Каждый файл имеет SHA-256 checksum и тип.</td>
+              <td class="ok">Покрыто backend-тестами.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Выполняем <code>POST /process-deployment/packages/current/deploy</code> с <code>execute=false</code>.</td>
+              <td>Проверить readiness gate без изменения runtime Flowable.</td>
+              <td>API возвращает <code>validated / dry_run</code>.</td>
+              <td class="ok">Проверено тестом dry-run endpoint.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Формируем multipart payload для Flowable REST.</td>
+              <td>Подтвердить техническую готовность фактической загрузки.</td>
+              <td>Payload содержит deploymentName и все process-файлы.</td>
+              <td class="ok">Проверено unit-тестом multipart body.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Мокаем успешный ответ Flowable с deployment id.</td>
+              <td>Проверить audit evidence уровня API без зависимости от внешнего runtime.</td>
+              <td>API фиксирует <code>deployment_id</code> и количество артефактов.</td>
+              <td class="ok">Проверено unit-тестом execute path.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>Backend process-deployment tests</td><td class="ok">17 targeted tests passed with config/quality gates</td></tr>
+            <tr><td>Full backend regression</td><td class="ok">414 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+            <tr><td>Docker Compose config</td><td class="ok">DEV/TEST/STAGE valid</td></tr>
+            <tr><td>Production caveat</td><td class="warn">Actual upload still requires live Flowable credentials and explicit <code>execute=true</code>.</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
