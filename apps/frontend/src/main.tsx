@@ -146,6 +146,14 @@ type ProcessDeploymentResultApiResponse = {
   message: string;
 };
 
+type ProcessDeployabilityApiResponse = {
+  bpmn_total: number;
+  bpmn_runtime_deployable: number;
+  bpmn_requires_model_fix: number;
+  dmn_governance_artifacts: number;
+  cmmn_governance_artifacts: number;
+};
+
 type PilotShadowPackApiResponse = {
   pack_id: string;
   mode: string;
@@ -1361,6 +1369,7 @@ function App() {
   const [policyCheckStatus, setPolicyCheckStatus] = React.useState("loading");
   const [processDeploymentStatus, setProcessDeploymentStatus] = React.useState("loading");
   const [processDeploymentDryRunStatus, setProcessDeploymentDryRunStatus] = React.useState("loading");
+  const [processDeployabilityStatus, setProcessDeployabilityStatus] = React.useState("loading");
   const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
@@ -1592,6 +1601,7 @@ function App() {
     const controller = new AbortController();
     Promise.all([
       fetch(apiUrl("/process-deployment/packages/current"), { signal: controller.signal }),
+      fetch(apiUrl("/process-deployment/packages/current/deployability"), { signal: controller.signal }),
       fetch(apiUrl("/process-deployment/packages/current/deploy"), {
         method: "POST",
         signal: controller.signal,
@@ -1599,18 +1609,22 @@ function App() {
         body: JSON.stringify({ execute: false, deployment_name: "OPEN_FNR_UI_DRY_RUN" }),
       })
     ])
-      .then(([packageResponse, dryRunResponse]) => {
-        if (!packageResponse.ok || !dryRunResponse.ok) {
+      .then(([packageResponse, deployabilityResponse, dryRunResponse]) => {
+        if (!packageResponse.ok || !deployabilityResponse.ok || !dryRunResponse.ok) {
           throw new Error("Process deployment API returned an error");
         }
         return Promise.all([
           packageResponse.json() as Promise<ProcessDeploymentPackageApiResponse>,
+          deployabilityResponse.json() as Promise<ProcessDeployabilityApiResponse>,
           dryRunResponse.json() as Promise<ProcessDeploymentResultApiResponse>,
         ]);
       })
-      .then(([payload, dryRun]) => {
+      .then(([payload, deployability, dryRun]) => {
         setProcessDeploymentStatus(
           `${payload.artifact_count} artifacts / ${payload.bpmn_count} BPMN / ${payload.dmn_count} DMN / ${payload.cmmn_count} CMMN`,
+        );
+        setProcessDeployabilityStatus(
+          `${deployability.bpmn_runtime_deployable} / ${deployability.bpmn_total} BPMN deployable, ${deployability.bpmn_requires_model_fix} fix`,
         );
         setProcessDeploymentDryRunStatus(`${dryRun.status} / ${dryRun.execution_mode}`);
       })
@@ -1619,6 +1633,7 @@ function App() {
           return;
         }
         setProcessDeploymentStatus("fallback");
+        setProcessDeployabilityStatus("fallback");
         setProcessDeploymentDryRunStatus("fallback");
       });
     return () => controller.abort();
@@ -3785,6 +3800,11 @@ function App() {
             <span>Flowable Upload Gate</span>
             <strong>{processDeploymentDryRunStatus}</strong>
             <p>Runtime upload uses configured Flowable REST endpoint, credentials and timeout; UI calls dry run by default.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Deployability Gate</span>
+            <strong>{processDeployabilityStatus}</strong>
+            <p>Only runtime-safe BPMN is uploaded; DMN and CMMN remain governed artifacts until model/runtime support is verified.</p>
           </article>
         </div>
         <div className="table-shell">

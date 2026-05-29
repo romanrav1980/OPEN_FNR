@@ -286,6 +286,26 @@ Status: completed for configurable dry run and execute path.
 - Runtime upload uses `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_FLOWABLE_PORT`, `OPEN_FNR_FLOWABLE_HTTP_TIMEOUT_SECONDS`, `OPEN_FNR_FLOWABLE_REST_USERNAME` and `OPEN_FNR_FLOWABLE_REST_PASSWORD`.
 - Test evidence: `docs/test-reports/sprint-flowable-rest-upload/index.html`.
 
+## PROC-DEPLOY-3. Live Flowable Runtime Evidence
+
+Status: completed for runtime-safe BPMN deployment evidence.
+
+### Scope
+
+- execute deployment against local DEV Flowable runtime;
+- separate deployable runtime BPMN from governance-only DMN/CMMN artifacts;
+- detect BPMN model defects before runtime upload;
+- preserve evidence with deployment id and blocker details.
+
+### Current Implementation
+
+- API endpoint: `/process-deployment/packages/current/deployability`.
+- Live deployment evidence: Flowable returned deployment id `5cf69d38-5b3b-11f1-b6e2-aeebf3826aa0`.
+- Runtime-safe subset: 37 of 38 BPMN files deployed.
+- Model fix required: `processes/data-ingestion/source_batch_publication_process.bpmn20.xml` gateway `source_batch_accepted_gateway` has no outgoing sequence flow.
+- DMN/CMMN remain governed package artifacts until runtime support is explicitly enabled and tested.
+- Test evidence: `docs/test-reports/sprint-flowable-live-deployment/index.html`.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.
