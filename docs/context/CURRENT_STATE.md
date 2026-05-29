@@ -744,7 +744,8 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 
 ## IH-3 Production Audit Event Storage
 
-- IH-3 started.
+- IH-3 completed.
+- Completion note: `docs/context/IH3_COMPLETION.md`.
 - Audit retention configuration added:
   - `OPEN_FNR_AUDIT_RETENTION_DAYS`;
   - default is 1095 days.
