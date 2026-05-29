@@ -692,7 +692,8 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 
 ## IH-2 PostgreSQL Persistence Foundation
 
-- IH-2 started.
+- IH-2 completed as persistence foundation.
+- Completion note: `docs/context/IH2_COMPLETION.md`.
 - PostgreSQL schema foundation added in `infra/dev/postgres/init/001_open_fnr.sql`:
   - `open_fnr.process_tasks`;
   - `open_fnr.process_task_events`;
@@ -739,4 +740,4 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 40 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_store_management.py tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 49 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_adjustments.py tests/backend/test_exceptions.py tests/backend/test_store_management.py tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 61 passed, 1 warning about `.pytest_cache` permissions.
-  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 480 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 482 passed, 1 warning about `.pytest_cache` permissions.
