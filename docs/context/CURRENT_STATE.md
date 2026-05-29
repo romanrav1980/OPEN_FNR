@@ -710,11 +710,16 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Publication/export boundary:
   - publication send/retry still returns the same API payload;
   - send/retry now writes `OperationalDecisionRecord` through `operational_decision_repository` with idempotency key.
+- Replenishment decision boundary:
+  - order proposal adjustment still returns the same API payload;
+  - adjustment now writes `OperationalDecisionRecord` through `operational_decision_repository` with idempotency key.
 - Tests added/updated:
   - `tests/backend/test_repositories.py`;
   - `tests/backend/test_process_engine.py`;
   - `tests/backend/test_publication.py`;
+  - `tests/backend/test_replenishment.py`;
   - `tests/data/test_postgres_operational_schema.py`.
 - Verification:
   - `pytest tests/backend/test_repositories.py tests/data/test_postgres_operational_schema.py tests/architecture/test_persistence_inventory.py` -> 10 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_publication.py tests/backend/test_process_engine.py tests/backend/test_repositories.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.
+  - `pytest tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 40 passed, 1 warning about `.pytest_cache` permissions.

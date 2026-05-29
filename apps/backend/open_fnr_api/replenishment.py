@@ -4,6 +4,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, Field, model_validator
 
+from .repositories import OperationalDecisionRecord, operational_decision_repository
+
 
 router = APIRouter(prefix="/replenishment", tags=["replenishment"])
 
@@ -631,6 +633,28 @@ def adjust_order_proposal(proposal_id: str, payload: OrderAdjustmentRequest) -> 
         reason=payload.reason,
         comment=payload.comment,
         created_at=datetime(2026, 5, 28, 6, 0, tzinfo=timezone.utc),
+    )
+    operational_decision_repository.upsert_decision(
+        OperationalDecisionRecord(
+            decision_id=f"replenishment-adjust-{proposal_id}",
+            decision_type="order_proposal_adjustment",
+            object_type="order_proposal",
+            object_id=proposal_id,
+            status=adjusted_order.status.value,
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            idempotency_key=f"{proposal_id}:adjust:{payload.actor}:{payload.final_order_qty}",
+            correlation_id=proposal_id,
+            payload={
+                "old_order_qty": final_order.final_order_qty,
+                "new_order_qty": payload.final_order_qty,
+                "reason": payload.reason,
+                "comment": payload.comment,
+                "projected_stock_after_order_qty": adjusted_order.projected_stock_after_order_qty,
+            },
+            created_at=audit_event.created_at,
+            updated_at=audit_event.created_at,
+        )
     )
     return {"final_order": adjusted_order.model_dump(mode="json"), "audit_event": audit_event.model_dump(mode="json")}
 

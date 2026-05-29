@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
+from open_fnr_api import replenishment
 from open_fnr_api.main import app
 from open_fnr_api.replenishment import (
     StockOutRisk,
@@ -19,6 +20,17 @@ from open_fnr_api.replenishment import FreshBatch, SpoilageRisk
 
 
 client = TestClient(app)
+
+
+class CapturingOperationalDecisionRepository:
+    mode = "in_memory"
+
+    def __init__(self) -> None:
+        self.decisions = []
+
+    def upsert_decision(self, decision):
+        self.decisions.append(decision)
+        return decision
 
 
 def test_inventory_projection_endpoint_contains_demand_and_stock_layers() -> None:
@@ -141,6 +153,28 @@ def test_adjust_order_proposal_returns_final_order_and_audit_event() -> None:
     assert payload["final_order"]["projected_stock_after_order_qty"] == 267
     assert payload["audit_event"]["old_order_qty"] == 276
     assert payload["audit_event"]["new_order_qty"] == 300
+
+
+def test_adjust_order_proposal_writes_operational_decision_boundary(monkeypatch) -> None:
+    repository = CapturingOperationalDecisionRepository()
+    monkeypatch.setattr(replenishment, "operational_decision_repository", repository)
+
+    response = client.post(
+        "/replenishment/order-proposals/order-proposal-20260528-s001-sku001/adjust",
+        json={
+            "final_order_qty": 300,
+            "actor": "replenishment.planner@example.org",
+            "actor_role": "Replenishment Planner",
+            "reason": "cover promo stock-out",
+            "comment": "Repository boundary check.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert repository.decisions[0].decision_type == "order_proposal_adjustment"
+    assert repository.decisions[0].object_id == "order-proposal-20260528-s001-sku001"
+    assert repository.decisions[0].status == "adjusted"
+    assert repository.decisions[0].payload["new_order_qty"] == 300
 
 
 def test_viewer_cannot_adjust_order_proposal() -> None:
