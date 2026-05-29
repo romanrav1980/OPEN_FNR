@@ -267,6 +267,26 @@ Status: completed for package manifest and checksum gate.
 - Process artifacts root is configured by `OPEN_FNR_PROCESS_ARTIFACTS_ROOT_PATH`.
 - Test evidence: `docs/test-reports/sprint-flowable-deployment-package/index.html`.
 
+## PILOT-1. Shadow Pilot Pack
+
+Status: completed for first runbook and rollback package.
+
+### Scope
+
+- package pilot scope;
+- expose readiness checklist;
+- define role-based runbook;
+- define rollback triggers and RTO owners;
+- surface shadow readiness in Business Pilot UI.
+
+### Current Implementation
+
+- API endpoint: `/pilot/shadow-pack`.
+- Scope: north region, S001-S003, fresh/grocery.
+- Runbook covers source discovery, DQ, forecast, replenishment and business go/no-go.
+- Rollback covers critical data gap, WAPE threshold breach and export incident.
+- Test evidence: `docs/test-reports/sprint-pilot-shadow-pack/index.html`.
+
 ## Pilot Readiness Gate
 
 The system can enter pilot only when:

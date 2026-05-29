@@ -21,7 +21,8 @@ Status: handoff after real source landing wiring checkpoint.
 | Shared policy layer | closed for first RBAC/ABAC gate | `docs/test-reports/sprint-shared-policy-layer/index.html` |
 | Routed UI shell | closed for first navigation foundation | `docs/test-reports/sprint-routed-ui-shell/index.html` |
 | Flowable deployment package | closed for deployment manifest/checksum gate | `docs/test-reports/sprint-flowable-deployment-package/index.html` |
-| Backend regression | green | `python -m pytest` -> 409 passed |
+| Pilot shadow pack | closed for first runbook/rollback package | `docs/test-reports/sprint-pilot-shadow-pack/index.html` |
+| Backend regression | green | `python -m pytest` -> 411 passed |
 | Frontend build | green | `npm.cmd run build` |
 | DEV/STAGE compose config | green | `docker compose ... config --quiet` |
 
@@ -35,13 +36,14 @@ Status: handoff after real source landing wiring checkpoint.
 | Routed UI productization | Move from single Control Tower to operational pages | First hash-route shell implemented; next split modules into route-specific pages | E2E smoke covers forecast, replenishment, exceptions, admin |
 | Process deployment pipeline | Deploy BPMN/DMN/CMMN into Flowable, not only validate XML | Deployment package API implemented; next add actual REST upload execution | DEV Flowable receives process definitions with version evidence |
 | Production deployment decision | Choose Kubernetes or hardened production Compose | Deployment topology doc and environment matrix | PROD-like dry run has rollback and health checks |
-| Pilot rehearsal | Run a limited real-data shadow pilot | Select stores/SKU, load history, run forecasts/orders without operational export | KPI baseline vs OPEN FNR report signed by business |
+| Pilot rehearsal | Run a limited real-data shadow pilot | Shadow pack implemented; next run with actual source files/API credentials | KPI baseline vs OPEN FNR report signed by business |
 
 ## Tactical Next Sprint Order
 
-1. `PILOT-1 Shadow Pilot Pack`
-   - generate pilot scope, source checklist, runbook and rollback plan;
-   - run full daily cycle on limited store/SKU scope.
+1. `REAL-PILOT-1 Actual Source Connection`
+   - place or connect real POS/WMS/ERP/MDM/PROMO pilot data;
+   - run `/data/ingestion/pilot-shadow-load/plan`;
+   - run clean publication and daily gate on the real business date.
 
 2. `PROC-DEPLOY-2 Flowable REST Upload`
    - send deployment package to Flowable REST;
@@ -61,6 +63,6 @@ Status: handoff after real source landing wiring checkpoint.
 ## Saved Context For Resume
 
 - Latest pushed hardening commit at previous checkpoint: `87bdc09`.
-- Backend regression count after PROC-DEPLOY-1: 409 tests passed.
+- Backend regression count after PILOT-1: 411 tests passed.
 - Target adapter reports are under `docs/test-reports`.
-- The next autonomous implementation should start with `PILOT-1 Shadow Pilot Pack`.
+- The next autonomous implementation should start with `REAL-PILOT-1 Actual Source Connection` when real source files or API credentials are available.

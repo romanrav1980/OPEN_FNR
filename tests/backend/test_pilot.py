@@ -7,6 +7,7 @@ from open_fnr_api.pilot import (
     PilotIssue,
     PilotIssueStatus,
     PilotKpi,
+    build_pilot_shadow_pack,
     pilot_ready_for_acceptance,
 )
 
@@ -41,6 +42,31 @@ def test_business_owner_can_sign_pilot_acceptance() -> None:
     payload = response.json()
     assert payload["status"] == "accepted"
     assert payload["signed_by"] == "business.owner@example.org"
+
+
+def test_pilot_shadow_pack_contains_scope_runbook_and_rollback() -> None:
+    response = client.get("/pilot/shadow-pack")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["pack_id"] == "pilot-shadow-pack-north-fresh-001"
+    assert payload["mode"] == "shadow"
+    assert payload["ready_for_shadow"] is True
+    assert len(payload["checklist"]) == 4
+    assert len(payload["runbook"]) == 5
+    assert {item["trigger"] for item in payload["rollback"]} == {
+        "critical_data_gap",
+        "wape_above_threshold",
+        "export_incident",
+    }
+
+
+def test_pilot_shadow_pack_helper_is_ready_when_all_checklist_items_ready() -> None:
+    pack = build_pilot_shadow_pack()
+
+    assert pack.ready_for_shadow is True
+    assert pack.scope.scope_id == "pilot-north-fresh-001"
+    assert pack.runbook[0].owner_role == "Data Engineer"
 
 
 def test_pilot_acceptance_requires_business_owner() -> None:

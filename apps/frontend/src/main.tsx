@@ -139,6 +139,16 @@ type ProcessDeploymentPackageApiResponse = {
   deploy_channel: string;
 };
 
+type PilotShadowPackApiResponse = {
+  pack_id: string;
+  mode: string;
+  business_dates: string[];
+  ready_for_shadow: boolean;
+  checklist: { item_id: string; status: string }[];
+  runbook: { step: number }[];
+  rollback: { trigger: string }[];
+};
+
 type SecurityUserRow = {
   user: string;
   roles: string;
@@ -1343,6 +1353,7 @@ function App() {
   const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
   const [policyCheckStatus, setPolicyCheckStatus] = React.useState("loading");
   const [processDeploymentStatus, setProcessDeploymentStatus] = React.useState("loading");
+  const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
@@ -1588,6 +1599,29 @@ function App() {
           return;
         }
         setProcessDeploymentStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/pilot/shadow-pack"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Pilot shadow pack API returned ${response.status}`);
+        }
+        return response.json() as Promise<PilotShadowPackApiResponse>;
+      })
+      .then((payload) => {
+        setPilotShadowPackStatus(
+          `${payload.mode} / ${payload.ready_for_shadow ? "ready" : "blocked"} / ${payload.business_dates.length} days`,
+        );
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setPilotShadowPackStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3926,6 +3960,11 @@ function App() {
             <span>Acceptance</span>
             <strong>Ready for signature</strong>
             <p>All pilot KPIs are green, no critical defects remain, feedback is captured and triaged.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Shadow Pack</span>
+            <strong>{pilotShadowPackStatus}</strong>
+            <p>Scope, checklist, runbook and rollback actions are loaded from the pilot API.</p>
           </article>
         </div>
         <div className="table-shell">

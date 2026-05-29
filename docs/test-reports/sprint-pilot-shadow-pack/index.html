@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR Pilot Shadow Pack Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Pilot Shadow Pack</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем пакет shadow pilot: scope, checklist, runbook и rollback actions.
+          Такой пакет нужен, чтобы запуск пилота был воспроизводимым и бизнес мог увидеть,
+          какие условия должны быть выполнены до controlled export.
+        </p>
+        <img src="screenshots/pilot-shadow-pack.png" alt="Pilot shadow pack in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем Control Tower.</td><td>Проверяем pilot dashboard после API подключения.</td><td>Страница загружена.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем Shadow Pack card.</td><td>Бизнес должен видеть режим и готовность shadow пилота.</td><td>mode/ready/days отображаются.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем API-backed status.</td><td>Статус должен приходить из backend, а не быть текстом.</td><td>Данные загружены через <code>/pilot/shadow-pack</code>.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Фиксируем pilot scope.</td><td>Пилот должен быть ограничен region/store/category.</td><td>north, S001-S003, fresh/grocery.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Проверяем readiness checklist.</td><td>Source, security, process package and KPI baseline должны быть готовы.</td><td>4 checklist items ready.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Проверяем runbook.</td><td>Роли должны знать порядок действий в shadow режиме.</td><td>5 ordered steps.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Проверяем rollback actions.</td><td>Пилот должен иметь быстрый безопасный откат.</td><td>data gap, WAPE, export incident triggers.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Проверяем acceptance readiness.</td><td>Business Owner подписывает только при зеленых KPI и без critical defects.</td><td>ready_for_shadow=true.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_pilot.py tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">7 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page .../#/control-tower</code></td><td class="ok">pilot-shadow-pack.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>
