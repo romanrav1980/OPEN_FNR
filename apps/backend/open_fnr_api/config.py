@@ -75,6 +75,11 @@ class Settings(BaseModel):
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
+    auth_enabled: bool = Field(default_factory=lambda: env_bool("AUTH_ENABLED", False))
+    auth_dev_bypass_enabled: bool = Field(default_factory=lambda: env_bool("AUTH_DEV_BYPASS_ENABLED", True))
+    oidc_issuer: str = Field(default_factory=lambda: env_str("OIDC_ISSUER", ""))
+    oidc_audience: str = Field(default_factory=lambda: env_str("OIDC_AUDIENCE", ""))
+    oidc_jwks_url: str = Field(default_factory=lambda: env_str("OIDC_JWKS_URL", ""))
     cors_allow_origins: tuple[str, ...] = Field(
         default_factory=lambda: env_csv("CORS_ALLOW_ORIGINS", ("http://127.0.0.1:13000", "http://localhost:13000"))
     )

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .adjustments import router as adjustments_router
 from .audit import router as audit_router
+from .auth import AuthMiddleware, router as auth_router
 from .capacity import router as capacity_router
 from .config import settings
 from .clean_publication import router as clean_publication_router
@@ -52,7 +53,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AuthMiddleware)
 
+app.include_router(auth_router)
 app.include_router(ingestion_router)
 app.include_router(clean_publication_router)
 app.include_router(adjustments_router)
@@ -113,7 +116,13 @@ def metadata() -> dict[str, object]:
         "runtime_mode": settings.runtime_mode,
         "mock_mode": settings.mock_mode,
         "audit_enabled": settings.audit_enabled,
+        "auth_enabled": settings.auth_enabled,
+        "auth_dev_bypass_enabled": settings.auth_dev_bypass_enabled,
+        "oidc_issuer_configured": bool(settings.oidc_issuer),
+        "oidc_audience_configured": bool(settings.oidc_audience),
+        "oidc_jwks_url_configured": bool(settings.oidc_jwks_url),
         "modules": [
+            "auth",
             "audit",
             "data-platform",
             "capacity",

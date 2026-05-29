@@ -17,7 +17,8 @@ Status: handoff after real source landing wiring checkpoint.
 | Planogram target | closed for adapter layer | `docs/test-reports/sprint-planogram-target/index.html` |
 | IdP provisioning target | closed for adapter layer | `docs/test-reports/sprint-idp-provisioning-target/index.html` |
 | Pilot source landing wiring | closed for first pilot gate | `docs/test-reports/sprint-real-source-landing-wiring/index.html` |
-| Backend regression | green | `python -m pytest` -> 397 passed |
+| JWT/OIDC boundary | closed for first security gate | `docs/test-reports/sprint-jwt-oidc-boundary/index.html` |
+| Backend regression | green | `python -m pytest` -> 402 passed |
 | Frontend build | green | `npm.cmd run build` |
 | DEV/STAGE compose config | green | `docker compose ... config --quiet` |
 
@@ -26,7 +27,7 @@ Status: handoff after real source landing wiring checkpoint.
 | Block | Goal | First implementation slice | Acceptance signal |
 | --- | --- | --- | --- |
 | Real inbound source connection | Replace sample manifests with real pilot POS/WMS/ERP/MDM/promo file drops or APIs | First landing gate implemented; next connect actual pilot files/API credentials | Real source files discovered, schema/DQ passed, clean publication ready |
-| OIDC/JWT middleware | Authenticate real users and service clients | Add FastAPI JWT verification and frontend auth boundary | Unauthorized calls rejected, valid token maps to user/roles |
+| OIDC/JWT middleware | Authenticate real users and service clients | First FastAPI JWT boundary implemented; next add signature/JWKS verification details | Unauthorized calls rejected, valid token maps to user/roles |
 | Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | `policy.py` with role, region, category and object checks | Security tests cover positive/negative object-level access |
 | Routed UI productization | Move from single Control Tower to operational pages | React Router, API client, route-level loading/error/denied states | E2E smoke covers forecast, replenishment, exceptions, admin |
 | Process deployment pipeline | Deploy BPMN/DMN/CMMN into Flowable, not only validate XML | Deployment script/API and version registry | DEV Flowable receives process definitions with version evidence |
@@ -35,10 +36,10 @@ Status: handoff after real source landing wiring checkpoint.
 
 ## Tactical Next Sprint Order
 
-1. `SEC-2 JWT/OIDC Boundary`
-   - add token verification middleware;
-   - map token claims to OPEN FNR roles/scopes;
-   - keep local dev bypass configurable and disabled by default outside dev/test.
+1. `POL-1 Shared Policy Layer`
+   - introduce reusable role/scope/object policy checks;
+   - move endpoint-local authorization checks into shared helpers;
+   - add negative object-level access tests.
 
 2. `UI-1 Routed Shell`
    - introduce router and page layout;
@@ -67,6 +68,6 @@ Status: handoff after real source landing wiring checkpoint.
 ## Saved Context For Resume
 
 - Latest pushed hardening commit at previous checkpoint: `87bdc09`.
-- Backend regression count after RDI-1: 397 tests passed.
+- Backend regression count after SEC-2: 402 tests passed.
 - Target adapter reports are under `docs/test-reports`.
-- The next autonomous implementation should start with `SEC-2 JWT/OIDC Boundary` unless the user provides UI or Flowable priority first.
+- The next autonomous implementation should start with `POL-1 Shared Policy Layer` unless the user provides UI or Flowable priority first.

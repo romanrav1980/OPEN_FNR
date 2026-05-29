@@ -44,11 +44,25 @@ def test_settings_allow_per_service_hosts_for_container_networks() -> None:
 
 
 def test_settings_expose_runtime_mode_and_mock_mode() -> None:
-    settings = Settings(runtime_mode="test", mock_mode=False, audit_enabled=True)
+    settings = Settings(
+        runtime_mode="test",
+        mock_mode=False,
+        audit_enabled=True,
+        auth_enabled=True,
+        auth_dev_bypass_enabled=False,
+        oidc_issuer="https://idp.example.org",
+        oidc_audience="open-fnr-api",
+        oidc_jwks_url="https://idp.example.org/.well-known/jwks.json",
+    )
 
     assert settings.runtime_mode == "test"
     assert settings.mock_mode is False
     assert settings.audit_enabled is True
+    assert settings.auth_enabled is True
+    assert settings.auth_dev_bypass_enabled is False
+    assert settings.oidc_issuer == "https://idp.example.org"
+    assert settings.oidc_audience == "open-fnr-api"
+    assert settings.oidc_jwks_url == "https://idp.example.org/.well-known/jwks.json"
 
 
 def test_audit_is_enabled_by_default_and_can_be_disabled() -> None:

@@ -32,6 +32,14 @@ External integration endpoints must also be configured, not embedded in code. Ou
 
 Browser-to-backend access is controlled by `OPEN_FNR_CORS_ALLOW_ORIGINS`.
 
+Authentication and OIDC/JWT boundary settings are centralized as:
+
+- `OPEN_FNR_AUTH_ENABLED`;
+- `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED`;
+- `OPEN_FNR_OIDC_ISSUER`;
+- `OPEN_FNR_OIDC_AUDIENCE`;
+- `OPEN_FNR_OIDC_JWKS_URL`.
+
 ## Allowed Exceptions
 
 The following files may contain default local development addresses because they are configuration sources:
@@ -54,6 +62,7 @@ The following files may contain default local development addresses because they
 - Tests must assert behavior through configuration, not embedded addresses.
 - Sprint reports may mention command evidence, but executable code must stay configuration-driven.
 - Business process audit must be controlled by `OPEN_FNR_AUDIT_ENABLED`; default is enabled.
+- Authentication must be controlled by `OPEN_FNR_AUTH_ENABLED`; DEV/TEST bypass must be controlled by `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED` and disabled in STAGE/PROD configuration.
 - Source file landing paths must be controlled by `OPEN_FNR_LANDING_ROOT_PATH`; source adapters must not hardcode local paths.
 - Publication, supplier, TMS capacity, Store App task, planogram and IdP/IAM target URLs must be controlled by the `OPEN_FNR_*_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`, `OPEN_FNR_PLANOGRAM_EXPORT_URL` and `OPEN_FNR_IDP_PROVISIONING_URL` settings; empty values mean local fallback mode only.
 

@@ -123,6 +123,14 @@ type DailyPipelineGateApiResponse = {
   stages: DailyPipelineStage[];
 };
 
+type MetadataApiResponse = {
+  auth_enabled: boolean;
+  auth_dev_bypass_enabled: boolean;
+  oidc_issuer_configured: boolean;
+  oidc_audience_configured: boolean;
+  oidc_jwks_url_configured: boolean;
+};
+
 type SecurityUserRow = {
   user: string;
   roles: string;
@@ -1255,6 +1263,7 @@ function App() {
     React.useState<ShadowLoadSource[]>(shadowLoadSources);
   const [runtimeShadowLoadTasks, setRuntimeShadowLoadTasks] = React.useState<ShadowLoadTask[]>(shadowLoadTasks);
   const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
@@ -1432,6 +1441,30 @@ function App() {
           return;
         }
         setSecurityApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/metadata"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Metadata API returned ${response.status}`);
+        }
+        return response.json() as Promise<MetadataApiResponse>;
+      })
+      .then((payload) => {
+        const oidcReady = payload.oidc_issuer_configured && payload.oidc_audience_configured && payload.oidc_jwks_url_configured;
+        setAuthBoundaryStatus(
+          payload.auth_enabled ? `enabled / oidc ${oidcReady ? "configured" : "pending"}` : "disabled in dev",
+        );
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setAuthBoundaryStatus("metadata fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3533,6 +3566,11 @@ function App() {
             <span>API Status</span>
             <strong>{securityApiStatus}</strong>
             <p>Users and access requests are loaded from Security API with IdP provisioning target support.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Auth Boundary</span>
+            <strong>{authBoundaryStatus}</strong>
+            <p>Stage/production can require Bearer JWT while DEV/TEST keep configurable bypass for local work.</p>
           </article>
         </div>
         <div className="table-shell">

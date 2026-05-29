@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR JWT OIDC Boundary Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>JWT / OIDC Boundary</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем первый production security boundary: при включенном
+          <code>OPEN_FNR_AUTH_ENABLED</code> рабочие API требуют Bearer JWT, а DEV/TEST могут использовать
+          явно включенный bypass header. Такой способ нужен, чтобы не смешивать локальную разработку
+          и stage/production доступы.
+        </p>
+        <p>UI читает <code>/metadata</code> и показывает auth boundary status в Admin Console.</p>
+        <img src="screenshots/jwt-oidc-boundary.png" alt="JWT OIDC boundary in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем Control Tower.</td><td>Проверяем, что UI работает после middleware.</td><td>Страница загружена.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем Admin Console.</td><td>Security Owner должен видеть состояние auth boundary.</td><td>Auth Boundary card отображается.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем metadata read.</td><td>UI должен получать auth config status без hardcoded значений.</td><td>Статус загружается из API.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Оставляем public endpoints открытыми.</td><td>Health/metadata нужны для readiness и UI bootstrap.</td><td><code>/metadata</code> доступен.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Включаем auth и вызываем API без токена.</td><td>Production API не должен быть открытым.</td><td>401 Bearer token required.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Проверяем DEV/TEST bypass.</td><td>Локальная разработка должна оставаться управляемой.</td><td>Header дает auth_mode=dev_bypass.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Проверяем JWT claims.</td><td>Issuer/audience/exp/sub являются минимальным security contract.</td><td>Валидный token проходит.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Проверяем wrong audience.</td><td>Токен для другой системы нельзя принимать.</td><td>401 audience mismatch.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_auth.py tests/backend/test_config.py tests/backend/test_audit.py tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">18 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Stage compose</td><td><code>docker compose --env-file infra/stage/.env.example -f infra/dev/compose.yaml config --quiet</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page ...</code></td><td class="ok">jwt-oidc-boundary.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>
