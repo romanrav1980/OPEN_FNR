@@ -37,6 +37,7 @@ class UserPermission(BaseModel):
     roles: tuple[RoleName, ...]
     regions: tuple[str, ...]
     categories: tuple[str, ...]
+    suppliers: tuple[str, ...] = ()
     active: bool
 
 
@@ -106,6 +107,7 @@ USERS: tuple[UserPermission, ...] = (
         roles=(RoleName.ADMIN,),
         regions=("all",),
         categories=("all",),
+        suppliers=("all",),
         active=True,
     ),
     UserPermission(
@@ -114,6 +116,7 @@ USERS: tuple[UserPermission, ...] = (
         roles=(RoleName.VIEWER,),
         regions=("north",),
         categories=("fresh",),
+        suppliers=("SUP001",),
         active=True,
     ),
 )
@@ -154,8 +157,8 @@ def has_role(user: UserPermission, role: RoleName) -> bool:
     return has_any_role(user_principal(user), {role})
 
 
-def has_scope(user: UserPermission, region: str, category: str) -> bool:
-    return has_object_scope(user_principal(user), region, category)
+def has_scope(user: UserPermission, region: str, category: str, supplier_id: str | None = None) -> bool:
+    return has_object_scope(user_principal(user), region, category, supplier_id)
 
 
 def user_principal(user: UserPermission) -> Principal:
@@ -164,12 +167,13 @@ def user_principal(user: UserPermission) -> Principal:
         roles=tuple(role.value for role in user.roles),
         regions=user.regions,
         categories=user.categories,
+        suppliers=user.suppliers,
         active=user.active,
     )
 
 
 def role_principal(actor_role: RoleName, actor: str = "api-request") -> Principal:
-    return Principal(subject=actor, roles=(actor_role.value,), regions=("all",), categories=("all",), active=True)
+    return Principal(subject=actor, roles=(actor_role.value,), regions=("all",), categories=("all",), suppliers=("all",), active=True)
 
 
 def assert_admin(actor_role: RoleName) -> None:
@@ -318,13 +322,20 @@ def send_idp_provision(request_id: str, request: IdpProvisionRequest) -> IdpProv
 
 
 @router.get("/access-check")
-def check_access(user_id: str, region: str, category: str, role: RoleName) -> dict[str, object]:
+def check_access(user_id: str, region: str, category: str, role: RoleName, supplier_id: str | None = None) -> dict[str, object]:
     user = next((item for item in USERS if item.user_id == user_id), None)
     if user is None:
         raise HTTPException(status_code=404, detail="user not found")
     principal = user_principal(user)
-    allowed = has_any_role(principal, {role}) and has_object_scope(principal, region, category)
-    return {"user_id": user_id, "allowed": allowed, "region": region, "category": category, "role": role}
+    allowed = has_any_role(principal, {role}) and has_object_scope(principal, region, category, supplier_id)
+    return {
+        "user_id": user_id,
+        "allowed": allowed,
+        "region": region,
+        "category": category,
+        "supplier_id": supplier_id,
+        "role": role,
+    }
 
 
 @router.get("/policy-check")
@@ -342,4 +353,32 @@ def check_policy(user_id: str, region: str, category: str, allowed_role: RoleNam
         "region": region,
         "category": category,
         "policy": "shared_policy_v1",
+    }
+
+
+@router.get("/object-access-check")
+def check_object_access(
+    user_id: str,
+    region: str,
+    category: str,
+    object_type: str,
+    object_id: str,
+    allowed_role: RoleName,
+    supplier_id: str | None = None,
+) -> dict[str, object]:
+    user = next((item for item in USERS if item.user_id == user_id), None)
+    if user is None:
+        raise HTTPException(status_code=404, detail="user not found")
+    principal = user_principal(user)
+    assert_any_role(principal, {allowed_role}, "role policy denied")
+    assert_object_scope(principal, region, category, "object scope policy denied", supplier_id=supplier_id)
+    return {
+        "user_id": user_id,
+        "allowed": True,
+        "object_type": object_type,
+        "object_id": object_id,
+        "region": region,
+        "category": category,
+        "supplier_id": supplier_id,
+        "policy": "shared_policy_v2_supplier_scope",
     }

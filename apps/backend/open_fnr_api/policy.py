@@ -11,6 +11,7 @@ class Principal:
     roles: tuple[str, ...]
     regions: tuple[str, ...] = ()
     categories: tuple[str, ...] = ()
+    suppliers: tuple[str, ...] = ()
     active: bool = True
 
 
@@ -29,16 +30,23 @@ def assert_any_role(principal: Principal, allowed_roles: set[object], detail: st
         raise HTTPException(status_code=403, detail=detail)
 
 
-def has_object_scope(principal: Principal, region: str, category: str) -> bool:
+def _scope_allowed(values: tuple[str, ...], requested: str | None) -> bool:
+    if requested is None:
+        return True
+    return "all" in values or requested in values
+
+
+def has_object_scope(principal: Principal, region: str, category: str, supplier_id: str | None = None) -> bool:
     if not principal.active:
         return False
-    region_allowed = "all" in principal.regions or region in principal.regions
-    category_allowed = "all" in principal.categories or category in principal.categories
-    return region_allowed and category_allowed
+    region_allowed = _scope_allowed(principal.regions, region)
+    category_allowed = _scope_allowed(principal.categories, category)
+    supplier_allowed = _scope_allowed(principal.suppliers, supplier_id)
+    return region_allowed and category_allowed and supplier_allowed
 
 
-def assert_object_scope(principal: Principal, region: str, category: str, detail: str) -> None:
-    if not has_object_scope(principal, region, category):
+def assert_object_scope(principal: Principal, region: str, category: str, detail: str, supplier_id: str | None = None) -> None:
+    if not has_object_scope(principal, region, category, supplier_id):
         raise HTTPException(status_code=403, detail=detail)
 
 

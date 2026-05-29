@@ -47,6 +47,34 @@ def test_access_check_enforces_role_region_and_category_scope() -> None:
     assert denied.json()["allowed"] is False
 
 
+def test_access_check_enforces_supplier_scope_when_present() -> None:
+    allowed = client.get(
+        "/security/access-check",
+        params={
+            "user_id": "u-viewer-001",
+            "region": "north",
+            "category": "fresh",
+            "supplier_id": "SUP001",
+            "role": "Viewer",
+        },
+    )
+    denied = client.get(
+        "/security/access-check",
+        params={
+            "user_id": "u-viewer-001",
+            "region": "north",
+            "category": "fresh",
+            "supplier_id": "SUP002",
+            "role": "Viewer",
+        },
+    )
+
+    assert allowed.status_code == 200
+    assert allowed.json()["allowed"] is True
+    assert denied.status_code == 200
+    assert denied.json()["allowed"] is False
+
+
 def test_security_owner_can_approve_access_request_with_audit() -> None:
     response = client.post(
         "/security/access-requests/access-20260528-001/approve",
@@ -186,5 +214,6 @@ def test_security_helpers_cover_role_and_scope() -> None:
 
     assert has_role(admin, RoleName.SECURITY_OWNER) is True
     assert has_role(viewer, RoleName.SUPPLY_CHAIN_MANAGER) is False
-    assert has_scope(viewer, region="north", category="fresh") is True
+    assert has_scope(viewer, region="north", category="fresh", supplier_id="SUP001") is True
+    assert has_scope(viewer, region="north", category="fresh", supplier_id="SUP002") is False
     assert has_scope(viewer, region="north", category="grocery") is False

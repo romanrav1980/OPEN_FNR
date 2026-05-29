@@ -986,3 +986,22 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/backend/test_auth.py tests/backend/test_config.py tests/backend/test_security.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 35 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 509 passed, 1 warning about `.pytest_cache` permissions.
+
+## SEC-2 RBAC And Object-Level Access
+
+- SEC-2 completed as object-access foundation.
+- Completion note: `docs/context/SEC2_COMPLETION.md`.
+- Object-level access specification added: `OBJECT_LEVEL_ACCESS_SPEC.md`.
+- Shared policy now supports supplier scope:
+  - `Principal.suppliers`;
+  - `has_object_scope(..., supplier_id=...)`;
+  - `assert_object_scope(..., supplier_id=...)`.
+- Security API added:
+  - `GET /security/object-access-check`.
+- Existing `GET /security/access-check` now supports optional `supplier_id`.
+- Tests added/updated:
+  - `tests/backend/test_policy.py`;
+  - `tests/backend/test_security.py`.
+- Verification:
+  - `pytest tests/backend/test_policy.py tests/backend/test_security.py tests/backend/test_auth.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 34 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 512 passed, 1 warning about `.pytest_cache` permissions.

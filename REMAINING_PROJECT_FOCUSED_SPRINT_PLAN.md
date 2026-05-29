@@ -46,7 +46,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | RI-5 | MDM And Promo Ingestion | Product, store, hierarchy, lifecycle and promo ingestion | Completed foundation |
 | RI-6 | Reconciliation, Retries And Source SLA | Idempotency, retry, reconciliation, degraded mode and source SLA gates | Completed foundation |
 | SEC-1 | OIDC/JWT Authentication | Real authentication and token verification | Completed foundation |
-| SEC-2 | RBAC And Object-Level Access | Role/object policy across API and UI | SEC-1 |
+| SEC-2 | RBAC And Object-Level Access | Role/object policy across API and UI | Completed foundation |
 | SEC-3 | Secrets And Service Accounts | Secrets outside git and controlled integration identities | SEC-1 |
 | SEC-4 | Security Audit And Access Review | Audit views, access review workflow and negative tests | SEC-2..SEC-3 |
 | UI-1 | Routed Application Foundation | React Router, feature pages and API client | SEC-1 |
