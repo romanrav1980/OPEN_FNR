@@ -449,7 +449,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 is implemented and verified. Next: connect real source adapters or file drops for pilot shadow load, then harden clean canonical tables and Process Engine DQ tasks.
+Real-ingestion I1-I5 contracts and outbound target adapters are implemented and verified. Next: start `RDI-1 Real Source Landing Wiring` to connect pilot POS/WMS/ERP/MDM/promo file drops or APIs, then add OIDC/JWT middleware, routed UI and Flowable deployment automation.
 
 ## Post-Sprint Planning Artifacts
 
@@ -461,6 +461,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 - Production security hardening: `PRODUCTION_SECURITY_HARDENING_PLAN.md`.
 - UI productization: `UI_PRODUCTIZATION_PLAN.md`.
 - Pilot launch: `PILOT_LAUNCH_PLAN.md`.
+- Pilot-ready remaining work handoff: `PILOT_READY_REMAINING_WORK.md`.
 
 ## H1 Industrial Hardening Artifacts
 
