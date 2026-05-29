@@ -51,6 +51,44 @@ class ModelAuditEvent(BaseModel):
     created_at: datetime
 
 
+class ChampionChallengerEntry(BaseModel):
+    model_family: str
+    champion_model_id: str
+    challenger_model_id: str
+    traffic_mode: str
+    champion_wape: float = Field(ge=0)
+    challenger_wape: float = Field(ge=0)
+    status: str
+
+
+class ShadowScoringReport(BaseModel):
+    report_id: str
+    model_id: str
+    business_date: str
+    shadow_days_completed: int = Field(ge=0)
+    min_shadow_days_required: int = Field(ge=0)
+    shadow_wape: float = Field(ge=0)
+    production_wape: float = Field(ge=0)
+    status: str
+
+
+class DriftReport(BaseModel):
+    report_id: str
+    model_id: str
+    feature_drift_score: float = Field(ge=0)
+    target_drift_score: float = Field(ge=0)
+    severity: DriftSeverity
+    recommended_action: str
+
+
+class FallbackPlan(BaseModel):
+    model_id: str
+    fallback_model_id: str
+    rollback_trigger: str
+    rehearsal_status: str
+    max_rollback_minutes: int = Field(gt=0)
+
+
 MODEL_CANDIDATES: tuple[ModelCandidate, ...] = (
     ModelCandidate(
         model_id="regular-demand-lgbm-v2",
@@ -63,6 +101,52 @@ MODEL_CANDIDATES: tuple[ModelCandidate, ...] = (
         shadow_wape=15.2,
         drift_severity=DriftSeverity.LOW,
         status=ModelReleaseStatus.SHADOW,
+    ),
+)
+
+CHAMPION_CHALLENGER_REGISTRY: tuple[ChampionChallengerEntry, ...] = (
+    ChampionChallengerEntry(
+        model_family="regular_demand",
+        champion_model_id="seasonal-naive-v1",
+        challenger_model_id="regular-demand-lgbm-v2",
+        traffic_mode="shadow_only",
+        champion_wape=18.4,
+        challenger_wape=14.9,
+        status="challenger_ready_for_approval",
+    ),
+)
+
+SHADOW_SCORING_REPORTS: tuple[ShadowScoringReport, ...] = (
+    ShadowScoringReport(
+        report_id="shadow-regular-demand-lgbm-v2-20260528",
+        model_id="regular-demand-lgbm-v2",
+        business_date="2026-05-28",
+        shadow_days_completed=14,
+        min_shadow_days_required=14,
+        shadow_wape=15.2,
+        production_wape=18.4,
+        status="passed",
+    ),
+)
+
+DRIFT_REPORTS: tuple[DriftReport, ...] = (
+    DriftReport(
+        report_id="drift-regular-demand-lgbm-v2-20260528",
+        model_id="regular-demand-lgbm-v2",
+        feature_drift_score=0.08,
+        target_drift_score=0.05,
+        severity=DriftSeverity.LOW,
+        recommended_action="continue_shadow_and_prepare_release_review",
+    ),
+)
+
+FALLBACK_PLANS: tuple[FallbackPlan, ...] = (
+    FallbackPlan(
+        model_id="regular-demand-lgbm-v2",
+        fallback_model_id="seasonal-naive-v1",
+        rollback_trigger="high_drift_or_wape_regression_or_failed_export",
+        rehearsal_status="passed",
+        max_rollback_minutes=15,
     ),
 )
 
@@ -95,6 +179,29 @@ def transition_model(candidate: ModelCandidate, action: str, payload: ModelRelea
 @router.get("/candidates")
 def list_model_candidates() -> dict[str, object]:
     return {"items": [item.model_dump(mode="json") for item in MODEL_CANDIDATES], "total": len(MODEL_CANDIDATES)}
+
+
+@router.get("/registry")
+def get_champion_challenger_registry() -> dict[str, object]:
+    return {
+        "items": [item.model_dump(mode="json") for item in CHAMPION_CHALLENGER_REGISTRY],
+        "total": len(CHAMPION_CHALLENGER_REGISTRY),
+    }
+
+
+@router.get("/shadow-reports")
+def list_shadow_scoring_reports() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in SHADOW_SCORING_REPORTS], "total": len(SHADOW_SCORING_REPORTS)}
+
+
+@router.get("/drift-reports")
+def list_drift_reports() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in DRIFT_REPORTS], "total": len(DRIFT_REPORTS)}
+
+
+@router.get("/fallback-plans")
+def list_fallback_plans() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in FALLBACK_PLANS], "total": len(FALLBACK_PLANS)}
 
 
 @router.post("/candidates/{model_id}/{action}")

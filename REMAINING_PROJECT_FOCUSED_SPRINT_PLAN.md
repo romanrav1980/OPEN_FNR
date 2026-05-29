@@ -56,7 +56,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | Completed foundation |
 | ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | Completed foundation |
 | ML-2 | Forecast Training And Retraining | Regular/promo model training and scheduled retraining | Completed foundation |
-| ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | ML-2 |
+| ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | Completed foundation |
 | ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | ML-2, RI-6 |
 | ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | ML-4 |
 | DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | IH-2 |
@@ -611,6 +611,12 @@ Acceptance criteria:
 
 - model promotion is controlled;
 - rollback path is tested.
+
+Completion checkpoint:
+
+- ML-3 foundation scope is fixed in `ML_CHAMPION_CHALLENGER_DRIFT_SPEC.md`;
+- backend exposes champion/challenger registry, shadow reports, drift reports and fallback plans;
+- automated tests cover registry, shadow duration, drift action and rollback rehearsal visibility.
 
 ### ML-4. Replenishment Optimization Production
 

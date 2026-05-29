@@ -1179,3 +1179,20 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_ml_training_jobs.py tests/backend/test_ml_training.py tests/backend/test_ml_models.py tests/backend/test_ml_governance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 22 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 550 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after ML-2: 11 sprints (`ML-3..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## ML-3 Champion Challenger And Drift
+
+- ML-3 completed as model lifecycle governance foundation.
+- Completion note: `docs/context/ML3_COMPLETION.md`.
+- Specification added: `ML_CHAMPION_CHALLENGER_DRIFT_SPEC.md`.
+- Backend extended:
+  - `/ml-governance/registry`;
+  - `/ml-governance/shadow-reports`;
+  - `/ml-governance/drift-reports`;
+  - `/ml-governance/fallback-plans`.
+- Tests added:
+  - `tests/backend/test_ml_lifecycle_governance.py`.
+- Verification:
+  - `pytest tests/backend/test_ml_lifecycle_governance.py tests/backend/test_ml_training_jobs.py tests/backend/test_ml_training.py tests/backend/test_ml_models.py tests/backend/test_ml_governance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 26 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 554 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after ML-3: 10 sprints (`ML-4..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
