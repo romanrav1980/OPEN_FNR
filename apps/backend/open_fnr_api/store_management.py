@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
 from .config import settings
+from .repositories import OperationalDecisionRecord, operational_decision_repository
 
 
 router = APIRouter(prefix="/store-management", tags=["store-management"])
@@ -212,6 +213,28 @@ def complete_store_task(task_id: str, request: StoreTaskCompletionRequest) -> di
                 "counted_qty": request.counted_qty,
                 "previous_virtual_stock": TRUE_INVENTORY.virtual_stock,
                 "status": status,
+            },
+        )
+    )
+    operational_decision_repository.upsert_decision(
+        OperationalDecisionRecord(
+            decision_id=f"store-task-complete-{task_id}",
+            decision_type="store_task_completion",
+            object_type="store_task",
+            object_id=task_id,
+            status=status.value,
+            actor=request.actor,
+            actor_role=request.actor_role,
+            idempotency_key=f"{task_id}:{request.store_id}:complete:{request.counted_qty}",
+            correlation_id=f"{task_id}:{request.store_id}",
+            payload={
+                "store_id": request.store_id,
+                "sku": task.sku,
+                "task_type": task.task_type.value,
+                "counted_qty": request.counted_qty,
+                "previous_virtual_stock": TRUE_INVENTORY.virtual_stock,
+                "comment": request.comment,
+                "photo_reference": request.photo_reference,
             },
         )
     )

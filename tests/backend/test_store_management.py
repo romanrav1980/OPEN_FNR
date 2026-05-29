@@ -8,6 +8,17 @@ from open_fnr_api.store_management import calculate_virtual_stock
 client = TestClient(app)
 
 
+class CapturingOperationalDecisionRepository:
+    mode = "in_memory"
+
+    def __init__(self) -> None:
+        self.decisions = []
+
+    def upsert_decision(self, decision):
+        self.decisions.append(decision)
+        return decision
+
+
 def test_true_inventory_has_virtual_stock_confidence_and_suggestion() -> None:
     response = client.get("/store-management/true-inventory", params={"store_id": "S001"})
     assert response.status_code == 200
@@ -74,6 +85,29 @@ def test_store_task_completion_requires_role_scope_and_returns_audit() -> None:
     assert payload["status"] == "corrected"
     assert payload["quality_flag"] == "store_feedback_received"
     assert payload["audit"]["photo_reference"] == "store-photo-placeholder-001"
+
+
+def test_store_task_completion_writes_operational_decision_boundary(monkeypatch) -> None:
+    repository = CapturingOperationalDecisionRepository()
+    monkeypatch.setattr(store_management, "operational_decision_repository", repository)
+
+    response = client.post(
+        "/store-management/tasks/store-task-stock-s001-sku001/complete",
+        json={
+            "actor": "store.ops@example.org",
+            "actor_role": "Store Operations",
+            "store_id": "S001",
+            "counted_qty": 38,
+            "comment": "Repository boundary check.",
+            "photo_reference": "store-photo-placeholder-001",
+        },
+    )
+
+    assert response.status_code == 200
+    assert repository.decisions[0].decision_type == "store_task_completion"
+    assert repository.decisions[0].object_id == "store-task-stock-s001-sku001"
+    assert repository.decisions[0].status == "corrected"
+    assert repository.decisions[0].payload["photo_reference"] == "store-photo-placeholder-001"
 
 
 def test_store_task_dispatch_preview_is_idempotent_and_uses_local_fallback() -> None:
