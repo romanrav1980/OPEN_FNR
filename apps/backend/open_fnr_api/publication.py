@@ -75,6 +75,38 @@ class TargetExportResult(BaseModel):
     response_message: str = Field(min_length=1, max_length=512)
 
 
+class ControlledExportGate(BaseModel):
+    gate_id: str
+    scope_id: str
+    allowed_targets: tuple[PublicationTarget, ...]
+    approved_package_ids: tuple[str, ...]
+    stop_switch_active: bool
+    idempotency_policy: str
+    reconciliation_required: bool
+    owner_role: str
+    status: str
+
+
+class ControlledExportReconciliation(BaseModel):
+    reconciliation_id: str
+    scope_id: str
+    package_id: str
+    target: PublicationTarget
+    idempotency_key: str
+    source_status: str
+    target_status: str
+    duplicate_detected: bool
+    ready_to_resume: bool
+
+
+class StopSwitch(BaseModel):
+    switch_id: str
+    active: bool
+    reason: str
+    owner_role: str
+    blocks_targets: tuple[PublicationTarget, ...]
+
+
 PUBLICATION_PACKAGES: tuple[PublicationPackage, ...] = (
     PublicationPackage(
         package_id="pub-wms-orders-20260528-001",
@@ -153,6 +185,40 @@ PUBLICATION_PACKAGES: tuple[PublicationPackage, ...] = (
         response_message="final order must be approved before export",
         retry_count=0,
     ),
+)
+
+CONTROLLED_EXPORT_GATE = ControlledExportGate(
+    gate_id="controlled-export-gate-pilot-north-fresh-001",
+    scope_id="pilot-north-fresh-001",
+    allowed_targets=(PublicationTarget.ERP, PublicationTarget.AUTO_ORDER),
+    approved_package_ids=("pub-wms-orders-20260528-001",),
+    stop_switch_active=False,
+    idempotency_policy="same_business_key_same_idempotency_key_no_duplicate_target_send",
+    reconciliation_required=True,
+    owner_role="Integration Owner",
+    status="ready_for_controlled_export",
+)
+
+CONTROLLED_EXPORT_RECONCILIATION: tuple[ControlledExportReconciliation, ...] = (
+    ControlledExportReconciliation(
+        reconciliation_id="recon-controlled-export-20260615-001",
+        scope_id="pilot-north-fresh-001",
+        package_id="pub-wms-orders-20260528-001",
+        target=PublicationTarget.ERP,
+        idempotency_key="pilot:controlled-export:20260615:001",
+        source_status="sent",
+        target_status="accepted",
+        duplicate_detected=False,
+        ready_to_resume=True,
+    ),
+)
+
+CONTROLLED_EXPORT_STOP_SWITCH = StopSwitch(
+    switch_id="publication-stop-switch-pilot",
+    active=False,
+    reason="controlled export window approved",
+    owner_role="Incident Manager",
+    blocks_targets=(PublicationTarget.ERP, PublicationTarget.AUTO_ORDER),
 )
 
 
@@ -328,6 +394,16 @@ def retry_export(package: PublicationPackage, request: ExportRequest) -> ExportR
     return ExportResponse(package=retried_package, duplicate=False)
 
 
+def controlled_export_allowed(package: PublicationPackage, gate: ControlledExportGate = CONTROLLED_EXPORT_GATE) -> bool:
+    return (
+        gate.status == "ready_for_controlled_export"
+        and not gate.stop_switch_active
+        and package.target in gate.allowed_targets
+        and all_items_approved(package)
+        and gate.reconciliation_required
+    )
+
+
 @router.get("/packages")
 def list_publication_packages() -> dict[str, object]:
     return {"items": [item.model_dump(mode="json") for item in PUBLICATION_PACKAGES], "total": len(PUBLICATION_PACKAGES)}
@@ -355,3 +431,22 @@ def retry_publication_package(package_id: str, request: ExportRequest) -> dict[s
     if package is None:
         raise HTTPException(status_code=404, detail="publication package not found")
     return retry_export(package, request).model_dump(mode="json")
+
+
+@router.get("/controlled-export/gate")
+def get_controlled_export_gate() -> dict[str, object]:
+    return CONTROLLED_EXPORT_GATE.model_dump(mode="json")
+
+
+@router.get("/controlled-export/reconciliation")
+def get_controlled_export_reconciliation() -> dict[str, object]:
+    return {
+        "items": [item.model_dump(mode="json") for item in CONTROLLED_EXPORT_RECONCILIATION],
+        "total": len(CONTROLLED_EXPORT_RECONCILIATION),
+        "all_ready_to_resume": all(item.ready_to_resume and not item.duplicate_detected for item in CONTROLLED_EXPORT_RECONCILIATION),
+    }
+
+
+@router.get("/controlled-export/stop-switch")
+def get_controlled_export_stop_switch() -> dict[str, object]:
+    return CONTROLLED_EXPORT_STOP_SWITCH.model_dump(mode="json")

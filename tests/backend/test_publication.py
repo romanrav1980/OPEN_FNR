@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from open_fnr_api import audit
 from open_fnr_api.main import app
 from open_fnr_api import publication
-from open_fnr_api.publication import PUBLICATION_PACKAGES, all_items_approved, find_duplicate_export
+from open_fnr_api.publication import PUBLICATION_PACKAGES, PublicationTarget, all_items_approved, controlled_export_allowed, find_duplicate_export
 
 
 client = TestClient(app)
@@ -191,3 +191,49 @@ def test_publication_helpers() -> None:
     assert all_items_approved(PUBLICATION_PACKAGES[0]) is True
     assert all_items_approved(PUBLICATION_PACKAGES[3]) is False
     assert find_duplicate_export("dwh:forecast:20260528:001").package_id == "pub-dwh-forecast-20260528-001"
+
+
+def test_controlled_export_gate_limits_targets_and_requires_reconciliation() -> None:
+    response = client.get("/publication/controlled-export/gate")
+    assert response.status_code == 200
+
+    payload = response.json()
+
+    assert payload["scope_id"] == "pilot-north-fresh-001"
+    assert payload["status"] == "ready_for_controlled_export"
+    assert payload["stop_switch_active"] is False
+    assert payload["allowed_targets"] == ["erp", "auto_order"]
+    assert payload["reconciliation_required"] is True
+    assert payload["idempotency_policy"] == "same_business_key_same_idempotency_key_no_duplicate_target_send"
+
+
+def test_controlled_export_reconciliation_blocks_duplicates_before_resume() -> None:
+    response = client.get("/publication/controlled-export/reconciliation")
+    assert response.status_code == 200
+
+    payload = response.json()
+    item = payload["items"][0]
+
+    assert payload["all_ready_to_resume"] is True
+    assert item["duplicate_detected"] is False
+    assert item["ready_to_resume"] is True
+    assert item["idempotency_key"] == "pilot:controlled-export:20260615:001"
+
+
+def test_controlled_export_stop_switch_blocks_erp_and_auto_order_targets() -> None:
+    response = client.get("/publication/controlled-export/stop-switch")
+    assert response.status_code == 200
+
+    payload = response.json()
+
+    assert payload["active"] is False
+    assert payload["owner_role"] == "Incident Manager"
+    assert payload["blocks_targets"] == ["erp", "auto_order"]
+
+
+def test_controlled_export_allowed_helper_requires_allowed_target_and_approved_items() -> None:
+    erp_package = PUBLICATION_PACKAGES[0].model_copy(update={"target": PublicationTarget.ERP})
+
+    assert controlled_export_allowed(erp_package) is True
+    assert controlled_export_allowed(PUBLICATION_PACKAGES[0]) is False
+    assert controlled_export_allowed(PUBLICATION_PACKAGES[3].model_copy(update={"target": PublicationTarget.ERP})) is False

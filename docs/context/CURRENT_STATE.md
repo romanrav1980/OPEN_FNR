@@ -1351,3 +1351,26 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_pilot.py tests/backend/test_ml_lifecycle_governance.py tests/backend/test_replenishment_optimization.py tests/process/test_bpmn_artifacts.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 68 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 588 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after PILOT-2: 3 sprints (`PILOT-3..PILOT-5`).
+
+## PILOT-3 Controlled Export Pilot
+
+- PILOT-3 completed as controlled-export foundation.
+- Completion note: `docs/context/PILOT3_COMPLETION.md`.
+- Specification added: `PILOT_CONTROLLED_EXPORT_SPEC.md`.
+- Backend extended:
+  - `GET /publication/controlled-export/gate`;
+  - `GET /publication/controlled-export/reconciliation`;
+  - `GET /publication/controlled-export/stop-switch`.
+- Controlled export gate includes:
+  - signed pilot scope;
+  - ERP and auto-order target restriction;
+  - stop switch state;
+  - idempotency policy;
+  - reconciliation requirement;
+  - owner role.
+- Tests added/updated:
+  - `tests/backend/test_publication.py`.
+- Verification:
+  - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_publication.py tests/backend/test_integration_operations.py tests/backend/test_release_gate.py tests/operations/test_rollback_dr_runbook.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 34 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 592 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after PILOT-3: 2 sprints (`PILOT-4..PILOT-5`).

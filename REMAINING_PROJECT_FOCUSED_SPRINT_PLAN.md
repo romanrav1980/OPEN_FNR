@@ -65,7 +65,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | Completed foundation |
 | PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | Completed foundation |
 | PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | Completed foundation |
-| PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | PILOT-2, DEP-4 |
+| PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | Completed foundation |
 | PILOT-4 | Business KPI Acceptance | WAPE, service level, lost sales, overstock and waste evidence | PILOT-3 |
 | PILOT-5 | Production Go/No-Go | Final acceptance pack and launch decision | PILOT-4 |
 
@@ -867,6 +867,13 @@ Acceptance criteria:
 
 - limited export works on approved scope;
 - rollback is tested.
+
+Completion checkpoint:
+
+- PILOT-3 controlled export rules are fixed in `PILOT_CONTROLLED_EXPORT_SPEC.md`;
+- publication API exposes controlled export gate, reconciliation and stop switch;
+- controlled export is limited to pilot scope and ERP/auto-order targets;
+- automated tests validate stop switch, reconciliation, idempotency policy and controlled export helper.
 
 ### PILOT-4. Business KPI Acceptance
 
