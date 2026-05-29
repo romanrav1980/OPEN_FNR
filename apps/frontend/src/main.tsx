@@ -169,6 +169,44 @@ type PurchaseProposalApiItem = {
   decision: { reason: string };
 };
 
+type ShelfPlanogramRow = {
+  store: string;
+  sku: string;
+  zone: string;
+  shelf: number;
+  display: number;
+  direct: string;
+};
+
+type ShelfPlanogramApiItem = {
+  store_id: string;
+  sku_id: string;
+  zone: string;
+  shelf_capacity_qty: number;
+  display_capacity_qty: number;
+  direct_to_shelf: boolean;
+};
+
+type ShelfValidationRow = {
+  store: string;
+  sku: string;
+  requested: number;
+  capacity: number;
+  status: string;
+  direct: string;
+  warning: string;
+};
+
+type ShelfValidationApiItem = {
+  store_id: string;
+  sku_id: string;
+  requested_display_qty: number;
+  display_capacity_qty: number;
+  status: string;
+  direct_to_shelf_recommended: boolean;
+  warning: string | null;
+};
+
 type CapacityMoveRow = {
   order: string;
   supplier: string;
@@ -988,12 +1026,12 @@ const purchaseProposalRows: PurchaseProposalRow[] = [
   },
 ];
 
-const shelfPlanogramRows = [
+const shelfPlanogramRows: ShelfPlanogramRow[] = [
   { store: "S001", sku: "SKU001", zone: "front", shelf: 80, display: 120, direct: "yes" },
   { store: "S001", sku: "SKU002", zone: "fresh-wall", shelf: 60, display: 90, direct: "no" },
 ];
 
-const shelfValidationRows = [
+const shelfValidationRows: ShelfValidationRow[] = [
   {
     store: "S001",
     sku: "SKU001",
@@ -1159,6 +1197,11 @@ function App() {
   const [procurementApiStatus, setProcurementApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimePurchaseProposalRows, setRuntimePurchaseProposalRows] =
     React.useState<PurchaseProposalRow[]>(purchaseProposalRows);
+  const [shelfApiStatus, setShelfApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeShelfPlanogramRows, setRuntimeShelfPlanogramRows] =
+    React.useState<ShelfPlanogramRow[]>(shelfPlanogramRows);
+  const [runtimeShelfValidationRows, setRuntimeShelfValidationRows] =
+    React.useState<ShelfValidationRow[]>(shelfValidationRows);
   const [capacityApiStatus, setCapacityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeCapacityMoveRows, setRuntimeCapacityMoveRows] = React.useState<CapacityMoveRow[]>(capacityMoveRows);
   const [storeApiStatus, setStoreApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
@@ -1333,6 +1376,54 @@ function App() {
           return;
         }
         setProcurementApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      fetch(apiUrl("/shelf-space/planograms"), { signal: controller.signal }),
+      fetch(apiUrl("/shelf-space/validations"), { signal: controller.signal }),
+    ])
+      .then(([planogramsResponse, validationsResponse]) => {
+        if (!planogramsResponse.ok || !validationsResponse.ok) {
+          throw new Error("Shelf Space API returned an error");
+        }
+        return Promise.all([
+          planogramsResponse.json() as Promise<{ items: ShelfPlanogramApiItem[] }>,
+          validationsResponse.json() as Promise<{ items: ShelfValidationApiItem[] }>,
+        ]);
+      })
+      .then(([planograms, validations]) => {
+        setRuntimeShelfPlanogramRows(
+          planograms.items.map((row) => ({
+            store: row.store_id,
+            sku: row.sku_id,
+            zone: row.zone,
+            shelf: row.shelf_capacity_qty,
+            display: row.display_capacity_qty,
+            direct: row.direct_to_shelf ? "yes" : "no",
+          })),
+        );
+        setRuntimeShelfValidationRows(
+          validations.items.map((row) => ({
+            store: row.store_id,
+            sku: row.sku_id,
+            requested: row.requested_display_qty,
+            capacity: row.display_capacity_qty,
+            status: row.status,
+            direct: row.direct_to_shelf_recommended ? "yes" : "no",
+            warning: row.warning ?? "-",
+          })),
+        );
+        setShelfApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setShelfApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -4212,6 +4303,11 @@ function App() {
             <strong>Recommendation visible when shelf capacity fits</strong>
             <p>Store Operations can approve direct-to-shelf and audit changed display values.</p>
           </article>
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{shelfApiStatus}</strong>
+            <p>Planograms and display validations are loaded from Shelf Space API with local fallback data.</p>
+          </article>
         </div>
         <div className="table-shell">
           <table>
@@ -4226,7 +4322,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {shelfPlanogramRows.map((row) => (
+              {runtimeShelfPlanogramRows.map((row) => (
                 <tr key={`${row.store}-${row.sku}`}>
                   <td>{row.store}</td>
                   <td>{row.sku}</td>
@@ -4253,7 +4349,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {shelfValidationRows.map((row) => (
+              {runtimeShelfValidationRows.map((row) => (
                 <tr key={`${row.store}-${row.sku}`}>
                   <td>{row.store}</td>
                   <td>{row.sku}</td>
@@ -4282,10 +4378,11 @@ function App() {
             </div>
           </aside>
           <aside className="dq-detail">
-            <span className="eyebrow">Planogram Mock</span>
-            <h3>Store zone hierarchy</h3>
+            <span className="eyebrow">Planogram Target</span>
+            <h3>Configured space-management export</h3>
             <p>
-              Planogram fields provide shelf capacity, display capacity, direct-to-shelf flag and zone filters.
+              Approved display decisions are exported with idempotency key, service account gate
+              and target URL from environment configuration.
             </p>
           </aside>
         </div>

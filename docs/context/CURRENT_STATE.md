@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 386 automated tests passed.
+Current backend regression status: 390 automated tests passed.
 
 ## Local Infrastructure
 
@@ -372,13 +372,15 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Shelf Space API: `apps/backend/open_fnr_api/shelf_space.py`.
 - Shelf Space tests: `tests/backend/test_shelf_space.py`.
+- Planogram export send API with service account gate, local fallback and configurable `OPEN_FNR_PLANOGRAM_EXPORT_URL`.
 - Shelf Space process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Shelf space review BPMN: `processes/shelf-space/shelf_space_review_process.bpmn20.xml`.
 - Display capacity DMN: `processes/shelf-space/display_capacity_decision.dmn.xml`.
 - Direct-to-shelf DMN: `processes/shelf-space/direct_to_shelf_decision.dmn.xml`.
 - Shelf capacity exception CMMN: `processes/shelf-space/shelf_capacity_exception_case.cmmn.xml`.
-- UI Shelf Space section with planogram, zone filters, display warnings and direct-to-shelf recommendation.
+- UI Shelf Space section with planogram, zone filters, display warnings, API status, planogram target export and direct-to-shelf recommendation.
 - HTML test report with screenshot: `docs/test-reports/sprint-32-shelf-space-optimization/index.html`.
+- Planogram target hardening report: `docs/test-reports/sprint-planogram-target/index.html`.
 
 ## Sprint 33 Artifacts
 
@@ -434,7 +436,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 386 passed.
+- `python -m pytest` -> 390 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -462,7 +464,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 
 - Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
 - Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=true` by default.
-- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL`, `OPEN_FNR_AUTO_ORDER_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL` and `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`.
+- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL`, `OPEN_FNR_AUTO_ORDER_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL` and `OPEN_FNR_PLANOGRAM_EXPORT_URL`.
 - Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Audit API: `apps/backend/open_fnr_api/audit.py`.
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.

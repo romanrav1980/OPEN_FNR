@@ -88,6 +88,7 @@ def test_publication_target_urls_are_centralized_settings() -> None:
         supplier_forecast_share_url="http://supplier.local/share",
         tms_capacity_export_url="http://tms.local/capacity",
         store_app_task_export_url="http://store-app.local/tasks",
+        planogram_export_url="http://planogram.local/decisions",
         publication_http_timeout_seconds=11,
     )
 
@@ -97,4 +98,5 @@ def test_publication_target_urls_are_centralized_settings() -> None:
     assert settings.supplier_forecast_share_url == "http://supplier.local/share"
     assert settings.tms_capacity_export_url == "http://tms.local/capacity"
     assert settings.store_app_task_export_url == "http://store-app.local/tasks"
+    assert settings.planogram_export_url == "http://planogram.local/decisions"
     assert settings.publication_http_timeout_seconds == 11
