@@ -1228,3 +1228,18 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 563 passed, 1 warning about `.pytest_cache` permissions.
 - R5 ML and replenishment production status: completed foundation.
 - Remaining focused sprint count after ML-5: 8 sprints (`DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## DEP-1 Environment Topology
+
+- DEP-1 completed as environment topology foundation.
+- Completion note: `docs/context/DEP1_COMPLETION.md`.
+- Specification added: `DEPLOYMENT_TOPOLOGY_MATRIX.md`.
+- Infrastructure added:
+  - `infra/prod/.env.example`;
+  - `infra/prod/README.md`.
+- Tests added:
+  - `tests/deployment/test_environment_topology.py`.
+- Verification:
+  - `pytest tests/deployment/test_environment_topology.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 11 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 567 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after DEP-1: 7 sprints (`DEP-2..DEP-4`, `PILOT-1..PILOT-5`).

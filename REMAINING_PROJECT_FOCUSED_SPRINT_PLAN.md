@@ -59,7 +59,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | Completed foundation |
 | ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | Completed foundation |
 | ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | Completed foundation |
-| DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | IH-2 |
+| DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | Completed foundation |
 | DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | DEP-1 |
 | DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | DEP-1 |
 | DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | IH-4, DEP-2 |
@@ -697,6 +697,12 @@ Acceptance criteria:
 
 - each environment can be deployed reproducibly;
 - configuration is centralized.
+
+Completion checkpoint:
+
+- DEP-1 foundation scope is fixed in `DEPLOYMENT_TOPOLOGY_MATRIX.md`;
+- `infra/prod/.env.example` and `infra/prod/README.md` define production environment rules without committed secret values;
+- automated tests validate DEV/TEST/STAGE/PROD templates and production auth/mock safeguards.
 
 ### DEP-2. CI/CD Release Gates
 
