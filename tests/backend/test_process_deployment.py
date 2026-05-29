@@ -100,8 +100,9 @@ def test_process_deployment_deployability_report_finds_model_fix_items() -> None
     assert report.bpmn_runtime_deployable > 0
     assert report.dmn_governance_artifacts > 0
     assert report.cmmn_governance_artifacts > 0
-    assert report.bpmn_requires_model_fix >= 1
-    assert any(issue.element_id == "source_batch_accepted_gateway" for issue in report.issues)
+    assert report.bpmn_requires_model_fix == 0
+    assert report.bpmn_runtime_deployable == report.bpmn_total
+    assert report.issues == ()
 
 
 def test_process_deployment_normalizes_service_tasks_for_flowable() -> None:

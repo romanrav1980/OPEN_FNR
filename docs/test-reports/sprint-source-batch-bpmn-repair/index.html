@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Source Batch BPMN Repair</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Source Batch BPMN Repair</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем исправление бизнес-процесса публикации входного source batch. До ремонта Flowable блокировал
+          процесс из-за gateway без исходящего sequence flow. Тест нужен, чтобы доказать, что процесс не только
+          описан в документах, но и разворачивается в реальном Process Engine.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/source-batch-bpmn-repair-admin.png" alt="Admin Console after source batch BPMN repair" />
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процесса</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Добавляем sequence flows от старта до publication branch и recovery branch.</td>
+              <td>Сделать BPMN-модель исполняемой для Flowable.</td>
+              <td>Gateway <code>source_batch_accepted_gateway</code> имеет outgoing flows.</td>
+              <td class="ok">Sequence flows добавлены.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Запускаем deployability report.</td>
+              <td>Проверить, что больше нет blocker-issues.</td>
+              <td><code>bpmn_requires_model_fix = 0</code>.</td>
+              <td class="ok">38 / 38 BPMN deployable.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Деплоим runtime-safe package в Flowable.</td>
+              <td>Получить live evidence после ремонта процесса.</td>
+              <td>Flowable возвращает HTTP 201 и новый deployment id.</td>
+              <td class="ok"><code>0ad2ac04-5b3c-11f1-b6e2-aeebf3826aa0</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>BPMN total</td><td class="ok">38</td></tr>
+            <tr><td>BPMN runtime-deployable</td><td class="ok">38</td></tr>
+            <tr><td>Model fix items</td><td class="ok">0</td></tr>
+            <tr><td>Targeted tests</td><td class="ok">13 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

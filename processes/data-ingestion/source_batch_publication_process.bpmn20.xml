@@ -16,5 +16,19 @@
     <bpmn:serviceTask id="open_recovery_case" name="Open source batch recovery case" />
     <bpmn:endEvent id="end_published" name="Clean data published" />
     <bpmn:endEvent id="end_blocked" name="Source batch blocked" />
+    <bpmn:sequenceFlow id="flow_start_to_manifest" sourceRef="start_batch_arrived" targetRef="load_manifest" />
+    <bpmn:sequenceFlow id="flow_manifest_to_discovery" sourceRef="load_manifest" targetRef="discover_source_files" />
+    <bpmn:sequenceFlow id="flow_discovery_to_schema" sourceRef="discover_source_files" targetRef="validate_schema" />
+    <bpmn:sequenceFlow id="flow_schema_to_counts" sourceRef="validate_schema" targetRef="validate_counts_checksum" />
+    <bpmn:sequenceFlow id="flow_counts_to_gate" sourceRef="validate_counts_checksum" targetRef="evaluate_source_batch_gate" />
+    <bpmn:sequenceFlow id="flow_gate_to_decision" sourceRef="evaluate_source_batch_gate" targetRef="source_batch_accepted_gateway" />
+    <bpmn:sequenceFlow id="flow_decision_to_publish" sourceRef="source_batch_accepted_gateway" targetRef="publish_clean_canonical" />
+    <bpmn:sequenceFlow id="flow_decision_to_review" sourceRef="source_batch_accepted_gateway" targetRef="review_source_batch_blocker" />
+    <bpmn:sequenceFlow id="flow_publish_to_lineage" sourceRef="publish_clean_canonical" targetRef="write_lineage" />
+    <bpmn:sequenceFlow id="flow_lineage_to_audit" sourceRef="write_lineage" targetRef="write_publication_audit" />
+    <bpmn:sequenceFlow id="flow_audit_to_published" sourceRef="write_publication_audit" targetRef="end_published" />
+    <bpmn:sequenceFlow id="flow_review_to_approval" sourceRef="review_source_batch_blocker" targetRef="approve_reprocessing" />
+    <bpmn:sequenceFlow id="flow_approval_to_recovery_case" sourceRef="approve_reprocessing" targetRef="open_recovery_case" />
+    <bpmn:sequenceFlow id="flow_recovery_case_to_blocked" sourceRef="open_recovery_case" targetRef="end_blocked" />
   </bpmn:process>
 </bpmn:definitions>

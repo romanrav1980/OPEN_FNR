@@ -457,7 +457,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer, routed UI shell, Flowable deployment package, Flowable REST upload gate, live Flowable runtime evidence and pilot shadow pack are implemented and verified. Next: repair the remaining source batch BPMN model defect, then connect actual pilot source files/API credentials and run a real-data rehearsal.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer, routed UI shell, Flowable deployment package, Flowable REST upload gate, live Flowable runtime evidence, source batch BPMN repair and pilot shadow pack are implemented and verified. Next: decide DMN/CMMN runtime strategy, then connect actual pilot source files/API credentials and run a real-data rehearsal.
 
 ## Post-Sprint Planning Artifacts
 
@@ -475,6 +475,7 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Flowable deployment package test report: `docs/test-reports/sprint-flowable-deployment-package/index.html`.
 - Flowable REST upload gate test report: `docs/test-reports/sprint-flowable-rest-upload/index.html`.
 - Live Flowable deployment evidence report: `docs/test-reports/sprint-flowable-live-deployment/index.html`.
+- Source batch BPMN repair report: `docs/test-reports/sprint-source-batch-bpmn-repair/index.html`.
 
 ## H1 Industrial Hardening Artifacts
 

@@ -306,6 +306,24 @@ Status: completed for runtime-safe BPMN deployment evidence.
 - DMN/CMMN remain governed package artifacts until runtime support is explicitly enabled and tested.
 - Test evidence: `docs/test-reports/sprint-flowable-live-deployment/index.html`.
 
+## PROC-MODEL-FIX-1. Source Batch BPMN Repair
+
+Status: completed.
+
+### Scope
+
+- repair source batch publication process sequence flow;
+- remove deployability blocker from `source_batch_accepted_gateway`;
+- redeploy runtime-safe BPMN package to Flowable;
+- prove 38 / 38 BPMN runtime deployability.
+
+### Current Implementation
+
+- BPMN file: `processes/data-ingestion/source_batch_publication_process.bpmn20.xml`.
+- Runtime-safe subset after repair: 38 of 38 BPMN files deployable.
+- Live deployment evidence: Flowable returned deployment id `0ad2ac04-5b3c-11f1-b6e2-aeebf3826aa0`.
+- Test evidence: `docs/test-reports/sprint-source-batch-bpmn-repair/index.html`.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.

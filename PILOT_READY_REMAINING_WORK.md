@@ -1,7 +1,7 @@
 # OPEN FNR Pilot-Ready Remaining Work
 
 Date: 2026-05-29
-Status: handoff after live Flowable runtime deployment checkpoint.
+Status: handoff after source batch BPMN repair checkpoint.
 
 ## What Is Now Closed
 
@@ -23,6 +23,7 @@ Status: handoff after live Flowable runtime deployment checkpoint.
 | Flowable deployment package | closed for deployment manifest/checksum gate | `docs/test-reports/sprint-flowable-deployment-package/index.html` |
 | Flowable REST upload gate | closed for configurable dry run and execute path | `docs/test-reports/sprint-flowable-rest-upload/index.html` |
 | Live Flowable runtime evidence | closed for runtime-safe BPMN subset | `docs/test-reports/sprint-flowable-live-deployment/index.html` |
+| Source batch BPMN repair | closed for 38 / 38 runtime-deployable BPMN | `docs/test-reports/sprint-source-batch-bpmn-repair/index.html` |
 | Pilot shadow pack | closed for first runbook/rollback package | `docs/test-reports/sprint-pilot-shadow-pack/index.html` |
 | Backend regression | green | `python -m pytest` -> 418 passed |
 | Frontend build | green | `npm.cmd run build` |
@@ -36,7 +37,7 @@ Status: handoff after live Flowable runtime deployment checkpoint.
 | OIDC/JWT middleware | Authenticate real users and service clients | First FastAPI JWT boundary implemented; next add signature/JWKS verification details | Unauthorized calls rejected, valid token maps to user/roles |
 | Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | First `policy.py` implemented for Security API; next migrate remaining domain endpoints | Security tests cover positive/negative object-level access |
 | Routed UI productization | Move from single Control Tower to operational pages | First hash-route shell implemented; next split modules into route-specific pages | E2E smoke covers forecast, replenishment, exceptions, admin |
-| Process deployment pipeline | Deploy BPMN runtime subset and govern DMN/CMMN artifacts | Live DEV Flowable deployment completed for 37 runtime-safe BPMN files | Fix remaining BPMN model defect and decide DMN/CMMN runtime support |
+| Process deployment pipeline | Deploy BPMN runtime subset and govern DMN/CMMN artifacts | Live DEV Flowable deployment completed for 38 runtime-safe BPMN files | Decide DMN/CMMN runtime support |
 | Production deployment decision | Choose Kubernetes or hardened production Compose | Deployment topology doc and environment matrix | PROD-like dry run has rollback and health checks |
 | Pilot rehearsal | Run a limited real-data shadow pilot | Shadow pack implemented; next run with actual source files/API credentials | KPI baseline vs OPEN FNR report signed by business |
 
@@ -47,10 +48,10 @@ Status: handoff after live Flowable runtime deployment checkpoint.
    - run `/data/ingestion/pilot-shadow-load/plan`;
    - run clean publication and daily gate on the real business date.
 
-2. `PROC-MODEL-FIX-1 Source Batch BPMN Repair`
-   - add missing sequence flows to `source_batch_publication_process.bpmn20.xml`;
-   - redeploy runtime-safe Flowable package;
-   - promote BPMN deployability gate to 38 / 38.
+2. `PROC-RUNTIME-4 DMN/CMMN Runtime Strategy`
+   - decide whether DMN/CMMN should be deployed to Flowable runtime or kept as governed decision/case artifacts;
+   - if deployed, add engine-specific deployment route and tests;
+   - if governed only, document runtime boundary and UI wording.
 
 ## Current Risk Register
 
@@ -59,12 +60,12 @@ Status: handoff after live Flowable runtime deployment checkpoint.
 | No real source samples yet | Real-data rehearsal cannot be proven end to end | Provide POS/WMS/ERP/MDM/promo files or API specs for `REAL-PILOT-1` |
 | OIDC details unknown | Security middleware cannot be production-final | Fill issuer/audience/JWKS env values and add cryptographic signature validation |
 | UI still keeps most modules in one file | Productization velocity and test isolation suffer | Continue route split module by module after pilot source wiring |
-| One BPMN model requires repair | Source batch publication process is not runtime-deployable yet | Fix gateway outgoing sequence flows and rerun deployability gate |
+| DMN/CMMN runtime support not finalized | Decision/case artifacts are governed but not proven in Flowable runtime | Decide runtime strategy and test the chosen route |
 | Performance still synthetic/smoke | EPYC sizing not proven on real data | Run pilot-scale synthetic plus first real-data profile before controlled export |
 
 ## Saved Context For Resume
 
-- Latest pushed hardening commit before this checkpoint: `2a03408`; current checkpoint is the live Flowable deployment evidence work.
-- Backend regression count after PROC-DEPLOY-3: 418 tests passed.
+- Latest pushed hardening commit before this checkpoint: `2d25249`; current checkpoint is the source batch BPMN repair work.
+- Backend regression count after PROC-MODEL-FIX-1: 418 tests passed.
 - Target adapter reports are under `docs/test-reports`.
 - The next autonomous implementation should start with `REAL-PILOT-1 Actual Source Connection` when real source files or API credentials are available.
