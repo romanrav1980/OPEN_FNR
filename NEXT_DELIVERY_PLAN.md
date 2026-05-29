@@ -7,6 +7,8 @@ Scope: industrial hardening, production deployment, real integrations and pilot 
 
 Move OPEN FNR from a completed functional prototype with process/UI/API coverage and hardened outbound target adapters to a pilot-ready industrial system connected to real enterprise data sources.
 
+Focused execution plan: [REMAINING_PROJECT_FOCUSED_SPRINT_PLAN.md](REMAINING_PROJECT_FOCUSED_SPRINT_PLAN.md). This document is the tactical source for the remaining work and keeps execution limited to one active release at a time.
+
 ## Release Map
 
 | Release | Name | Goal | Exit criteria |
@@ -178,11 +180,8 @@ Detailed industrial hardening sprint execution is tracked in [INDUSTRIAL_HARDENI
 
 ## Immediate Next Actions
 
-1. Approve pilot scope: stores, categories, SKU, suppliers and regions.
-2. Collect source contracts and sample files/API specs from POS, ERP, WMS, DWH, MDM and promo systems.
-3. Provide real endpoint details for ERP/WMS/DWH/BI/auto-order, supplier portal, TMS, Store App, planogram and IdP.
-4. Decide production deployment mode: Kubernetes vs production Compose.
-5. Choose OIDC/JWT provider details and token validation parameters.
-6. Prioritize UI productization pages for pilot users.
-7. Start SUP-1 Source SLA Runtime Controls.
-8. Start PN-2 Process Navigator UI Shell using the existing PN-1 backend contract.
+1. Start `IH-1 Persistence Inventory And Repository Boundaries`.
+2. Execute `IH-2 PostgreSQL Persistence And Migrations`.
+3. Freeze real source contracts in `RI-1` only after persistence boundaries are known.
+4. Keep Process Navigator PN-3..PN-12 closed; do not reopen it unless a pilot blocker is found.
+5. Use [REMAINING_PROJECT_FOCUSED_SPRINT_PLAN.md](REMAINING_PROJECT_FOCUSED_SPRINT_PLAN.md) as the active sprint backlog.

@@ -656,3 +656,18 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `npm.cmd run build` in `apps/frontend` -> passed.
   - `pytest tests/backend/test_process_navigator.py tests/orchestration/test_process_health_digest.py tests/performance/test_process_navigator_performance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 34 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 469 passed, 1 warning about `.pytest_cache` permissions.
+
+## Remaining Project Focused Plan
+
+- New tactical plan: `REMAINING_PROJECT_FOCUSED_SPRINT_PLAN.md`.
+- The plan wraps all remaining work into focused releases and sprints:
+  - `IH-1..IH-4` industrial hardening;
+  - `RI-1..RI-6` real integrations;
+  - `SEC-1..SEC-4` production security;
+  - `UI-1..UI-5` UI productization;
+  - `ML-1..ML-5` ML/replenishment production;
+  - `DEP-1..DEP-4` deployment and operations;
+  - `PILOT-1..PILOT-5` pilot launch.
+- Focus rule: one active release at a time and at most one preparation sprint in discovery.
+- Recommended next sprint: `IH-1 Persistence Inventory And Repository Boundaries`, followed by `IH-2 PostgreSQL Persistence And Migrations`.
+- `NEXT_DELIVERY_PLAN.md` now references this focused sprint plan and uses it as the tactical source for remaining work.
