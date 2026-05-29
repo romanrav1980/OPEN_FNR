@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - PN-2 Process Navigator UI Shell</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #1e1e1e; color: #d4d4d4; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { margin: 0 0 12px; }
+      section { background: #252526; border: 1px solid #3a3a3a; padding: 18px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid #3a3a3a; padding: 10px; text-align: left; vertical-align: top; }
+      th { color: #b83a4b; }
+      code { color: #ffcf70; }
+      img { width: 100%; border: 1px solid #3a3a3a; margin-top: 12px; }
+      .ok { color: #8fd19e; font-weight: 700; }
+      .warn { color: #ffcf70; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>PN-2 Process Navigator UI Shell</h1>
+      <p>
+        Аннотация: тестируем первый UI-слой карты бизнес-процессов. Проверяем, что пользователь видит
+        отдельный маршрут Process Navigator, semantic zoom, карту доменов/процессов, выбранный BPMN-процесс,
+        алерты и edge-list, а данные приходят из backend-контракта <code>/process-navigator/*</code>.
+      </p>
+
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем <code>#/process-navigator</code>.</td>
+              <td>Проверить отдельную навигацию для процессной карты.</td>
+              <td>Маршрут активен, страница рендерится без ошибки.</td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем панель zoom Z0-Z4.</td>
+              <td>Карта должна поддерживать semantic zoom.</td>
+              <td>Пользователь видит уровни приближения.</td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем карту узлов.</td>
+              <td>Должны быть видны домены, процессы и статусы.</td>
+              <td>Отображаются nodes, edges, alerts и status counts.</td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем detail panel выбранного BPMN.</td>
+              <td>Пользователь должен понять владельца, домен, граф и открытые задачи.</td>
+              <td>Панель содержит owner, domain, BPMN graph, open tasks.</td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Проверяем таблицу алертов.</td>
+              <td>Карта должна показывать несоответствия, а не только схему.</td>
+              <td>Видны severity, source и recommended action.</td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тестирование бизнес-процесса</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Почему это важно</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Получаем карту процессов из backend.</td>
+              <td>Бизнес-процессы должны быть управляемыми объектами, а не статичной картинкой.</td>
+              <td class="ok">API возвращает 124 nodes и 96 edges для zoom 1.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Выбираем BPMN-процесс.</td>
+              <td>Планировщик должен быстро перейти от домена к конкретному процессу.</td>
+              <td class="ok">Detail panel показывает выбранный BPMN.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Смотрим алерты.</td>
+              <td>SLA и BPMN quality challenges должны быть видимы до production gate.</td>
+              <td class="ok">Алерты показаны с recommended action.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем fallback.</td>
+              <td>UI не должен становиться пустым при недоступности API.</td>
+              <td class="ok">Fallback dataset есть в frontend.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Команды</h2>
+        <table>
+          <tbody>
+            <tr>
+              <td>Frontend build</td>
+              <td><code>npm.cmd run build</code></td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>Backend health</td>
+              <td><code>curl.exe -s http://127.0.0.1:8000/health</code></td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>Process map API</td>
+              <td><code>curl.exe -s http://127.0.0.1:8000/process-navigator/map?zoom=1</code></td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>Screenshot</td>
+              <td><code>npx.cmd -p playwright playwright screenshot --full-page ...</code></td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Скриншот</h2>
+        <img src="screenshots/process-navigator-map.png" alt="Process Navigator UI shell screenshot" />
+      </section>
+
+      <section>
+        <h2>Остаток</h2>
+        <p class="warn">
+          После PN-2 осталось 25 спринтов до controlled pilot: 10 SUP, 4 PN, 4 real integration,
+          6 productization/security/load and 2 pilot с учетом пересечения SUP-9/PN.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

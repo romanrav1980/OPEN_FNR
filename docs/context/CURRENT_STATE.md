@@ -14,6 +14,7 @@ Latest planning and navigation additions:
 - Process Navigator map specification: `PROCESS_NAVIGATOR_MAP_SPEC.md`.
 - Process Navigator backend API: `/process-navigator/map`, `/process-navigator/alerts`, `/process-navigator/processes/{process_key}/drilldown`.
 - Tactical work plan updated in `NEXT_DELIVERY_PLAN.md`: SUP-1...SUP-10 and PN-1...PN-6 are now part of the delivery backlog.
+- PN-2 Process Navigator UI Shell is implemented at `#/process-navigator` with zoom controls, map nodes, selected BPMN detail and alert tables.
 
 ## Local Infrastructure
 

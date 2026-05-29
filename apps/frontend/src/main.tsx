@@ -171,6 +171,68 @@ type BpmnQualityApiResponse = {
   cognitive_challenge_count: number;
 };
 
+type ProcessNavigatorNode = {
+  id: string;
+  label: string;
+  node_type: string;
+  domain: string;
+  level: number;
+  status: string;
+  owner_role: string | null;
+  artifact_type: string | null;
+  artifact_path: string | null;
+  count: number;
+  alert_count: number;
+  challenge_count: number;
+};
+
+type ProcessNavigatorEdge = {
+  source: string;
+  target: string;
+  edge_type: string;
+  label: string | null;
+};
+
+type ProcessNavigatorMapApiResponse = {
+  zoom_level: number;
+  semantic_level: string;
+  node_count: number;
+  edge_count: number;
+  nodes: ProcessNavigatorNode[];
+  edges: ProcessNavigatorEdge[];
+  legend: Record<string, string>;
+};
+
+type ProcessNavigatorAlert = {
+  alert_id: string;
+  severity: string;
+  domain: string;
+  process_key: string | null;
+  source: string;
+  message: string;
+  recommended_action: string;
+  status: string;
+};
+
+type ProcessNavigatorAlertApiResponse = {
+  items: ProcessNavigatorAlert[];
+};
+
+type ProcessNavigatorDrilldownApiResponse = {
+  process_key: string;
+  domain: string;
+  label: string;
+  owner_role: string;
+  artifact_path: string;
+  bpmn_node_count: number;
+  bpmn_edge_count: number;
+  related_artifacts: string[];
+  open_tasks: string[];
+  audit_event_count: number;
+  nodes: ProcessNavigatorNode[];
+  edges: ProcessNavigatorEdge[];
+};
+
 type SupplementCoverageApiResponse = {
   sections: string[];
   implemented_gates: string[];
@@ -450,6 +512,13 @@ const appRoutes: AppRoute[] = [
     hash: "#/admin",
     owner: "Security Owner",
     purpose: "Security, process governance, observability and release readiness.",
+  },
+  {
+    key: "process-navigator",
+    label: "Process Navigator",
+    hash: "#/process-navigator",
+    owner: "Process Owner",
+    purpose: "Zoomable business-process map with alerts, BPMN drill-down and task/audit context.",
   },
 ];
 
@@ -1356,6 +1425,155 @@ const storeFeedbackRows = [
   },
 ];
 
+const fallbackProcessNavigatorMap: ProcessNavigatorMapApiResponse = {
+  zoom_level: 1,
+  semantic_level: "process_definitions",
+  node_count: 8,
+  edge_count: 5,
+  legend: {
+    healthy: "No blocker or open escalation is present.",
+    attention: "Review warning, cognitive challenge or SLA escalation.",
+    blocked: "Blocker must be resolved before release or production gate.",
+  },
+  nodes: [
+    {
+      id: "domain:forecast",
+      label: "Forecasting",
+      node_type: "domain_cluster",
+      domain: "forecast",
+      level: 0,
+      status: "attention",
+      owner_role: null,
+      artifact_type: null,
+      artifact_path: null,
+      count: 5,
+      alert_count: 2,
+      challenge_count: 0,
+    },
+    {
+      id: "domain:replenishment",
+      label: "Replenishment",
+      node_type: "domain_cluster",
+      domain: "replenishment",
+      level: 0,
+      status: "attention",
+      owner_role: null,
+      artifact_type: null,
+      artifact_path: null,
+      count: 6,
+      alert_count: 1,
+      challenge_count: 0,
+    },
+    {
+      id: "domain:promo",
+      label: "Promo Planning",
+      node_type: "domain_cluster",
+      domain: "promo",
+      level: 0,
+      status: "attention",
+      owner_role: null,
+      artifact_type: null,
+      artifact_path: null,
+      count: 7,
+      alert_count: 2,
+      challenge_count: 0,
+    },
+    {
+      id: "process:forecast_review_process",
+      label: "Forecast review process",
+      node_type: "process_definition",
+      domain: "forecast",
+      level: 1,
+      status: "attention",
+      owner_role: "Forecast Planner",
+      artifact_type: "bpmn",
+      artifact_path: "processes/forecast/forecast_review_process.bpmn20.xml",
+      count: 1,
+      alert_count: 1,
+      challenge_count: 1,
+    },
+    {
+      id: "process:replenishment_approval_process",
+      label: "Replenishment approval process",
+      node_type: "process_definition",
+      domain: "replenishment",
+      level: 1,
+      status: "attention",
+      owner_role: "Replenishment Planner",
+      artifact_type: "bpmn",
+      artifact_path: "processes/process-engine/replenishment_approval_process.bpmn20.xml",
+      count: 1,
+      alert_count: 1,
+      challenge_count: 1,
+    },
+    {
+      id: "process:promo_draft_validation_process",
+      label: "Promo draft validation process",
+      node_type: "process_definition",
+      domain: "promo",
+      level: 1,
+      status: "healthy",
+      owner_role: "Promo Planner",
+      artifact_type: "bpmn",
+      artifact_path: "processes/promo/promo_draft_validation_process.bpmn20.xml",
+      count: 1,
+      alert_count: 0,
+      challenge_count: 1,
+    },
+  ],
+  edges: [
+    { source: "domain:forecast", target: "process:forecast_review_process", edge_type: "contains", label: null },
+    {
+      source: "domain:replenishment",
+      target: "process:replenishment_approval_process",
+      edge_type: "contains",
+      label: null,
+    },
+    { source: "domain:promo", target: "process:promo_draft_validation_process", edge_type: "contains", label: null },
+  ],
+};
+
+const fallbackProcessNavigatorAlerts: ProcessNavigatorAlert[] = [
+  {
+    alert_id: "sla-task-replenishment-001",
+    severity: "warning",
+    domain: "replenishment",
+    process_key: "replenishment_approval_process",
+    source: "process_task_sla",
+    message: "Replenishment task is escalated for planner review.",
+    recommended_action: "Open task inbox and resolve approval before publication.",
+    status: "open",
+  },
+  {
+    alert_id: "bpmn-quality-forecast-review",
+    severity: "challenge",
+    domain: "forecast",
+    process_key: "forecast_review_process",
+    source: "bpmn_quality_gate",
+    message: "Human task must have role, SLA and audit expectations confirmed.",
+    recommended_action: "Verify owner, escalation SLA and audit event before production release.",
+    status: "review",
+  },
+];
+
+const fallbackProcessNavigatorDrilldown: ProcessNavigatorDrilldownApiResponse = {
+  process_key: "forecast_review_process",
+  domain: "forecast",
+  label: "Forecast review process",
+  owner_role: "Forecast Planner",
+  artifact_path: "processes/forecast/forecast_review_process.bpmn20.xml",
+  bpmn_node_count: 5,
+  bpmn_edge_count: 4,
+  related_artifacts: [
+    "processes/forecast/forecast_review_required_decision.dmn.xml",
+    "processes/forecast/forecast_anomaly_case.cmmn.xml",
+  ],
+  open_tasks: ["task-forecast-001"],
+  audit_event_count: 0,
+  nodes: [],
+  edges: [],
+};
+
 function routeFromHash(hash: string): AppRoute {
   const routeKey = hash.replace("#/", "") || "control-tower";
   return appRoutes.find((route) => route.key === routeKey) ?? appRoutes[0];
@@ -1418,6 +1636,24 @@ function App() {
   const [runtimeTrueInventoryRows, setRuntimeTrueInventoryRows] =
     React.useState<TrueInventoryRow[]>(trueInventoryRows);
   const [runtimeStoreTaskRows, setRuntimeStoreTaskRows] = React.useState<StoreTaskRow[]>(storeTaskRows);
+  const [processNavigatorApiStatus, setProcessNavigatorApiStatus] =
+    React.useState<"loading" | "live" | "fallback">("loading");
+  const [processNavigatorZoom, setProcessNavigatorZoom] = React.useState(1);
+  const [selectedProcessKey, setSelectedProcessKey] = React.useState("forecast_review_process");
+  const [runtimeProcessMap, setRuntimeProcessMap] =
+    React.useState<ProcessNavigatorMapApiResponse>(fallbackProcessNavigatorMap);
+  const [runtimeProcessAlerts, setRuntimeProcessAlerts] =
+    React.useState<ProcessNavigatorAlert[]>(fallbackProcessNavigatorAlerts);
+  const [runtimeProcessDrilldown, setRuntimeProcessDrilldown] =
+    React.useState<ProcessNavigatorDrilldownApiResponse>(fallbackProcessNavigatorDrilldown);
+
+  const selectedProcessNode = runtimeProcessMap.nodes.find((node) => node.id === `process:${selectedProcessKey}`);
+  const processMapNodes = runtimeProcessMap.nodes.slice(0, processNavigatorZoom >= 3 ? 24 : 14);
+  const processMapAlertsForSelected = runtimeProcessAlerts.filter((alert) => alert.process_key === selectedProcessKey);
+  const processMapStatusCounts = runtimeProcessMap.nodes.reduce<Record<string, number>>((counts, node) => {
+    counts[node.status] = (counts[node.status] ?? 0) + 1;
+    return counts;
+  }, {});
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1459,6 +1695,68 @@ function App() {
       });
     return () => controller.abort();
   }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      fetch(apiUrl(`/process-navigator/map?zoom=${processNavigatorZoom}`), { signal: controller.signal }).then(
+        (response) => {
+          if (!response.ok) {
+            throw new Error(`Process Navigator map API returned ${response.status}`);
+          }
+          return response.json() as Promise<ProcessNavigatorMapApiResponse>;
+        },
+      ),
+      fetch(apiUrl("/process-navigator/alerts"), { signal: controller.signal }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process Navigator alerts API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessNavigatorAlertApiResponse>;
+      }),
+    ])
+      .then(([mapPayload, alertsPayload]) => {
+        setRuntimeProcessMap(mapPayload);
+        setRuntimeProcessAlerts(alertsPayload.items);
+        setProcessNavigatorApiStatus("live");
+        const selectedStillVisible = mapPayload.nodes.some((node) => node.id === `process:${selectedProcessKey}`);
+        const nextBpmnProcess = mapPayload.nodes.find(
+          (node) => node.node_type === "process_definition" && node.artifact_type === "bpmn",
+        );
+        if (!selectedStillVisible && nextBpmnProcess) {
+          setSelectedProcessKey(nextBpmnProcess.id.replace("process:", ""));
+        }
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setProcessNavigatorApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, [processNavigatorZoom, selectedProcessKey]);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/drilldown`), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process Navigator drilldown API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessNavigatorDrilldownApiResponse>;
+      })
+      .then((payload) => {
+        setRuntimeProcessDrilldown(payload);
+        setProcessNavigatorApiStatus((status) => (status === "fallback" ? status : "live"));
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setRuntimeProcessDrilldown(fallbackProcessNavigatorDrilldown);
+        setProcessNavigatorApiStatus((status) => (status === "live" ? "live" : "fallback"));
+      });
+    return () => controller.abort();
+  }, [selectedProcessKey]);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -2004,6 +2302,161 @@ function App() {
           <span>Process</span>
           <strong>BPMN / DMN / CMMN</strong>
         </article>
+      </section>
+
+      <section className="data-section process-navigator-section" aria-label="Process Navigator Map">
+        <div className="section-heading">
+          <div>
+            <h2>Process Navigator Map</h2>
+            <p>Semantic zoom from process domains to BPMN steps, alerts and audit context</p>
+          </div>
+          <span className={`status-dot process-status-${processNavigatorApiStatus}`}>
+            {processNavigatorApiStatus}
+          </span>
+        </div>
+        <div className="process-toolbar" aria-label="Process navigator controls">
+          <div className="zoom-control" aria-label="Semantic zoom">
+            {[0, 1, 2, 3, 4].map((zoom) => (
+              <button
+                aria-pressed={processNavigatorZoom === zoom}
+                className={processNavigatorZoom === zoom ? "zoom-active" : ""}
+                key={zoom}
+                onClick={() => setProcessNavigatorZoom(zoom)}
+                type="button"
+              >
+                Z{zoom}
+              </button>
+            ))}
+          </div>
+          <label>
+            Selected process
+            <select value={selectedProcessKey} onChange={(event) => setSelectedProcessKey(event.target.value)}>
+              {runtimeProcessMap.nodes
+                .filter((node) => node.node_type === "process_definition" && node.artifact_type === "bpmn")
+                .slice(0, 40)
+                .map((node) => (
+                  <option key={node.id} value={node.id.replace("process:", "")}>
+                    {node.label}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label>
+            Status
+            <input
+              readOnly
+              value={`healthy ${processMapStatusCounts.healthy ?? 0} / attention ${
+                processMapStatusCounts.attention ?? 0
+              } / blocked ${processMapStatusCounts.blocked ?? 0}`}
+            />
+          </label>
+          <label>
+            Semantic level
+            <input readOnly value={runtimeProcessMap.semantic_level} />
+          </label>
+        </div>
+        <div className="process-map-layout">
+          <div className="process-map-canvas" aria-label="Zoomable business process map">
+            <div className="process-map-header">
+              <span>{runtimeProcessMap.node_count} nodes</span>
+              <span>{runtimeProcessMap.edge_count} edges</span>
+              <span>{runtimeProcessAlerts.length} alerts</span>
+            </div>
+            <div className="process-node-grid">
+              {processMapNodes.map((node) => (
+                <button
+                  className={`process-node process-node-${node.status} process-node-${node.node_type}`}
+                  disabled={node.node_type !== "process_definition" || node.artifact_type !== "bpmn"}
+                  key={node.id}
+                  onClick={() => setSelectedProcessKey(node.id.replace("process:", ""))}
+                  type="button"
+                >
+                  <span>{node.domain}</span>
+                  <strong>{node.label}</strong>
+                  <small>
+                    {node.node_type} / alerts {node.alert_count}
+                  </small>
+                </button>
+              ))}
+            </div>
+          </div>
+          <aside className="process-detail-panel" aria-label="Selected process detail">
+            <span className="eyebrow">Selected BPMN</span>
+            <h3>{runtimeProcessDrilldown.label}</h3>
+            <dl>
+              <div>
+                <dt>Owner</dt>
+                <dd>{runtimeProcessDrilldown.owner_role}</dd>
+              </div>
+              <div>
+                <dt>Domain</dt>
+                <dd>{runtimeProcessDrilldown.domain}</dd>
+              </div>
+              <div>
+                <dt>BPMN graph</dt>
+                <dd>
+                  {runtimeProcessDrilldown.bpmn_node_count} nodes / {runtimeProcessDrilldown.bpmn_edge_count} edges
+                </dd>
+              </div>
+              <div>
+                <dt>Open tasks</dt>
+                <dd>{runtimeProcessDrilldown.open_tasks.length}</dd>
+              </div>
+            </dl>
+            <p>{selectedProcessNode?.artifact_path ?? runtimeProcessDrilldown.artifact_path}</p>
+            <div className="action-row">
+              <button type="button">Open BPMN</button>
+              <button type="button">Open Tasks</button>
+              <button type="button">Open Audit</button>
+            </div>
+          </aside>
+        </div>
+        <div className="process-map-layout">
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Alert</th>
+                  <th>Severity</th>
+                  <th>Source</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(processMapAlertsForSelected.length > 0 ? processMapAlertsForSelected : runtimeProcessAlerts.slice(0, 6)).map(
+                  (alert) => (
+                    <tr key={alert.alert_id}>
+                      <td>{alert.message}</td>
+                      <td>{alert.severity}</td>
+                      <td>{alert.source}</td>
+                      <td>{alert.recommended_action}</td>
+                    </tr>
+                  ),
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Runtime edge</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {runtimeProcessMap.edges.slice(0, 8).map((edge) => (
+                  <tr key={`${edge.source}-${edge.target}-${edge.edge_type}`}>
+                    <td>
+                      {edge.source} &rarr; {edge.target}
+                    </td>
+                    <td>{edge.edge_type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <section className="service-section">

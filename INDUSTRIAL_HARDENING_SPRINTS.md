@@ -488,3 +488,27 @@ Status: completed for backend contract and design specification.
 - Specification: `PROCESS_NAVIGATOR_MAP_SPEC.md`.
 - Test suite: `tests/backend/test_process_navigator.py`.
 - Test evidence: `docs/test-reports/sprint-process-navigator-map/index.html`.
+
+## PROC-NAV-2. Process Navigator UI Shell
+
+Status: completed for first UI shell.
+
+### Scope
+
+- add `Process Navigator` route to the frontend navigation;
+- render a business-process map section backed by `/process-navigator/map`;
+- expose semantic zoom controls `Z0` through `Z4`;
+- show selected BPMN process details, process alerts and map edges;
+- keep API fallback data so the UI does not become blank when backend is unavailable.
+
+### Current Implementation
+
+- UI files:
+  - `apps/frontend/src/main.tsx`;
+  - `apps/frontend/src/styles.css`.
+- Route: `#/process-navigator`.
+- Backend dependencies:
+  - `/process-navigator/map?zoom=0..4`;
+  - `/process-navigator/alerts`;
+  - `/process-navigator/processes/{process_key}/drilldown`.
+- Test evidence: `docs/test-reports/sprint-pn-2-process-navigator-ui/index.html`.

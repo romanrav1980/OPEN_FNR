@@ -149,7 +149,7 @@ Source document: [PROCESS_NAVIGATOR_MAP_SPEC.md](PROCESS_NAVIGATOR_MAP_SPEC.md).
 | SUP-9 | Process Navigator Map | zoomable process map, alerts and BPMN drill-down |
 | SUP-10 | Pilot Production Gate | unified Supplement 1 go/no-go for pilot |
 | PN-1 | Process Navigator Backend Map Contract | completed API contract and tests |
-| PN-2 | Process Navigator UI Shell | routed map UI, filters and detail panel |
+| PN-2 | Process Navigator UI Shell | completed routed map UI, filters and detail panel |
 | PN-3 | Process Runtime Overlay | Flowable task/instance/history overlay |
 | PN-4 | Alert Correlation | OpenSearch/Prometheus/Process Engine alert correlation |
 | PN-5 | BPMN Exact Viewer | bpmn-js diagram panel and drill-down |
