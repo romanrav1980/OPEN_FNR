@@ -149,6 +149,26 @@ type SupplierShareApiItem = {
   export_channel: string;
 };
 
+type PurchaseProposalRow = {
+  proposal: string;
+  sku: string;
+  dc: string;
+  qty: string;
+  supplier: string;
+  status: string;
+  reason: string;
+};
+
+type PurchaseProposalApiItem = {
+  proposal_id: string;
+  sku_id: string;
+  dc_id: string;
+  qty: number;
+  status: string;
+  selected_supplier_id: string;
+  decision: { reason: string };
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -894,7 +914,7 @@ const supplierRows = [
   { supplier: "SUP_CHEAP", lead: "5 days", fill: "90%", cost: "96.00", target: "40%", current: "48%", cutoff: "12:00" },
 ];
 
-const purchaseProposalRows = [
+const purchaseProposalRows: PurchaseProposalRow[] = [
   {
     proposal: "purchase-proposal-20260528-001",
     sku: "SKU001",
@@ -1074,6 +1094,9 @@ function App() {
     React.useState<PublicationPackageRow[]>(publicationPackages);
   const [supplierApiStatus, setSupplierApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeSupplierShareRows, setRuntimeSupplierShareRows] = React.useState<SupplierShareRow[]>(supplierShareRows);
+  const [procurementApiStatus, setProcurementApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimePurchaseProposalRows, setRuntimePurchaseProposalRows] =
+    React.useState<PurchaseProposalRow[]>(purchaseProposalRows);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1210,6 +1233,38 @@ function App() {
           return;
         }
         setSupplierApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/procurement/proposals"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Procurement API returned ${response.status}`);
+        }
+        return response.json() as Promise<{ items: PurchaseProposalApiItem[] }>;
+      })
+      .then((payload) => {
+        setRuntimePurchaseProposalRows(
+          payload.items.map((proposal) => ({
+            proposal: proposal.proposal_id,
+            sku: proposal.sku_id,
+            dc: proposal.dc_id,
+            qty: proposal.qty.toLocaleString("ru-RU"),
+            supplier: proposal.selected_supplier_id,
+            status: proposal.status,
+            reason: proposal.decision.reason,
+          })),
+        );
+        setProcurementApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setProcurementApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3899,7 +3954,12 @@ function App() {
           <article className="feature-summary">
             <span>Purchase Proposal</span>
             <strong>1 200 units to DC001</strong>
-            <p>Procurement Planner can approve before supplier order cutoff and export to ERP mock.</p>
+            <p>Procurement Planner can approve before supplier order cutoff and export to configured ERP target.</p>
+          </article>
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{procurementApiStatus}</strong>
+            <p>Purchase proposals are loaded from `/procurement/proposals` when backend is available.</p>
           </article>
         </div>
         <div className="table-shell">
@@ -3944,7 +4004,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {purchaseProposalRows.map((row) => (
+              {runtimePurchaseProposalRows.map((row) => (
                 <tr key={row.proposal}>
                   <td>{row.proposal}</td>
                   <td>{row.sku}</td>
@@ -3973,10 +4033,11 @@ function App() {
             </div>
           </aside>
           <aside className="dq-detail">
-            <span className="eyebrow">ERP Mock</span>
-            <h3>Idempotent supplier order</h3>
+            <span className="eyebrow">ERP Target</span>
+            <h3>Idempotent supplier order export</h3>
             <p>
               Supplier order export carries proposal id, selected supplier, quantity and idempotency key.
+              Target URL is controlled by environment configuration.
             </p>
           </aside>
         </div>

@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 376 automated tests passed.
+Current backend regression status: 379 automated tests passed.
 
 ## Local Infrastructure
 
@@ -358,13 +358,15 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Procurement API: `apps/backend/open_fnr_api/procurement.py`.
 - Procurement tests: `tests/backend/test_procurement.py`.
+- Procurement ERP export send API with service account gate, local fallback and configurable `OPEN_FNR_ERP_EXPORT_URL`.
 - Procurement process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Purchase proposal BPMN: `processes/procurement/purchase_proposal_process.bpmn20.xml`.
 - Supplier selection DMN: `processes/procurement/supplier_selection_decision.dmn.xml`.
 - Supplier share exception DMN: `processes/procurement/supplier_share_exception_decision.dmn.xml`.
 - Supplier constraint CMMN: `processes/procurement/supplier_constraint_case.cmmn.xml`.
-- UI Purchase Proposal section with supplier comparison, target share warning and ERP mock export action.
+- UI Purchase Proposal section with supplier comparison, target share warning and configurable ERP target export action.
 - HTML test report with screenshot: `docs/test-reports/sprint-31-procurement-optimization/index.html`.
+- Procurement ERP target hardening report: `docs/test-reports/sprint-procurement-erp-target/index.html`.
 
 ## Sprint 32 Artifacts
 

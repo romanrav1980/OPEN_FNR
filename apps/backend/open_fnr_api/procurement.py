@@ -1,8 +1,14 @@
+import json
 from datetime import datetime, timezone
 from enum import StrEnum
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+
+from .audit import AuditEventCreate, record_audit_event_if_enabled
+from .config import settings
 
 
 router = APIRouter(prefix="/procurement", tags=["procurement"])
@@ -50,6 +56,28 @@ class ProcurementActionRequest(BaseModel):
     actor: str = Field(min_length=1)
     actor_role: str
     reason: str = Field(min_length=1)
+
+
+class PurchaseErpExportRequest(BaseModel):
+    actor: str = Field(min_length=1)
+    actor_role: str = Field(default="Procurement Planner", min_length=1)
+    service_account: str = Field(min_length=1)
+
+
+class PurchaseErpExportPreview(BaseModel):
+    proposal_id: str
+    target: str
+    supplier_id: str
+    qty: int = Field(gt=0)
+    idempotency_key: str
+    export_channel: str
+
+
+class PurchaseErpExportResponse(BaseModel):
+    export: PurchaseErpExportPreview
+    response_code: str
+    response_message: str
+    audit_recorded: bool
 
 
 CONTRACTS: tuple[SupplierContract, ...] = (
@@ -108,6 +136,41 @@ def build_purchase_proposal() -> PurchaseProposal:
     )
 
 
+def purchase_erp_export_channel() -> str:
+    return "http_api" if settings.erp_export_url else "local_fallback"
+
+
+def build_purchase_erp_export(proposal: PurchaseProposal) -> PurchaseErpExportPreview:
+    return PurchaseErpExportPreview(
+        proposal_id=proposal.proposal_id,
+        target="ERP supplier purchase",
+        supplier_id=proposal.selected_supplier_id,
+        qty=proposal.qty,
+        idempotency_key=f"{proposal.proposal_id}:{proposal.selected_supplier_id}:v1",
+        export_channel=purchase_erp_export_channel(),
+    )
+
+
+def send_purchase_erp_export_to_target(export: PurchaseErpExportPreview) -> tuple[str, str]:
+    if not settings.erp_export_url:
+        return "202", "sent to local ERP purchase fallback"
+    request = Request(
+        settings.erp_export_url,
+        data=json.dumps(export.model_dump(mode="json"), ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "Idempotency-Key": export.idempotency_key,
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=settings.publication_http_timeout_seconds) as response:
+            response_body = response.read().decode("utf-8", errors="replace").strip()
+            return str(response.status), response_body or "sent to ERP purchase target"
+    except URLError as exc:
+        raise HTTPException(status_code=503, detail=f"ERP purchase target unavailable: {exc}") from exc
+
+
 @router.get("/contracts")
 def list_supplier_contracts() -> dict[str, object]:
     return {"items": [item.model_dump(mode="json") for item in CONTRACTS], "total": len(CONTRACTS)}
@@ -135,10 +198,41 @@ def get_purchase_erp_export(proposal_id: str) -> dict[str, object]:
     proposal = build_purchase_proposal()
     if proposal.proposal_id != proposal_id:
         raise HTTPException(status_code=404, detail="purchase proposal not found")
-    return {
-        "proposal_id": proposal_id,
-        "target": "ERP supplier purchase mock",
-        "supplier_id": proposal.selected_supplier_id,
-        "qty": proposal.qty,
-        "idempotency_key": f"{proposal_id}:{proposal.selected_supplier_id}:v1",
-    }
+    return build_purchase_erp_export(proposal).model_dump(mode="json")
+
+
+@router.post("/proposals/{proposal_id}/erp-export/send", response_model=PurchaseErpExportResponse)
+def send_purchase_erp_export(proposal_id: str, payload: PurchaseErpExportRequest) -> PurchaseErpExportResponse:
+    proposal = build_purchase_proposal()
+    if proposal.proposal_id != proposal_id:
+        raise HTTPException(status_code=404, detail="purchase proposal not found")
+    if payload.actor_role not in {"Supply Chain Manager", "Procurement Planner"}:
+        raise HTTPException(status_code=403, detail="procurement role required")
+    if payload.service_account != "svc-open-fnr-procurement-export":
+        raise HTTPException(status_code=403, detail="service account is not allowed to export purchase proposal")
+    export = build_purchase_erp_export(proposal)
+    response_code, response_message = send_purchase_erp_export_to_target(export)
+    event = record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="purchase_erp_export_sent",
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            object_type="purchase_proposal",
+            object_id=proposal.proposal_id,
+            action="send",
+            reason=f"Sent purchase proposal through {export.export_channel}",
+            correlation_id=export.idempotency_key,
+            payload={
+                "supplier_id": export.supplier_id,
+                "qty": export.qty,
+                "target": export.target,
+                "export_channel": export.export_channel,
+            },
+        )
+    )
+    return PurchaseErpExportResponse(
+        export=export,
+        response_code=response_code,
+        response_message=response_message,
+        audit_recorded=event is not None,
+    )
