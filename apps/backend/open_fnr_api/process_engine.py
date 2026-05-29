@@ -4,6 +4,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from .repositories import ProcessTaskEventRecord, ProcessTaskRecord, process_task_repository
+
 
 router = APIRouter(prefix="/process", tags=["process-engine"])
 
@@ -82,6 +84,38 @@ class CompleteTaskRequest(BaseModel):
 class CompleteTaskResponse(BaseModel):
     task: ProcessTask
     audit_events: tuple[AuditEvent, ...]
+
+
+def _task_to_repository_record(task: ProcessTask, payload: dict[str, object] | None = None) -> ProcessTaskRecord:
+    return ProcessTaskRecord(
+        task_id=task.task_id,
+        process_instance_id=task.process_instance_id,
+        process_key=task.process_key,
+        name=task.name,
+        status=task.status.value,
+        assigned_role=task.assigned_role,
+        candidate_roles=task.candidate_roles,
+        available_actions=task.available_actions,
+        sla_due_at=task.sla_due_at,
+        business_key=task.business_key,
+        payload=payload or {},
+        created_at=task.created_at,
+        updated_at=datetime.now(timezone.utc),
+        completed_at=datetime.now(timezone.utc) if task.status == TaskStatus.COMPLETED else None,
+    )
+
+
+def _audit_to_repository_record(event: AuditEvent, actor_role: str | None = None) -> ProcessTaskEventRecord:
+    return ProcessTaskEventRecord(
+        event_id=event.event_id,
+        process_instance_id=event.process_instance_id,
+        task_id=event.task_id,
+        event_type=event.event_type.value,
+        actor=event.actor,
+        actor_role=actor_role,
+        message=event.message,
+        created_at=event.created_at,
+    )
 
 
 PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
@@ -1256,28 +1290,42 @@ def complete_task(task_id: str, payload: CompleteTaskRequest) -> CompleteTaskRes
 
     completed_task = task.model_copy(update={"status": TaskStatus.COMPLETED})
     now = datetime(2026, 5, 28, 12, 5, tzinfo=timezone.utc)
+    audit_events = (
+        AuditEvent(
+            event_id=f"audit-{task_id}-comment",
+            process_instance_id=task.process_instance_id,
+            task_id=task.task_id,
+            event_type=AuditEventType.COMMENT_ADDED,
+            actor=payload.actor,
+            message=payload.comment,
+            created_at=now,
+        ),
+        AuditEvent(
+            event_id=f"audit-{task_id}-completed",
+            process_instance_id=task.process_instance_id,
+            task_id=task.task_id,
+            event_type=AuditEventType.TASK_COMPLETED,
+            actor=payload.actor,
+            message=f"Task completed with action {payload.action}.",
+            created_at=now,
+        ),
+    )
+    process_task_repository.upsert_task(
+        _task_to_repository_record(
+            completed_task,
+            payload={
+                "action": payload.action,
+                "comment": payload.comment,
+                "actor": payload.actor,
+                "actor_role": payload.actor_role,
+            },
+        )
+    )
+    for event in audit_events:
+        process_task_repository.append_event(_audit_to_repository_record(event, payload.actor_role))
     return CompleteTaskResponse(
         task=completed_task,
-        audit_events=(
-            AuditEvent(
-                event_id=f"audit-{task_id}-comment",
-                process_instance_id=task.process_instance_id,
-                task_id=task.task_id,
-                event_type=AuditEventType.COMMENT_ADDED,
-                actor=payload.actor,
-                message=payload.comment,
-                created_at=now,
-            ),
-            AuditEvent(
-                event_id=f"audit-{task_id}-completed",
-                process_instance_id=task.process_instance_id,
-                task_id=task.task_id,
-                event_type=AuditEventType.TASK_COMPLETED,
-                actor=payload.actor,
-                message=f"Task completed with action {payload.action}.",
-                created_at=now,
-            ),
-        ),
+        audit_events=audit_events,
     )
 
 

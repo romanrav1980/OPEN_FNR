@@ -1,9 +1,26 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import process_engine
 from open_fnr_api.main import app
 
 
 client = TestClient(app)
+
+
+class CapturingProcessTaskRepository:
+    mode = "in_memory"
+
+    def __init__(self) -> None:
+        self.tasks = []
+        self.events = []
+
+    def upsert_task(self, task):
+        self.tasks.append(task)
+        return task
+
+    def append_event(self, event):
+        self.events.append(event)
+        return event
 
 
 def test_process_definitions_include_bpmn_dmn_cmmn() -> None:
@@ -135,6 +152,28 @@ def test_task_completion_returns_audit_events() -> None:
     payload = response.json()
     assert payload["task"]["status"] == "completed"
     assert [event["event_type"] for event in payload["audit_events"]] == ["comment_added", "task_completed"]
+
+
+def test_task_completion_writes_repository_boundary(monkeypatch) -> None:
+    repository = CapturingProcessTaskRepository()
+    monkeypatch.setattr(process_engine, "process_task_repository", repository)
+
+    response = client.post(
+        "/process/tasks/task-promo-001/complete",
+        json={
+            "action": "complete",
+            "actor": "promo.planner@example.org",
+            "actor_role": "Promo Planner",
+            "comment": "Repository boundary check.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert repository.tasks[0].task_id == "task-promo-001"
+    assert repository.tasks[0].status == "completed"
+    assert repository.tasks[0].payload["action"] == "complete"
+    assert [event.event_type for event in repository.events] == ["comment_added", "task_completed"]
+    assert {event.actor_role for event in repository.events} == {"Promo Planner"}
 
 
 def test_task_completion_rejects_unavailable_action() -> None:

@@ -704,8 +704,17 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `ProcessTaskRepository`, `OperationalDecisionRepository`;
   - in-memory implementations for `OPEN_FNR_MOCK_MODE=true`;
   - PostgreSQL implementations with upsert/idempotency behavior.
+- Process runtime boundary:
+  - `/process/tasks/{task_id}/complete` still returns the same API payload;
+  - completion now writes completed task state and task events through `process_task_repository`.
+- Publication/export boundary:
+  - publication send/retry still returns the same API payload;
+  - send/retry now writes `OperationalDecisionRecord` through `operational_decision_repository` with idempotency key.
 - Tests added/updated:
   - `tests/backend/test_repositories.py`;
+  - `tests/backend/test_process_engine.py`;
+  - `tests/backend/test_publication.py`;
   - `tests/data/test_postgres_operational_schema.py`.
 - Verification:
   - `pytest tests/backend/test_repositories.py tests/data/test_postgres_operational_schema.py tests/architecture/test_persistence_inventory.py` -> 10 passed, 1 warning about `.pytest_cache` permissions.
+  - `pytest tests/backend/test_publication.py tests/backend/test_process_engine.py tests/backend/test_repositories.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.

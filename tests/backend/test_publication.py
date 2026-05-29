@@ -9,6 +9,17 @@ from open_fnr_api.publication import PUBLICATION_PACKAGES, all_items_approved, f
 client = TestClient(app)
 
 
+class CapturingOperationalDecisionRepository:
+    mode = "in_memory"
+
+    def __init__(self) -> None:
+        self.decisions = []
+
+    def upsert_decision(self, decision):
+        self.decisions.append(decision)
+        return decision
+
+
 def test_publication_packages_expose_status_idempotency_and_responses() -> None:
     response = client.get("/publication/packages")
     assert response.status_code == 200
@@ -74,6 +85,26 @@ def test_retry_failed_publication_package_increments_retry_count() -> None:
     payload = response.json()
     assert payload["package"]["status"] == "sent"
     assert payload["package"]["retry_count"] == 2
+
+
+def test_publication_send_writes_operational_decision_boundary(monkeypatch) -> None:
+    repository = CapturingOperationalDecisionRepository()
+    monkeypatch.setattr(publication, "operational_decision_repository", repository)
+
+    response = client.post(
+        "/publication/packages/pub-wms-orders-20260528-001/send",
+        json={
+            "actor": "integration.owner@example.org",
+            "service_account": "svc-open-fnr-export",
+            "idempotency_key": "wms:orders:20260528:repo",
+        },
+    )
+
+    assert response.status_code == 200
+    assert repository.decisions[0].decision_type == "publication_export"
+    assert repository.decisions[0].object_id == "pub-wms-orders-20260528-001"
+    assert repository.decisions[0].idempotency_key == "wms:orders:20260528:repo"
+    assert repository.decisions[0].payload["target"] == "wms"
 
 
 def test_send_publication_package_can_post_to_configured_http_target(monkeypatch) -> None:

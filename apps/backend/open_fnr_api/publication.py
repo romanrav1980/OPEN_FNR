@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
 from .config import settings
+from .repositories import OperationalDecisionRecord, operational_decision_repository
 
 
 router = APIRouter(prefix="/publication", tags=["publication"])
@@ -247,6 +248,27 @@ def send_export(package: PublicationPackage, request: ExportRequest) -> ExportRe
             },
         )
     )
+    operational_decision_repository.upsert_decision(
+        OperationalDecisionRecord(
+            decision_id=f"publication-send-{package.package_id}",
+            decision_type="publication_export",
+            object_type="publication_package",
+            object_id=package.package_id,
+            status=sent_package.status.value,
+            actor=request.actor,
+            actor_role="Integration Service",
+            idempotency_key=request.idempotency_key,
+            correlation_id=request.idempotency_key,
+            payload={
+                "target": package.target.value,
+                "response_code": target_result.response_code,
+                "response_message": target_result.response_message,
+                "item_count": len(package.items),
+            },
+            created_at=sent_package.sent_at or datetime.now(timezone.utc),
+            updated_at=sent_package.sent_at or datetime.now(timezone.utc),
+        )
+    )
     return ExportResponse(package=sent_package, duplicate=False)
 
 
@@ -280,6 +302,27 @@ def retry_export(package: PublicationPackage, request: ExportRequest) -> ExportR
                 "idempotency_key": request.idempotency_key,
                 "retry_count": retried_package.retry_count,
             },
+        )
+    )
+    operational_decision_repository.upsert_decision(
+        OperationalDecisionRecord(
+            decision_id=f"publication-retry-{package.package_id}",
+            decision_type="publication_export_retry",
+            object_type="publication_package",
+            object_id=package.package_id,
+            status=retried_package.status.value,
+            actor=request.actor,
+            actor_role="Integration Service",
+            idempotency_key=request.idempotency_key,
+            correlation_id=request.idempotency_key,
+            payload={
+                "target": package.target.value,
+                "response_code": target_result.response_code,
+                "response_message": target_result.response_message,
+                "retry_count": retried_package.retry_count,
+            },
+            created_at=retried_package.sent_at or datetime.now(timezone.utc),
+            updated_at=retried_package.sent_at or datetime.now(timezone.utc),
         )
     )
     return ExportResponse(package=retried_package, duplicate=False)
