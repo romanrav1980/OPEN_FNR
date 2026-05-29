@@ -64,6 +64,7 @@ The following files may contain default local development addresses because they
 - Business process audit must be controlled by `OPEN_FNR_AUDIT_ENABLED`; default is enabled.
 - Authentication must be controlled by `OPEN_FNR_AUTH_ENABLED`; DEV/TEST bypass must be controlled by `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED` and disabled in STAGE/PROD configuration.
 - Source file landing paths must be controlled by `OPEN_FNR_LANDING_ROOT_PATH`; source adapters must not hardcode local paths.
+- Process artifact deployment paths must be controlled by `OPEN_FNR_PROCESS_ARTIFACTS_ROOT_PATH`; Flowable deployment packaging must not hardcode environment-specific paths.
 - Publication, supplier, TMS capacity, Store App task, planogram and IdP/IAM target URLs must be controlled by the `OPEN_FNR_*_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`, `OPEN_FNR_PLANOGRAM_EXPORT_URL` and `OPEN_FNR_IDP_PROVISIONING_URL` settings; empty values mean local fallback mode only.
 
 ## Quality Gate

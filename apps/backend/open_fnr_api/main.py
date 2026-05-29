@@ -21,6 +21,7 @@ from .observability import router as observability_router
 from .performance import router as performance_router
 from .pilot import router as pilot_router
 from .process_engine import router as process_engine_router
+from .process_deployment import router as process_deployment_router
 from .process_governance import router as process_governance_router
 from .promo import router as promo_router
 from .procurement import router as procurement_router
@@ -79,6 +80,7 @@ app.include_router(procurement_router)
 app.include_router(publication_router)
 app.include_router(release_gate_router)
 app.include_router(process_engine_router)
+app.include_router(process_deployment_router)
 app.include_router(process_governance_router)
 app.include_router(replenishment_router)
 app.include_router(replenishment_scale_router)
@@ -153,6 +155,7 @@ def metadata() -> dict[str, object]:
             "store-management",
             "supplier-collaboration",
             "process-engine",
+            "process-deployment",
             "process-governance",
             "ui",
         ],

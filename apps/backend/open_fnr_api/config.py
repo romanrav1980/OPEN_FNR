@@ -72,6 +72,7 @@ class Settings(BaseModel):
         le=300,
     )
     landing_root_path: str = Field(default_factory=lambda: env_str("LANDING_ROOT_PATH", "data/landing"))
+    process_artifacts_root_path: str = Field(default_factory=lambda: env_str("PROCESS_ARTIFACTS_ROOT_PATH", "processes"))
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
@@ -106,6 +107,10 @@ class Settings(BaseModel):
     @property
     def flowable_engine_url(self) -> str:
         return self.http_url(self.flowable_host, self.flowable_port, "/flowable-rest/service/management/engine")
+
+    @property
+    def flowable_deployment_url(self) -> str:
+        return self.http_url(self.flowable_host, self.flowable_port, "/flowable-rest/service/repository/deployments")
 
     @property
     def airflow_health_url(self) -> str:

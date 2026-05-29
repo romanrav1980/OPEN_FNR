@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR Flowable Deployment Package Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Flowable Deployment Package</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем deployment package для BPMN/DMN/CMMN артефактов.
+          Такой пакет нужен, чтобы Process Engine получал управляемый набор файлов с checksum evidence,
+          а не разрозненные XML без версии и контроля состава.
+        </p>
+        <img src="screenshots/flowable-deployment-package.png" alt="Flowable deployment package in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем <code>#/admin</code>.</td><td>Process deployment относится к admin/governance workspace.</td><td>Admin route загружен.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем Process Deployment card.</td><td>Пользователь должен видеть состав process package.</td><td>Показаны BPMN/DMN/CMMN counts.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем API-backed status.</td><td>Счетчики должны приходить из backend, а не быть текстом в UI.</td><td>Данные загружены через API.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Сканируем process artifacts root.</td><td>Все BPMN/DMN/CMMN должны входить в deploy package.</td><td>artifact_count > 0.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Классифицируем BPMN/DMN/CMMN.</td><td>Flowable deploy pipeline должен знать типы файлов.</td><td>Каждый тип имеет count > 0.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Считаем SHA-256.</td><td>Нужна воспроизводимость и контроль изменений.</td><td>Каждый checksum длиной 64.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Проверяем deployment URL.</td><td>Адрес Flowable должен идти из общей конфигурации.</td><td>URL заканчивается repository/deployments.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Повторяем validate endpoint.</td><td>Validation должна быть идемпотентной.</td><td>Counts/checksum stable.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_process_deployment.py tests/backend/test_config.py tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">12 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Stage compose</td><td><code>docker compose --env-file infra/stage/.env.example -f infra/dev/compose.yaml config --quiet</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page .../#/admin</code></td><td class="ok">flowable-deployment-package.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

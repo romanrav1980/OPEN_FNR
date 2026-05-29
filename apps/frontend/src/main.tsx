@@ -131,6 +131,14 @@ type MetadataApiResponse = {
   oidc_jwks_url_configured: boolean;
 };
 
+type ProcessDeploymentPackageApiResponse = {
+  artifact_count: number;
+  bpmn_count: number;
+  dmn_count: number;
+  cmmn_count: number;
+  deploy_channel: string;
+};
+
 type SecurityUserRow = {
   user: string;
   roles: string;
@@ -1334,6 +1342,7 @@ function App() {
   const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
   const [policyCheckStatus, setPolicyCheckStatus] = React.useState("loading");
+  const [processDeploymentStatus, setProcessDeploymentStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
@@ -1556,6 +1565,29 @@ function App() {
           return;
         }
         setPolicyCheckStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/process-deployment/packages/current"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process deployment API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessDeploymentPackageApiResponse>;
+      })
+      .then((payload) => {
+        setProcessDeploymentStatus(
+          `${payload.artifact_count} artifacts / ${payload.bpmn_count} BPMN / ${payload.dmn_count} DMN / ${payload.cmmn_count} CMMN`,
+        );
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setProcessDeploymentStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3688,6 +3720,11 @@ function App() {
             <span>Shared Policy</span>
             <strong>{policyCheckStatus}</strong>
             <p>Role, service account and object-scope decisions use shared backend policy helpers.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Process Deployment</span>
+            <strong>{processDeploymentStatus}</strong>
+            <p>BPMN, DMN and CMMN artifacts are packaged with SHA-256 checksums for Flowable deployment.</p>
           </article>
         </div>
         <div className="table-shell">

@@ -247,6 +247,26 @@ Status: completed for first shell; route-specific module split remains.
 - Existing Control Tower remains the overview screen while route-specific page split is pending.
 - Test evidence: `docs/test-reports/sprint-routed-ui-shell/index.html`.
 
+## PROC-DEPLOY-1. Flowable Deployment Package
+
+Status: completed for package manifest and checksum gate.
+
+### Scope
+
+- scan BPMN/DMN/CMMN artifacts;
+- classify artifacts by Flowable type;
+- compute SHA-256 checksums;
+- expose package manifest through API;
+- show deployment package evidence in Admin workspace.
+
+### Current Implementation
+
+- API module: `apps/backend/open_fnr_api/process_deployment.py`.
+- Endpoint: `/process-deployment/packages/current`.
+- Backend Docker image copies `processes` into `/app/processes`.
+- Process artifacts root is configured by `OPEN_FNR_PROCESS_ARTIFACTS_ROOT_PATH`.
+- Test evidence: `docs/test-reports/sprint-flowable-deployment-package/index.html`.
+
 ## Pilot Readiness Gate
 
 The system can enter pilot only when:

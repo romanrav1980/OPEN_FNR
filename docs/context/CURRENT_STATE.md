@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 406 automated tests passed.
+Current backend regression status: 409 automated tests passed.
 
 ## Local Infrastructure
 
@@ -331,6 +331,8 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Process Governance API: `apps/backend/open_fnr_api/process_governance.py`.
 - Process Governance tests: `tests/backend/test_process_governance.py`.
+- Process deployment package API: `apps/backend/open_fnr_api/process_deployment.py`.
+- Process deployment tests: `tests/backend/test_process_deployment.py`.
 - Process governance definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Process change management BPMN: `processes/process-governance/process_change_management_process.bpmn20.xml`.
 - Process change risk DMN: `processes/process-governance/process_change_risk_decision.dmn.xml`.
@@ -442,7 +444,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 406 passed.
+- `python -m pytest` -> 409 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -453,7 +455,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer and routed UI shell are implemented and verified. Next: add Flowable deployment automation and pilot shadow pack.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer, routed UI shell and Flowable deployment package are implemented and verified. Next: prepare pilot shadow pack and connect actual pilot source files/API credentials.
 
 ## Post-Sprint Planning Artifacts
 
@@ -468,6 +470,7 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Pilot-ready remaining work handoff: `PILOT_READY_REMAINING_WORK.md`.
 - Real source landing wiring test report: `docs/test-reports/sprint-real-source-landing-wiring/index.html`.
 - Routed UI shell test report: `docs/test-reports/sprint-routed-ui-shell/index.html`.
+- Flowable deployment package test report: `docs/test-reports/sprint-flowable-deployment-package/index.html`.
 
 ## H1 Industrial Hardening Artifacts
 

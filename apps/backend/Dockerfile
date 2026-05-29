@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir \
     "pg8000>=1.31.0"
 
 COPY apps/backend/open_fnr_api /app/open_fnr_api
+COPY processes /app/processes
 
 EXPOSE 8000
 
