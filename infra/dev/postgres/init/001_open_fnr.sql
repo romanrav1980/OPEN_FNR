@@ -153,3 +153,94 @@ CREATE TABLE IF NOT EXISTS open_fnr.integration_batches
 
 CREATE INDEX IF NOT EXISTS ix_integration_batches_source_date
     ON open_fnr.integration_batches (source_system, business_date, status);
+
+CREATE TABLE IF NOT EXISTS open_fnr.process_tasks
+(
+    task_id text PRIMARY KEY,
+    process_instance_id text NOT NULL,
+    process_key text NOT NULL,
+    name text NOT NULL,
+    status text NOT NULL,
+    assigned_role text NOT NULL,
+    candidate_roles jsonb NOT NULL DEFAULT '[]'::jsonb,
+    available_actions jsonb NOT NULL DEFAULT '[]'::jsonb,
+    sla_due_at timestamptz NOT NULL,
+    business_key text NOT NULL,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    completed_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS ix_process_tasks_process_status
+    ON open_fnr.process_tasks (process_key, status, sla_due_at);
+
+CREATE INDEX IF NOT EXISTS ix_process_tasks_business_key
+    ON open_fnr.process_tasks (business_key, process_key);
+
+CREATE TABLE IF NOT EXISTS open_fnr.process_task_events
+(
+    event_id text PRIMARY KEY,
+    process_instance_id text NOT NULL,
+    task_id text REFERENCES open_fnr.process_tasks(task_id),
+    event_type text NOT NULL,
+    actor text NOT NULL,
+    actor_role text,
+    message text NOT NULL,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_process_task_events_instance
+    ON open_fnr.process_task_events (process_instance_id, created_at);
+
+CREATE TABLE IF NOT EXISTS open_fnr.operational_decisions
+(
+    decision_id text PRIMARY KEY,
+    decision_type text NOT NULL,
+    object_type text NOT NULL,
+    object_id text NOT NULL,
+    status text NOT NULL,
+    actor text NOT NULL,
+    actor_role text,
+    idempotency_key text NOT NULL UNIQUE,
+    correlation_id text,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_operational_decisions_object
+    ON open_fnr.operational_decisions (object_type, object_id, status);
+
+CREATE TABLE IF NOT EXISTS open_fnr.publication_packages
+(
+    package_id text PRIMARY KEY,
+    package_type text NOT NULL,
+    target_system text NOT NULL,
+    status text NOT NULL,
+    idempotency_key text NOT NULL UNIQUE,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_publication_packages_target_status
+    ON open_fnr.publication_packages (target_system, status);
+
+CREATE TABLE IF NOT EXISTS open_fnr.export_attempts
+(
+    attempt_id text PRIMARY KEY,
+    package_id text NOT NULL REFERENCES open_fnr.publication_packages(package_id),
+    target_system text NOT NULL,
+    status text NOT NULL,
+    retry_count integer NOT NULL DEFAULT 0 CHECK (retry_count >= 0),
+    idempotency_key text NOT NULL,
+    response_status integer,
+    response_message text,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_export_attempts_package
+    ON open_fnr.export_attempts (package_id, created_at DESC);

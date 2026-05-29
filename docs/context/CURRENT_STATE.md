@@ -671,3 +671,41 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Focus rule: one active release at a time and at most one preparation sprint in discovery.
 - Recommended next sprint: `IH-1 Persistence Inventory And Repository Boundaries`, followed by `IH-2 PostgreSQL Persistence And Migrations`.
 - `NEXT_DELIVERY_PLAN.md` now references this focused sprint plan and uses it as the tactical source for remaining work.
+
+## IH-1 Persistence Inventory
+
+- IH-1 completed.
+- New inventory document: `docs/persistence/PERSISTENCE_INVENTORY.md`.
+- Production persistence targets are classified as:
+  - `P0`: production decision state, target PostgreSQL in IH-2/IH-3;
+  - `P1`: operational pilot/reconciliation state;
+  - `P2`: analytical/model state, target ClickHouse and/or artifact metadata;
+  - `D1`: DEV fixtures allowed while `OPEN_FNR_MOCK_MODE=true`;
+  - `C1`: governed configuration/rule catalogs.
+- Core P0 targets identified:
+  - adjustments, exceptions, process tasks/audit, publication packages, order proposals/final orders, security users/service accounts/access requests and store tasks.
+- Target repository names and IH-2 migration order are defined.
+- Architecture guard added: `tests/architecture/test_persistence_inventory.py`.
+- Verification:
+  - `pytest tests/architecture/test_persistence_inventory.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 6 passed, 1 warning about `.pytest_cache` permissions.
+- Next sprint: `IH-2 PostgreSQL Persistence And Migrations`.
+
+## IH-2 PostgreSQL Persistence Foundation
+
+- IH-2 started.
+- PostgreSQL schema foundation added in `infra/dev/postgres/init/001_open_fnr.sql`:
+  - `open_fnr.process_tasks`;
+  - `open_fnr.process_task_events`;
+  - `open_fnr.operational_decisions`;
+  - `open_fnr.publication_packages`;
+  - `open_fnr.export_attempts`.
+- Repository foundation added in `apps/backend/open_fnr_api/repositories.py`:
+  - `ProcessTaskRecord`, `ProcessTaskEventRecord`, `OperationalDecisionRecord`;
+  - `ProcessTaskRepository`, `OperationalDecisionRepository`;
+  - in-memory implementations for `OPEN_FNR_MOCK_MODE=true`;
+  - PostgreSQL implementations with upsert/idempotency behavior.
+- Tests added/updated:
+  - `tests/backend/test_repositories.py`;
+  - `tests/data/test_postgres_operational_schema.py`.
+- Verification:
+  - `pytest tests/backend/test_repositories.py tests/data/test_postgres_operational_schema.py tests/architecture/test_persistence_inventory.py` -> 10 passed, 1 warning about `.pytest_cache` permissions.
