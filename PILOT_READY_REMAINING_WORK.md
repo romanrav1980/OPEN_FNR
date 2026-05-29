@@ -18,7 +18,8 @@ Status: handoff after real source landing wiring checkpoint.
 | IdP provisioning target | closed for adapter layer | `docs/test-reports/sprint-idp-provisioning-target/index.html` |
 | Pilot source landing wiring | closed for first pilot gate | `docs/test-reports/sprint-real-source-landing-wiring/index.html` |
 | JWT/OIDC boundary | closed for first security gate | `docs/test-reports/sprint-jwt-oidc-boundary/index.html` |
-| Backend regression | green | `python -m pytest` -> 402 passed |
+| Shared policy layer | closed for first RBAC/ABAC gate | `docs/test-reports/sprint-shared-policy-layer/index.html` |
+| Backend regression | green | `python -m pytest` -> 406 passed |
 | Frontend build | green | `npm.cmd run build` |
 | DEV/STAGE compose config | green | `docker compose ... config --quiet` |
 
@@ -28,7 +29,7 @@ Status: handoff after real source landing wiring checkpoint.
 | --- | --- | --- | --- |
 | Real inbound source connection | Replace sample manifests with real pilot POS/WMS/ERP/MDM/promo file drops or APIs | First landing gate implemented; next connect actual pilot files/API credentials | Real source files discovered, schema/DQ passed, clean publication ready |
 | OIDC/JWT middleware | Authenticate real users and service clients | First FastAPI JWT boundary implemented; next add signature/JWKS verification details | Unauthorized calls rejected, valid token maps to user/roles |
-| Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | `policy.py` with role, region, category and object checks | Security tests cover positive/negative object-level access |
+| Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | First `policy.py` implemented for Security API; next migrate remaining domain endpoints | Security tests cover positive/negative object-level access |
 | Routed UI productization | Move from single Control Tower to operational pages | React Router, API client, route-level loading/error/denied states | E2E smoke covers forecast, replenishment, exceptions, admin |
 | Process deployment pipeline | Deploy BPMN/DMN/CMMN into Flowable, not only validate XML | Deployment script/API and version registry | DEV Flowable receives process definitions with version evidence |
 | Production deployment decision | Choose Kubernetes or hardened production Compose | Deployment topology doc and environment matrix | PROD-like dry run has rollback and health checks |
@@ -36,22 +37,17 @@ Status: handoff after real source landing wiring checkpoint.
 
 ## Tactical Next Sprint Order
 
-1. `POL-1 Shared Policy Layer`
-   - introduce reusable role/scope/object policy checks;
-   - move endpoint-local authorization checks into shared helpers;
-   - add negative object-level access tests.
-
-2. `UI-1 Routed Shell`
+1. `UI-1 Routed Shell`
    - introduce router and page layout;
    - keep Control Tower as status overview;
    - move Admin, Publication, Supplier, Capacity, Store and Shelf pages behind routes.
 
-3. `PROC-DEPLOY-1 Flowable Deployment`
+2. `PROC-DEPLOY-1 Flowable Deployment`
    - package process artifacts;
    - deploy to Flowable OSS in dev compose;
    - save version and checksum evidence.
 
-4. `PILOT-1 Shadow Pilot Pack`
+3. `PILOT-1 Shadow Pilot Pack`
    - generate pilot scope, source checklist, runbook and rollback plan;
    - run full daily cycle on limited store/SKU scope.
 
@@ -68,6 +64,6 @@ Status: handoff after real source landing wiring checkpoint.
 ## Saved Context For Resume
 
 - Latest pushed hardening commit at previous checkpoint: `87bdc09`.
-- Backend regression count after SEC-2: 402 tests passed.
+- Backend regression count after POL-1: 406 tests passed.
 - Target adapter reports are under `docs/test-reports`.
-- The next autonomous implementation should start with `POL-1 Shared Policy Layer` unless the user provides UI or Flowable priority first.
+- The next autonomous implementation should start with `UI-1 Routed Shell` unless the user provides Flowable priority first.

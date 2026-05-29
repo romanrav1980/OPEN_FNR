@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR Shared Policy Layer Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Shared Policy Layer</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем переход от endpoint-local проверок к общему policy layer.
+          Такой слой нужен, чтобы role checks, service account checks и object-level scope checks
+          были единообразными для всех бизнес-процессов.
+        </p>
+        <p>UI вызывает <code>/security/policy-check</code> и показывает активную policy версию в Admin Console.</p>
+        <img src="screenshots/shared-policy-layer.png" alt="Shared policy layer in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем Control Tower.</td><td>Проверяем UI после подключения policy status.</td><td>Страница загружена.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем Admin Console.</td><td>Security Owner должен видеть shared policy evidence.</td><td>Shared Policy card отображается.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем policy-check API status.</td><td>UI должен получать policy version из backend.</td><td><code>shared_policy_v1</code>.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Проверяем role policy.</td><td>Admin должен проходить любые admin-approved проверки.</td><td>Admin allowed.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Проверяем scoped user.</td><td>Viewer должен видеть только свой регион/категорию.</td><td>north/fresh allowed.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Проверяем out-of-scope object.</td><td>object-level access должен блокировать чужой регион.</td><td>south/fresh -> 403.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Проверяем service account helper.</td><td>Интеграционные write actions должны иметь единый gate.</td><td>Wrong account -> 403.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Проверяем Security API migration.</td><td>Access requests и IdP provisioning должны использовать shared helpers.</td><td>Existing security tests pass.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_policy.py tests/backend/test_security.py</code></td><td class="ok">passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page ...</code></td><td class="ok">shared-policy-layer.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

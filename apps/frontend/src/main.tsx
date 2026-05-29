@@ -1264,6 +1264,7 @@ function App() {
   const [runtimeShadowLoadTasks, setRuntimeShadowLoadTasks] = React.useState<ShadowLoadTask[]>(shadowLoadTasks);
   const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
+  const [policyCheckStatus, setPolicyCheckStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
@@ -1465,6 +1466,27 @@ function App() {
           return;
         }
         setAuthBoundaryStatus("metadata fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/security/policy-check?user_id=u-viewer-001&region=north&category=fresh&allowed_role=Viewer"), {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Policy API returned ${response.status}`);
+        }
+        return response.json() as Promise<{ policy: string }>;
+      })
+      .then((payload) => setPolicyCheckStatus(payload.policy))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setPolicyCheckStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3571,6 +3593,11 @@ function App() {
             <span>Auth Boundary</span>
             <strong>{authBoundaryStatus}</strong>
             <p>Stage/production can require Bearer JWT while DEV/TEST keep configurable bypass for local work.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Shared Policy</span>
+            <strong>{policyCheckStatus}</strong>
+            <p>Role, service account and object-scope decisions use shared backend policy helpers.</p>
           </article>
         </div>
         <div className="table-shell">

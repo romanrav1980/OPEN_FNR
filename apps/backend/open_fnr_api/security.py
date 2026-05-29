@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
 from .config import settings
+from .policy import Principal, assert_any_role, assert_object_scope, assert_service_account, has_any_role, has_object_scope
 
 
 router = APIRouter(prefix="/security", tags=["security"])
@@ -150,27 +151,38 @@ ACCESS_REQUESTS: tuple[AccessRequest, ...] = (
 
 
 def has_role(user: UserPermission, role: RoleName) -> bool:
-    return role in user.roles or RoleName.ADMIN in user.roles
+    return has_any_role(user_principal(user), {role})
 
 
 def has_scope(user: UserPermission, region: str, category: str) -> bool:
-    region_allowed = "all" in user.regions or region in user.regions
-    category_allowed = "all" in user.categories or category in user.categories
-    return user.active and region_allowed and category_allowed
+    return has_object_scope(user_principal(user), region, category)
+
+
+def user_principal(user: UserPermission) -> Principal:
+    return Principal(
+        subject=user.user_id,
+        roles=tuple(role.value for role in user.roles),
+        regions=user.regions,
+        categories=user.categories,
+        active=user.active,
+    )
+
+
+def role_principal(actor_role: RoleName, actor: str = "api-request") -> Principal:
+    return Principal(subject=actor, roles=(actor_role.value,), regions=("all",), categories=("all",), active=True)
 
 
 def assert_admin(actor_role: RoleName) -> None:
-    if actor_role != RoleName.ADMIN:
-        raise HTTPException(status_code=403, detail="Admin role required")
+    assert_any_role(role_principal(actor_role), {RoleName.ADMIN}, "Admin role required")
 
 
 def transition_access_request(access_request: AccessRequest, action: str, payload: AccessActionRequest) -> AccessRequest:
-    if action in {"approve", "reject"} and payload.actor_role != RoleName.SECURITY_OWNER:
-        raise HTTPException(status_code=403, detail="Security Owner role required")
-    if action == "provision" and payload.actor_role != RoleName.USER_MANAGER:
-        raise HTTPException(status_code=403, detail="User Manager role required")
-    if action == "revoke" and payload.actor_role != RoleName.ADMIN:
-        raise HTTPException(status_code=403, detail="Admin role required")
+    if action in {"approve", "reject"}:
+        assert_any_role(role_principal(payload.actor_role, payload.actor), {RoleName.SECURITY_OWNER}, "Security Owner role required")
+    if action == "provision":
+        assert_any_role(role_principal(payload.actor_role, payload.actor), {RoleName.USER_MANAGER}, "User Manager role required")
+    if action == "revoke":
+        assert_any_role(role_principal(payload.actor_role, payload.actor), {RoleName.ADMIN}, "Admin role required")
     status_by_action = {
         "approve": AccessRequestStatus.APPROVED,
         "reject": AccessRequestStatus.REJECTED,
@@ -239,8 +251,11 @@ def list_service_accounts(actor_role: RoleName = RoleName.ADMIN) -> dict[str, ob
 
 @router.get("/access-requests")
 def list_access_requests(actor_role: RoleName = RoleName.SECURITY_OWNER) -> dict[str, object]:
-    if actor_role not in {RoleName.ADMIN, RoleName.SECURITY_OWNER, RoleName.USER_MANAGER}:
-        raise HTTPException(status_code=403, detail="access request visibility denied")
+    assert_any_role(
+        role_principal(actor_role),
+        {RoleName.ADMIN, RoleName.SECURITY_OWNER, RoleName.USER_MANAGER},
+        "access request visibility denied",
+    )
     return {"items": [item.model_dump(mode="json") for item in ACCESS_REQUESTS], "total": len(ACCESS_REQUESTS)}
 
 
@@ -267,10 +282,12 @@ def get_idp_provision(request_id: str) -> dict[str, object]:
 
 @router.post("/access-requests/{request_id}/idp-provision/send", response_model=IdpProvisionResponse)
 def send_idp_provision(request_id: str, request: IdpProvisionRequest) -> IdpProvisionResponse:
-    if request.actor_role != RoleName.USER_MANAGER:
-        raise HTTPException(status_code=403, detail="User Manager role required")
-    if request.service_account != "svc-open-fnr-idp-provisioning":
-        raise HTTPException(status_code=403, detail="service account is not allowed to provision IdP access")
+    assert_any_role(role_principal(request.actor_role, request.actor), {RoleName.USER_MANAGER}, "User Manager role required")
+    assert_service_account(
+        request.service_account,
+        "svc-open-fnr-idp-provisioning",
+        "service account is not allowed to provision IdP access",
+    )
     access_request = find_access_request(request_id)
     provision = build_idp_provision(access_request)
     response_code, response_message = send_idp_provision_to_target(provision)
@@ -305,5 +322,24 @@ def check_access(user_id: str, region: str, category: str, role: RoleName) -> di
     user = next((item for item in USERS if item.user_id == user_id), None)
     if user is None:
         raise HTTPException(status_code=404, detail="user not found")
-    allowed = has_role(user, role) and has_scope(user, region, category)
+    principal = user_principal(user)
+    allowed = has_any_role(principal, {role}) and has_object_scope(principal, region, category)
     return {"user_id": user_id, "allowed": allowed, "region": region, "category": category, "role": role}
+
+
+@router.get("/policy-check")
+def check_policy(user_id: str, region: str, category: str, allowed_role: RoleName) -> dict[str, object]:
+    user = next((item for item in USERS if item.user_id == user_id), None)
+    if user is None:
+        raise HTTPException(status_code=404, detail="user not found")
+    principal = user_principal(user)
+    assert_any_role(principal, {allowed_role}, "role policy denied")
+    assert_object_scope(principal, region, category, "object scope policy denied")
+    return {
+        "user_id": user_id,
+        "allowed": True,
+        "role": allowed_role,
+        "region": region,
+        "category": category,
+        "policy": "shared_policy_v1",
+    }

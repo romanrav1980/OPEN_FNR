@@ -193,8 +193,9 @@ Status: partially completed.
 - Access approval/provisioning process is covered by API tests and UI evidence.
 - IdP/IAM provisioning target adapter is configurable through `OPEN_FNR_IDP_PROVISIONING_URL`.
 - JWT/OIDC boundary middleware is configurable through `OPEN_FNR_AUTH_ENABLED`, `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED`, `OPEN_FNR_OIDC_ISSUER`, `OPEN_FNR_OIDC_AUDIENCE` and `OPEN_FNR_OIDC_JWKS_URL`.
+- Shared policy layer `apps/backend/open_fnr_api/policy.py` centralizes role, service account and object-scope checks for the Security API.
 - Local fallback is available for DEV/TEST; service account `svc-open-fnr-idp-provisioning` gates outbound provisioning.
-- Remaining work: shared policy layer, object-level access enforcement, cryptographic JWKS signature validation and external secret store.
+- Remaining work: migrate remaining domain endpoints to shared policy helpers, add cryptographic JWKS signature validation and external secret store.
 
 ## X1. Outbound Target Adapter Hardening
 

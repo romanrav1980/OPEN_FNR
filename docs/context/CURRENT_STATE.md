@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 402 automated tests passed.
+Current backend regression status: 406 automated tests passed.
 
 ## Local Infrastructure
 
@@ -261,6 +261,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Security tests: `tests/backend/test_security.py`.
 - IdP provisioning send API with service account gate, local fallback and configurable `OPEN_FNR_IDP_PROVISIONING_URL`.
 - JWT/OIDC auth middleware and `/auth/context` API: `apps/backend/open_fnr_api/auth.py`.
+- Shared policy layer for roles, service accounts and object scope: `apps/backend/open_fnr_api/policy.py`.
 - Security process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Access request BPMN: `processes/security/access_request_process.bpmn20.xml`.
 - Role assignment DMN: `processes/security/role_assignment_decision.dmn.xml`.
@@ -269,6 +270,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - HTML test report with screenshot: `docs/test-reports/sprint-22-security-rbac/index.html`.
 - IdP provisioning target hardening report: `docs/test-reports/sprint-idp-provisioning-target/index.html`.
 - JWT/OIDC boundary test report: `docs/test-reports/sprint-jwt-oidc-boundary/index.html`.
+- Shared policy layer test report: `docs/test-reports/sprint-shared-policy-layer/index.html`.
 
 ## Sprint 23 Artifacts
 
@@ -440,7 +442,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 402 passed.
+- `python -m pytest` -> 406 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -451,7 +453,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters and JWT/OIDC boundary are implemented and verified. Next: add shared policy layer, routed UI and Flowable deployment automation.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary and shared policy layer are implemented and verified. Next: add routed UI and Flowable deployment automation.
 
 ## Post-Sprint Planning Artifacts
 
