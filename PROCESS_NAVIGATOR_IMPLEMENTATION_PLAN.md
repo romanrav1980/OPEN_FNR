@@ -37,7 +37,7 @@ Source specs:
 | PN-8 | RBAC And Supplier Block | role matrix, supplier deny, scope filtering, audit access | Completed |
 | PN-9 | UI Detail Panels And Help | conformance/performance/version/detail panels with help-сноски | Completed |
 | PN-10 | Accessibility And Refresh | WCAG 2.1 AA, keyboard map, polling/staleness, axe-core | Completed |
-| PN-11 | Reporting And Superset Payload | weekly report endpoint, Airflow digest, BI dataset contract | Planned |
+| PN-11 | Reporting And Superset Payload | weekly report endpoint, Airflow digest, BI dataset contract | Completed |
 | PN-12 | Load, Regression And Presentation | performance gate, HTML reports, stakeholder/developer presentation | Planned |
 
 ## 4. Спринты
@@ -344,4 +344,4 @@ Acceptance criteria:
 - `PN-8` завершен: backend RBAC boundary и supplier block.
 - `PN-9` завершен: UI detail panels, contextual help footnotes и HTML evidence report.
 
-Осталось `2` PN-спринта: `PN-11` reporting/Superset payload, `PN-12` load/regression/presentation.
+Осталось `1` PN-спринт: `PN-12` load/regression/presentation.

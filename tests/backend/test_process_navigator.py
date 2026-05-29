@@ -327,9 +327,14 @@ def test_process_navigator_tracking_rejects_incomplete_business_key() -> None:
 
 
 def test_process_navigator_weekly_report_contract() -> None:
-    response = client.get("/process-navigator/reports/weekly", params={"business_week": "2026-W22"})
+    response = client.get("/process-navigator/reports/weekly", params={"business_week": "2026-W22", "env": "stage"})
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["business_week"] == "2026-W22"
+    assert payload["environment"] == "stage"
     assert payload["superset_dataset_ref"] == "process_alert_history"
+    assert isinstance(payload["domain_summary"], list)
+    assert isinstance(payload["alert_summary"], list)
+    assert isinstance(payload["root_causes"], list)
+    assert isinstance(payload["sla_breaches"], list)
