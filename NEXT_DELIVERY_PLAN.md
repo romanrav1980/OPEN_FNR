@@ -15,7 +15,9 @@ Move OPEN FNR from a completed functional prototype with process/UI/API coverage
 | R2 | Real Data Integration | Connect POS, ERP, WMS, DWH, MDM and promo data | Daily real data loads pass DQ and lineage checks |
 | R3 | Process And Security Productionization | Deploy Flowable artifacts and production security | OIDC/JWT, RBAC, object-level access, IdP provisioning and process deployment pipeline |
 | R4 | UI Productization | Replace demo control tower with routed API-backed application | Core workflows use real API, E2E tests pass |
-| R5 | Pilot Launch | Run controlled pilot on selected stores/SKU | Pilot KPIs measured, business acceptance signed |
+| R5 | Supplement 1 Production Controls | Turn Supplement 1 governance into executable controls | Source SLA, ML lifecycle, acceptance, API, supplier, DR/BC and notification gates are enforced |
+| R6 | Process Navigator | Make process execution visible through a zoomable map | Business-process map, alerts, BPMN drill-down and task/audit overlays are available |
+| R7 | Pilot Launch | Run controlled pilot on selected stores/SKU | Pilot KPIs measured, business acceptance signed |
 
 ## Workstream Plan
 
@@ -90,6 +92,35 @@ Move OPEN FNR from a completed functional prototype with process/UI/API coverage
 | Enable controlled exports | Real operational impact |
 | Measure business KPIs | WAPE, service level, lost sales, overstock, waste |
 
+### 7. Supplement 1 Production Controls
+
+Source document: [SUPPLEMENT_1_IMPLEMENTATION_SPRINT_PLAN.md](SUPPLEMENT_1_IMPLEMENTATION_SPRINT_PLAN.md).
+
+| Task | Output |
+| --- | --- |
+| Implement source SLA runtime controls | Daily source readiness, degraded mode and publication block/waiver |
+| Implement ML lifecycle controls | Candidate, shadow, champion, challenger, rollback and fallback governance |
+| Implement replenishment financial parameters | Signed holding/lost sales/waste/service-level inputs for order optimization |
+| Implement historical simulation and acceptance gates | 52-week simulation, shadow, parallel run and controlled pilot evidence |
+| Implement API versioning governance | Consumer registry, standard errors, deprecation and idempotency controls |
+| Implement supplier isolation and data classification | Supplier claim, object-level access and C1-C4 data controls |
+| Implement notification, SLA and ITSM escalation | Human-task SLA, notification routing and ITSM integration |
+| Implement lineage, retention and DR/BC controls | Dataset lineage, retention, backup/restore and degraded runbooks |
+
+### 8. Process Navigator
+
+Source document: [PROCESS_NAVIGATOR_MAP_SPEC.md](PROCESS_NAVIGATOR_MAP_SPEC.md).
+
+| Task | Output |
+| --- | --- |
+| Keep backend map contract current | `/process-navigator/map`, `/alerts`, BPMN drill-down |
+| Add routed UI module | `#/process-navigator` with map canvas, filters and details |
+| Add semantic zoom | Domain cluster -> process -> BPMN step -> task/audit |
+| Add alert overlays | BPMN quality, SLA, source data, ML drift, integration and security alerts |
+| Add Flowable runtime overlay | Live process instance, task and history data |
+| Add BPMN exact viewer | bpmn-js viewer for selected executable BPMN model |
+| Add E2E and visual reports | Screenshots, business-process test narrative and regression evidence |
+
 ## Suggested Sprint Breakdown
 
 | Sprint | Name | Main output |
@@ -107,6 +138,22 @@ Move OPEN FNR from a completed functional prototype with process/UI/API coverage
 | U2 | Forecast/Replenishment UI Productization | real API-backed core workflows |
 | U3 | Store/Supplier/Diagnostics UI Productization | extended workflows |
 | L1 | Load And Reliability Gate | EPYC profile tests and runbooks |
+| SUP-1 | Source SLA Runtime Controls | source readiness, degraded mode and publication decision workflow |
+| SUP-2 | ML Lifecycle Runtime Controls | candidate/shadow/champion/fallback gates |
+| SUP-3 | Replenishment Financial Parameters | signed cost and service-level parameters |
+| SUP-4 | Historical Simulation And Acceptance | 52-week simulation, shadow and parallel-run evidence |
+| SUP-5 | API Versioning And Consumer Registry | versioned APIs, error registry, deprecation and idempotency |
+| SUP-6 | Supplier Isolation And Data Classification | supplier API isolation and C1-C4 controls |
+| SUP-7 | Notification, SLA And ITSM Escalation | alert routing, human-task SLA and ITSM webhook |
+| SUP-8 | Lineage, Retention And DR/BC | lineage, retention, backup/restore and degraded mode |
+| SUP-9 | Process Navigator Map | zoomable process map, alerts and BPMN drill-down |
+| SUP-10 | Pilot Production Gate | unified Supplement 1 go/no-go for pilot |
+| PN-1 | Process Navigator Backend Map Contract | completed API contract and tests |
+| PN-2 | Process Navigator UI Shell | routed map UI, filters and detail panel |
+| PN-3 | Process Runtime Overlay | Flowable task/instance/history overlay |
+| PN-4 | Alert Correlation | OpenSearch/Prometheus/Process Engine alert correlation |
+| PN-5 | BPMN Exact Viewer | bpmn-js diagram panel and drill-down |
+| PN-6 | Process Navigator Hardening | RBAC, load, audit, accessibility and presentation report |
 | Pilot 1 | Shadow Pilot | no operational exports, KPI comparison |
 | Pilot 2 | Controlled Export Pilot | limited real exports and business sign-off |
 
@@ -120,3 +167,5 @@ Detailed industrial hardening sprint execution is tracked in [INDUSTRIAL_HARDENI
 4. Decide production deployment mode: Kubernetes vs production Compose.
 5. Choose OIDC/JWT provider details and token validation parameters.
 6. Prioritize UI productization pages for pilot users.
+7. Start SUP-1 Source SLA Runtime Controls.
+8. Start PN-2 Process Navigator UI Shell using the existing PN-1 backend contract.

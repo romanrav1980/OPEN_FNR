@@ -13,6 +13,7 @@ Latest planning and navigation additions:
 - Supplement 1 sprint plan: `SUPPLEMENT_1_IMPLEMENTATION_SPRINT_PLAN.md`.
 - Process Navigator map specification: `PROCESS_NAVIGATOR_MAP_SPEC.md`.
 - Process Navigator backend API: `/process-navigator/map`, `/process-navigator/alerts`, `/process-navigator/processes/{process_key}/drilldown`.
+- Tactical work plan updated in `NEXT_DELIVERY_PLAN.md`: SUP-1...SUP-10 and PN-1...PN-6 are now part of the delivery backlog.
 
 ## Local Infrastructure
 
