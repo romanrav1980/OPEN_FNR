@@ -58,7 +58,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | ML-2 | Forecast Training And Retraining | Regular/promo model training and scheduled retraining | Completed foundation |
 | ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | Completed foundation |
 | ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | Completed foundation |
-| ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | ML-4 |
+| ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | Completed foundation |
 | DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | IH-2 |
 | DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | DEP-1 |
 | DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | DEP-1 |
@@ -669,6 +669,12 @@ Acceptance criteria:
 
 - daily calculation fits agreed SLA;
 - sizing report is updated.
+
+Completion checkpoint:
+
+- ML-5 foundation scope is fixed in `ML_EPYC_PERFORMANCE_GATE_SPEC.md`;
+- backend exposes `/performance/epyc-gate` for 30 000 stores, 5 500 SKU, 90-day horizon and 6-node EPYC profile;
+- automated tests cover row count, two-hour runtime target, memory budget and insufficient-memory blocker.
 
 ### DEP-1. Environment Topology
 

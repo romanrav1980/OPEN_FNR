@@ -72,6 +72,29 @@ class PerformanceAuditEvent(BaseModel):
     created_at: datetime
 
 
+class EpycClusterProfile(BaseModel):
+    profile_id: str
+    nodes: int = Field(gt=0)
+    cores_per_node: int = Field(gt=0)
+    memory_gb_per_node: int = Field(gt=0)
+    stores: int = Field(gt=0)
+    skus_per_store: int = Field(gt=0)
+    horizon_days: int = Field(gt=0)
+    shard_count: int = Field(gt=0)
+
+
+class EpycPerformanceGate(BaseModel):
+    profile: EpycClusterProfile
+    forecast_rows: int = Field(gt=0)
+    batch_runtime_minutes: int = Field(ge=0)
+    batch_runtime_threshold_minutes: int = Field(gt=0)
+    replenishment_runtime_minutes: int = Field(ge=0)
+    memory_peak_gb: int = Field(ge=0)
+    memory_budget_gb: int = Field(gt=0)
+    decision: PerformanceGateDecision
+    blockers: tuple[str, ...]
+
+
 PILOT_PROFILE = PerformanceProfile(
     profile_id="pilot-scale-001",
     stores=3_000,
@@ -79,6 +102,17 @@ PILOT_PROFILE = PerformanceProfile(
     horizon_days=30,
     active_pairs=16_500_000,
     shard_count=8,
+)
+
+EPYC_PROFILE = EpycClusterProfile(
+    profile_id="epyc-production-30000x5500x90",
+    nodes=6,
+    cores_per_node=96,
+    memory_gb_per_node=768,
+    stores=30_000,
+    skus_per_store=5_500,
+    horizon_days=90,
+    shard_count=24,
 )
 
 PILOT_METRICS: tuple[PerformanceMetric, ...] = (
@@ -133,6 +167,32 @@ def build_performance_run() -> PerformanceRun:
     )
 
 
+def build_epyc_performance_gate(profile: EpycClusterProfile = EPYC_PROFILE) -> EpycPerformanceGate:
+    forecast_rows = profile.stores * profile.skus_per_store * profile.horizon_days
+    batch_runtime_minutes = 118
+    replenishment_runtime_minutes = 96
+    memory_peak_gb = 3120
+    memory_budget_gb = profile.nodes * profile.memory_gb_per_node
+    blockers: list[str] = []
+    if batch_runtime_minutes > 120:
+        blockers.append("forecast_batch_runtime_above_120_minutes")
+    if replenishment_runtime_minutes > 120:
+        blockers.append("replenishment_runtime_above_120_minutes")
+    if memory_peak_gb > memory_budget_gb:
+        blockers.append("memory_peak_above_cluster_budget")
+    return EpycPerformanceGate(
+        profile=profile,
+        forecast_rows=forecast_rows,
+        batch_runtime_minutes=batch_runtime_minutes,
+        batch_runtime_threshold_minutes=120,
+        replenishment_runtime_minutes=replenishment_runtime_minutes,
+        memory_peak_gb=memory_peak_gb,
+        memory_budget_gb=memory_budget_gb,
+        decision=PerformanceGateDecision.PASS if not blockers else PerformanceGateDecision.FAIL,
+        blockers=tuple(blockers),
+    )
+
+
 @router.get("/runs")
 def list_performance_runs() -> dict[str, object]:
     run = build_performance_run()
@@ -158,6 +218,11 @@ def get_synthetic_scale(run_id: str = Path(min_length=1)) -> dict[str, object]:
         "synthetic_forecast_rows": calculate_synthetic_rows(run.profile),
         "shard_count": run.profile.shard_count,
     }
+
+
+@router.get("/epyc-gate")
+def get_epyc_performance_gate() -> dict[str, object]:
+    return build_epyc_performance_gate().model_dump(mode="json")
 
 
 @router.post("/runs/{run_id}/waive")

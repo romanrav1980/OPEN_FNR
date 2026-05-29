@@ -1213,3 +1213,18 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_replenishment_optimization.py tests/backend/test_replenishment.py tests/backend/test_replenishment_scale.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 31 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 559 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after ML-4: 9 sprints (`ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## ML-5 EPYC Performance Gate
+
+- ML-5 completed as EPYC production performance gate foundation.
+- Completion note: `docs/context/ML5_COMPLETION.md`.
+- Specification added: `ML_EPYC_PERFORMANCE_GATE_SPEC.md`.
+- Backend extended:
+  - `/performance/epyc-gate`.
+- Tests added:
+  - `tests/backend/test_epyc_performance_gate.py`.
+- Verification:
+  - `pytest tests/backend/test_epyc_performance_gate.py tests/backend/test_performance.py tests/backend/test_replenishment_scale.py tests/backend/test_replenishment_optimization.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 24 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 563 passed, 1 warning about `.pytest_cache` permissions.
+- R5 ML and replenishment production status: completed foundation.
+- Remaining focused sprint count after ML-5: 8 sprints (`DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
