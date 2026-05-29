@@ -64,7 +64,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | Completed foundation |
 | DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | Completed foundation |
 | PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | Completed foundation |
-| PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | ML-4, UI-5 |
+| PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | Completed foundation |
 | PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | PILOT-2, DEP-4 |
 | PILOT-4 | Business KPI Acceptance | WAPE, service level, lost sales, overstock and waste evidence | PILOT-3 |
 | PILOT-5 | Production Go/No-Go | Final acceptance pack and launch decision | PILOT-4 |
@@ -838,6 +838,13 @@ Acceptance criteria:
 
 - shadow KPI report is accepted by business;
 - blockers are triaged.
+
+Completion checkpoint:
+
+- PILOT-2 shadow mode rules are fixed in `PILOT_SHADOW_MODE_SPEC.md`;
+- pilot API exposes shadow run summary and shadow run detail;
+- shadow mode explicitly keeps exports disabled;
+- automated tests validate OPEN FNR vs legacy metrics, planner exceptions and not-found handling.
 
 ### PILOT-3. Controlled Export Pilot
 

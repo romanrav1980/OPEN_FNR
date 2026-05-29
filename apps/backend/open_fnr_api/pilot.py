@@ -81,6 +81,36 @@ class PilotReadinessPack(BaseModel):
     ready_for_shadow_mode: bool
 
 
+class PilotShadowMetric(BaseModel):
+    metric: str
+    open_fnr_value: float
+    legacy_value: float
+    unit: str
+    status: str
+
+
+class PilotShadowException(BaseModel):
+    exception_id: str
+    store_id: str
+    sku_id: str
+    reason: str
+    recommended_action: str
+    owner_role: str
+
+
+class PilotShadowRun(BaseModel):
+    run_id: str
+    business_date: str
+    mode: str
+    export_enabled: bool
+    compared_orders: int
+    metrics: tuple[PilotShadowMetric, ...]
+    exceptions: tuple[PilotShadowException, ...]
+    planner_actions: tuple[str, ...]
+    status: str
+    ready_for_business_review: bool
+
+
 class PilotKpi(BaseModel):
     name: str
     value: float
@@ -225,6 +255,35 @@ PILOT_ACCEPTANCE_THRESHOLDS: tuple[PilotAcceptanceThreshold, ...] = (
     PilotAcceptanceThreshold(metric="waste_reduction", threshold=1.5, unit="pp", direction="greater_or_equal", owner_role="Fresh Category Manager"),
 )
 
+PILOT_SHADOW_RUNS: tuple[PilotShadowRun, ...] = (
+    PilotShadowRun(
+        run_id="shadow-run-20260601-001",
+        business_date="2026-06-01",
+        mode="shadow",
+        export_enabled=False,
+        compared_orders=18420,
+        metrics=(
+            PilotShadowMetric(metric="wape", open_fnr_value=16.9, legacy_value=19.4, unit="%", status="green"),
+            PilotShadowMetric(metric="bias", open_fnr_value=-0.7, legacy_value=-2.8, unit="%", status="green"),
+            PilotShadowMetric(metric="service_level_proxy", open_fnr_value=95.8, legacy_value=94.6, unit="%", status="green"),
+            PilotShadowMetric(metric="order_quantity_delta_abs", open_fnr_value=4.2, legacy_value=0.0, unit="%", status="amber"),
+        ),
+        exceptions=(
+            PilotShadowException(
+                exception_id="shadow-exc-001",
+                store_id="S002",
+                sku_id="SKU-FRESH-0007",
+                reason="legacy order is lower than projected demand and presentation stock",
+                recommended_action="planner review before controlled export gate",
+                owner_role="Replenishment Owner",
+            ),
+        ),
+        planner_actions=("review amber order deltas", "confirm fresh exceptions", "record business feedback"),
+        status="business_review",
+        ready_for_business_review=True,
+    ),
+)
+
 PILOT_KPIS: tuple[PilotKpi, ...] = (
     PilotKpi(name="wape", value=15.7, threshold=18.0, unit="%", status="green"),
     PilotKpi(name="service_level", value=96.2, threshold=95.0, unit="%", status="green"),
@@ -333,6 +392,21 @@ def build_pilot_readiness_pack() -> PilotReadinessPack:
     )
 
 
+def build_shadow_mode_summary() -> dict[str, object]:
+    runs = list(PILOT_SHADOW_RUNS)
+    green_metric_count = sum(1 for run in runs for metric in run.metrics if metric.status == "green")
+    amber_metric_count = sum(1 for run in runs for metric in run.metrics if metric.status == "amber")
+    return {
+        "mode": "shadow",
+        "export_enabled": False,
+        "run_count": len(runs),
+        "green_metric_count": green_metric_count,
+        "amber_metric_count": amber_metric_count,
+        "ready_for_business_review": all(run.ready_for_business_review for run in runs),
+        "runs": [run.model_dump(mode="json") for run in runs],
+    }
+
+
 @router.get("/scope")
 def get_pilot_scope() -> dict[str, object]:
     return PILOT_SCOPE.model_dump(mode="json")
@@ -358,6 +432,19 @@ def get_pilot_data_readiness() -> dict[str, object]:
 @router.get("/readiness-pack")
 def get_pilot_readiness_pack() -> dict[str, object]:
     return build_pilot_readiness_pack().model_dump(mode="json")
+
+
+@router.get("/shadow-runs")
+def list_pilot_shadow_runs() -> dict[str, object]:
+    return build_shadow_mode_summary()
+
+
+@router.get("/shadow-runs/{run_id}")
+def get_pilot_shadow_run(run_id: str) -> dict[str, object]:
+    run = next((item for item in PILOT_SHADOW_RUNS if item.run_id == run_id), None)
+    if run is None:
+        raise HTTPException(status_code=404, detail="shadow run not found")
+    return run.model_dump(mode="json")
 
 
 @router.get("/dashboard")

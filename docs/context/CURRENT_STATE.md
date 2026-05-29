@@ -1329,3 +1329,25 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_pilot.py tests/backend/test_ingestion.py tests/backend/test_shadow_gate.py tests/backend/test_pilot_fixtures.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 36 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 584 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after PILOT-1: 4 sprints (`PILOT-2..PILOT-5`).
+
+## PILOT-2 Shadow Mode
+
+- PILOT-2 completed as shadow-mode foundation.
+- Completion note: `docs/context/PILOT2_COMPLETION.md`.
+- Specification added: `PILOT_SHADOW_MODE_SPEC.md`.
+- Backend extended:
+  - `GET /pilot/shadow-runs`;
+  - `GET /pilot/shadow-runs/{run_id}`.
+- Shadow run payload includes:
+  - export disabled flag;
+  - compared order count;
+  - OPEN FNR vs legacy metric values;
+  - WAPE, Bias, service-level proxy and order quantity delta;
+  - planner exceptions;
+  - planner actions.
+- Tests added/updated:
+  - `tests/backend/test_pilot.py`.
+- Verification:
+  - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_pilot.py tests/backend/test_ml_lifecycle_governance.py tests/backend/test_replenishment_optimization.py tests/process/test_bpmn_artifacts.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 68 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 588 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after PILOT-2: 3 sprints (`PILOT-3..PILOT-5`).

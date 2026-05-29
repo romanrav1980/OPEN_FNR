@@ -9,6 +9,7 @@ from open_fnr_api.pilot import (
     PilotKpi,
     build_pilot_readiness_pack,
     build_pilot_shadow_pack,
+    build_shadow_mode_summary,
     pilot_ready_for_acceptance,
 )
 
@@ -108,6 +109,49 @@ def test_pilot_scope_signoff_endpoint_records_all_required_roles() -> None:
     assert payload["scope_id"] == "pilot-north-fresh-001"
     assert set(payload["signed_roles"]) == {"Business Owner", "Supply Chain Director", "Data Platform Lead", "IT Ops"}
     assert payload["status"] == "signed"
+
+
+def test_shadow_mode_summary_keeps_exports_disabled_and_compares_legacy_orders() -> None:
+    response = client.get("/pilot/shadow-runs")
+    assert response.status_code == 200
+
+    payload = response.json()
+    run = payload["runs"][0]
+    metric_names = {item["metric"] for item in run["metrics"]}
+
+    assert payload["mode"] == "shadow"
+    assert payload["export_enabled"] is False
+    assert payload["ready_for_business_review"] is True
+    assert run["compared_orders"] > 0
+    assert run["export_enabled"] is False
+    assert {"wape", "bias", "service_level_proxy", "order_quantity_delta_abs"}.issubset(metric_names)
+    assert run["exceptions"][0]["owner_role"] == "Replenishment Owner"
+
+
+def test_shadow_run_detail_supports_planner_review_actions() -> None:
+    response = client.get("/pilot/shadow-runs/shadow-run-20260601-001")
+    assert response.status_code == 200
+
+    payload = response.json()
+
+    assert payload["status"] == "business_review"
+    assert "review amber order deltas" in payload["planner_actions"]
+    assert payload["exceptions"][0]["recommended_action"] == "planner review before controlled export gate"
+
+
+def test_shadow_run_detail_returns_not_found_for_unknown_run() -> None:
+    response = client.get("/pilot/shadow-runs/unknown")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "shadow run not found"
+
+
+def test_shadow_mode_summary_helper_counts_metric_statuses() -> None:
+    summary = build_shadow_mode_summary()
+
+    assert summary["export_enabled"] is False
+    assert summary["green_metric_count"] == 3
+    assert summary["amber_metric_count"] == 1
 
 
 def test_pilot_acceptance_requires_business_owner() -> None:
