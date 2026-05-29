@@ -61,7 +61,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | Completed foundation |
 | DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | Completed foundation |
 | DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | Completed foundation |
-| DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | DEP-1 |
+| DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | Completed foundation |
 | DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | IH-4, DEP-2 |
 | PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | RI-6 |
 | PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | ML-4, UI-5 |
@@ -752,6 +752,13 @@ Tests:
 Acceptance criteria:
 
 - support can diagnose source, forecast, replenishment, process and export issues.
+
+Completion checkpoint:
+
+- DEP-3 foundation scope is fixed in `OBSERVABILITY_RUNBOOKS_STRATEGY.md`;
+- observability API exposes SLO targets, alert rules, trace propagation smoke and runbook drills;
+- publication export failure runbook is stored in `docs/runbooks/publication-export-failure.md`;
+- automated tests validate SLO coverage, alert rule metadata, trace/log propagation and runbook drill evidence.
 
 ### DEP-4. Rollback And DR Drill
 

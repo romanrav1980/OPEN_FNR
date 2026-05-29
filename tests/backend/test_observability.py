@@ -64,3 +64,50 @@ def test_incident_helpers_cover_severity_sla_and_transition() -> None:
     assert incident_sla_minutes(AlertSeverity.SEV2) == 60
     incident = client.get("/observability/incidents").json()["items"][0]
     assert incident["sla_minutes"] == incident_sla_minutes(ALERTS[0].severity)
+
+
+def test_slo_targets_cover_core_operational_domains() -> None:
+    response = client.get("/observability/slo-targets")
+    assert response.status_code == 200
+
+    items = response.json()["items"]
+    services = {item["service"] for item in items}
+
+    assert {"daily-pipeline", "forecasting", "publication-export"}.issubset(services)
+    assert all(item["owner_role"] for item in items)
+    assert all(item["dashboard_panel"] for item in items)
+
+
+def test_alert_rules_link_to_runbooks_and_processes() -> None:
+    response = client.get("/observability/alert-rules")
+    assert response.status_code == 200
+
+    items = response.json()["items"]
+
+    assert any(item["rule_id"] == "alert-rule-publication-export-failed" for item in items)
+    assert all(item["runbook_url"].startswith("docs/runbooks/") for item in items)
+    assert all(item["process_key"].endswith("_process") for item in items)
+    assert all(item["severity"] in {"sev1", "sev2", "sev3"} for item in items)
+
+
+def test_trace_propagation_smoke_links_services_to_logs() -> None:
+    response = client.get("/observability/trace-propagation")
+    assert response.status_code == 200
+
+    check = response.json()["items"][0]
+
+    assert check["status"] == "passed"
+    assert "publication-export" in check["services"]
+    assert "trace_id_present_in_log" in check["evidence"]
+
+
+def test_runbook_drill_has_recovery_steps_and_no_duplicate_export_guard() -> None:
+    response = client.get("/observability/runbook-drills")
+    assert response.status_code == 200
+
+    drill = response.json()["items"][0]
+
+    assert drill["last_result"] == "passed"
+    assert drill["runbook_url"] == "docs/runbooks/publication-export-failure.md"
+    assert "without duplicate publication" in drill["expected_result"]
+    assert len(drill["steps"]) >= 5

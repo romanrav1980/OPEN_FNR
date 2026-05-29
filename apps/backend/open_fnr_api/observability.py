@@ -45,6 +45,41 @@ class IncidentActionRequest(BaseModel):
     comment: str = Field(min_length=1)
 
 
+class SloTarget(BaseModel):
+    service: str
+    indicator: str
+    target: str
+    window: str
+    owner_role: str
+    dashboard_panel: str
+
+
+class AlertRule(BaseModel):
+    rule_id: str
+    service: str
+    severity: AlertSeverity
+    expression: str
+    runbook_url: str
+    owner_role: str
+    process_key: str
+
+
+class TracePropagationCheck(BaseModel):
+    trace_id: str
+    services: tuple[str, ...]
+    status: str
+    evidence: tuple[str, ...]
+
+
+class RunbookDrill(BaseModel):
+    drill_id: str
+    incident_type: str
+    runbook_url: str
+    steps: tuple[str, ...]
+    expected_result: str
+    last_result: str
+
+
 ALERTS: tuple[Alert, ...] = (
     Alert(
         alert_id="alert-export-20260528-001",
@@ -53,6 +88,89 @@ ALERTS: tuple[Alert, ...] = (
         message="ERP export failed for replenishment package.",
         runbook_url="runbooks/publication-export-failure.md",
         created_at=datetime(2026, 5, 28, 21, 0, tzinfo=timezone.utc),
+    ),
+)
+
+SLO_TARGETS: tuple[SloTarget, ...] = (
+    SloTarget(
+        service="daily-pipeline",
+        indicator="successful_daily_cycle",
+        target="99.0%",
+        window="rolling_30_days",
+        owner_role="Data Platform Lead",
+        dashboard_panel="pipeline_success_rate",
+    ),
+    SloTarget(
+        service="forecasting",
+        indicator="forecast_batch_runtime",
+        target="p95_under_2_hours",
+        window="rolling_14_days",
+        owner_role="ML Lead",
+        dashboard_panel="forecast_runtime_p95",
+    ),
+    SloTarget(
+        service="publication-export",
+        indicator="erp_export_latency",
+        target="p95_under_15_minutes",
+        window="business_day",
+        owner_role="Integration Lead",
+        dashboard_panel="erp_export_latency",
+    ),
+)
+
+ALERT_RULES: tuple[AlertRule, ...] = (
+    AlertRule(
+        rule_id="alert-rule-source-sla-missed",
+        service="integration-operations",
+        severity=AlertSeverity.SEV2,
+        expression="source_readiness_status == blocked for one daily cycle",
+        runbook_url="docs/runbooks/source-sla-missed.md",
+        owner_role="Data Platform Lead",
+        process_key="data_load_monitoring_process",
+    ),
+    AlertRule(
+        rule_id="alert-rule-forecast-runtime-p95",
+        service="forecasting",
+        severity=AlertSeverity.SEV2,
+        expression="forecast_batch_runtime_p95 exceeds configured two hour gate",
+        runbook_url="docs/runbooks/forecast-runtime-breach.md",
+        owner_role="ML Lead",
+        process_key="performance_test_run_process",
+    ),
+    AlertRule(
+        rule_id="alert-rule-publication-export-failed",
+        service="publication-export",
+        severity=AlertSeverity.SEV2,
+        expression="export_status == failed after retry budget exhausted",
+        runbook_url="docs/runbooks/publication-export-failure.md",
+        owner_role="Integration Lead",
+        process_key="publication_process",
+    ),
+)
+
+TRACE_PROPAGATION_CHECKS: tuple[TracePropagationCheck, ...] = (
+    TracePropagationCheck(
+        trace_id="trace-export-001",
+        services=("daily-pipeline", "replenishment", "publication-export", "opensearch"),
+        status="passed",
+        evidence=("correlation_id_present", "trace_id_present_in_log", "incident_links_trace"),
+    ),
+)
+
+RUNBOOK_DRILLS: tuple[RunbookDrill, ...] = (
+    RunbookDrill(
+        drill_id="drill-publication-export-20260529",
+        incident_type="publication_export_failed",
+        runbook_url="docs/runbooks/publication-export-failure.md",
+        steps=(
+            "confirm alert severity and owner",
+            "find trace_id in log search",
+            "check export idempotency key",
+            "retry export or escalate to Integration Lead",
+            "resolve incident with timeline evidence",
+        ),
+        expected_result="support can diagnose and recover failed ERP export without duplicate publication",
+        last_result="passed",
     ),
 )
 
@@ -96,6 +214,29 @@ def list_alerts(actor_role: str = "L1") -> dict[str, object]:
 @router.get("/incidents")
 def list_incidents() -> dict[str, object]:
     return {"items": [item.model_dump(mode="json") for item in INCIDENTS], "total": len(INCIDENTS)}
+
+
+@router.get("/slo-targets")
+def list_slo_targets() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in SLO_TARGETS], "total": len(SLO_TARGETS)}
+
+
+@router.get("/alert-rules")
+def list_alert_rules() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in ALERT_RULES], "total": len(ALERT_RULES)}
+
+
+@router.get("/trace-propagation")
+def list_trace_propagation_checks() -> dict[str, object]:
+    return {
+        "items": [item.model_dump(mode="json") for item in TRACE_PROPAGATION_CHECKS],
+        "total": len(TRACE_PROPAGATION_CHECKS),
+    }
+
+
+@router.get("/runbook-drills")
+def list_runbook_drills() -> dict[str, object]:
+    return {"items": [item.model_dump(mode="json") for item in RUNBOOK_DRILLS], "total": len(RUNBOOK_DRILLS)}
 
 
 @router.post("/incidents/{incident_id}/{action}")

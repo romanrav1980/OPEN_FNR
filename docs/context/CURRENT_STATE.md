@@ -1256,4 +1256,24 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/release/test_ci_release_gates.py tests/deployment/test_environment_topology.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 14 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 570 passed, 1 warning about `.pytest_cache` permissions.
-- Remaining focused sprint count after DEP-2: 6 sprints (`DEP-3..DEP-4`, `PILOT-1..PILOT-5`).
+- Remaining focused sprint count after DEP-2: 7 sprints (`DEP-3..DEP-4`, `PILOT-1..PILOT-5`).
+
+## DEP-3 Observability And Runbooks
+
+- DEP-3 completed as observability/runbook foundation.
+- Completion note: `docs/context/DEP3_COMPLETION.md`.
+- Specification added: `OBSERVABILITY_RUNBOOKS_STRATEGY.md`.
+- Runbook added:
+  - `docs/runbooks/publication-export-failure.md`.
+- Backend extended:
+  - `GET /observability/slo-targets`;
+  - `GET /observability/alert-rules`;
+  - `GET /observability/trace-propagation`;
+  - `GET /observability/runbook-drills`.
+- Tests added/updated:
+  - `tests/backend/test_observability.py`;
+  - `tests/operations/test_observability_runbooks.py`.
+- Verification:
+  - `pytest tests/backend/test_observability.py tests/operations/test_observability_runbooks.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 18 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 576 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after DEP-3: 6 sprints (`DEP-4`, `PILOT-1..PILOT-5`).
