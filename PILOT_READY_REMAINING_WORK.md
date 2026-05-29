@@ -1,7 +1,7 @@
 # OPEN FNR Pilot-Ready Remaining Work
 
 Date: 2026-05-29
-Status: handoff after target-adapter hardening checkpoints.
+Status: handoff after real source landing wiring checkpoint.
 
 ## What Is Now Closed
 
@@ -16,7 +16,8 @@ Status: handoff after target-adapter hardening checkpoints.
 | Store App task target | closed for adapter layer | `docs/test-reports/sprint-store-app-task-target/index.html` |
 | Planogram target | closed for adapter layer | `docs/test-reports/sprint-planogram-target/index.html` |
 | IdP provisioning target | closed for adapter layer | `docs/test-reports/sprint-idp-provisioning-target/index.html` |
-| Backend regression | green | `python -m pytest` -> 394 passed |
+| Pilot source landing wiring | closed for first pilot gate | `docs/test-reports/sprint-real-source-landing-wiring/index.html` |
+| Backend regression | green | `python -m pytest` -> 397 passed |
 | Frontend build | green | `npm.cmd run build` |
 | DEV/STAGE compose config | green | `docker compose ... config --quiet` |
 
@@ -24,7 +25,7 @@ Status: handoff after target-adapter hardening checkpoints.
 
 | Block | Goal | First implementation slice | Acceptance signal |
 | --- | --- | --- | --- |
-| Real inbound source connection | Replace sample manifests with real pilot POS/WMS/ERP/MDM/promo file drops or APIs | Configure landing folders/endpoints and run one business date through shadow load | Source files discovered, schema/DQ passed, clean publication ready |
+| Real inbound source connection | Replace sample manifests with real pilot POS/WMS/ERP/MDM/promo file drops or APIs | First landing gate implemented; next connect actual pilot files/API credentials | Real source files discovered, schema/DQ passed, clean publication ready |
 | OIDC/JWT middleware | Authenticate real users and service clients | Add FastAPI JWT verification and frontend auth boundary | Unauthorized calls rejected, valid token maps to user/roles |
 | Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | `policy.py` with role, region, category and object checks | Security tests cover positive/negative object-level access |
 | Routed UI productization | Move from single Control Tower to operational pages | React Router, API client, route-level loading/error/denied states | E2E smoke covers forecast, replenishment, exceptions, admin |
@@ -34,27 +35,22 @@ Status: handoff after target-adapter hardening checkpoints.
 
 ## Tactical Next Sprint Order
 
-1. `RDI-1 Real Source Landing Wiring`
-   - configure pilot landing paths or API credentials through env only;
-   - add sample real-like manifest validation;
-   - produce HTML report with source discovery and DQ screenshots.
-
-2. `SEC-2 JWT/OIDC Boundary`
+1. `SEC-2 JWT/OIDC Boundary`
    - add token verification middleware;
    - map token claims to OPEN FNR roles/scopes;
    - keep local dev bypass configurable and disabled by default outside dev/test.
 
-3. `UI-1 Routed Shell`
+2. `UI-1 Routed Shell`
    - introduce router and page layout;
    - keep Control Tower as status overview;
    - move Admin, Publication, Supplier, Capacity, Store and Shelf pages behind routes.
 
-4. `PROC-DEPLOY-1 Flowable Deployment`
+3. `PROC-DEPLOY-1 Flowable Deployment`
    - package process artifacts;
    - deploy to Flowable OSS in dev compose;
    - save version and checksum evidence.
 
-5. `PILOT-1 Shadow Pilot Pack`
+4. `PILOT-1 Shadow Pilot Pack`
    - generate pilot scope, source checklist, runbook and rollback plan;
    - run full daily cycle on limited store/SKU scope.
 
@@ -70,7 +66,7 @@ Status: handoff after target-adapter hardening checkpoints.
 
 ## Saved Context For Resume
 
-- Latest pushed hardening commit at this checkpoint: `bca8c9d`.
-- Backend regression count: 394 tests passed.
+- Latest pushed hardening commit at previous checkpoint: `87bdc09`.
+- Backend regression count after RDI-1: 397 tests passed.
 - Target adapter reports are under `docs/test-reports`.
-- The next autonomous implementation should start with `RDI-1 Real Source Landing Wiring` unless the user provides OIDC or UI priority first.
+- The next autonomous implementation should start with `SEC-2 JWT/OIDC Boundary` unless the user provides UI or Flowable priority first.

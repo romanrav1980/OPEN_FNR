@@ -30,7 +30,7 @@ type DataQualityIncident = {
 type ShadowLoadSource = {
   source: string;
   contract: string;
-  status: "discovered" | "missing_files";
+  status: "discovered" | "missing_files" | "manifest_missing" | "manifest_mismatch";
   files: number;
   owner: string;
 };
@@ -41,6 +41,31 @@ type ShadowLoadTask = {
   owner: string;
   reason: string;
   actions: string;
+};
+
+type PilotShadowLoadSourceApiItem = {
+  source_system: string;
+  contract_name: string;
+  status: ShadowLoadSource["status"];
+  files: number;
+  owner_role: string;
+};
+
+type PilotShadowLoadTaskApiItem = {
+  task_id: string;
+  source_system: string;
+  owner_role: string;
+  reason: string;
+  actions: string[];
+};
+
+type PilotShadowLoadPlanApiResponse = {
+  status: string;
+  discovered_count: number;
+  required_count: number;
+  next_gate: string;
+  sources: PilotShadowLoadSourceApiItem[];
+  recovery_tasks: PilotShadowLoadTaskApiItem[];
 };
 
 type FeatureMartStatus = {
@@ -1223,6 +1248,12 @@ function App() {
   const [dailyPipelineApiStatus, setDailyPipelineApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeDailyPipelineStages, setRuntimeDailyPipelineStages] =
     React.useState<DailyPipelineStage[]>(dailyPipelineStages);
+  const [shadowLoadApiStatus, setShadowLoadApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [shadowLoadGateStatus, setShadowLoadGateStatus] = React.useState("recovery_required");
+  const [shadowLoadCoverage, setShadowLoadCoverage] = React.useState("3 / 6");
+  const [runtimeShadowLoadSources, setRuntimeShadowLoadSources] =
+    React.useState<ShadowLoadSource[]>(shadowLoadSources);
+  const [runtimeShadowLoadTasks, setRuntimeShadowLoadTasks] = React.useState<ShadowLoadTask[]>(shadowLoadTasks);
   const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
@@ -1314,6 +1345,47 @@ function App() {
           return;
         }
         setDailyPipelineApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/data/ingestion/pilot-shadow-load/plan?business_date=2026-05-28"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Pilot shadow-load plan API returned ${response.status}`);
+        }
+        return response.json() as Promise<PilotShadowLoadPlanApiResponse>;
+      })
+      .then((payload) => {
+        setShadowLoadGateStatus(payload.status);
+        setShadowLoadCoverage(`${payload.discovered_count} / ${payload.required_count}`);
+        setRuntimeShadowLoadSources(
+          payload.sources.map((source) => ({
+            source: source.source_system,
+            contract: source.contract_name,
+            status: source.status,
+            files: source.files,
+            owner: source.owner_role,
+          })),
+        );
+        setRuntimeShadowLoadTasks(
+          payload.recovery_tasks.map((task) => ({
+            task: task.task_id,
+            source: task.source_system,
+            owner: task.owner_role,
+            reason: task.reason,
+            actions: task.actions.join(", "),
+          })),
+        );
+        setShadowLoadApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setShadowLoadApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -1677,18 +1749,23 @@ function App() {
         <div className="feature-grid">
           <article className="feature-summary">
             <span>Process instance</span>
-            <strong>proc-shadow-load-2026-05-28</strong>
+            <strong>{shadowLoadGateStatus}</strong>
             <p>
-              The gate calls <code>/data/ingestion/shadow-load/run</code>, checks every source contract
+              The gate calls <code>/data/ingestion/pilot-shadow-load/plan</code>, checks every source contract
               and opens recovery tasks for missing or blocked batches.
             </p>
           </article>
           <article className="feature-summary">
-            <span>Business audit</span>
-            <strong>OPEN_FNR_AUDIT_ENABLED=true</strong>
+            <span>Coverage</span>
+            <strong>{shadowLoadCoverage}</strong>
             <p>
-              Every gate run records actor, role, landing root, missing contracts and process correlation id.
+              Pilot source coverage is calculated from configured landing root and manifest sidecars.
             </p>
+          </article>
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{shadowLoadApiStatus}</strong>
+            <p>Source discovery uses central landing root config and keeps DEV/TEST fallback rows.</p>
           </article>
         </div>
         <div className="table-shell">
@@ -1703,7 +1780,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {shadowLoadSources.map((source) => (
+              {runtimeShadowLoadSources.map((source) => (
                 <tr key={`${source.source}-${source.contract}`}>
                   <td>{source.source}</td>
                   <td>{source.contract}</td>
@@ -1731,7 +1808,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {shadowLoadTasks.map((task) => (
+              {runtimeShadowLoadTasks.map((task) => (
                 <tr key={task.task}>
                   <td>{task.task}</td>
                   <td>{task.source}</td>

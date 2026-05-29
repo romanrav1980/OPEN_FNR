@@ -64,7 +64,7 @@ Status: completed.
 
 ## I1. POS Sales Ingestion
 
-Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
+Status: implemented as contract, manifest, DAG skeleton and pilot landing discovery gate; awaiting actual pilot source files/API credentials.
 
 ### Scope
 
@@ -83,7 +83,7 @@ Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot 
 
 ## I2. WMS Stock, Open Orders And In-Transit
 
-Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
+Status: implemented as contract, manifest, DAG skeleton and pilot landing discovery gate; awaiting actual pilot source files/API credentials.
 
 ### Scope
 
@@ -101,7 +101,7 @@ Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot 
 
 ## I3. ERP Prices And Order Export Statuses
 
-Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
+Status: implemented as contract, manifest, DAG skeleton and pilot landing discovery gate; awaiting actual pilot source files/API credentials.
 
 ### Scope
 
@@ -120,7 +120,7 @@ Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot 
 
 ## I4. MDM And PIM Reference Data
 
-Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
+Status: implemented as contract, manifest, DAG skeleton and pilot landing discovery gate; awaiting actual pilot source files/API credentials.
 
 ### Scope
 
@@ -139,7 +139,7 @@ Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot 
 
 ## I5. Promo Source Ingestion
 
-Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
+Status: implemented as contract, manifest, DAG skeleton and pilot landing discovery gate; awaiting actual pilot source files/API credentials.
 
 ### Scope
 
@@ -155,6 +155,25 @@ Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot 
 - Promo manifest endpoint exposes source batch metadata and idempotency key.
 - `orchestration/airflow/dags/promo_plan_ingestion.py` defines the promo plan ingestion DAG skeleton.
 - ClickHouse raw landing DDL includes promo plan table.
+
+## RDI-1. Real Source Landing Wiring
+
+Status: completed for first pilot gate.
+
+### Scope
+
+- define mandatory pilot source contract matrix;
+- discover configured local file drops for POS/WMS/ERP/MDM/PROMO;
+- validate `manifest.json` sidecar presence and file references;
+- return recovery tasks for missing files and manifest mismatch;
+- surface source coverage in Control Tower.
+
+### Current Implementation
+
+- Required contract matrix: `PILOT_REQUIRED_SOURCE_CONTRACTS`.
+- API endpoint: `/data/ingestion/pilot-shadow-load/plan`.
+- UI Shadow Load Gate now loads source coverage and recovery tasks from the API.
+- Test evidence: `docs/test-reports/sprint-real-source-landing-wiring/index.html`.
 
 ## S1. Production Security Foundation
 

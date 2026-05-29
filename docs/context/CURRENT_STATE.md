@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 394 automated tests passed.
+Current backend regression status: 397 automated tests passed.
 
 ## Local Infrastructure
 
@@ -438,7 +438,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 394 passed.
+- `python -m pytest` -> 397 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -449,7 +449,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts and outbound target adapters are implemented and verified. Next: start `RDI-1 Real Source Landing Wiring` to connect pilot POS/WMS/ERP/MDM/promo file drops or APIs, then add OIDC/JWT middleware, routed UI and Flowable deployment automation.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring and outbound target adapters are implemented and verified. Next: add OIDC/JWT middleware, shared policy layer, routed UI and Flowable deployment automation.
 
 ## Post-Sprint Planning Artifacts
 
@@ -462,6 +462,7 @@ Real-ingestion I1-I5 contracts and outbound target adapters are implemented and 
 - UI productization: `UI_PRODUCTIZATION_PLAN.md`.
 - Pilot launch: `PILOT_LAUNCH_PLAN.md`.
 - Pilot-ready remaining work handoff: `PILOT_READY_REMAINING_WORK.md`.
+- Real source landing wiring test report: `docs/test-reports/sprint-real-source-landing-wiring/index.html`.
 
 ## H1 Industrial Hardening Artifacts
 
@@ -492,6 +493,8 @@ Real-ingestion I1-I5 contracts and outbound target adapters are implemented and 
 
 - POS receipt-line contract: `PosSalesLine` in `apps/backend/open_fnr_api/data_contracts.py`.
 - POS manifest endpoint: `/data/ingestion/manifests/pos-sales`.
+- Pilot shadow-load plan endpoint: `/data/ingestion/pilot-shadow-load/plan`.
+- Required pilot source contract matrix: `PILOT_REQUIRED_SOURCE_CONTRACTS` in `apps/backend/open_fnr_api/ingestion.py`.
 - POS ingestion DAG skeleton: `orchestration/airflow/dags/pos_sales_ingestion.py`.
 - Raw ClickHouse landing table: `open_fnr.raw_pos_sales_lines`.
 - POS ingestion tests: `tests/backend/test_ingestion.py`, `tests/data/test_contract_validation.py`, `tests/data/test_clickhouse_pos_sales_schema.py`, `tests/orchestration/test_pos_sales_ingestion.py`.

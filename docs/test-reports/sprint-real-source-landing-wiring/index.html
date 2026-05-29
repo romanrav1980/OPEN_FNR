@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR Real Source Landing Wiring Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Real Source Landing Wiring</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем первый pilot-ready inbound gate для реальных POS/WMS/ERP/MDM/PROMO file drops.
+          Такой тест нужен, чтобы перед clean publication система проверяла не один файл, а всю обязательную
+          матрицу source-system × contract × business-date через настроенный landing root.
+        </p>
+        <p>
+          UI получает план из <code>/data/ingestion/pilot-shadow-load/plan</code>, показывает coverage,
+          статусы discovery и recovery tasks.
+        </p>
+        <img src="screenshots/real-source-landing-wiring.png" alt="Real source landing wiring in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем Control Tower.</td><td>Проверяем доступность UI после подключения pilot gate.</td><td>Страница загружена.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем Shadow Load Gate API status.</td><td>UI должен показывать live/fallback состояние.</td><td>При backend online статус live.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем coverage.</td><td>Пользователь должен видеть, сколько обязательных контрактов найдено.</td><td>Coverage рассчитан backend-ом.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем таблицу источников.</td><td>Нужны POS/WMS/ERP/MDM/PROMO контракты и owner роли.</td><td>Строки source contracts отображаются.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>5</td><td>Проверяем recovery tasks.</td><td>Missing files/manifest issues должны становиться управляемыми задачами.</td><td>Recovery tasks отображаются при неполном landing.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Проверяем configured landing root.</td><td>Пути нельзя hardcode-ить в коде.</td><td>Используется <code>OPEN_FNR_LANDING_ROOT_PATH</code>.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Ищем обязательные source files.</td><td>Прогноз и пополнение требуют полного набора фактов.</td><td>9 обязательных контрактов проверяются.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Читаем manifest sidecar.</td><td>Нужны row_count, checksum и idempotency key.</td><td>manifest.json исключается из data files и валидируется отдельно.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Проверяем missing source recovery.</td><td>Система не должна молча идти в clean publication.</td><td>status recovery_required, создаются recovery tasks.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Проверяем полный landing.</td><td>При полном наборе источников можно идти дальше.</td><td>status ready_for_clean_publication.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>6</td><td>Проверяем manifest mismatch.</td><td>Checksum/manifest без файлов не должны считаться валидной поставкой.</td><td>status manifest_mismatch.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_ingestion.py tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">15 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page ...</code></td><td class="ok">real-source-landing-wiring.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

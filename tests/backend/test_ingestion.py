@@ -1,10 +1,34 @@
+from datetime import date
+
 from fastapi.testclient import TestClient
 
 from open_fnr_api import config
 from open_fnr_api.main import app
+from open_fnr_api.ingestion import PILOT_REQUIRED_SOURCE_CONTRACTS, build_pilot_shadow_load_plan
 
 
 client = TestClient(app)
+
+
+def write_source_file_with_manifest(root, source_system: str, contract_name: str, business_date: str = "2026-05-28") -> None:
+    source_dir = root / source_system.lower() / contract_name / f"business_date={business_date}"
+    source_dir.mkdir(parents=True)
+    file_name = f"{contract_name}.csv"
+    (source_dir / file_name).write_text("id,value\n1,ok\n", encoding="utf-8")
+    (source_dir / "manifest.json").write_text(
+        f"""
+        {{
+          "source_system": "{source_system}",
+          "contract_name": "{contract_name}",
+          "business_date": "{business_date}",
+          "row_count": 1,
+          "checksum": "sha256:{source_system.lower()}-{contract_name}-{business_date}",
+          "idempotency_key": "{source_system}:{contract_name}:v1:{business_date}",
+          "files": ["{file_name}"]
+        }}
+        """,
+        encoding="utf-8",
+    )
 
 
 def test_contracts_endpoint_lists_core_domains() -> None:
@@ -182,3 +206,75 @@ def test_local_source_file_discovery_returns_manifest_sidecar(tmp_path) -> None:
     payload = response.json()
     assert payload["manifest"]["row_count"] == 1
     assert payload["manifest"]["checksum"] == "sha256:test"
+
+
+def test_pilot_shadow_load_plan_blocks_when_required_sources_are_missing(tmp_path) -> None:
+    write_source_file_with_manifest(tmp_path, "POS", "pos_sales_line")
+
+    original_path = config.settings.landing_root_path
+    config.settings.landing_root_path = str(tmp_path)
+    try:
+        response = client.get("/data/ingestion/pilot-shadow-load/plan", params={"business_date": "2026-05-28"})
+    finally:
+        config.settings.landing_root_path = original_path
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "recovery_required"
+    assert payload["discovered_count"] == 1
+    assert payload["required_count"] == len(PILOT_REQUIRED_SOURCE_CONTRACTS)
+    assert payload["next_gate"] == "source_recovery"
+    assert any(task["source_system"] == "WMS" for task in payload["recovery_tasks"])
+
+
+def test_pilot_shadow_load_plan_is_ready_when_all_contracts_have_files_and_manifests(tmp_path) -> None:
+    for contract in PILOT_REQUIRED_SOURCE_CONTRACTS:
+        write_source_file_with_manifest(tmp_path, contract.source_system, contract.contract_name)
+
+    original_path = config.settings.landing_root_path
+    config.settings.landing_root_path = str(tmp_path)
+    try:
+        response = client.get("/data/ingestion/pilot-shadow-load/plan", params={"business_date": "2026-05-28"})
+    finally:
+        config.settings.landing_root_path = original_path
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ready_for_clean_publication"
+    assert payload["discovered_count"] == payload["required_count"] == len(PILOT_REQUIRED_SOURCE_CONTRACTS)
+    assert payload["recovery_tasks"] == []
+    promo = next(source for source in payload["sources"] if source["source_system"] == "PROMO")
+    assert "promo_forecast" in promo["required_for"]
+    assert promo["checksum"].startswith("sha256:promo")
+
+
+def test_pilot_shadow_load_helper_detects_manifest_mismatch(tmp_path) -> None:
+    source_dir = tmp_path / "pos" / "pos_sales_line" / "business_date=2026-05-28"
+    source_dir.mkdir(parents=True)
+    (source_dir / "actual.csv").write_text("id,value\n1,ok\n", encoding="utf-8")
+    (source_dir / "manifest.json").write_text(
+        """
+        {
+          "source_system": "POS",
+          "contract_name": "pos_sales_line",
+          "business_date": "2026-05-28",
+          "row_count": 1,
+          "checksum": "sha256:pos-mismatch",
+          "idempotency_key": "POS:pos_sales_line:v1:2026-05-28",
+          "files": ["missing.csv"]
+        }
+        """,
+        encoding="utf-8",
+    )
+
+    original_path = config.settings.landing_root_path
+    config.settings.landing_root_path = str(tmp_path)
+    try:
+        plan = build_pilot_shadow_load_plan(date.fromisoformat("2026-05-28"))
+        response = client.get("/data/ingestion/pilot-shadow-load/plan", params={"business_date": "2026-05-28"})
+    finally:
+        config.settings.landing_root_path = original_path
+
+    assert plan.required_count == len(PILOT_REQUIRED_SOURCE_CONTRACTS)
+    pos = next(source for source in response.json()["sources"] if source["source_system"] == "POS")
+    assert pos["status"] == "manifest_mismatch"

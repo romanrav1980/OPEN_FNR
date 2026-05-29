@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 
+from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Path
 
 from .data_contracts import BatchStatus, DataDomain, DqSeverity, IngestionBatch, SourceBatchManifest, contract_summaries
@@ -9,6 +10,47 @@ from .source_adapters import LocalFileDropAdapter
 
 
 router = APIRouter(prefix="/data", tags=["data-ingestion"])
+
+
+class PilotSourceContract(BaseModel):
+    source_system: str
+    contract_name: str
+    owner_role: str
+    required_for: tuple[str, ...]
+
+
+class PilotSourceDiscovery(BaseModel):
+    source_system: str
+    contract_name: str
+    business_date: date
+    status: str
+    files: int
+    row_count: int | None
+    checksum: str | None
+    idempotency_key: str | None
+    owner_role: str
+    required_for: tuple[str, ...]
+    issue: str | None = None
+
+
+class PilotRecoveryTask(BaseModel):
+    task_id: str
+    source_system: str
+    contract_name: str
+    owner_role: str
+    reason: str
+    actions: tuple[str, ...]
+
+
+class PilotShadowLoadPlan(BaseModel):
+    business_date: date
+    landing_root_path: str
+    status: str
+    discovered_count: int
+    required_count: int
+    sources: tuple[PilotSourceDiscovery, ...]
+    recovery_tasks: tuple[PilotRecoveryTask, ...]
+    next_gate: str
 
 
 SAMPLE_BATCHES: tuple[IngestionBatch, ...] = (
@@ -194,6 +236,122 @@ SOURCE_PIPELINE_READINESS: tuple[dict[str, object], ...] = (
     },
 )
 
+PILOT_REQUIRED_SOURCE_CONTRACTS: tuple[PilotSourceContract, ...] = (
+    PilotSourceContract(
+        source_system="POS",
+        contract_name="pos_sales_line",
+        owner_role="Data Engineer",
+        required_for=("regular_forecast", "promo_forecast", "demand_projection"),
+    ),
+    PilotSourceContract(
+        source_system="WMS",
+        contract_name="wms_stock_snapshot_line",
+        owner_role="Supply Chain Data Owner",
+        required_for=("projected_stock", "replenishment", "true_inventory"),
+    ),
+    PilotSourceContract(
+        source_system="WMS",
+        contract_name="wms_open_order_line",
+        owner_role="Supply Chain Data Owner",
+        required_for=("projected_stock", "replenishment", "multi_echelon"),
+    ),
+    PilotSourceContract(
+        source_system="WMS",
+        contract_name="wms_in_transit_line",
+        owner_role="Supply Chain Data Owner",
+        required_for=("projected_stock", "replenishment", "capacity"),
+    ),
+    PilotSourceContract(
+        source_system="ERP",
+        contract_name="erp_price_line",
+        owner_role="Commercial Data Owner",
+        required_for=("regular_forecast", "promo_forecast", "procurement"),
+    ),
+    PilotSourceContract(
+        source_system="ERP",
+        contract_name="erp_order_export_status_line",
+        owner_role="Integration Owner",
+        required_for=("publication_reconciliation", "order_status_monitoring"),
+    ),
+    PilotSourceContract(
+        source_system="MDM",
+        contract_name="mdm_product_line",
+        owner_role="MDM Data Owner",
+        required_for=("assortment", "fresh", "lifecycle", "hierarchy"),
+    ),
+    PilotSourceContract(
+        source_system="MDM",
+        contract_name="mdm_store_line",
+        owner_role="MDM Data Owner",
+        required_for=("store_scope", "replenishment_calendar", "routing"),
+    ),
+    PilotSourceContract(
+        source_system="PROMO",
+        contract_name="promo_plan_line",
+        owner_role="Promo Planner",
+        required_for=("promo_forecast", "shelf_space", "display_capacity"),
+    ),
+)
+
+
+def build_pilot_shadow_load_plan(business_date: date, adapter: LocalFileDropAdapter | None = None) -> PilotShadowLoadPlan:
+    source_adapter = adapter or LocalFileDropAdapter()
+    sources: list[PilotSourceDiscovery] = []
+    recovery_tasks: list[PilotRecoveryTask] = []
+    for contract in PILOT_REQUIRED_SOURCE_CONTRACTS:
+        files = source_adapter.discover(contract.source_system, contract.contract_name, business_date)
+        manifest = source_adapter.load_manifest_sidecar(contract.source_system, contract.contract_name, business_date)
+        discovered_file_names = {file.file_name for file in files}
+        status = "discovered"
+        issue = None
+        if not files:
+            status = "missing_files"
+            issue = "no supported source files found"
+        elif manifest is None:
+            status = "manifest_missing"
+            issue = "manifest.json sidecar is missing"
+        elif set(manifest.files) - discovered_file_names:
+            status = "manifest_mismatch"
+            issue = "manifest references files that were not discovered"
+
+        source = PilotSourceDiscovery(
+            source_system=contract.source_system,
+            contract_name=contract.contract_name,
+            business_date=business_date,
+            status=status,
+            files=len(files),
+            row_count=manifest.row_count if manifest is not None else None,
+            checksum=manifest.checksum if manifest is not None else None,
+            idempotency_key=manifest.idempotency_key if manifest is not None else None,
+            owner_role=contract.owner_role,
+            required_for=contract.required_for,
+            issue=issue,
+        )
+        sources.append(source)
+        if issue is not None:
+            recovery_tasks.append(
+                PilotRecoveryTask(
+                    task_id=f"recover-{contract.source_system.lower()}-{contract.contract_name}-{business_date.isoformat()}",
+                    source_system=contract.source_system,
+                    contract_name=contract.contract_name,
+                    owner_role=contract.owner_role,
+                    reason=issue,
+                    actions=("request_resend", "reload_landing", "rerun_shadow_load"),
+                )
+            )
+
+    discovered_count = sum(1 for source in sources if source.status == "discovered")
+    return PilotShadowLoadPlan(
+        business_date=business_date,
+        landing_root_path=str(source_adapter.landing_root_path),
+        status="ready_for_clean_publication" if discovered_count == len(sources) else "recovery_required",
+        discovered_count=discovered_count,
+        required_count=len(sources),
+        sources=tuple(sources),
+        recovery_tasks=tuple(recovery_tasks),
+        next_gate="clean_publication" if discovered_count == len(sources) else "source_recovery",
+    )
+
 
 @router.get("/contracts")
 def list_contracts() -> dict[str, object]:
@@ -271,6 +429,11 @@ def discover_local_source_files(source_system: str, contract_name: str, business
         "items": [file.model_dump(mode="json") for file in files],
         "manifest": manifest.model_dump(mode="json") if manifest is not None else None,
     }
+
+
+@router.get("/ingestion/pilot-shadow-load/plan")
+def get_pilot_shadow_load_plan(business_date: date) -> dict[str, object]:
+    return build_pilot_shadow_load_plan(business_date).model_dump(mode="json")
 
 
 @router.get("/ingestion/status")
