@@ -230,7 +230,7 @@ Status: completed for core pilot outbound targets.
 
 ## U1. Routed UI Foundation
 
-Status: not started.
+Status: completed for first shell; route-specific module split remains.
 
 ### Scope
 
@@ -239,6 +239,13 @@ Status: not started.
 - add API client;
 - add loading/error/denied states;
 - keep control tower as a demo/status page only.
+
+### Current Implementation
+
+- Hash-route workspace shell defines Control Tower, Data, Forecast, Replenishment, Operations and Admin routes.
+- Topbar and route summary reflect active route owner and purpose.
+- Existing Control Tower remains the overview screen while route-specific page split is pending.
+- Test evidence: `docs/test-reports/sprint-routed-ui-shell/index.html`.
 
 ## Pilot Readiness Gate
 

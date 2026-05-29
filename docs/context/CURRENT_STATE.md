@@ -453,7 +453,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary and shared policy layer are implemented and verified. Next: add routed UI and Flowable deployment automation.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer and routed UI shell are implemented and verified. Next: add Flowable deployment automation and pilot shadow pack.
 
 ## Post-Sprint Planning Artifacts
 
@@ -467,6 +467,7 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Pilot launch: `PILOT_LAUNCH_PLAN.md`.
 - Pilot-ready remaining work handoff: `PILOT_READY_REMAINING_WORK.md`.
 - Real source landing wiring test report: `docs/test-reports/sprint-real-source-landing-wiring/index.html`.
+- Routed UI shell test report: `docs/test-reports/sprint-routed-ui-shell/index.html`.
 
 ## H1 Industrial Hardening Artifacts
 

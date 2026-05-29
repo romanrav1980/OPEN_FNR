@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR Routed UI Shell Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Routed UI Shell</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем первый routed shell для Control Tower: workspace navigation,
+          active route summary and mobile-safe layout. Это foundation-слой перед выносом больших
+          модулей в отдельные страницы.
+        </p>
+        <img src="screenshots/routed-ui-shell-admin.png" alt="Routed UI shell admin route" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем <code>#/admin</code>.</td><td>Проверяем hash route parsing.</td><td>Topbar показывает Route: Admin.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем route nav.</td><td>Пользователь должен видеть основные рабочие зоны.</td><td>6 routes видны.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем active state.</td><td>Текущая зона должна быть визуально выделена.</td><td>Admin route active.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем route summary.</td><td>Пользователь должен понимать назначение страницы.</td><td>Показаны owner и purpose.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Разделяем workspace routes.</td><td>Большая система требует навигации по ролям и доменам.</td><td>Data, Forecast, Replenishment, Operations, Admin.</td><td class="ok">В UI.</td></tr>
+          <tr><td>2</td><td>Назначаем owner каждой route.</td><td>Пользователь должен видеть ответственность.</td><td>Owner отображается в topbar/card.</td><td class="ok">В UI.</td></tr>
+          <tr><td>3</td><td>Оставляем Control Tower.</td><td>Нужен обзорный экран для pilot readiness.</td><td>Control Tower route сохранен.</td><td class="ok">В UI.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Network config gate</td><td><code>python -m pytest tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page .../#/admin</code></td><td class="ok">routed-ui-shell-admin.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

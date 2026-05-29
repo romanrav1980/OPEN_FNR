@@ -336,6 +336,14 @@ type StoreTaskApiItem = {
   instruction: string;
 };
 
+type AppRoute = {
+  key: string;
+  label: string;
+  hash: string;
+  owner: string;
+  purpose: string;
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -343,6 +351,51 @@ const serviceLinks: ServiceLink[] = [
   { name: "ClickHouse", url: localServiceUrl(serviceConfig.clickhouseHttpPort, "/play"), purpose: "Forecast store" },
   { name: "OpenSearch", url: localServiceUrl(serviceConfig.opensearchDashboardsPort), purpose: "Logs" },
   { name: "Superset", url: localServiceUrl(serviceConfig.supersetPort), purpose: "BI" },
+];
+
+const appRoutes: AppRoute[] = [
+  {
+    key: "control-tower",
+    label: "Control Tower",
+    hash: "#/control-tower",
+    owner: "Product Owner",
+    purpose: "Full operational overview for dev/pilot readiness.",
+  },
+  {
+    key: "data",
+    label: "Data",
+    hash: "#/data",
+    owner: "Data Platform Owner",
+    purpose: "Source landing, DQ, clean publication and feature build gates.",
+  },
+  {
+    key: "forecast",
+    label: "Forecast",
+    hash: "#/forecast",
+    owner: "Forecast Owner",
+    purpose: "Regular forecast, promo uplift, model monitoring and KPI review.",
+  },
+  {
+    key: "replenishment",
+    label: "Replenishment",
+    hash: "#/replenishment",
+    owner: "Replenishment Owner",
+    purpose: "Projected stock, order proposals, publication and replenishment scale.",
+  },
+  {
+    key: "operations",
+    label: "Operations",
+    hash: "#/operations",
+    owner: "Supply Chain Manager",
+    purpose: "Procurement, shelf, capacity, suppliers, diagnostics and store execution.",
+  },
+  {
+    key: "admin",
+    label: "Admin",
+    hash: "#/admin",
+    owner: "Security Owner",
+    purpose: "Security, process governance, observability and release readiness.",
+  },
 ];
 
 const dataLoadStatuses: DataLoadStatus[] = [
@@ -1248,7 +1301,23 @@ const storeFeedbackRows = [
   },
 ];
 
+function routeFromHash(hash: string): AppRoute {
+  const routeKey = hash.replace("#/", "") || "control-tower";
+  return appRoutes.find((route) => route.key === routeKey) ?? appRoutes[0];
+}
+
+function useHashRoute(): AppRoute {
+  const [route, setRoute] = React.useState<AppRoute>(() => routeFromHash(window.location.hash));
+  React.useEffect(() => {
+    const handleHashChange = () => setRoute(routeFromHash(window.location.hash));
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+  return route;
+}
+
 function App() {
+  const activeRoute = useHashRoute();
   const [featureBuildApiStatus, setFeatureBuildApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeFeatureBuildDependencies, setRuntimeFeatureBuildDependencies] =
     React.useState<FeatureBuildDependency[]>(featureBuildDependencies);
@@ -1727,11 +1796,32 @@ function App() {
     <main className="app-shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Sprint 0</p>
+          <p className="eyebrow">Route: {activeRoute.label}</p>
           <h1>OPEN FNR Dev Control Tower</h1>
         </div>
-        <span className="status-pill">Dev bootstrap</span>
+        <span className="status-pill">{activeRoute.owner}</span>
       </header>
+
+      <nav className="route-shell" aria-label="OPEN FNR workspace routes">
+        {appRoutes.map((route) => (
+          <a
+            className={`route-link ${route.key === activeRoute.key ? "route-active" : ""}`}
+            href={route.hash}
+            key={route.key}
+          >
+            <span>{route.owner}</span>
+            <strong>{route.label}</strong>
+          </a>
+        ))}
+      </nav>
+
+      <section className="route-panel" aria-label="Active route summary">
+        <div>
+          <span className="eyebrow">Workspace</span>
+          <h2>{activeRoute.label}</h2>
+        </div>
+        <p>{activeRoute.purpose}</p>
+      </section>
 
       <section className="summary-grid" aria-label="Project modules">
         <article>
