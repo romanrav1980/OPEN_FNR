@@ -130,11 +130,13 @@ Completed foundation:
 - Runtime write boundary for publication send/retry.
 - Runtime write boundary for replenishment order proposal adjustment.
 - Runtime write boundary for store task completion.
+- Runtime write boundary for manual adjustment actions.
+- Runtime write boundary for exception actions.
 
 Remaining IH-2 domain-table migrations:
 
-- dedicated `manual_adjustments` table and repository;
-- dedicated `exceptions` table and repository;
+- dedicated `manual_adjustments` table and repository if query/edit workload outgrows generic `operational_decisions`;
+- dedicated `exceptions` table and repository if exception queue needs mutable persisted listing before UI productization;
 - dedicated `order_proposals`/`final_orders` PostgreSQL decision tables if pilot requires OLTP editing outside ClickHouse marts;
 - dedicated `store_task_feedback` table if photo/evidence metadata must be queried independently;
 - security admin tables for users, service accounts and access requests, unless moved to `SEC-1..SEC-3`.

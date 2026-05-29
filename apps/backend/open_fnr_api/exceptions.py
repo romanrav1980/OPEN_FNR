@@ -4,6 +4,8 @@ from enum import StrEnum
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from .repositories import OperationalDecisionRecord, operational_decision_repository
+
 
 router = APIRouter(prefix="/exceptions", tags=["exception-center"])
 
@@ -238,6 +240,27 @@ def act_on_exception(exception_id: str, payload: ExceptionActionRequest) -> dict
         reason=payload.reason,
         comment=payload.comment,
         created_at=datetime(2026, 5, 28, 14, 0, tzinfo=timezone.utc),
+    )
+    operational_decision_repository.upsert_decision(
+        OperationalDecisionRecord(
+            decision_id=f"exception-{exception_id}-{payload.action}",
+            decision_type="exception_action",
+            object_type="exception",
+            object_id=exception_id,
+            status=updated.status.value,
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            idempotency_key=f"{exception_id}:{payload.action}:{payload.actor}",
+            correlation_id=event.event_id,
+            payload={
+                "exception_type": item.exception_type.value,
+                "severity": item.severity.value,
+                "reason": payload.reason,
+                "comment": payload.comment,
+            },
+            created_at=event.created_at,
+            updated_at=event.created_at,
+        )
     )
     return ExceptionActionResponse(exception=updated, audit_event=event).model_dump(mode="json")
 

@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, model_validator
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
+from .repositories import OperationalDecisionRecord, operational_decision_repository
 
 
 router = APIRouter(prefix="/adjustments", tags=["manual-adjustments"])
@@ -269,6 +270,28 @@ def act_on_adjustment(adjustment_id: str, action: str, payload: AdjustmentAction
                 "target_type": adjustment.target_type,
                 "target_id": adjustment.target_id,
             },
+        )
+    )
+    operational_decision_repository.upsert_decision(
+        OperationalDecisionRecord(
+            decision_id=f"manual-adjustment-{adjustment_id}-{action}",
+            decision_type="manual_adjustment_action",
+            object_type="manual_adjustment",
+            object_id=adjustment_id,
+            status=updated.status.value,
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            idempotency_key=f"{adjustment_id}:{action}:{payload.actor}",
+            correlation_id=event.event_id,
+            payload={
+                "old_status": adjustment.status.value,
+                "new_status": updated.status.value,
+                "target_type": adjustment.target_type.value,
+                "target_id": adjustment.target_id,
+                "comment": payload.comment,
+            },
+            created_at=event.created_at,
+            updated_at=event.created_at,
         )
     )
     return {"adjustment": updated.model_dump(mode="json"), "audit_event": event.model_dump(mode="json")}

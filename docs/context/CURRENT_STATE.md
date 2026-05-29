@@ -716,6 +716,12 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Store task decision boundary:
   - store task completion still returns the same API payload;
   - completion now writes `OperationalDecisionRecord` through `operational_decision_repository` with idempotency key and photo reference.
+- Manual adjustment decision boundary:
+  - adjustment action endpoints still return the same API payload;
+  - apply/cancel/reject style actions now write `OperationalDecisionRecord`.
+- Exception decision boundary:
+  - exception action endpoint still returns the same API payload;
+  - take/resolve/ignore/escalate actions now write `OperationalDecisionRecord`.
 - `REMAINING_PROJECT_FOCUSED_SPRINT_PLAN.md` marks `IH-2` as in progress.
 - `docs/persistence/PERSISTENCE_INVENTORY.md` now includes IH-2 foundation status and remaining domain-table migration list.
 - Tests added/updated:
@@ -724,10 +730,13 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `tests/backend/test_publication.py`;
   - `tests/backend/test_replenishment.py`;
   - `tests/backend/test_store_management.py`;
+  - `tests/backend/test_adjustments.py`;
+  - `tests/backend/test_exceptions.py`;
   - `tests/data/test_postgres_operational_schema.py`.
 - Verification:
   - `pytest tests/backend/test_repositories.py tests/data/test_postgres_operational_schema.py tests/architecture/test_persistence_inventory.py` -> 10 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_publication.py tests/backend/test_process_engine.py tests/backend/test_repositories.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 40 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_store_management.py tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 49 passed, 1 warning about `.pytest_cache` permissions.
+  - `pytest tests/backend/test_adjustments.py tests/backend/test_exceptions.py tests/backend/test_store_management.py tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 61 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 480 passed, 1 warning about `.pytest_cache` permissions.

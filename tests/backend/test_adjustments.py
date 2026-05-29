@@ -1,10 +1,22 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import adjustments
 from open_fnr_api.adjustments import AdjustmentMode, adjustment_approval_required, preview_adjusted_value
 from open_fnr_api.main import app
 
 
 client = TestClient(app)
+
+
+class CapturingOperationalDecisionRepository:
+    mode = "in_memory"
+
+    def __init__(self) -> None:
+        self.decisions = []
+
+    def upsert_decision(self, decision):
+        self.decisions.append(decision)
+        return decision
 
 
 def test_adjustments_are_listed_without_overwriting_targets() -> None:
@@ -44,6 +56,26 @@ def test_adjustment_apply_returns_status_and_audit() -> None:
     assert payload["adjustment"]["status"] == "applied"
     assert payload["audit_event"]["old_status"] == "previewed"
     assert payload["audit_event"]["new_status"] == "applied"
+
+
+def test_adjustment_action_writes_operational_decision_boundary(monkeypatch) -> None:
+    repository = CapturingOperationalDecisionRepository()
+    monkeypatch.setattr(adjustments, "operational_decision_repository", repository)
+
+    response = client.post(
+        "/adjustments/adj-forecast-20260528-001/apply",
+        json={
+            "actor": "forecast.planner@example.org",
+            "actor_role": "Forecast Planner",
+            "comment": "Repository boundary check.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert repository.decisions[0].decision_type == "manual_adjustment_action"
+    assert repository.decisions[0].object_id == "adj-forecast-20260528-001"
+    assert repository.decisions[0].status == "applied"
+    assert repository.decisions[0].payload["target_type"] == "forecast"
 
 
 def test_wrong_role_cannot_manage_adjustment() -> None:
