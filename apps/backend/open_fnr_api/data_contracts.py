@@ -126,6 +126,23 @@ class SourceBatchManifest(BaseModel):
     landed_uri: str = Field(min_length=1, max_length=512)
 
 
+class SourceContractDefinition(BaseModel):
+    contract_name: str = Field(min_length=1, max_length=128)
+    contract_version: str = Field(default="v1", min_length=1, max_length=32)
+    source_system: str = Field(min_length=1, max_length=64)
+    model_name: str = Field(min_length=1, max_length=128)
+    primary_key: tuple[str, ...]
+    required_fields: tuple[str, ...]
+    business_owner_role: str = Field(min_length=1, max_length=128)
+    technical_owner_role: str = Field(min_length=1, max_length=128)
+    source_sla: str = Field(min_length=1, max_length=64)
+    freshness_field: str = Field(min_length=1, max_length=64)
+    idempotency_fields: tuple[str, ...]
+    reconciliation_keys: tuple[str, ...]
+    required_for: tuple[str, ...]
+    blocking_dq_checks: tuple[str, ...]
+
+
 class PosSalesLine(BaseModel):
     receipt_id: str = Field(min_length=1, max_length=128)
     line_id: str = Field(min_length=1, max_length=128)
@@ -300,6 +317,156 @@ SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
     DataDomain.CALENDAR: CalendarDayRecord,
 }
 
+SOURCE_CONTRACT_MODELS: dict[str, type[BaseModel]] = {
+    "pos_sales_line": PosSalesLine,
+    "wms_stock_snapshot_line": WmsStockSnapshotLine,
+    "wms_open_order_line": WmsOpenOrderLine,
+    "wms_in_transit_line": WmsInTransitLine,
+    "erp_price_line": ErpPriceLine,
+    "erp_order_export_status_line": ErpOrderExportStatusLine,
+    "mdm_product_line": MdmProductLine,
+    "mdm_store_line": MdmStoreLine,
+    "promo_plan_line": PromoPlanLine,
+}
+
+SOURCE_CONTRACT_REGISTRY: tuple[SourceContractDefinition, ...] = (
+    SourceContractDefinition(
+        source_system="POS",
+        contract_name="pos_sales_line",
+        model_name="PosSalesLine",
+        primary_key=("receipt_id", "line_id"),
+        required_fields=("receipt_id", "line_id", "business_date", "store_id", "sku_id", "sales_qty", "net_amount"),
+        business_owner_role="Sales Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_forecast_cutoff",
+        freshness_field="business_date",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("business_date", "store_id", "sku_id"),
+        required_for=("regular_forecast", "promo_forecast", "demand_projection"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "freshness"),
+    ),
+    SourceContractDefinition(
+        source_system="WMS",
+        contract_name="wms_stock_snapshot_line",
+        model_name="WmsStockSnapshotLine",
+        primary_key=("snapshot_id", "location_id", "sku_id"),
+        required_fields=("snapshot_id", "snapshot_at", "business_date", "location_id", "location_type", "sku_id", "on_hand_qty", "available_qty"),
+        business_owner_role="Supply Chain Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_replenishment_cutoff",
+        freshness_field="snapshot_at",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("business_date", "location_id", "sku_id"),
+        required_for=("projected_stock", "replenishment", "true_inventory"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "freshness", "negative_stock"),
+    ),
+    SourceContractDefinition(
+        source_system="WMS",
+        contract_name="wms_open_order_line",
+        model_name="WmsOpenOrderLine",
+        primary_key=("order_id", "line_id"),
+        required_fields=("order_id", "line_id", "order_date", "expected_delivery_date", "target_location_id", "sku_id", "ordered_qty", "status"),
+        business_owner_role="Supply Chain Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_replenishment_cutoff",
+        freshness_field="expected_delivery_date",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("order_id", "line_id", "sku_id"),
+        required_for=("projected_stock", "replenishment", "multi_echelon"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "date_order"),
+    ),
+    SourceContractDefinition(
+        source_system="WMS",
+        contract_name="wms_in_transit_line",
+        model_name="WmsInTransitLine",
+        primary_key=("shipment_id", "line_id"),
+        required_fields=("shipment_id", "line_id", "ship_date", "eta_date", "source_location_id", "target_location_id", "sku_id", "shipped_qty", "status"),
+        business_owner_role="Supply Chain Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_replenishment_cutoff",
+        freshness_field="eta_date",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("shipment_id", "line_id", "sku_id"),
+        required_for=("projected_stock", "replenishment", "capacity"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "date_order"),
+    ),
+    SourceContractDefinition(
+        source_system="ERP",
+        contract_name="erp_price_line",
+        model_name="ErpPriceLine",
+        primary_key=("price_id",),
+        required_fields=("price_id", "sku_id", "location_scope", "valid_from", "regular_price", "selling_price", "currency"),
+        business_owner_role="Commercial Data Owner",
+        technical_owner_role="Integration Owner",
+        source_sla="before_forecast_and_replenishment_cutoff",
+        freshness_field="valid_from",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("sku_id", "location_scope", "valid_from"),
+        required_for=("regular_forecast", "promo_forecast", "procurement"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "price_validity"),
+    ),
+    SourceContractDefinition(
+        source_system="ERP",
+        contract_name="erp_order_export_status_line",
+        model_name="ErpOrderExportStatusLine",
+        primary_key=("export_id",),
+        required_fields=("export_id", "proposal_id", "exported_at", "target_system", "status"),
+        business_owner_role="Integration Owner",
+        technical_owner_role="Integration Owner",
+        source_sla="before_export_reconciliation_cutoff",
+        freshness_field="exported_at",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("export_id", "proposal_id", "external_order_id"),
+        required_for=("publication_reconciliation", "order_status_monitoring"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "status_validity", "export_reconciliation"),
+    ),
+    SourceContractDefinition(
+        source_system="MDM",
+        contract_name="mdm_product_line",
+        model_name="MdmProductLine",
+        primary_key=("sku_id",),
+        required_fields=("sku_id", "product_name", "category_id", "category_path", "lifecycle_status", "is_active"),
+        business_owner_role="MDM Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_master_data_cutoff",
+        freshness_field="source_system",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("sku_id", "category_id", "supplier_id"),
+        required_for=("assortment", "fresh", "lifecycle", "hierarchy"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "hierarchy_integrity", "lifecycle_validity"),
+    ),
+    SourceContractDefinition(
+        source_system="MDM",
+        contract_name="mdm_store_line",
+        model_name="MdmStoreLine",
+        primary_key=("store_id",),
+        required_fields=("store_id", "store_name", "region_id", "format_id", "timezone", "is_active"),
+        business_owner_role="MDM Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_master_data_cutoff",
+        freshness_field="source_system",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("store_id", "region_id", "warehouse_id"),
+        required_for=("store_scope", "replenishment_calendar", "routing"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "region_integrity", "calendar_integrity"),
+    ),
+    SourceContractDefinition(
+        source_system="PROMO",
+        contract_name="promo_plan_line",
+        model_name="PromoPlanLine",
+        primary_key=("promo_id", "sku_id", "store_scope_id"),
+        required_fields=("promo_id", "promo_name", "sku_id", "store_scope_id", "date_from", "date_to", "regular_price", "promo_price", "discount_pct"),
+        business_owner_role="Promo Planner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_promo_forecast_cutoff",
+        freshness_field="date_from",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("promo_id", "sku_id", "store_scope_id"),
+        required_for=("promo_forecast", "shelf_space", "display_capacity"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "promo_overlap", "display_capacity"),
+    ),
+)
+
 
 def contract_summaries() -> list[dict[str, Any]]:
     return [
@@ -309,4 +476,14 @@ def contract_summaries() -> list[dict[str, Any]]:
             "schema": model.model_json_schema(),
         }
         for domain, model in SCHEMA_REGISTRY.items()
+    ]
+
+
+def source_contract_summaries() -> list[dict[str, Any]]:
+    return [
+        {
+            **definition.model_dump(mode="json"),
+            "schema": SOURCE_CONTRACT_MODELS[definition.contract_name].model_json_schema(),
+        }
+        for definition in SOURCE_CONTRACT_REGISTRY
     ]

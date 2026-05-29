@@ -35,10 +35,15 @@ def test_contracts_endpoint_lists_core_domains() -> None:
     response = client.get("/data/contracts")
     assert response.status_code == 200
 
-    domains = {item["domain"] for item in response.json()["contracts"]}
+    payload = response.json()
+    domains = {item["domain"] for item in payload["contracts"]}
     assert {"sales", "stock", "prices", "product_mdm", "store_mdm", "calendar"} <= domains
-    sales_contract = next(item for item in response.json()["contracts"] if item["domain"] == "sales")
+    sales_contract = next(item for item in payload["contracts"] if item["domain"] == "sales")
     assert sales_contract["model"] == "PosSalesLine"
+    assert payload["freeze_status"] == "ri_1_frozen"
+    assert payload["source_contract_count"] == len(PILOT_REQUIRED_SOURCE_CONTRACTS)
+    source_contract_names = {item["contract_name"] for item in payload["source_contracts"]}
+    assert {contract.contract_name for contract in PILOT_REQUIRED_SOURCE_CONTRACTS} == source_contract_names
 
 
 def test_ingestion_status_can_filter_by_domain() -> None:

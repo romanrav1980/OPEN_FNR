@@ -39,7 +39,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | IH-2 | PostgreSQL Persistence And Migrations | Metadata, process, audit and operational tables with migrations | Completed foundation |
 | IH-3 | Production Audit Event Storage | Production-grade audit/event repository, retention and query APIs | Completed |
 | IH-4 | Backup Restore Smoke | PostgreSQL/ClickHouse backup/restore smoke and runbook | Completed |
-| RI-1 | Source Contracts Freeze | Real source contracts, field mapping and SLA matrix | IH-1 |
+| RI-1 | Source Contracts Freeze | Real source contracts, field mapping and SLA matrix | Completed |
 | RI-2 | POS And DWH Sales Ingestion | Real sales facts and history ingestion | RI-1 |
 | RI-3 | WMS Stock, In-Transit And Open Orders | Real stock/in-transit/open-order ingestion | RI-1 |
 | RI-4 | ERP Prices, Suppliers And Order Status | ERP commercial ingestion and outbound status reconciliation | RI-1 |

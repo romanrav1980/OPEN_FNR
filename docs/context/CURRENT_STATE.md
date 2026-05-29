@@ -792,3 +792,47 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/scripts/test_backup_restore_scripts.py tests/backend/test_config.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 15 passed, 1 warning about `.pytest_cache` permissions.
   - `backup-smoke.ps1 -Mode plan` and `restore-smoke.ps1 -Mode plan` passed through process-level PowerShell execution policy bypass.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 489 passed, 1 warning about `.pytest_cache` permissions.
+
+## RI-1 Source Contracts Freeze
+
+- RI-1 completed.
+- Contract freeze document: `SOURCE_CONTRACTS_FREEZE.md`.
+- Machine-checkable source contract registry added in `apps/backend/open_fnr_api/data_contracts.py`:
+  - `SourceContractDefinition`;
+  - `SOURCE_CONTRACT_MODELS`;
+  - `SOURCE_CONTRACT_REGISTRY`;
+  - `source_contract_summaries()`.
+- `/data/contracts` now exposes:
+  - legacy domain schemas;
+  - frozen source contract list;
+  - `freeze_status=ri_1_frozen`;
+  - source contract count.
+- Frozen pilot contracts:
+  - `pos_sales_line`;
+  - `wms_stock_snapshot_line`;
+  - `wms_open_order_line`;
+  - `wms_in_transit_line`;
+  - `erp_price_line`;
+  - `erp_order_export_status_line`;
+  - `mdm_product_line`;
+  - `mdm_store_line`;
+  - `promo_plan_line`.
+- Each frozen contract carries:
+  - source system;
+  - model name;
+  - primary key;
+  - required fields;
+  - business owner role;
+  - technical owner role;
+  - source SLA label;
+  - freshness field;
+  - idempotency fields;
+  - reconciliation keys;
+  - required downstream capabilities;
+  - blocking DQ checks.
+- Tests added/updated:
+  - `tests/data/test_source_contract_freeze.py`;
+  - `tests/backend/test_ingestion.py`.
+- Verification:
+  - `pytest tests/backend/test_ingestion.py tests/data/test_contract_validation.py tests/data/test_source_contract_freeze.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 492 passed, 1 warning about `.pytest_cache` permissions.

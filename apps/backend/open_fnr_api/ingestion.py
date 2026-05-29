@@ -5,7 +5,16 @@ from datetime import date, datetime, timezone
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Path
 
-from .data_contracts import BatchStatus, DataDomain, DqSeverity, IngestionBatch, SourceBatchManifest, contract_summaries
+from .data_contracts import (
+    BatchStatus,
+    DataDomain,
+    DqSeverity,
+    IngestionBatch,
+    SOURCE_CONTRACT_REGISTRY,
+    SourceBatchManifest,
+    contract_summaries,
+    source_contract_summaries,
+)
 from .source_adapters import LocalFileDropAdapter
 
 
@@ -355,7 +364,12 @@ def build_pilot_shadow_load_plan(business_date: date, adapter: LocalFileDropAdap
 
 @router.get("/contracts")
 def list_contracts() -> dict[str, object]:
-    return {"contracts": contract_summaries()}
+    return {
+        "freeze_status": "ri_1_frozen",
+        "contracts": contract_summaries(),
+        "source_contracts": source_contract_summaries(),
+        "source_contract_count": len(SOURCE_CONTRACT_REGISTRY),
+    }
 
 
 @router.get("/ingestion/manifests/pos-sales")
