@@ -1243,3 +1243,17 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/deployment/test_environment_topology.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 11 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 567 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after DEP-1: 7 sprints (`DEP-2..DEP-4`, `PILOT-1..PILOT-5`).
+
+## DEP-2 CI/CD Release Gates
+
+- DEP-2 completed as CI/CD release gate foundation.
+- Completion note: `docs/context/DEP2_COMPLETION.md`.
+- Specification added: `RELEASE_GATE_STRATEGY.md`.
+- Release template added:
+  - `docs/release/RELEASE_NOTES_TEMPLATE.md`.
+- Tests added:
+  - `tests/release/test_ci_release_gates.py`.
+- Verification:
+  - `pytest tests/release/test_ci_release_gates.py tests/deployment/test_environment_topology.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 14 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 570 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after DEP-2: 6 sprints (`DEP-3..DEP-4`, `PILOT-1..PILOT-5`).

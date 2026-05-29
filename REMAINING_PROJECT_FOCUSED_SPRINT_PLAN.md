@@ -60,7 +60,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | Completed foundation |
 | ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | Completed foundation |
 | DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | Completed foundation |
-| DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | DEP-1 |
+| DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | Completed foundation |
 | DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | DEP-1 |
 | DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | IH-4, DEP-2 |
 | PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | RI-6 |
@@ -725,6 +725,12 @@ Acceptance criteria:
 
 - release cannot pass with failing tests or migrations;
 - artifacts are traceable to commit.
+
+Completion checkpoint:
+
+- DEP-2 foundation scope is fixed in `RELEASE_GATE_STRATEGY.md`;
+- release notes template is stored in `docs/release/RELEASE_NOTES_TEMPLATE.md`;
+- automated tests validate CI backend, frontend and compose gates plus release traceability requirements.
 
 ### DEP-3. Observability And Runbooks
 
