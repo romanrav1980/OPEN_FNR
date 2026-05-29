@@ -1047,3 +1047,22 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_security.py tests/backend/test_policy.py tests/process/test_security_access_review_process.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 28 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_process_deployment.py tests/backend/test_security.py tests/process/test_security_access_review_process.py` -> 29 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 519 passed, 1 warning about `.pytest_cache` permissions.
+
+## UI-1 Routed Application Foundation
+
+- UI-1 completed as routed application foundation.
+- Completion note: `docs/context/UI1_COMPLETION.md`.
+- Specification added: `UI_ROUTED_APPLICATION_FOUNDATION_SPEC.md`.
+- Verified existing frontend capabilities:
+  - hash routes for major workspaces;
+  - active route state from browser hash;
+  - centralized API/service config through `app_config.ts`;
+  - contextual `HelpFootnote` support for UI controls.
+- Tests added:
+  - `tests/frontend/test_ui_routed_foundation.py`.
+- Evidence report:
+  - `docs/test-reports/sprint-ui-1-routed-foundation/index.html`.
+- Verification:
+  - `pytest tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 6 passed, 1 warning about `.pytest_cache` permissions.
+  - `npm.cmd run build` in `apps/frontend` -> passed.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 522 passed, 1 warning about `.pytest_cache` permissions.

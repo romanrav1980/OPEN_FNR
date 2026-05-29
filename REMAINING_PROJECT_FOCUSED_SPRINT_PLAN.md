@@ -49,7 +49,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | SEC-2 | RBAC And Object-Level Access | Role/object policy across API and UI | Completed foundation |
 | SEC-3 | Secrets And Service Accounts | Secrets outside git and controlled integration identities | Completed foundation |
 | SEC-4 | Security Audit And Access Review | Audit views, access review workflow and negative tests | Completed foundation |
-| UI-1 | Routed Application Foundation | React Router, feature pages and API client | SEC-1 |
+| UI-1 | Routed Application Foundation | React Router, feature pages and API client | Completed foundation |
 | UI-2 | Forecast And Replenishment Workbenches | Real API-backed forecast/order workflows | UI-1, RI-6 |
 | UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | UI-1, RI-6 |
 | UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | UI-1, SEC-4 |

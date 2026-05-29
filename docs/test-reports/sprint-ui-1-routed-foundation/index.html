@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR UI-1 Routed Foundation Test Report</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 32px; color: #1f2933; }
+      h1, h2 { color: #8f1d2c; }
+      .card { border: 1px solid #d9dee7; border-radius: 8px; padding: 16px; margin: 16px 0; }
+      table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+      th, td { border: 1px solid #d9dee7; padding: 8px; text-align: left; }
+      th { background: #f7f8fa; }
+      .pass { color: #116329; font-weight: 700; }
+      code { background: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>OPEN FNR UI-1 Routed Foundation</h1>
+    <div class="card">
+      <h2>Аннотация</h2>
+      <p>
+        Проверяется базовый UI-фундамент: маршруты рабочих областей, состояние активного маршрута,
+        централизованная конфигурация API/service URL и наличие help-сносок, которые связывают UI
+        с постановками задач и бизнес-процессами. Такой тест нужен, чтобы дальнейшая продуктовая
+        доработка UI не расползалась и не вносила сетевой хардкод.
+      </p>
+    </div>
+    <div class="card">
+      <h2>Результаты</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Проверка</th>
+            <th>Зачем</th>
+            <th>Ожидаемый результат</th>
+            <th>Фактический результат</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Workspace routes</td>
+            <td>Проверить наличие основных рабочих областей.</td>
+            <td>Все hash routes присутствуют.</td>
+            <td class="pass">PASS</td>
+          </tr>
+          <tr>
+            <td>Hash route state</td>
+            <td>Проверить, что UI реагирует на изменение маршрута.</td>
+            <td><code>hashchange</code> listener присутствует.</td>
+            <td class="pass">PASS</td>
+          </tr>
+          <tr>
+            <td>Central API config</td>
+            <td>Исключить хардкод host/port в UI.</td>
+            <td>Используются <code>apiUrl</code>, <code>localServiceUrl</code>, env config.</td>
+            <td class="pass">PASS</td>
+          </tr>
+          <tr>
+            <td>Help footnotes</td>
+            <td>Связать UI-инструменты с ТЗ и бизнес-процессами.</td>
+            <td><code>HelpFootnote</code> присутствует и поддерживает links.</td>
+            <td class="pass">PASS</td>
+          </tr>
+          <tr>
+            <td>Frontend build</td>
+            <td>Проверить TypeScript/Vite сборку.</td>
+            <td><code>npm.cmd run build</code> проходит.</td>
+            <td class="pass">PASS</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Команды</h2>
+      <p><code>pytest tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py</code> -> 6 passed.</p>
+      <p><code>npm.cmd run build</code> -> passed.</p>
+    </div>
+    <div class="card">
+      <h2>Скриншоты</h2>
+      <p>
+        В UI-1 не менялся визуальный слой и не запускался браузерный сценарий. Скриншотное evidence
+        остается обязательным для UI-2..UI-5, где будут изменяться реальные пользовательские workflow.
+      </p>
+    </div>
+  </body>
+</html>
