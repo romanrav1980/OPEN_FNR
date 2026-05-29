@@ -1124,3 +1124,21 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `npm.cmd run build` in `apps/frontend` -> passed.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 537 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after UI-4: 14 sprints (`UI-5`, `ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## UI-5 UI E2E Visual Accessibility Suite
+
+- UI-5 completed as UI regression safety-net foundation.
+- Completion note: `docs/context/UI5_COMPLETION.md`.
+- Specification added: `UI_E2E_VISUAL_ACCESSIBILITY_SUITE_SPEC.md`.
+- Tests added:
+  - `tests/frontend/test_ui_e2e_visual_accessibility_suite.py`.
+- Evidence report:
+  - `docs/test-reports/sprint-ui-5-e2e-visual-accessibility/index.html`.
+- Quality gate update:
+  - `tests/quality/test_no_committed_secrets.py` now ignores `.claude` nested worktrees so local agent workspaces do not create false positives.
+- Verification:
+  - `pytest tests/quality/test_no_committed_secrets.py tests/frontend/test_ui_e2e_visual_accessibility_suite.py tests/frontend/test_ui_security_admin_process.py tests/frontend/test_ui_integration_data_quality.py tests/frontend/test_ui_forecast_replenishment_workbenches.py tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 30 passed, 1 warning about `.pytest_cache` permissions.
+  - `npm.cmd run build` in `apps/frontend` -> passed.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 542 passed, 1 warning about `.pytest_cache` permissions.
+- R4 UI productization status: completed foundation.
+- Remaining focused sprint count after UI-5: 13 sprints (`ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).

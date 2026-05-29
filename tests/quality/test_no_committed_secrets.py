@@ -26,7 +26,8 @@ def _tracked_text_files() -> list[Path]:
         if not path.is_file():
             continue
         relative = path.relative_to(ROOT).as_posix()
-        if any(part in {".git", "__pycache__", "node_modules", "dist", ".pytest_cache", "tmp"} for part in path.parts):
+        ignored_parts = {".git", ".claude", "__pycache__", "node_modules", "dist", ".pytest_cache", "tmp"}
+        if any(part in ignored_parts for part in path.parts):
             continue
         if path.suffix.lower() in {".py", ".md", ".txt", ".yaml", ".yml", ".json", ".toml", ".env", ".example", ".ps1"} or path.name.endswith(".example"):
             candidates.append(path)

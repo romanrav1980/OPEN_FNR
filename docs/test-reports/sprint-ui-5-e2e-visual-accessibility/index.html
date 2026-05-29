@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>OPEN FNR UI-5 E2E Visual Accessibility Suite</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; color: #1f2328; }
+    h1, h2 { color: #8f1d2c; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px; vertical-align: top; }
+    th { background: #f6f8fa; }
+    .ok { color: #1a7f37; font-weight: 700; }
+    .warn { color: #9a6700; font-weight: 700; }
+    .note { background: #fff8c5; padding: 12px; border-left: 4px solid #bf8700; }
+  </style>
+</head>
+<body>
+  <h1>UI-5: E2E Visual Accessibility Suite</h1>
+  <p><strong>Annotation.</strong> This report closes the UI productization block with a unified evidence gate. We verify routed workspaces, critical business-process UI markers, audit/RBAC/process context, accessibility foundations and HTML report availability. Browser screenshots are deferred to the deployment-hardening pass where Playwright browser binaries can be managed as approved dependencies.</p>
+
+  <h2>Covered Workflows</h2>
+  <table>
+    <tr><th>Workflow</th><th>What We Test</th><th>Why</th><th>Result</th></tr>
+    <tr><td>Forecast and replenishment</td><td>Forecast Workbench, promo uplift, projections, order proposals, adjustments.</td><td>Planner workflow must remain visible after UI changes.</td><td class="ok">Covered</td></tr>
+    <tr><td>Integration and DQ</td><td>Shadow load, DQ Console, Integration Operations Console, retry/reconciliation.</td><td>Bad data must not silently enter ML or replenishment.</td><td class="ok">Covered</td></tr>
+    <tr><td>Security and process operations</td><td>Admin Console, service accounts, access review, Process Engine Task Inbox.</td><td>Production operations must not require manual database edits.</td><td class="ok">Covered</td></tr>
+    <tr><td>Process Navigator</td><td>Route, help, keyboard drill-down, WCAG markers and map context.</td><td>Business-process visibility is a central control-room capability.</td><td class="ok">Covered</td></tr>
+  </table>
+
+  <h2>Test Matrix</h2>
+  <table>
+    <tr><th>Test Class</th><th>Check</th><th>Result</th></tr>
+    <tr><td>Smoke</td><td>All major hash routes and pilot-critical sections are present.</td><td class="ok">Passed</td></tr>
+    <tr><td>Validation/error states</td><td>Fallback, blocked, denied and DQ blocker text exists.</td><td class="ok">Passed</td></tr>
+    <tr><td>RBAC/audit/process</td><td>Service accounts, access review, task actions and audit markers exist.</td><td class="ok">Passed</td></tr>
+    <tr><td>Accessibility foundation</td><td>aria-label, button type, HelpFootnote, keyboard and reduced-motion markers exist.</td><td class="ok">Passed</td></tr>
+    <tr><td>Visual evidence</td><td>HTML reports exist for UI-1..UI-5.</td><td class="ok">Passed</td></tr>
+    <tr><td>Browser screenshots</td><td>Deferred to deployment-hardening browser runner.</td><td class="warn">Deferred</td></tr>
+  </table>
+
+  <p class="note">The next hardening step is to add managed browser-based Playwright screenshots and WCAG automation once the deployment environment owns browser binaries and dependency approval. The current sprint avoids adding ungoverned dependencies while still enforcing a useful regression gate.</p>
+</body>
+</html>

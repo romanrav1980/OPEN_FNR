@@ -53,7 +53,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | UI-2 | Forecast And Replenishment Workbenches | Real API-backed forecast/order workflows | Completed foundation |
 | UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | Completed foundation |
 | UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | Completed foundation |
-| UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | UI-2..UI-4 |
+| UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | Completed foundation |
 | ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | RI-6 |
 | ML-2 | Forecast Training And Retraining | Regular/promo model training and scheduled retraining | ML-1 |
 | ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | ML-2 |
@@ -526,6 +526,13 @@ Acceptance criteria:
 
 - pilot-critical workflows have automated UI evidence;
 - UI regressions are caught in CI.
+
+Completion checkpoint:
+
+- UI-5 foundation scope is fixed in `UI_E2E_VISUAL_ACCESSIBILITY_SUITE_SPEC.md`;
+- unified frontend tests cover route markers, business-process UI markers, accessibility foundations, fallback/error states and UI evidence reports;
+- sprint evidence report is stored in `docs/test-reports/sprint-ui-5-e2e-visual-accessibility/index.html`;
+- browser-based Playwright screenshots remain a deployment-hardening extension once managed browser dependencies are approved.
 
 ### ML-1. Training Data Mart And Backtesting
 
