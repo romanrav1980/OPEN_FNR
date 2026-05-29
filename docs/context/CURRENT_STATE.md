@@ -199,6 +199,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Export failure CMMN: `processes/publication/export_failure_case.cmmn.xml`.
 - UI Publication Console section with package list, statuses, idempotency keys, retry action, error details and linked exceptions.
 - HTML test report with screenshot: `docs/test-reports/sprint-16-publication-export-v1/index.html`.
+- Outbound publication target hardening report: `docs/test-reports/sprint-outbound-publication-targets/index.html`.
 
 ## Sprint 17 Artifacts
 

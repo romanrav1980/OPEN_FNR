@@ -98,6 +98,33 @@ type DailyPipelineGateApiResponse = {
   stages: DailyPipelineStage[];
 };
 
+type PublicationPackageRow = {
+  id: string;
+  target: string;
+  status: string;
+  key: string;
+  object: string;
+  response: string;
+  retry: number;
+  exception: string;
+};
+
+type PublicationPackageApiItem = {
+  package_id: string;
+  target: string;
+  status: string;
+  idempotency_key: string;
+  items: { object_id: string }[];
+  response_code: string | null;
+  response_message: string | null;
+  retry_count: number;
+  linked_exception_id: string | null;
+};
+
+type PublicationPackageApiResponse = {
+  items: PublicationPackageApiItem[];
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -476,7 +503,7 @@ const adjustmentAudit = [
   { time: "06:10", actor: "Replenishment Planner", action: "apply", oldValue: 276, newValue: 300, reason: "supply_constraint" },
 ];
 
-const publicationPackages = [
+const publicationPackages: PublicationPackageRow[] = [
   {
     id: "pub-wms-orders-20260528-001",
     target: "wms",
@@ -1017,6 +1044,9 @@ function App() {
   const [dailyPipelineApiStatus, setDailyPipelineApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeDailyPipelineStages, setRuntimeDailyPipelineStages] =
     React.useState<DailyPipelineStage[]>(dailyPipelineStages);
+  const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimePublicationPackages, setRuntimePublicationPackages] =
+    React.useState<PublicationPackageRow[]>(publicationPackages);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1086,6 +1116,39 @@ function App() {
           return;
         }
         setDailyPipelineApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/publication/packages"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Publication API returned ${response.status}`);
+        }
+        return response.json() as Promise<PublicationPackageApiResponse>;
+      })
+      .then((payload) => {
+        setRuntimePublicationPackages(
+          payload.items.map((pkg) => ({
+            id: pkg.package_id,
+            target: pkg.target,
+            status: pkg.status,
+            key: pkg.idempotency_key,
+            object: pkg.items.map((item) => item.object_id).join(", "),
+            response: [pkg.response_code, pkg.response_message].filter(Boolean).join(" ") || "-",
+            retry: pkg.retry_count,
+            exception: pkg.linked_exception_id ?? "-",
+          })),
+        );
+        setPublicationApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setPublicationApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -2369,12 +2432,12 @@ function App() {
           <article className="feature-summary">
             <span>Ready Package</span>
             <strong>pub-wms-orders-20260528-001</strong>
-            <p>Final order export to WMS mock uses idempotency key wms:orders:20260528:001.</p>
+            <p>Final order export uses configured WMS target URL or local fallback with idempotency key.</p>
           </article>
           <article className="feature-summary">
-            <span>Failed Export</span>
-            <strong>ERP_TIMEOUT linked to exc-export-20260528-001</strong>
-            <p>Failure opens export failure case and allows controlled retry by Integration Owner.</p>
+            <span>API Status</span>
+            <strong>{publicationApiStatus}</strong>
+            <p>Packages are loaded from `/publication/packages` when backend is available.</p>
           </article>
         </div>
         <div className="table-shell">
@@ -2392,7 +2455,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {publicationPackages.map((pkg) => (
+              {runtimePublicationPackages.map((pkg) => (
                 <tr key={pkg.id}>
                   <td>{pkg.id}</td>
                   <td>{pkg.target}</td>
