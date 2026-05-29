@@ -1005,3 +1005,21 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/backend/test_policy.py tests/backend/test_security.py tests/backend/test_auth.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 34 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 512 passed, 1 warning about `.pytest_cache` permissions.
+
+## SEC-3 Secrets And Service Accounts
+
+- SEC-3 completed as secrets/service-account foundation.
+- Completion note: `docs/context/SEC3_COMPLETION.md`.
+- Secret management specification added: `SECRET_MANAGEMENT_SPEC.md`.
+- `.gitignore` now blocks:
+  - local env files;
+  - secret/key artifacts;
+  - `secrets/` directory.
+- Quality gate added:
+  - `tests/quality/test_no_committed_secrets.py`.
+- Service accounts documented:
+  - `svc-airflow-export`;
+  - `svc-open-fnr-idp-provisioning`.
+- Verification:
+  - `pytest tests/quality/test_no_committed_secrets.py tests/backend/test_security.py tests/backend/test_policy.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 25 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 516 passed, 1 warning about `.pytest_cache` permissions.

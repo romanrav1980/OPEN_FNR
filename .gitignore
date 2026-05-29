@@ -16,6 +16,11 @@ dist/
 .env
 .env.local
 infra/dev/.env
+*.secret
+*.secrets
+*.pem
+*.key
+secrets/
 
 # OS / editors
 .DS_Store
