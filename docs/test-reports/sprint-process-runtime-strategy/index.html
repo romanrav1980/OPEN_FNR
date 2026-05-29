@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Process Runtime Strategy</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      .warn { color: #ffd166; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Process Runtime Strategy</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем, что OPEN FNR явно различает runtime-deployable BPMN и governance-only DMN/CMMN. Это нужно,
+          чтобы команда разработки и бизнес не считали DMN/CMMN автоматически исполняемыми в Flowable OSS, пока
+          для них не утверждён отдельный runtime adapter и тестовый контур.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/process-runtime-strategy-admin.png" alt="Admin Console with runtime strategy gate" />
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процесса</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Запрашиваем runtime strategy API.</td>
+              <td>Получить единый контракт по BPMN/DMN/CMMN execution boundary.</td>
+              <td>API возвращает 3 стратегии по типам артефактов.</td>
+              <td class="ok">Endpoint добавлен и покрыт тестом.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем BPMN strategy.</td>
+              <td>Убедиться, что процессы действительно идут в Flowable runtime.</td>
+              <td>BPMN имеет стратегию <code>runtime_deploy</code>.</td>
+              <td class="ok">38 BPMN runtime-deployable.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем DMN/CMMN strategy.</td>
+              <td>Зафиксировать границу между governed artifacts и runtime execution.</td>
+              <td>DMN/CMMN имеют стратегию <code>governed_artifact</code>.</td>
+              <td class="warn">Runtime adapter будет отдельным решением.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>BPMN</td><td class="ok">Flowable runtime deployment</td></tr>
+            <tr><td>DMN</td><td class="warn">Governed artifact, runtime adapter decision pending</td></tr>
+            <tr><td>CMMN</td><td class="warn">Governed artifact, runtime adapter decision pending</td></tr>
+            <tr><td>Targeted tests</td><td class="ok">15 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

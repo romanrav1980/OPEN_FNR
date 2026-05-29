@@ -84,6 +84,22 @@ class ProcessDeployabilityReport(BaseModel):
     issues: tuple[ProcessDeployabilityIssue, ...]
 
 
+class ProcessRuntimeStrategyItem(BaseModel):
+    artifact_type: ProcessArtifactType
+    runtime_target: str
+    strategy: str
+    artifact_count: int = Field(ge=0)
+    status: str
+    rationale: str
+    next_gate: str
+
+
+class ProcessRuntimeStrategyReport(BaseModel):
+    package_id: str
+    flowable_runtime_url: str
+    items: tuple[ProcessRuntimeStrategyItem, ...]
+
+
 ElementTree.register_namespace("", BPMN_NS)
 ElementTree.register_namespace("flowable", FLOWABLE_NS)
 
@@ -208,6 +224,51 @@ def build_process_deployability_report(root_path: str | Path | None = None) -> P
         dmn_governance_artifacts=package.dmn_count,
         cmmn_governance_artifacts=package.cmmn_count,
         issues=tuple(issues),
+    )
+
+
+def build_process_runtime_strategy_report(root_path: str | Path | None = None) -> ProcessRuntimeStrategyReport:
+    package = build_process_deployment_package(root_path)
+    deployability = build_process_deployability_report(root_path)
+    return ProcessRuntimeStrategyReport(
+        package_id=package.package_id,
+        flowable_runtime_url=package.deployment_url,
+        items=(
+            ProcessRuntimeStrategyItem(
+                artifact_type=ProcessArtifactType.BPMN,
+                runtime_target="flowable_process_engine",
+                strategy="runtime_deploy",
+                artifact_count=deployability.bpmn_runtime_deployable,
+                status="ready",
+                rationale="BPMN processes are normalized into a runtime-safe .bar package and accepted by Flowable REST.",
+                next_gate="redeploy_on_process_change",
+            ),
+            ProcessRuntimeStrategyItem(
+                artifact_type=ProcessArtifactType.DMN,
+                runtime_target="open_fnr_governance_package",
+                strategy="governed_artifact",
+                artifact_count=package.dmn_count,
+                status="governed_not_runtime_deployed",
+                rationale=(
+                    "Current Flowable REST image rejected combined DMN runtime upload with a missing KIE runtime "
+                    "dependency; OPEN FNR keeps DMN versioned and tested as governed decision artifacts until a "
+                    "dedicated DMN runtime route is enabled."
+                ),
+                next_gate="dmn_runtime_adapter_decision",
+            ),
+            ProcessRuntimeStrategyItem(
+                artifact_type=ProcessArtifactType.CMMN,
+                runtime_target="open_fnr_governance_package",
+                strategy="governed_artifact",
+                artifact_count=package.cmmn_count,
+                status="governed_not_runtime_deployed",
+                rationale=(
+                    "CMMN case models remain versioned governance artifacts while case execution behavior is "
+                    "represented through OPEN FNR API tests and UI process evidence."
+                ),
+                next_gate="cmmn_runtime_adapter_decision",
+            ),
+        ),
     )
 
 
@@ -349,6 +410,11 @@ def validate_current_process_deployment_package() -> ProcessDeploymentPackage:
 @router.get("/packages/current/deployability", response_model=ProcessDeployabilityReport)
 def get_current_process_deployability_report() -> ProcessDeployabilityReport:
     return build_process_deployability_report()
+
+
+@router.get("/packages/current/runtime-strategy", response_model=ProcessRuntimeStrategyReport)
+def get_current_process_runtime_strategy_report() -> ProcessRuntimeStrategyReport:
+    return build_process_runtime_strategy_report()
 
 
 @router.post("/packages/current/deploy", response_model=ProcessDeploymentResult)

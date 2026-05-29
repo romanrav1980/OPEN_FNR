@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 418 automated tests passed.
+Current backend regression status: 420 automated tests passed.
 
 ## Local Infrastructure
 
@@ -446,7 +446,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 418 passed.
+- `python -m pytest` -> 420 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -457,7 +457,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer, routed UI shell, Flowable deployment package, Flowable REST upload gate, live Flowable runtime evidence, source batch BPMN repair and pilot shadow pack are implemented and verified. Next: decide DMN/CMMN runtime strategy, then connect actual pilot source files/API credentials and run a real-data rehearsal.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary, shared policy layer, routed UI shell, Flowable deployment package, Flowable REST upload gate, live Flowable runtime evidence, source batch BPMN repair, process runtime strategy and pilot shadow pack are implemented and verified. Next: add JWT signature/JWKS verification, then connect actual pilot source files/API credentials and run a real-data rehearsal.
 
 ## Post-Sprint Planning Artifacts
 
@@ -476,6 +476,7 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Flowable REST upload gate test report: `docs/test-reports/sprint-flowable-rest-upload/index.html`.
 - Live Flowable deployment evidence report: `docs/test-reports/sprint-flowable-live-deployment/index.html`.
 - Source batch BPMN repair report: `docs/test-reports/sprint-source-batch-bpmn-repair/index.html`.
+- Process runtime strategy report: `docs/test-reports/sprint-process-runtime-strategy/index.html`.
 
 ## H1 Industrial Hardening Artifacts
 

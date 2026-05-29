@@ -154,6 +154,10 @@ type ProcessDeployabilityApiResponse = {
   cmmn_governance_artifacts: number;
 };
 
+type ProcessRuntimeStrategyApiResponse = {
+  items: { artifact_type: string; strategy: string; status: string; artifact_count: number }[];
+};
+
 type PilotShadowPackApiResponse = {
   pack_id: string;
   mode: string;
@@ -1370,6 +1374,7 @@ function App() {
   const [processDeploymentStatus, setProcessDeploymentStatus] = React.useState("loading");
   const [processDeploymentDryRunStatus, setProcessDeploymentDryRunStatus] = React.useState("loading");
   const [processDeployabilityStatus, setProcessDeployabilityStatus] = React.useState("loading");
+  const [processRuntimeStrategyStatus, setProcessRuntimeStrategyStatus] = React.useState("loading");
   const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
@@ -1602,6 +1607,7 @@ function App() {
     Promise.all([
       fetch(apiUrl("/process-deployment/packages/current"), { signal: controller.signal }),
       fetch(apiUrl("/process-deployment/packages/current/deployability"), { signal: controller.signal }),
+      fetch(apiUrl("/process-deployment/packages/current/runtime-strategy"), { signal: controller.signal }),
       fetch(apiUrl("/process-deployment/packages/current/deploy"), {
         method: "POST",
         signal: controller.signal,
@@ -1609,23 +1615,26 @@ function App() {
         body: JSON.stringify({ execute: false, deployment_name: "OPEN_FNR_UI_DRY_RUN" }),
       })
     ])
-      .then(([packageResponse, deployabilityResponse, dryRunResponse]) => {
-        if (!packageResponse.ok || !deployabilityResponse.ok || !dryRunResponse.ok) {
+      .then(([packageResponse, deployabilityResponse, strategyResponse, dryRunResponse]) => {
+        if (!packageResponse.ok || !deployabilityResponse.ok || !strategyResponse.ok || !dryRunResponse.ok) {
           throw new Error("Process deployment API returned an error");
         }
         return Promise.all([
           packageResponse.json() as Promise<ProcessDeploymentPackageApiResponse>,
           deployabilityResponse.json() as Promise<ProcessDeployabilityApiResponse>,
+          strategyResponse.json() as Promise<ProcessRuntimeStrategyApiResponse>,
           dryRunResponse.json() as Promise<ProcessDeploymentResultApiResponse>,
         ]);
       })
-      .then(([payload, deployability, dryRun]) => {
+      .then(([payload, deployability, strategy, dryRun]) => {
         setProcessDeploymentStatus(
           `${payload.artifact_count} artifacts / ${payload.bpmn_count} BPMN / ${payload.dmn_count} DMN / ${payload.cmmn_count} CMMN`,
         );
         setProcessDeployabilityStatus(
           `${deployability.bpmn_runtime_deployable} / ${deployability.bpmn_total} BPMN deployable, ${deployability.bpmn_requires_model_fix} fix`,
         );
+        const governed = strategy.items.filter((item) => item.strategy === "governed_artifact");
+        setProcessRuntimeStrategyStatus(`${governed.length} governed types / BPMN runtime`);
         setProcessDeploymentDryRunStatus(`${dryRun.status} / ${dryRun.execution_mode}`);
       })
       .catch((error: unknown) => {
@@ -1634,6 +1643,7 @@ function App() {
         }
         setProcessDeploymentStatus("fallback");
         setProcessDeployabilityStatus("fallback");
+        setProcessRuntimeStrategyStatus("fallback");
         setProcessDeploymentDryRunStatus("fallback");
       });
     return () => controller.abort();
@@ -3805,6 +3815,11 @@ function App() {
             <span>Deployability Gate</span>
             <strong>{processDeployabilityStatus}</strong>
             <p>Only runtime-safe BPMN is uploaded; DMN and CMMN remain governed artifacts until model/runtime support is verified.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Runtime Strategy</span>
+            <strong>{processRuntimeStrategyStatus}</strong>
+            <p>BPMN is deployed to Flowable runtime; DMN and CMMN stay under governance until dedicated runtime adapters are approved.</p>
           </article>
         </div>
         <div className="table-shell">

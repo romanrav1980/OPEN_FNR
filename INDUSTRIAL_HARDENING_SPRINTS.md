@@ -324,6 +324,25 @@ Status: completed.
 - Live deployment evidence: Flowable returned deployment id `0ad2ac04-5b3c-11f1-b6e2-aeebf3826aa0`.
 - Test evidence: `docs/test-reports/sprint-source-batch-bpmn-repair/index.html`.
 
+## PROC-RUNTIME-4. DMN/CMMN Runtime Strategy
+
+Status: completed for explicit execution boundary.
+
+### Scope
+
+- define per-artifact runtime strategy for BPMN, DMN and CMMN;
+- expose strategy through backend API;
+- surface strategy in Admin workspace;
+- prevent accidental claims that DMN/CMMN are runtime-deployed before adapter approval.
+
+### Current Implementation
+
+- API endpoint: `/process-deployment/packages/current/runtime-strategy`.
+- BPMN strategy: `runtime_deploy` to Flowable process engine.
+- DMN strategy: `governed_artifact` until a dedicated DMN runtime adapter is approved.
+- CMMN strategy: `governed_artifact` until a dedicated CMMN runtime adapter is approved.
+- Test evidence: `docs/test-reports/sprint-process-runtime-strategy/index.html`.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.

@@ -1,7 +1,7 @@
 # OPEN FNR Pilot-Ready Remaining Work
 
 Date: 2026-05-29
-Status: handoff after source batch BPMN repair checkpoint.
+Status: handoff after process runtime strategy checkpoint.
 
 ## What Is Now Closed
 
@@ -24,6 +24,7 @@ Status: handoff after source batch BPMN repair checkpoint.
 | Flowable REST upload gate | closed for configurable dry run and execute path | `docs/test-reports/sprint-flowable-rest-upload/index.html` |
 | Live Flowable runtime evidence | closed for runtime-safe BPMN subset | `docs/test-reports/sprint-flowable-live-deployment/index.html` |
 | Source batch BPMN repair | closed for 38 / 38 runtime-deployable BPMN | `docs/test-reports/sprint-source-batch-bpmn-repair/index.html` |
+| Process runtime strategy | closed for BPMN runtime and DMN/CMMN governance boundary | `docs/test-reports/sprint-process-runtime-strategy/index.html` |
 | Pilot shadow pack | closed for first runbook/rollback package | `docs/test-reports/sprint-pilot-shadow-pack/index.html` |
 | Backend regression | green | `python -m pytest` -> 418 passed |
 | Frontend build | green | `npm.cmd run build` |
@@ -37,7 +38,7 @@ Status: handoff after source batch BPMN repair checkpoint.
 | OIDC/JWT middleware | Authenticate real users and service clients | First FastAPI JWT boundary implemented; next add signature/JWKS verification details | Unauthorized calls rejected, valid token maps to user/roles |
 | Shared policy layer | Replace endpoint-local role checks with reusable RBAC/ABAC policy | First `policy.py` implemented for Security API; next migrate remaining domain endpoints | Security tests cover positive/negative object-level access |
 | Routed UI productization | Move from single Control Tower to operational pages | First hash-route shell implemented; next split modules into route-specific pages | E2E smoke covers forecast, replenishment, exceptions, admin |
-| Process deployment pipeline | Deploy BPMN runtime subset and govern DMN/CMMN artifacts | Live DEV Flowable deployment completed for 38 runtime-safe BPMN files | Decide DMN/CMMN runtime support |
+| Process deployment pipeline | Deploy BPMN runtime subset and govern DMN/CMMN artifacts | Live DEV Flowable deployment completed for 38 runtime-safe BPMN files; DMN/CMMN boundary documented in API | Optional future DMN/CMMN runtime adapter |
 | Production deployment decision | Choose Kubernetes or hardened production Compose | Deployment topology doc and environment matrix | PROD-like dry run has rollback and health checks |
 | Pilot rehearsal | Run a limited real-data shadow pilot | Shadow pack implemented; next run with actual source files/API credentials | KPI baseline vs OPEN FNR report signed by business |
 
@@ -48,10 +49,10 @@ Status: handoff after source batch BPMN repair checkpoint.
    - run `/data/ingestion/pilot-shadow-load/plan`;
    - run clean publication and daily gate on the real business date.
 
-2. `PROC-RUNTIME-4 DMN/CMMN Runtime Strategy`
-   - decide whether DMN/CMMN should be deployed to Flowable runtime or kept as governed decision/case artifacts;
-   - if deployed, add engine-specific deployment route and tests;
-   - if governed only, document runtime boundary and UI wording.
+2. `SEC-JWKS-1 JWT Signature Verification`
+   - add cryptographic JWKS validation to the existing JWT/OIDC boundary;
+   - keep DEV/TEST bypass configurable;
+   - add positive/negative token tests.
 
 ## Current Risk Register
 
@@ -60,12 +61,12 @@ Status: handoff after source batch BPMN repair checkpoint.
 | No real source samples yet | Real-data rehearsal cannot be proven end to end | Provide POS/WMS/ERP/MDM/promo files or API specs for `REAL-PILOT-1` |
 | OIDC details unknown | Security middleware cannot be production-final | Fill issuer/audience/JWKS env values and add cryptographic signature validation |
 | UI still keeps most modules in one file | Productization velocity and test isolation suffer | Continue route split module by module after pilot source wiring |
-| DMN/CMMN runtime support not finalized | Decision/case artifacts are governed but not proven in Flowable runtime | Decide runtime strategy and test the chosen route |
+| DMN/CMMN runtime adapters are optional future work | Decision/case artifacts are governed but not Flowable-runtime-executed | Keep strategy visible in API/UI and approve adapters only if business needs runtime execution |
 | Performance still synthetic/smoke | EPYC sizing not proven on real data | Run pilot-scale synthetic plus first real-data profile before controlled export |
 
 ## Saved Context For Resume
 
-- Latest pushed hardening commit before this checkpoint: `2d25249`; current checkpoint is the source batch BPMN repair work.
-- Backend regression count after PROC-MODEL-FIX-1: 418 tests passed.
+- Latest pushed hardening commit before this checkpoint: `5144545`; current checkpoint is the process runtime strategy work.
+- Backend regression count after PROC-RUNTIME-4: 420 tests passed.
 - Target adapter reports are under `docs/test-reports`.
 - The next autonomous implementation should start with `REAL-PILOT-1 Actual Source Connection` when real source files or API credentials are available.

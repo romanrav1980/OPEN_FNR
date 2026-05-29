@@ -8,6 +8,7 @@ from open_fnr_api.process_deployment import (
     build_multipart_deployment_body,
     build_process_deployability_report,
     build_process_deployment_package,
+    build_process_runtime_strategy_report,
     deploy_process_package_to_flowable,
     normalize_bpmn_for_flowable_deployment,
 )
@@ -69,6 +70,27 @@ def test_process_deployment_deployability_endpoint_exposes_runtime_safe_subset()
     assert payload["bpmn_total"] > payload["bpmn_requires_model_fix"]
     assert payload["dmn_governance_artifacts"] > 0
     assert payload["cmmn_governance_artifacts"] > 0
+
+
+def test_process_deployment_runtime_strategy_separates_runtime_and_governance_artifacts() -> None:
+    report = build_process_runtime_strategy_report()
+
+    strategies = {item.artifact_type: item for item in report.items}
+
+    assert strategies["bpmn"].strategy == "runtime_deploy"
+    assert strategies["bpmn"].status == "ready"
+    assert strategies["dmn"].strategy == "governed_artifact"
+    assert strategies["dmn"].status == "governed_not_runtime_deployed"
+    assert strategies["cmmn"].strategy == "governed_artifact"
+
+
+def test_process_deployment_runtime_strategy_endpoint() -> None:
+    response = client.get("/process-deployment/packages/current/runtime-strategy")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload["items"]) == 3
+    assert {item["artifact_type"] for item in payload["items"]} == {"bpmn", "dmn", "cmmn"}
 
 
 def test_process_deployment_multipart_body_contains_artifacts() -> None:
