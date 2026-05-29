@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Process Navigator Final Regression</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151515;
+        --panel: #202020;
+        --text: #f3f0ed;
+        --muted: #b8aaa5;
+        --red: #9f1d35;
+        --red-light: #df556d;
+        --border: #3a3030;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; line-height: 1.55; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 56px; }
+      h1 { border-left: 6px solid var(--red); padding-left: 16px; }
+      section { margin-top: 24px; border: 1px solid var(--border); background: var(--panel); padding: 18px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid var(--border); padding: 10px; vertical-align: top; }
+      th { color: var(--muted); text-align: left; text-transform: uppercase; font-size: 12px; }
+      a { color: var(--red-light); }
+      img { width: 100%; border: 1px solid var(--border); background: #111; }
+      .meta { color: var(--muted); }
+      .ok { color: #8fd19e; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Process Navigator PN-3..PN-12 - финальная регрессия</h1>
+      <p class="meta">
+        Дата: 2026-05-29. Цель: зафиксировать завершение крупного блока Process Navigator: backend contracts,
+        conformance, performance, alert correlation, RBAC, UI detail/help, accessibility/refresh, weekly digest и
+        performance smoke.
+      </p>
+
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем весь Process Navigator сквозным регрессионным набором, потому что модуль является операционной
+          картой бизнес-процессов OPEN FNR. Проверка должна доказать, что карта не только отображается, но и связана с
+          BPMN-контрактами, алертами, ролями, отчетностью и нагрузочным smoke-gate.
+        </p>
+      </section>
+
+      <section>
+        <h2>Финальный скриншот</h2>
+        <img src="screenshots/process-navigator-final.png" alt="Process Navigator final UI screenshot" />
+      </section>
+
+      <section>
+        <h2>Результаты регрессии</h2>
+        <table>
+          <thead>
+            <tr><th>Проверка</th><th>Что проверяем</th><th>Результат</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Frontend build</td><td>TypeScript и Vite production build</td><td class="ok">Пройдено</td></tr>
+            <tr><td>Targeted PN suite</td><td>Backend, orchestration, performance и quality gates</td><td class="ok">34 passed</td></tr>
+            <tr><td>Full pytest</td><td>Весь backend/data/process/orchestration/performance suite</td><td class="ok">469 passed</td></tr>
+            <tr><td>Warning</td><td>Pytest cache path under `.pytest_cache`</td><td>1 local permission warning, не влияет на тесты</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Проверка бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr><th>Процесс</th><th>Что делаем</th><th>Зачем</th><th>Фактический результат</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Process conformance</td>
+              <td>Проверяем пропущенные mandatory steps и unexpected sequence.</td>
+              <td>Исключить обход обязательных согласований.</td>
+              <td class="ok">Backend evaluator и UI summary готовы.</td>
+            </tr>
+            <tr>
+              <td>Performance and SLA</td>
+              <td>Проверяем cycle time, waiting/processing time, throughput и rework.</td>
+              <td>Показать операционные задержки до влияния на forecast/replenishment.</td>
+              <td class="ok">Endpoint, UI panel и performance smoke готовы.</td>
+            </tr>
+            <tr>
+              <td>Alert correlation</td>
+              <td>Строим root/cascade chain по зависимостям процессов.</td>
+              <td>Фиксировать upstream-причину вместо симптомов.</td>
+              <td class="ok">Causal chains и UI Cause column готовы.</td>
+            </tr>
+            <tr>
+              <td>RBAC</td>
+              <td>Проверяем supplier block и ограничение store roles по zoom.</td>
+              <td>Не раскрывать операционную карту поставщику и лишним ролям.</td>
+              <td class="ok">Backend policy boundary готов.</td>
+            </tr>
+            <tr>
+              <td>Weekly digest</td>
+              <td>Готовим weekly report payload и Airflow digest request.</td>
+              <td>Дать stakeholders отчет без входа в UI.</td>
+              <td class="ok">DAG skeleton и tests готовы.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Артефакты</h2>
+        <ul>
+          <li><a href="../../../PROCESS_NAVIGATOR_IMPLEMENTATION_PLAN.md">PROCESS_NAVIGATOR_IMPLEMENTATION_PLAN.md</a></li>
+          <li><a href="../../../PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md">PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md</a></li>
+          <li><a href="../../../docs/presentations/process-navigator-pn3-pn12/index.html">Developer/user presentation</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

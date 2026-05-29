@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Process Navigator PN-3..PN-12</title>
+    <style>
+      :root {
+        --bg: #1f1f1f;
+        --panel: #252526;
+        --panel2: #2d2d30;
+        --text: #f3f3f3;
+        --muted: #b7b7b7;
+        --red: #b91c1c;
+        --line: #3c3c3c;
+        --green: #22c55e;
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", Arial, sans-serif; line-height: 1.55; }
+      header, section { max-width: 1200px; margin: 0 auto; padding: 30px; }
+      header { min-height: 46vh; display: flex; flex-direction: column; justify-content: center; border-bottom: 4px solid var(--red); background: linear-gradient(120deg, #2d2d30, #1f1f1f 66%); }
+      h1 { font-size: 44px; margin: 0 0 14px; }
+      h2 { font-size: 30px; margin: 0 0 14px; }
+      h3 { margin: 0 0 10px; }
+      p { color: var(--muted); margin: 0 0 14px; }
+      .badge { display: inline-block; width: max-content; margin-bottom: 18px; padding: 5px 12px; border: 1px solid var(--red); color: #fecaca; background: rgba(185, 28, 28, 0.14); border-radius: 6px; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+      .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card, .screen { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+      .card strong { display: block; color: #fff; margin-bottom: 8px; }
+      table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); margin-top: 14px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 14px; }
+      th { color: #fecaca; background: var(--panel2); }
+      code { color: #fecaca; }
+      img { width: 100%; border: 1px solid var(--line); background: #111; }
+      .ok { color: #bbf7d0; border-color: #166534; background: rgba(34, 197, 94, 0.12); }
+      .step { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
+      .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--green); margin-top: 6px; flex: 0 0 auto; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="badge">OPEN FNR / Process Navigator</span>
+      <h1>Карта бизнес-процессов PN-3..PN-12</h1>
+      <p>
+        Process Navigator превращает BPMN/DMN/CMMN governance в операционную карту: домены, процессы, алерты,
+        соответствие модели, версии, SLA, инфраструктурные риски, роли, help-сноски и weekly digest для stakeholders.
+      </p>
+    </header>
+
+    <section>
+      <h2>Для чего нужен модуль</h2>
+      <div class="grid">
+        <div class="card"><strong>Операционный контроль</strong><p>Видим, какие процессы healthy, attention или blocked, и почему.</p></div>
+        <div class="card"><strong>Разбор инцидентов</strong><p>Root/cascade цепочки показывают первопричину, например POS late -> forecast degraded -> replenishment blocked.</p></div>
+        <div class="card"><strong>Аудит и governance</strong><p>Conformance, версии BPMN, роли и weekly digest дают доказательную базу для пилота.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>UI: карта и панель деталей</h2>
+      <img src="../../test-reports/sprint-pn-final/screenshots/process-navigator-final.png" alt="Process Navigator final UI" />
+    </section>
+
+    <section>
+      <h2>Бизнес-процессы, которые видны на карте</h2>
+      <div class="grid two">
+        <div class="screen">
+          <h3>Forecast review</h3>
+          <div class="step"><span class="dot"></span><p>Проверяем качество регулярного и промо-прогноза.</p></div>
+          <div class="step"><span class="dot"></span><p>Conformance ловит обход обязательного согласования.</p></div>
+          <div class="step"><span class="dot"></span><p>Performance показывает P95 cycle time и rework.</p></div>
+        </div>
+        <div class="screen">
+          <h3>Replenishment approval</h3>
+          <div class="step"><span class="dot"></span><p>Контролируем order proposal, approval и publication readiness.</p></div>
+          <div class="step"><span class="dot"></span><p>Причинные цепочки отделяют upstream failure от downstream symptoms.</p></div>
+          <div class="step"><span class="dot"></span><p>Weekly digest выводит root causes и SLA breaches для руководителей.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Структура модуля</h2>
+      <table>
+        <thead><tr><th>Слой</th><th>Артефакты</th><th>Назначение</th></tr></thead>
+        <tbody>
+          <tr><td>Backend API</td><td><code>process_navigator.py</code></td><td>Map, alerts, drilldown, conformance, performance, versions, tracking, reports.</td></tr>
+          <tr><td>Process Engine</td><td><code>processes/**/*.bpmn20.xml</code></td><td>Runtime BPMN scope for Flowable, DMN/CMMN governed at API layer.</td></tr>
+          <tr><td>Frontend</td><td><code>apps/frontend/src/main.tsx</code></td><td>Process Navigator route, controls, detail panels, help-сноски.</td></tr>
+          <tr><td>Orchestration</td><td><code>process_health_digest.py</code></td><td>Weekly stakeholder digest request and notification payload.</td></tr>
+          <tr><td>Tests</td><td><code>tests/backend</code>, <code>tests/orchestration</code>, <code>tests/performance</code></td><td>Contracts, DAG helpers, RBAC, performance smoke.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Результаты</h2>
+      <table>
+        <thead><tr><th>Пакет</th><th>Результат</th></tr></thead>
+        <tbody>
+          <tr><td>PN-3..PN-12</td><td class="ok">Завершено</td></tr>
+          <tr><td>Frontend build</td><td class="ok">Пройдено</td></tr>
+          <tr><td>Targeted PN regression</td><td class="ok">34 passed</td></tr>
+          <tr><td>Full pytest</td><td class="ok">469 passed</td></tr>
+          <tr><td>Evidence</td><td><code>docs/test-reports/sprint-pn-final/index.html</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

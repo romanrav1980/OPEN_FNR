@@ -645,9 +645,14 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - PN-11 evidence report:
   - `docs/test-reports/sprint-pn-11-reporting-superset/index.html`;
   - `docs/test-reports/sprint-pn-11-reporting-superset/screenshots/process-navigator-report-context.png`.
-- Process Navigator implementation plan now marks PN-3..PN-11 as completed; remaining PN sprint is PN-12.
+- PN-12 has completed final load/regression/presentation:
+  - performance smoke tests added in `tests/performance/test_process_navigator_performance.py`;
+  - final regression report created at `docs/test-reports/sprint-pn-final/index.html`;
+  - final Process Navigator screenshot created at `docs/test-reports/sprint-pn-final/screenshots/process-navigator-final.png`;
+  - developer/user presentation created at `docs/presentations/process-navigator-pn3-pn12/index.html`.
+- Process Navigator implementation plan now marks PN-3..PN-12 as completed; remaining PN sprints: 0.
 - Process Navigator backend tests now cover 26 scenarios in `tests/backend/test_process_navigator.py`.
 - Verification:
   - `npm.cmd run build` in `apps/frontend` -> passed.
-  - `pytest tests/backend/test_process_navigator.py tests/orchestration/test_process_health_digest.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 32 passed, 1 warning about `.pytest_cache` permissions.
-  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 467 passed, 1 warning about `.pytest_cache` permissions.
+  - `pytest tests/backend/test_process_navigator.py tests/orchestration/test_process_health_digest.py tests/performance/test_process_navigator_performance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 34 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 469 passed, 1 warning about `.pytest_cache` permissions.
