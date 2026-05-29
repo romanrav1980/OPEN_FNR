@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - JWT JWKS Signature Verification</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      .warn { color: #ffd166; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>JWT JWKS Signature Verification</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем production boundary авторизации: stage/prod больше не принимают unsigned JWT без JWKS URL,
+          а RS256-токены валидируются по публичному ключу из JWKS. Это нужно, чтобы система не доверяла только
+          содержимому claims и могла безопасно работать с реальным OIDC-провайдером.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/jwt-jwks-signature-admin.png" alt="Admin Console auth boundary" />
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процесса доступа</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Включаем auth в stage mode без dev bypass и без JWKS URL.</td>
+              <td>Проверить fail-closed поведение production-контура.</td>
+              <td>API отклоняет bearer token.</td>
+              <td class="ok">401, JWKS URL required.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Передаём корректно подписанный RS256 JWT и JWKS.</td>
+              <td>Проверить позитивный путь OIDC.</td>
+              <td>API создаёт auth context с email и ролями.</td>
+              <td class="ok">Запрос принят.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Меняем signature segment в JWT.</td>
+              <td>Проверить, что claims нельзя подменить без ключа.</td>
+              <td>API возвращает 401.</td>
+              <td class="ok">signature verification failed.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем DEV/TEST bypass.</td>
+              <td>Оставить локальную разработку быстрой и управляемой конфигом.</td>
+              <td>Bypass работает только в dev/test при явном флаге.</td>
+              <td class="ok">Поведение покрыто тестом.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>RS256/JWKS verification</td><td class="ok">Implemented with Python standard library</td></tr>
+            <tr><td>Targeted auth/config/quality tests</td><td class="ok">19 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+            <tr><td>License posture</td><td class="ok">No proprietary, SaaS, GPL/AGPL/SSPL/BUSL dependency added</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

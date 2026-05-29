@@ -343,6 +343,24 @@ Status: completed for explicit execution boundary.
 - CMMN strategy: `governed_artifact` until a dedicated CMMN runtime adapter is approved.
 - Test evidence: `docs/test-reports/sprint-process-runtime-strategy/index.html`.
 
+## SEC-JWKS-1. JWT Signature Verification
+
+Status: completed for RS256/JWKS boundary.
+
+### Scope
+
+- verify JWT signature against configured JWKS;
+- require JWKS URL in stage/prod when dev bypass is disabled;
+- keep DEV/TEST bypass configurable;
+- reject tampered tokens before claim trust.
+
+### Current Implementation
+
+- Backend module: `apps/backend/open_fnr_api/auth.py`.
+- RS256 verification implemented with Python standard library and RSA JWK `n/e`.
+- Metadata exposes whether signature verification is required.
+- Test evidence: `docs/test-reports/sprint-jwt-jwks-signature/index.html`.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.

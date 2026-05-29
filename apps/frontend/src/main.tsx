@@ -129,6 +129,7 @@ type MetadataApiResponse = {
   oidc_issuer_configured: boolean;
   oidc_audience_configured: boolean;
   oidc_jwks_url_configured: boolean;
+  jwt_signature_verification_required: boolean;
 };
 
 type ProcessDeploymentPackageApiResponse = {
@@ -1569,7 +1570,9 @@ function App() {
       .then((payload) => {
         const oidcReady = payload.oidc_issuer_configured && payload.oidc_audience_configured && payload.oidc_jwks_url_configured;
         setAuthBoundaryStatus(
-          payload.auth_enabled ? `enabled / oidc ${oidcReady ? "configured" : "pending"}` : "disabled in dev",
+          payload.auth_enabled
+            ? `enabled / oidc ${oidcReady ? "configured" : "pending"} / sig ${payload.jwt_signature_verification_required ? "required" : "relaxed"}`
+            : "disabled in dev",
         );
       })
       .catch((error: unknown) => {

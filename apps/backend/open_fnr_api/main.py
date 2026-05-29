@@ -123,6 +123,8 @@ def metadata() -> dict[str, object]:
         "oidc_issuer_configured": bool(settings.oidc_issuer),
         "oidc_audience_configured": bool(settings.oidc_audience),
         "oidc_jwks_url_configured": bool(settings.oidc_jwks_url),
+        "jwt_signature_verification_required": settings.runtime_mode in {"stage", "prod"}
+        and not settings.auth_dev_bypass_enabled,
         "modules": [
             "auth",
             "audit",
