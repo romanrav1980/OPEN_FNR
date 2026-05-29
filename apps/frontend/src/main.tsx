@@ -169,6 +169,26 @@ type PurchaseProposalApiItem = {
   decision: { reason: string };
 };
 
+type CapacityMoveRow = {
+  order: string;
+  supplier: string;
+  original: string;
+  proposed: string;
+  qty: string;
+  priority: string;
+};
+
+type CapacityPlanApiItem = {
+  affected_orders: {
+    order_id: string;
+    supplier_id: string;
+    original_date: string;
+    proposed_date: string;
+    qty: number;
+    priority: string;
+  }[];
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -963,7 +983,7 @@ const capacityCalendarRows = [
   },
 ];
 
-const capacityMoveRows = [
+const capacityMoveRows: CapacityMoveRow[] = [
   {
     order: "po-001",
     supplier: "SUP_FAST",
@@ -1097,6 +1117,8 @@ function App() {
   const [procurementApiStatus, setProcurementApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimePurchaseProposalRows, setRuntimePurchaseProposalRows] =
     React.useState<PurchaseProposalRow[]>(purchaseProposalRows);
+  const [capacityApiStatus, setCapacityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeCapacityMoveRows, setRuntimeCapacityMoveRows] = React.useState<CapacityMoveRow[]>(capacityMoveRows);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1265,6 +1287,41 @@ function App() {
           return;
         }
         setProcurementApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/capacity/plans"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Capacity API returned ${response.status}`);
+        }
+        return response.json() as Promise<{ items: CapacityPlanApiItem[] }>;
+      })
+      .then((payload) => {
+        const plan = payload.items[0];
+        if (!plan) {
+          throw new Error("Capacity API returned no plan");
+        }
+        setRuntimeCapacityMoveRows(
+          plan.affected_orders.map((order) => ({
+            order: order.order_id,
+            supplier: order.supplier_id,
+            original: order.original_date,
+            proposed: order.proposed_date,
+            qty: order.qty.toLocaleString("ru-RU"),
+            priority: order.priority,
+          })),
+        );
+        setCapacityApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setCapacityApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -4154,6 +4211,11 @@ function App() {
             <strong>Move 2 400 units</strong>
             <p>Medium and low priority orders are shifted to the following available receiving days.</p>
           </article>
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{capacityApiStatus}</strong>
+            <p>Capacity move rows are loaded from `/capacity/plans` when backend is available.</p>
+          </article>
         </div>
         <div className="table-shell">
           <table>
@@ -4194,7 +4256,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {capacityMoveRows.map((row) => (
+              {runtimeCapacityMoveRows.map((row) => (
                 <tr key={row.order}>
                   <td>{row.order}</td>
                   <td>{row.supplier}</td>
@@ -4222,10 +4284,11 @@ function App() {
             </div>
           </aside>
           <aside className="dq-detail">
-            <span className="eyebrow">TMS Mock</span>
+            <span className="eyebrow">TMS Target</span>
             <h3>Idempotent capacity export</h3>
             <p>
               Export carries plan id, proposed delivery dates, moved quantities and idempotency key.
+              Target URL is controlled by environment configuration.
             </p>
           </aside>
         </div>

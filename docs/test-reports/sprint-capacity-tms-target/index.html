@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Capacity TMS Target Test Report</title>
+    <style>
+      body { margin: 0; background: #1e1e1e; color: #d4d4d4; font-family: Arial, sans-serif; }
+      main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 32px 0; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-top: 28px; }
+      p { margin-top: 8px; color: #aeb4bf; line-height: 1.55; }
+      .eyebrow { color: #b83a4b; font-weight: 700; text-transform: uppercase; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; border: 1px solid #3a3a3a; background: #252526; }
+      th, td { border-bottom: 1px solid #3a3a3a; padding: 12px; text-align: left; vertical-align: top; }
+      th { color: #9da3ae; font-size: 12px; text-transform: uppercase; }
+      tr:last-child td { border-bottom: 0; }
+      .ok { color: #8fd19e; font-weight: 700; }
+      img { width: 100%; margin-top: 16px; border: 1px solid #3a3a3a; }
+      code { color: #ffcf70; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">UI, API и интеграционный тест</p>
+      <h1>Capacity TMS Target</h1>
+      <p>
+        Аннотация: тестируем экспорт сглаженного capacity-плана в TMS через configurable target adapter.
+        В DEV/TEST используется local fallback, в STAGE/PROD endpoint задается через <code>OPEN_FNR_TMS_CAPACITY_EXPORT_URL</code>.
+      </p>
+
+      <h2>Скриншот</h2>
+      <p>UI получает affected order moves из <code>GET /capacity/plans</code>.</p>
+      <img src="screenshots/capacity-tms-target.png" alt="Capacity TMS target in OPEN FNR Control Tower" />
+
+      <h2>UI-тестирование</h2>
+      <table>
+        <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Открываем Capacity Workbench.</td><td>Проверяем рабочее место Supply Chain Manager.</td><td>Секция доступна.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем API status.</td><td>UI должен показывать live/fallback режим.</td><td>При backend online статус live.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем affected orders.</td><td>План сглаживания должен быть понятен по заказам.</td><td>Видны original/proposed dates, qty, priority.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем TMS target text.</td><td>Не должно оставаться жесткого TMS mock.</td><td>Показан configured TMS target.</td><td class="ok">Пройдено.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Тестирование бизнес-процесса</h2>
+      <table>
+        <thead><tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Detect overload.</td><td>Нужно найти превышение receiving capacity.</td><td>overload_qty = 2400.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Approve capacity plan.</td><td>Экспорт должен идти после роли Supply Chain Manager.</td><td>status approved.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Preview TMS export.</td><td>Проверяем idempotency key и moved orders.</td><td>2 moved orders.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Send через wrong service account.</td><td>Write operation должна быть защищена.</td><td>403.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Send через configured HTTP target.</td><td>Production TMS endpoint задается настройкой.</td><td>POST с Idempotency-Key.</td><td class="ok">Покрыто monkeypatch-тестом.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Проверки</h2>
+      <table>
+        <thead><tr><th>Тип</th><th>Команда</th><th>Результат</th></tr></thead>
+        <tbody>
+          <tr><td>Backend regression</td><td><code>python -m pytest</code></td><td class="ok">382 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Compose DEV/STAGE</td><td><code>docker compose config --quiet</code></td><td class="ok">passed</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>

@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 379 automated tests passed.
+Current backend regression status: 382 automated tests passed.
 
 ## Local Infrastructure
 
@@ -384,13 +384,15 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Capacity API: `apps/backend/open_fnr_api/capacity.py`.
 - Capacity tests: `tests/backend/test_capacity.py`.
+- Capacity TMS export send API with service account gate, local fallback and configurable `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`.
 - Capacity process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Capacity smoothing BPMN: `processes/capacity/capacity_smoothing_process.bpmn20.xml`.
 - Capacity overload DMN: `processes/capacity/capacity_overload_decision.dmn.xml`.
 - Order shift priority DMN: `processes/capacity/order_shift_priority_decision.dmn.xml`.
 - Capacity overload CMMN: `processes/capacity/capacity_overload_case.cmmn.xml`.
-- UI Capacity Workbench section with overload calendar, smoothing preview, affected orders and TMS export action.
+- UI Capacity Workbench section with overload calendar, smoothing preview, affected orders, live API status and configurable TMS target export action.
 - HTML test report with screenshot: `docs/test-reports/sprint-33-capacity-workload/index.html`.
+- Capacity TMS target hardening report: `docs/test-reports/sprint-capacity-tms-target/index.html`.
 
 ## Sprint 34 Artifacts
 

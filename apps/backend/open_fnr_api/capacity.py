@@ -1,9 +1,13 @@
+import json
 from enum import StrEnum
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
+from .config import settings
 
 
 router = APIRouter(prefix="/capacity", tags=["capacity"])
@@ -52,6 +56,27 @@ class CapacityActionRequest(BaseModel):
     reason: str = Field(min_length=1)
 
 
+class TmsCapacityExportRequest(BaseModel):
+    actor: str = Field(min_length=1)
+    actor_role: str = Field(default="Supply Chain Manager", min_length=1)
+    service_account: str = Field(min_length=1)
+
+
+class TmsCapacityExportPreview(BaseModel):
+    target: str
+    plan_id: str
+    moved_orders: tuple[dict[str, object], ...]
+    idempotency_key: str
+    export_channel: str
+
+
+class TmsCapacityExportResponse(BaseModel):
+    export: TmsCapacityExportPreview
+    response_code: str
+    response_message: str
+    audit_recorded: bool
+
+
 CALENDAR = CapacityCalendarDay(
     dc_id="DC001",
     date="2026-06-02",
@@ -84,6 +109,40 @@ def build_capacity_plan() -> CapacityPlan:
         affected_orders=AFFECTED_ORDERS,
         recommendation="Move medium and low priority orders to following receiving days.",
     )
+
+
+def tms_capacity_export_channel() -> str:
+    return "http_api" if settings.tms_capacity_export_url else "local_fallback"
+
+
+def build_tms_capacity_export(plan: CapacityPlan) -> TmsCapacityExportPreview:
+    return TmsCapacityExportPreview(
+        target="TMS capacity",
+        plan_id=plan.plan_id,
+        moved_orders=tuple(order.model_dump(mode="json") for order in plan.affected_orders),
+        idempotency_key=f"{plan.plan_id}:tms:v1",
+        export_channel=tms_capacity_export_channel(),
+    )
+
+
+def send_tms_capacity_export_to_target(export: TmsCapacityExportPreview) -> tuple[str, str]:
+    if not settings.tms_capacity_export_url:
+        return "202", "sent to local TMS capacity fallback"
+    request = Request(
+        settings.tms_capacity_export_url,
+        data=json.dumps(export.model_dump(mode="json"), ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "Idempotency-Key": export.idempotency_key,
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=settings.publication_http_timeout_seconds) as response:
+            response_body = response.read().decode("utf-8", errors="replace").strip()
+            return str(response.status), response_body or "sent to TMS capacity target"
+    except URLError as exc:
+        raise HTTPException(status_code=503, detail=f"TMS capacity target unavailable: {exc}") from exc
 
 
 @router.get("/plans")
@@ -124,9 +183,38 @@ def approve_capacity_plan(plan_id: str, payload: CapacityActionRequest) -> dict[
 @router.get("/tms-export")
 def get_tms_capacity_export() -> dict[str, object]:
     plan = build_capacity_plan()
-    return {
-        "target": "TMS capacity mock",
-        "plan_id": plan.plan_id,
-        "moved_orders": [order.model_dump(mode="json") for order in plan.affected_orders],
-        "idempotency_key": f"{plan.plan_id}:tms:v1",
-    }
+    return build_tms_capacity_export(plan).model_dump(mode="json")
+
+
+@router.post("/tms-export/send", response_model=TmsCapacityExportResponse)
+def send_tms_capacity_export(payload: TmsCapacityExportRequest) -> TmsCapacityExportResponse:
+    if payload.actor_role not in {"Supply Chain Manager", "Store Operations"}:
+        raise HTTPException(status_code=403, detail="capacity export role required")
+    if payload.service_account != "svc-open-fnr-tms-export":
+        raise HTTPException(status_code=403, detail="service account is not allowed to export capacity plan")
+    plan = build_capacity_plan()
+    export = build_tms_capacity_export(plan)
+    response_code, response_message = send_tms_capacity_export_to_target(export)
+    event = record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="tms_capacity_export_sent",
+            actor=payload.actor,
+            actor_role=payload.actor_role,
+            object_type="capacity_plan",
+            object_id=plan.plan_id,
+            action="send",
+            reason=f"Sent capacity plan through {export.export_channel}",
+            correlation_id=export.idempotency_key,
+            payload={
+                "target": export.target,
+                "moved_order_count": len(export.moved_orders),
+                "export_channel": export.export_channel,
+            },
+        )
+    )
+    return TmsCapacityExportResponse(
+        export=export,
+        response_code=response_code,
+        response_message=response_message,
+        audit_recorded=event is not None,
+    )

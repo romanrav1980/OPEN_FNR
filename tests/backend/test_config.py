@@ -86,6 +86,7 @@ def test_publication_target_urls_are_centralized_settings() -> None:
         wms_export_url="http://wms.local/orders",
         dwh_export_url="http://dwh.local/forecast",
         supplier_forecast_share_url="http://supplier.local/share",
+        tms_capacity_export_url="http://tms.local/capacity",
         publication_http_timeout_seconds=11,
     )
 
@@ -93,4 +94,5 @@ def test_publication_target_urls_are_centralized_settings() -> None:
     assert settings.wms_export_url == "http://wms.local/orders"
     assert settings.dwh_export_url == "http://dwh.local/forecast"
     assert settings.supplier_forecast_share_url == "http://supplier.local/share"
+    assert settings.tms_capacity_export_url == "http://tms.local/capacity"
     assert settings.publication_http_timeout_seconds == 11
