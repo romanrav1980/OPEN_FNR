@@ -132,6 +132,11 @@ type MetadataApiResponse = {
   jwt_signature_verification_required: boolean;
 };
 
+type IdpReadinessApiResponse = {
+  status: string;
+  checks: { check: string; status: string }[];
+};
+
 type ProcessDeploymentPackageApiResponse = {
   artifact_count: number;
   bpmn_count: number;
@@ -1371,6 +1376,7 @@ function App() {
   const [runtimeShadowLoadTasks, setRuntimeShadowLoadTasks] = React.useState<ShadowLoadTask[]>(shadowLoadTasks);
   const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
+  const [idpReadinessStatus, setIdpReadinessStatus] = React.useState("loading");
   const [policyCheckStatus, setPolicyCheckStatus] = React.useState("loading");
   const [processDeploymentStatus, setProcessDeploymentStatus] = React.useState("loading");
   const [processDeploymentDryRunStatus, setProcessDeploymentDryRunStatus] = React.useState("loading");
@@ -1560,26 +1566,34 @@ function App() {
 
   React.useEffect(() => {
     const controller = new AbortController();
-    fetch(apiUrl("/metadata"), { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Metadata API returned ${response.status}`);
+    Promise.all([
+      fetch(apiUrl("/metadata"), { signal: controller.signal }),
+      fetch(apiUrl("/auth/idp-readiness"), { signal: controller.signal }),
+    ])
+      .then(([metadataResponse, readinessResponse]) => {
+        if (!metadataResponse.ok || !readinessResponse.ok) {
+          throw new Error("Auth metadata API returned an error");
         }
-        return response.json() as Promise<MetadataApiResponse>;
+        return Promise.all([
+          metadataResponse.json() as Promise<MetadataApiResponse>,
+          readinessResponse.json() as Promise<IdpReadinessApiResponse>,
+        ]);
       })
-      .then((payload) => {
+      .then(([payload, readiness]) => {
         const oidcReady = payload.oidc_issuer_configured && payload.oidc_audience_configured && payload.oidc_jwks_url_configured;
         setAuthBoundaryStatus(
           payload.auth_enabled
             ? `enabled / oidc ${oidcReady ? "configured" : "pending"} / sig ${payload.jwt_signature_verification_required ? "required" : "relaxed"}`
             : "disabled in dev",
         );
+        setIdpReadinessStatus(`${readiness.status} / ${readiness.checks.filter((check) => check.status === "passed").length}/${readiness.checks.length}`);
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
         }
         setAuthBoundaryStatus("metadata fallback");
+        setIdpReadinessStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3798,6 +3812,11 @@ function App() {
             <span>Auth Boundary</span>
             <strong>{authBoundaryStatus}</strong>
             <p>Stage/production can require Bearer JWT while DEV/TEST keep configurable bypass for local work.</p>
+          </article>
+          <article className="feature-summary">
+            <span>IdP Readiness</span>
+            <strong>{idpReadinessStatus}</strong>
+            <p>Issuer, audience, JWKS, auth flag and dev bypass are checked before enterprise IdP rehearsal.</p>
           </article>
           <article className="feature-summary">
             <span>Shared Policy</span>

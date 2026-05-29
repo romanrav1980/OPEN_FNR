@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - IdP Readiness Gate</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      .warn { color: #ffd166; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>IdP Readiness Gate</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем gate перед подключением enterprise IdP: auth flag, отключение dev bypass, issuer, audience и
+          JWKS URL. Такой тест нужен, чтобы stage/prod не запускались в полубезопасном режиме и чтобы команда сразу
+          видела недостающие параметры интеграции.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/idp-readiness-gate-admin.png" alt="Admin Console IdP readiness gate" />
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процесса доступа</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Запрашиваем <code>/auth/idp-readiness</code> при неполной настройке.</td>
+              <td>Проверить диагностический blocker для stage.</td>
+              <td>Статус <code>blocked</code>, указаны недостающие checks.</td>
+              <td class="ok">Покрыто тестом.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Запрашиваем readiness при полной issuer/audience/JWKS настройке.</td>
+              <td>Подтвердить критерий готовности к real IdP rehearsal.</td>
+              <td>Статус <code>ready</code>.</td>
+              <td class="ok">Покрыто тестом.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Показываем результат в Admin Console.</td>
+              <td>Дать DevOps/Security быстрый UI-индикатор.</td>
+              <td>Карточка IdP Readiness отображает статус и число passed checks.</td>
+              <td class="warn">На текущем локальном DEV ожидаем fallback или blocked до перезапуска backend с новой версией.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>Targeted auth/quality tests</td><td class="ok">13 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+            <tr><td>Next gate</td><td class="warn">Fill real enterprise IdP values in STAGE and run signed-token smoke.</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

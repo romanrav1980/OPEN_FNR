@@ -361,6 +361,23 @@ Status: completed for RS256/JWKS boundary.
 - Metadata exposes whether signature verification is required.
 - Test evidence: `docs/test-reports/sprint-jwt-jwks-signature/index.html`.
 
+## REAL-IDP-1. IdP Readiness Gate
+
+Status: completed for configuration readiness diagnostics.
+
+### Scope
+
+- expose readiness checks for enterprise IdP connection;
+- verify auth flag, dev bypass, issuer, audience and JWKS configuration;
+- surface readiness in Admin workspace;
+- define the next step for real signed-token rehearsal.
+
+### Current Implementation
+
+- API endpoint: `/auth/idp-readiness`.
+- UI card: `IdP Readiness`.
+- Test evidence: `docs/test-reports/sprint-idp-readiness-gate/index.html`.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.

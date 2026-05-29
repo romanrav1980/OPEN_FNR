@@ -96,6 +96,56 @@ def test_auth_disabled_keeps_context_open() -> None:
     assert response.json()["auth_mode"] == "disabled"
 
 
+def test_idp_readiness_reports_blocked_when_required_settings_are_missing() -> None:
+    original = (
+        auth.settings.auth_enabled,
+        auth.settings.auth_dev_bypass_enabled,
+        auth.settings.runtime_mode,
+        auth.settings.oidc_issuer,
+        auth.settings.oidc_audience,
+        auth.settings.oidc_jwks_url,
+    )
+    auth.settings.auth_enabled = True
+    auth.settings.auth_dev_bypass_enabled = False
+    auth.settings.runtime_mode = "stage"
+    auth.settings.oidc_issuer = ""
+    auth.settings.oidc_audience = "open-fnr-api"
+    auth.settings.oidc_jwks_url = ""
+    try:
+        response = client.get("/auth/idp-readiness")
+    finally:
+        restore_auth_settings(original)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "blocked"
+    assert any(check["check"] == "jwks_configured" and check["status"] == "blocked" for check in payload["checks"])
+
+
+def test_idp_readiness_reports_ready_when_stage_oidc_is_complete() -> None:
+    original = (
+        auth.settings.auth_enabled,
+        auth.settings.auth_dev_bypass_enabled,
+        auth.settings.runtime_mode,
+        auth.settings.oidc_issuer,
+        auth.settings.oidc_audience,
+        auth.settings.oidc_jwks_url,
+    )
+    auth.settings.auth_enabled = True
+    auth.settings.auth_dev_bypass_enabled = False
+    auth.settings.runtime_mode = "stage"
+    auth.settings.oidc_issuer = "https://idp.example.org"
+    auth.settings.oidc_audience = "open-fnr-api"
+    auth.settings.oidc_jwks_url = "https://idp.example.org/.well-known/jwks.json"
+    try:
+        response = client.get("/auth/idp-readiness")
+    finally:
+        restore_auth_settings(original)
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ready"
+
+
 def test_auth_enabled_rejects_api_without_bearer_token() -> None:
     original = (
         auth.settings.auth_enabled,

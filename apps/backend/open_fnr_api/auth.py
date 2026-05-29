@@ -10,6 +10,7 @@ from typing import Callable
 from urllib.request import urlopen
 
 from fastapi import APIRouter, Request
+from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 
@@ -23,6 +24,7 @@ PUBLIC_PATHS = (
     "/docs",
     "/redoc",
     "/openapi.json",
+    "/auth/idp-readiness",
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -35,6 +37,18 @@ class AuthContext:
     roles: tuple[str, ...]
     scopes: tuple[str, ...]
     auth_mode: str
+
+
+class IdpReadinessCheck(BaseModel):
+    check: str
+    status: str
+    detail: str
+
+
+class IdpReadinessReport(BaseModel):
+    status: str
+    runtime_mode: str
+    checks: tuple[IdpReadinessCheck, ...]
 
 
 def is_public_path(path: str) -> bool:
@@ -196,3 +210,39 @@ def get_auth_context(request: Request) -> dict[str, object]:
         "roles": list(context.roles),
         "scopes": list(context.scopes),
     }
+
+
+@router.get("/idp-readiness", response_model=IdpReadinessReport)
+def get_idp_readiness() -> IdpReadinessReport:
+    checks = (
+        IdpReadinessCheck(
+            check="auth_enabled",
+            status="passed" if settings.auth_enabled else "blocked",
+            detail="OPEN_FNR_AUTH_ENABLED must be true in STAGE/PROD.",
+        ),
+        IdpReadinessCheck(
+            check="dev_bypass_disabled",
+            status="passed" if not settings.auth_dev_bypass_enabled else "blocked",
+            detail="OPEN_FNR_AUTH_DEV_BYPASS_ENABLED must be false outside DEV/TEST.",
+        ),
+        IdpReadinessCheck(
+            check="issuer_configured",
+            status="passed" if bool(settings.oidc_issuer) else "blocked",
+            detail="OPEN_FNR_OIDC_ISSUER must match the enterprise IdP issuer.",
+        ),
+        IdpReadinessCheck(
+            check="audience_configured",
+            status="passed" if bool(settings.oidc_audience) else "blocked",
+            detail="OPEN_FNR_OIDC_AUDIENCE must match the OPEN FNR API audience.",
+        ),
+        IdpReadinessCheck(
+            check="jwks_configured",
+            status="passed" if bool(settings.oidc_jwks_url) else "blocked",
+            detail="OPEN_FNR_OIDC_JWKS_URL is required for RS256 signature verification.",
+        ),
+    )
+    return IdpReadinessReport(
+        status="ready" if all(check.status == "passed" for check in checks) else "blocked",
+        runtime_mode=settings.runtime_mode,
+        checks=checks,
+    )
