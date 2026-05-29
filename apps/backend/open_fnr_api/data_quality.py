@@ -172,6 +172,13 @@ SOURCE_CONTRACT_DQ_PLANS: tuple[SourceContractDqPlan, ...] = (
         owner_role="Data Engineer",
     ),
     SourceContractDqPlan(
+        source_system="DWH",
+        contract_name="dwh_sales_history_line",
+        blocking_rules=("required_keys", "date_range_coverage", "known_store_sku", "checksum_match"),
+        warning_rules=("late_arrival", "history_gap"),
+        owner_role="Sales Data Owner",
+    ),
+    SourceContractDqPlan(
         source_system="WMS",
         contract_name="wms_stock_snapshot_line",
         blocking_rules=("required_keys", "non_negative_qty", "available_not_above_on_hand", "known_location_sku"),
@@ -205,6 +212,13 @@ SOURCE_CONTRACT_DQ_PLANS: tuple[SourceContractDqPlan, ...] = (
         blocking_rules=("required_keys", "known_proposal_id", "valid_export_status"),
         warning_rules=("retry_count_high", "missing_external_order_id"),
         owner_role="Integration Owner",
+    ),
+    SourceContractDqPlan(
+        source_system="ERP",
+        contract_name="erp_supplier_term_line",
+        blocking_rules=("required_keys", "known_supplier_sku", "positive_pack_size", "valid_lead_time"),
+        warning_rules=("missing_order_calendar", "large_moq_change"),
+        owner_role="Commercial Data Owner",
     ),
     SourceContractDqPlan(
         source_system="MDM",

@@ -11,8 +11,10 @@ from pydantic import BaseModel, Field
 from .config import settings
 from .data_contracts import SourceBatchManifest
 from .ingestion import (
+    DWH_SALES_HISTORY_MANIFEST,
     ERP_ORDER_STATUS_MANIFEST,
     ERP_PRICES_MANIFEST,
+    ERP_SUPPLIER_TERMS_MANIFEST,
     MDM_PRODUCTS_MANIFEST,
     MDM_STORES_MANIFEST,
     POS_SALES_MANIFEST,
@@ -26,11 +28,13 @@ from .source_adapters import LocalFileDropAdapter, SourceFile
 
 SOURCE_MANIFESTS: tuple[SourceBatchManifest, ...] = (
     POS_SALES_MANIFEST,
+    DWH_SALES_HISTORY_MANIFEST,
     WMS_STOCK_MANIFEST,
     WMS_OPEN_ORDERS_MANIFEST,
     WMS_IN_TRANSIT_MANIFEST,
     ERP_PRICES_MANIFEST,
     ERP_ORDER_STATUS_MANIFEST,
+    ERP_SUPPLIER_TERMS_MANIFEST,
     MDM_PRODUCTS_MANIFEST,
     MDM_STORES_MANIFEST,
     PROMO_PLAN_MANIFEST,

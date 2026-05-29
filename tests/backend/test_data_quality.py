@@ -20,15 +20,17 @@ def test_source_contract_dq_plans_cover_real_ingestion_sources() -> None:
     assert response.status_code == 200
 
     payload = response.json()
-    assert payload["total"] == 9
+    assert payload["total"] == 11
     contracts = {item["contract_name"] for item in payload["items"]}
     assert {
         "pos_sales_line",
+        "dwh_sales_history_line",
         "wms_stock_snapshot_line",
         "wms_open_order_line",
         "wms_in_transit_line",
         "erp_price_line",
         "erp_order_export_status_line",
+        "erp_supplier_term_line",
         "mdm_product_line",
         "mdm_store_line",
         "promo_plan_line",

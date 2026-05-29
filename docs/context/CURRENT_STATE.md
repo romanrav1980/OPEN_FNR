@@ -932,3 +932,36 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/orchestration/test_mdm_reference_ingestion.py tests/orchestration/test_promo_plan_ingestion.py tests/data/test_clickhouse_mdm_schema.py tests/data/test_clickhouse_promo_schema.py tests/data/test_source_contract_freeze.py tests/backend/test_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 501 passed, 1 warning about `.pytest_cache` permissions.
+
+## RI-6 Reconciliation, Retries And Source SLA
+
+- RI-6 completed as operations foundation.
+- Completion note: `docs/context/RI6_COMPLETION.md`.
+- Real integration operations specification added: `REAL_INTEGRATION_OPERATIONS_SPEC.md`.
+- DWH sales history and ERP supplier terms are now included in shadow-load source manifests.
+- Source-contract DQ plans now cover all 11 frozen contracts.
+- Integration operations API added:
+  - `GET /integration/operations/source-readiness`;
+  - `GET /integration/operations/retry-plan`;
+  - `GET /integration/operations/reconciliation`.
+- Source readiness exposes:
+  - owner role;
+  - source SLA label;
+  - blocker and warning counts;
+  - retry flag;
+  - recovery action;
+  - idempotency key.
+- Retry plan uses `same_idempotency_key_no_duplicate_clean_rows`.
+- Reconciliation summary exposes:
+  - reconciliation keys;
+  - downstream blockers;
+  - per-contract status.
+- Tests added/updated:
+  - `tests/backend/test_integration_operations.py`;
+  - `tests/backend/test_data_quality.py`;
+  - `tests/backend/test_dq_execution.py`;
+  - `tests/backend/test_shadow_gate.py`.
+  - `tests/backend/test_pilot_fixtures.py`.
+- Verification:
+  - `pytest tests/backend/test_integration_operations.py tests/backend/test_data_quality.py tests/backend/test_dq_execution.py tests/backend/test_shadow_gate.py tests/backend/test_daily_pipeline.py tests/backend/test_pilot_fixtures.py tests/backend/test_ingestion.py tests/data/test_source_contract_freeze.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 43 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 506 passed, 1 warning about `.pytest_cache` permissions.

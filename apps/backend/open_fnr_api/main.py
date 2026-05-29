@@ -39,6 +39,7 @@ from .supplier_collaboration import router as supplier_collaboration_router
 from .supplement_governance import router as supplement_governance_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
+from .integration_operations import router as integration_operations_router
 from .kpi import router as kpi_router
 from .lifecycle import router as lifecycle_router
 from .marts import router as marts_router
@@ -60,6 +61,7 @@ app.add_middleware(AuthMiddleware)
 
 app.include_router(auth_router)
 app.include_router(ingestion_router)
+app.include_router(integration_operations_router)
 app.include_router(clean_publication_router)
 app.include_router(adjustments_router)
 app.include_router(audit_router)
@@ -136,6 +138,7 @@ def metadata() -> dict[str, object]:
             "capacity",
             "clean-publication",
             "data-ingestion",
+            "integration-operations",
             "data-quality",
             "daily-pipeline",
             "production-data-scale",

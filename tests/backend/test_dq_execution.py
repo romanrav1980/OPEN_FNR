@@ -15,8 +15,8 @@ def test_source_contract_dq_blocks_missing_files(tmp_path) -> None:
     result = run_source_contract_dq(report)
 
     assert result.status == "blocked"
-    assert result.total_contracts == 9
-    assert result.blocker_count == 9
+    assert result.total_contracts == len(SOURCE_MANIFESTS)
+    assert result.blocker_count == len(SOURCE_MANIFESTS)
     assert all(item.status == "blocked" for item in result.results)
 
 
@@ -50,5 +50,5 @@ def test_source_contract_dq_api_runs_against_landing_path(tmp_path) -> None:
 
     payload = response.json()
     assert payload["status"] == "blocked"
-    assert payload["blocker_count"] == 9
+    assert payload["blocker_count"] == len(SOURCE_MANIFESTS)
     assert payload["results"][0]["severity"] == "blocker"

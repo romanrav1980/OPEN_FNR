@@ -45,6 +45,7 @@ class ShadowLoadGateResponse(BaseModel):
 def owner_role_for_source(source_system: str) -> str:
     return {
         "POS": "Data Engineer",
+        "DWH": "Sales Data Owner",
         "WMS": "Supply Chain Data Owner",
         "ERP": "Integration Owner",
         "MDM": "MDM Data Owner",

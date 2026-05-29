@@ -22,8 +22,8 @@ def test_shadow_load_gate_creates_recovery_tasks_for_missing_files(tmp_path) -> 
     payload = response.json()
     assert payload["status"] == "recovery_required"
     assert payload["process_instance_id"] == "proc-shadow-load-2026-05-28"
-    assert payload["report"]["missing_contracts"] == 9
-    assert len(payload["recovery_tasks"]) == 9
+    assert payload["report"]["missing_contracts"] == 11
+    assert len(payload["recovery_tasks"]) == 11
     assert {task["case_key"] for task in payload["recovery_tasks"]} == {"source_batch_recovery_case"}
     assert payload["audit_recorded"] is True
 
@@ -31,11 +31,13 @@ def test_shadow_load_gate_creates_recovery_tasks_for_missing_files(tmp_path) -> 
 def test_shadow_load_gate_is_ready_when_all_files_are_present(tmp_path) -> None:
     contracts = (
         ("pos", "pos_sales_line"),
+        ("dwh", "dwh_sales_history_line"),
         ("wms", "wms_stock_snapshot_line"),
         ("wms", "wms_open_order_line"),
         ("wms", "wms_in_transit_line"),
         ("erp", "erp_price_line"),
         ("erp", "erp_order_export_status_line"),
+        ("erp", "erp_supplier_term_line"),
         ("mdm", "mdm_product_line"),
         ("mdm", "mdm_store_line"),
         ("promo", "promo_plan_line"),
@@ -64,11 +66,13 @@ def test_shadow_load_gate_is_ready_when_all_files_are_present(tmp_path) -> None:
 def test_shadow_load_gate_creates_dq_recovery_tasks_when_dq_blocks_after_discovery(tmp_path) -> None:
     contracts = (
         ("pos", "pos_sales_line"),
+        ("dwh", "dwh_sales_history_line"),
         ("wms", "wms_stock_snapshot_line"),
         ("wms", "wms_open_order_line"),
         ("wms", "wms_in_transit_line"),
         ("erp", "erp_price_line"),
         ("erp", "erp_order_export_status_line"),
+        ("erp", "erp_supplier_term_line"),
         ("mdm", "mdm_product_line"),
         ("mdm", "mdm_store_line"),
         ("promo", "promo_plan_line"),
@@ -91,7 +95,7 @@ def test_shadow_load_gate_creates_dq_recovery_tasks_when_dq_blocks_after_discove
     payload = response.json()
     assert payload["status"] == "recovery_required"
     assert payload["report"]["missing_contracts"] == 0
-    assert len(payload["recovery_tasks"]) == 9
+    assert len(payload["recovery_tasks"]) == 11
     assert {task["reason"] for task in payload["recovery_tasks"]} == {"dq_blocker"}
     assert payload["recovery_tasks"][0]["available_actions"] == [
         "fix_source",
@@ -103,6 +107,7 @@ def test_shadow_load_gate_creates_dq_recovery_tasks_when_dq_blocks_after_discove
 
 def test_recovery_task_owner_routing_is_source_specific() -> None:
     assert shadow_gate.owner_role_for_source("POS") == "Data Engineer"
+    assert shadow_gate.owner_role_for_source("DWH") == "Sales Data Owner"
     assert shadow_gate.owner_role_for_source("WMS") == "Supply Chain Data Owner"
     assert shadow_gate.owner_role_for_source("ERP") == "Integration Owner"
     assert shadow_gate.owner_role_for_source("MDM") == "MDM Data Owner"
