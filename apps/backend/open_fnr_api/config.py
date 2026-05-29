@@ -80,6 +80,8 @@ class Settings(BaseModel):
         le=300,
     )
     landing_root_path: str = Field(default_factory=lambda: env_str("LANDING_ROOT_PATH", "data/landing"))
+    backup_root_path: str = Field(default_factory=lambda: env_str("BACKUP_ROOT_PATH", "backups/open_fnr"))
+    backup_retention_days: int = Field(default_factory=lambda: env_int("BACKUP_RETENTION_DAYS", 14), ge=1)
     process_artifacts_root_path: str = Field(default_factory=lambda: env_str("PROCESS_ARTIFACTS_ROOT_PATH", "processes"))
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     allowed_environments: tuple[str, ...] = Field(

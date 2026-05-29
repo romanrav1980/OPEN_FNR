@@ -18,6 +18,8 @@ Backend runtime supports both a shared `OPEN_FNR_SERVICE_HOST` for local host ac
 
 Audit retention is controlled by `OPEN_FNR_AUDIT_RETENTION_DAYS`. Business-process event audit remains enabled by default through `OPEN_FNR_AUDIT_ENABLED=true`.
 
+Backup and restore smoke configuration is controlled by `OPEN_FNR_BACKUP_ROOT_PATH` and `OPEN_FNR_BACKUP_RETENTION_DAYS`. Restore scripts must use dedicated restore database settings and must not infer network addresses, host names or ports from local defaults.
+
 External integration endpoints must also be configured, not embedded in code. Outbound publication uses:
 
 - `OPEN_FNR_ERP_EXPORT_URL`;
@@ -82,6 +84,7 @@ The following files may contain default local development addresses because they
 - Business process audit must be controlled by `OPEN_FNR_AUDIT_ENABLED`; default is enabled.
 - Authentication must be controlled by `OPEN_FNR_AUTH_ENABLED`; DEV/TEST bypass must be controlled by `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED` and disabled in STAGE/PROD configuration.
 - Source file landing paths must be controlled by `OPEN_FNR_LANDING_ROOT_PATH`; source adapters must not hardcode local paths.
+- Backup artifact paths and retention must be controlled by `OPEN_FNR_BACKUP_ROOT_PATH` and `OPEN_FNR_BACKUP_RETENTION_DAYS`; restore smoke must require an explicit execute mode and dedicated restore database variables.
 - Process artifact deployment paths must be controlled by `OPEN_FNR_PROCESS_ARTIFACTS_ROOT_PATH`; Flowable deployment packaging must not hardcode environment-specific paths.
 - Flowable runtime upload must use configured `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_FLOWABLE_PORT`, `OPEN_FNR_FLOWABLE_HTTP_TIMEOUT_SECONDS`, `OPEN_FNR_FLOWABLE_REST_USERNAME` and `OPEN_FNR_FLOWABLE_REST_PASSWORD`; UI and API dry runs must not perform network upload unless `execute=true`.
 - DEV/TEST may use explicit Flowable image credentials in `.env.example`; STAGE/PROD must inject runtime credentials from secrets and keep `OPEN_FNR_FLOWABLE_REST_PASSWORD` out of committed environment files.

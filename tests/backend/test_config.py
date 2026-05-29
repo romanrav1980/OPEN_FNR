@@ -71,9 +71,16 @@ def test_audit_is_enabled_by_default_and_can_be_disabled() -> None:
 
 
 def test_landing_root_path_is_configurable() -> None:
-    settings = Settings(landing_root_path="custom/landing", process_artifacts_root_path="custom/processes")
+    settings = Settings(
+        landing_root_path="custom/landing",
+        backup_root_path="custom/backups",
+        backup_retention_days=21,
+        process_artifacts_root_path="custom/processes",
+    )
 
     assert settings.landing_root_path == "custom/landing"
+    assert settings.backup_root_path == "custom/backups"
+    assert settings.backup_retention_days == 21
     assert settings.process_artifacts_root_path == "custom/processes"
 
 

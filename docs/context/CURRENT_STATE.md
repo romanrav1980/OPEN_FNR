@@ -762,3 +762,33 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Runbook added: `docs/runbooks/AUDIT_RETENTION_RUNBOOK.md`.
 - Verification:
   - `pytest tests/backend/test_audit.py tests/backend/test_repositories.py tests/data/test_postgres_operational_schema.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 17 passed, 1 warning about `.pytest_cache` permissions.
+
+## IH-4 Backup Restore Smoke
+
+- IH-4 completed.
+- Completion note: `docs/context/IH4_COMPLETION.md`.
+- Backup/restore configuration added:
+  - `OPEN_FNR_BACKUP_ROOT_PATH`;
+  - `OPEN_FNR_BACKUP_RETENTION_DAYS`;
+  - ClickHouse database/user/password entries in `.env.example`.
+- Line ending policy updated: PowerShell scripts now use UTF-8/LF through `.gitattributes`.
+- Backup smoke script:
+  - `scripts/dev/backup-smoke.ps1`;
+  - default `plan` mode;
+  - explicit `execute` mode;
+  - PostgreSQL dump checksum;
+  - ClickHouse backup command through configured database and backup disk.
+- Restore smoke script:
+  - `scripts/dev/restore-smoke.ps1`;
+  - default `plan` mode;
+  - explicit `execute` mode;
+  - mandatory backup manifest path;
+  - dedicated restore database variables;
+  - checksum validation before restore.
+- Runbook added: `docs/runbooks/BACKUP_RESTORE_RUNBOOK.md`.
+- Tests added:
+  - `tests/scripts/test_backup_restore_scripts.py`.
+- Verification:
+  - `pytest tests/scripts/test_backup_restore_scripts.py tests/backend/test_config.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 15 passed, 1 warning about `.pytest_cache` permissions.
+  - `backup-smoke.ps1 -Mode plan` and `restore-smoke.ps1 -Mode plan` passed through process-level PowerShell execution policy bypass.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 489 passed, 1 warning about `.pytest_cache` permissions.
