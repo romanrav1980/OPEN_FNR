@@ -454,6 +454,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 
 - Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
 - Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=true` by default.
+- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL` and `OPEN_FNR_AUTO_ORDER_EXPORT_URL`.
 - Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Audit API: `apps/backend/open_fnr_api/audit.py`.
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.
