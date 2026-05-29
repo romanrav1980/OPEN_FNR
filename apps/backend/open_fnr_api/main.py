@@ -31,6 +31,7 @@ from .procurement import router as procurement_router
 from .publication import router as publication_router
 from .release_gate import router as release_gate_router
 from .replenishment import router as replenishment_router
+from .replenishment_optimization import router as replenishment_optimization_router
 from .replenishment_scale import router as replenishment_scale_router
 from .security import router as security_router
 from .shelf_space import router as shelf_space_router
@@ -92,6 +93,7 @@ app.include_router(process_deployment_router)
 app.include_router(process_governance_router)
 app.include_router(process_navigator_router)
 app.include_router(replenishment_router)
+app.include_router(replenishment_optimization_router)
 app.include_router(replenishment_scale_router)
 app.include_router(kpi_router)
 app.include_router(lifecycle_router)
@@ -157,6 +159,7 @@ def metadata() -> dict[str, object]:
             "promo",
             "procurement",
             "replenishment",
+            "replenishment-optimization",
             "replenishment-scale",
             "release-gate",
             "multi-echelon",

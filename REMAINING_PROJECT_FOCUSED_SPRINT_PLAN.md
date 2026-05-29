@@ -57,7 +57,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | Completed foundation |
 | ML-2 | Forecast Training And Retraining | Regular/promo model training and scheduled retraining | Completed foundation |
 | ML-3 | Champion Challenger And Drift | Model registry, shadow, drift, rollback and fallback controls | Completed foundation |
-| ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | ML-2, RI-6 |
+| ML-4 | Replenishment Optimization Production | Demand projection, safety stock, order proposals on real data | Completed foundation |
 | ML-5 | EPYC Performance Gate | Production-scale forecast/replenishment runtime validation | ML-4 |
 | DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | IH-2 |
 | DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | DEP-1 |
@@ -640,6 +640,12 @@ Acceptance criteria:
 
 - replenishment produces explainable order proposals for pilot scope;
 - no order export happens without approval gate.
+
+Completion checkpoint:
+
+- ML-4 foundation scope is fixed in `ML_REPLENISHMENT_OPTIMIZATION_SPEC.md`;
+- backend exposes service-level targets, replenishment optimization run and export readiness gate;
+- automated tests cover ABC/XYZ targets, safety stock formula, source/projection/order blockers and business impacts.
 
 ### ML-5. EPYC Performance Gate
 

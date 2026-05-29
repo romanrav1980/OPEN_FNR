@@ -1196,3 +1196,20 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_ml_lifecycle_governance.py tests/backend/test_ml_training_jobs.py tests/backend/test_ml_training.py tests/backend/test_ml_models.py tests/backend/test_ml_governance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 26 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 554 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after ML-3: 10 sprints (`ML-4..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## ML-4 Replenishment Optimization Production
+
+- ML-4 completed as replenishment optimization foundation.
+- Completion note: `docs/context/ML4_COMPLETION.md`.
+- Specification added: `ML_REPLENISHMENT_OPTIMIZATION_SPEC.md`.
+- Backend added:
+  - `apps/backend/open_fnr_api/replenishment_optimization.py`;
+  - `/replenishment/optimization/service-level-targets`;
+  - `/replenishment/optimization/runs`;
+  - `/replenishment/optimization/runs/{run_id}/gate`.
+- Tests added:
+  - `tests/backend/test_replenishment_optimization.py`.
+- Verification:
+  - `pytest tests/backend/test_replenishment_optimization.py tests/backend/test_replenishment.py tests/backend/test_replenishment_scale.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 31 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 559 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after ML-4: 9 sprints (`ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
