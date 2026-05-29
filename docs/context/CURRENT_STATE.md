@@ -1105,3 +1105,22 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `npm.cmd run build` in `apps/frontend` -> passed.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 532 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after UI-3: 15 sprints (`UI-4..UI-5`, `ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## UI-4 Security, Admin And Process UI
+
+- UI-4 completed as security/admin/process UI foundation.
+- Completion note: `docs/context/UI4_COMPLETION.md`.
+- Specification added: `UI_SECURITY_ADMIN_PROCESS_SPEC.md`.
+- Frontend updated:
+  - added service account and access review tables to Admin Console;
+  - wired `/security/service-accounts` and `/security/access-review/report` through `apiUrl(...)`;
+  - kept Process Engine task inbox and process deployment quality gates visible.
+- Tests added:
+  - `tests/frontend/test_ui_security_admin_process.py`.
+- Evidence report:
+  - `docs/test-reports/sprint-ui-4-security-admin-process/index.html`.
+- Verification:
+  - `pytest tests/frontend/test_ui_security_admin_process.py tests/frontend/test_ui_integration_data_quality.py tests/frontend/test_ui_forecast_replenishment_workbenches.py tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 21 passed, 1 warning about `.pytest_cache` permissions.
+  - `npm.cmd run build` in `apps/frontend` -> passed.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 537 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after UI-4: 14 sprints (`UI-5`, `ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).

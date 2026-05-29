@@ -52,7 +52,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | UI-1 | Routed Application Foundation | React Router, feature pages and API client | Completed foundation |
 | UI-2 | Forecast And Replenishment Workbenches | Real API-backed forecast/order workflows | Completed foundation |
 | UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | Completed foundation |
-| UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | UI-1, SEC-4 |
+| UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | Completed foundation |
 | UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | UI-2..UI-4 |
 | ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | RI-6 |
 | ML-2 | Forecast Training And Retraining | Regular/promo model training and scheduled retraining | ML-1 |
@@ -498,6 +498,14 @@ Acceptance criteria:
 
 - admin workflows do not require manual DB edits;
 - access and process actions are traceable.
+
+Completion checkpoint:
+
+- UI-4 foundation scope is fixed in `UI_SECURITY_ADMIN_PROCESS_SPEC.md`;
+- Admin Console displays users, access requests, service accounts and access review evidence from Security API;
+- Process Engine Task Inbox and process deployment cards expose task audit, deployability, runtime strategy and BPMN quality gates;
+- static frontend tests cover RBAC, service account, access review and process governance context;
+- sprint evidence report is stored in `docs/test-reports/sprint-ui-4-security-admin-process/index.html`.
 
 ### UI-5. UI E2E Visual Accessibility Suite
 

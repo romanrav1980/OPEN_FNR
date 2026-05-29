@@ -463,6 +463,48 @@ type AccessRequestApiItem = {
   approver_role: string;
 };
 
+type ServiceAccountRow = {
+  account: string;
+  purpose: string;
+  scopes: string;
+  owner: string;
+  rotation: string;
+};
+
+type ServiceAccountApiItem = {
+  account_id: string;
+  purpose: string;
+  scopes: string[];
+  owner_role: string;
+  secret_rotation_days: number;
+};
+
+type AccessReviewRow = {
+  user: string;
+  roles: string;
+  status: string;
+  recommendation: string;
+  evidence: string;
+};
+
+type AccessReviewApiItem = {
+  email: string;
+  roles: string[];
+  status: string;
+  recommendation: string;
+  evidence: string[];
+};
+
+type AccessReviewApiResponse = {
+  review_id: string;
+  status: string;
+  reviewer_role: string;
+  total_users: number;
+  excessive_access_count: number;
+  inactive_access_count: number;
+  items: AccessReviewApiItem[];
+};
+
 type PublicationPackageRow = {
   id: string;
   target: string;
@@ -1339,6 +1381,23 @@ const securityUsers: SecurityUserRow[] = [
   { user: "viewer@example.org", roles: "Viewer", regions: "north", categories: "fresh", status: "active" },
 ];
 
+const serviceAccountRows: ServiceAccountRow[] = [
+  {
+    account: "svc-airflow-export",
+    purpose: "Airflow export to DWH and ERP configured targets",
+    scopes: "forecast:read, publication:write",
+    owner: "Admin",
+    rotation: "90 days",
+  },
+  {
+    account: "svc-open-fnr-idp-provisioning",
+    purpose: "Provision approved access requests in configured IdP or IAM target",
+    scopes: "security:provision, users:write",
+    owner: "Admin",
+    rotation: "60 days",
+  },
+];
+
 const accessRequests: AccessRequestRow[] = [
   {
     id: "access-20260528-001",
@@ -1347,6 +1406,23 @@ const accessRequests: AccessRequestRow[] = [
     regions: "north",
     status: "requested",
     approver: "Security Owner",
+  },
+];
+
+const accessReviewRows: AccessReviewRow[] = [
+  {
+    user: "admin@example.org",
+    roles: "Admin",
+    status: "review_required",
+    recommendation: "confirm privileged access before pilot",
+    evidence: "admin role, all regions, all categories",
+  },
+  {
+    user: "viewer@example.org",
+    roles: "Viewer",
+    status: "ok",
+    recommendation: "keep",
+    evidence: "limited region/category scope",
   },
 ];
 
@@ -1959,6 +2035,11 @@ function App() {
   const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
+  const [runtimeServiceAccounts, setRuntimeServiceAccounts] =
+    React.useState<ServiceAccountRow[]>(serviceAccountRows);
+  const [accessReviewStatus, setAccessReviewStatus] = React.useState("loading");
+  const [runtimeAccessReviewRows, setRuntimeAccessReviewRows] =
+    React.useState<AccessReviewRow[]>(accessReviewRows);
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimePublicationPackages, setRuntimePublicationPackages] =
     React.useState<PublicationPackageRow[]>(publicationPackages);
@@ -2345,17 +2426,23 @@ function App() {
     Promise.all([
       fetch(apiUrl("/security/users?actor_role=Admin"), { signal: controller.signal }),
       fetch(apiUrl("/security/access-requests?actor_role=Security%20Owner"), { signal: controller.signal }),
+      fetch(apiUrl("/security/service-accounts?actor_role=Admin"), { signal: controller.signal }),
+      fetch(apiUrl("/security/access-review/report?business_date=2026-05-29&actor_role=Security%20Owner"), {
+        signal: controller.signal,
+      }),
     ])
-      .then(([usersResponse, requestsResponse]) => {
-        if (!usersResponse.ok || !requestsResponse.ok) {
+      .then(([usersResponse, requestsResponse, serviceResponse, reviewResponse]) => {
+        if (!usersResponse.ok || !requestsResponse.ok || !serviceResponse.ok || !reviewResponse.ok) {
           throw new Error("Security API returned an error");
         }
         return Promise.all([
           usersResponse.json() as Promise<{ items: SecurityUserApiItem[] }>,
           requestsResponse.json() as Promise<{ items: AccessRequestApiItem[] }>,
+          serviceResponse.json() as Promise<{ items: ServiceAccountApiItem[] }>,
+          reviewResponse.json() as Promise<AccessReviewApiResponse>,
         ]);
       })
-      .then(([users, requests]) => {
+      .then(([users, requests, serviceAccounts, accessReview]) => {
         setRuntimeSecurityUsers(
           users.items.map((user) => ({
             user: user.email,
@@ -2375,6 +2462,27 @@ function App() {
             approver: request.approver_role,
           })),
         );
+        setRuntimeServiceAccounts(
+          serviceAccounts.items.map((account) => ({
+            account: account.account_id,
+            purpose: account.purpose,
+            scopes: account.scopes.join(", "),
+            owner: account.owner_role,
+            rotation: `${account.secret_rotation_days} days`,
+          })),
+        );
+        setAccessReviewStatus(
+          `${accessReview.status} / ${accessReview.total_users} users / excessive ${accessReview.excessive_access_count}`,
+        );
+        setRuntimeAccessReviewRows(
+          accessReview.items.map((item) => ({
+            user: item.email,
+            roles: item.roles.join(", "),
+            status: item.status,
+            recommendation: item.recommendation,
+            evidence: item.evidence.join(", "),
+          })),
+        );
         setSecurityApiStatus("live");
       })
       .catch((error: unknown) => {
@@ -2382,6 +2490,7 @@ function App() {
           return;
         }
         setSecurityApiStatus("fallback");
+        setAccessReviewStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -5192,6 +5301,11 @@ function App() {
             <p>Role, service account and object-scope decisions use shared backend policy helpers.</p>
           </article>
           <article className="feature-summary">
+            <span>Access Review</span>
+            <strong>{accessReviewStatus}</strong>
+            <p>Security Owner reviews privileged, inactive and excessive access before pilot go/no-go.</p>
+          </article>
+          <article className="feature-summary">
             <span>Process Deployment</span>
             <strong>{processDeploymentStatus}</strong>
             <p>BPMN, DMN and CMMN artifacts are packaged with SHA-256 checksums for Flowable deployment.</p>
@@ -5250,6 +5364,30 @@ function App() {
           <table>
             <thead>
               <tr>
+                <th>Service account</th>
+                <th>Purpose</th>
+                <th>Scopes</th>
+                <th>Owner</th>
+                <th>Secret rotation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runtimeServiceAccounts.map((row) => (
+                <tr key={row.account}>
+                  <td>{row.account}</td>
+                  <td>{row.purpose}</td>
+                  <td>{row.scopes}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.rotation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
                 <th>Request</th>
                 <th>User</th>
                 <th>Requested role</th>
@@ -5267,6 +5405,30 @@ function App() {
                   <td>{row.regions}</td>
                   <td>{row.status}</td>
                   <td>{row.approver}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th>Recommendation</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runtimeAccessReviewRows.map((row) => (
+                <tr key={`${row.user}-${row.roles}`}>
+                  <td>{row.user}</td>
+                  <td>{row.roles}</td>
+                  <td>{row.status}</td>
+                  <td>{row.recommendation}</td>
+                  <td>{row.evidence}</td>
                 </tr>
               ))}
             </tbody>
