@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from open_fnr_api.data_contracts import (
     ErpPriceLine,
+    DwhSalesHistoryLine,
     MdmProductLine,
     MdmStoreLine,
     PosSalesLine,
@@ -57,6 +58,32 @@ def test_pos_sales_line_accepts_returns_but_rejects_zero_quantity() -> None:
             store_id="S001",
             sku_id="SKU001",
             sales_qty=0,
+            gross_amount=100,
+            net_amount=100,
+        )
+
+
+def test_dwh_sales_history_rejects_negative_sales_quantity() -> None:
+    DwhSalesHistoryLine(
+        history_id="H001",
+        business_date=date(2026, 5, 28),
+        store_id="S001",
+        sku_id="SKU001",
+        sales_qty=3,
+        gross_amount=300,
+        net_amount=270,
+        discount_amount=30,
+        receipt_count=2,
+        return_qty=0,
+    )
+
+    with pytest.raises(ValidationError):
+        DwhSalesHistoryLine(
+            history_id="H002",
+            business_date=date(2026, 5, 28),
+            store_id="S001",
+            sku_id="SKU001",
+            sales_qty=-1,
             gross_amount=100,
             net_amount=100,
         )

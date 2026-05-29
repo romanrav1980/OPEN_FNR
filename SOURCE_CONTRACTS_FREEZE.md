@@ -32,6 +32,7 @@ The frozen baseline is machine-checkable through:
 | Source | Contract | Model | Primary key | Business owner | Technical owner | Required for |
 | --- | --- | --- | --- | --- | --- | --- |
 | POS | `pos_sales_line` | `PosSalesLine` | `receipt_id`, `line_id` | Sales Data Owner | Data Engineering | regular forecast, promo forecast, demand projection |
+| DWH | `dwh_sales_history_line` | `DwhSalesHistoryLine` | `history_id` | Sales Data Owner | Data Engineering | training history, backtesting, regular forecast, promo forecast |
 | WMS | `wms_stock_snapshot_line` | `WmsStockSnapshotLine` | `snapshot_id`, `location_id`, `sku_id` | Supply Chain Data Owner | Data Engineering | projected stock, replenishment, true inventory |
 | WMS | `wms_open_order_line` | `WmsOpenOrderLine` | `order_id`, `line_id` | Supply Chain Data Owner | Data Engineering | projected stock, replenishment, multi-echelon |
 | WMS | `wms_in_transit_line` | `WmsInTransitLine` | `shipment_id`, `line_id` | Supply Chain Data Owner | Data Engineering | projected stock, replenishment, capacity |
@@ -46,6 +47,7 @@ The frozen baseline is machine-checkable through:
 | Contract | SLA label | Blocking checks |
 | --- | --- | --- |
 | `pos_sales_line` | `before_forecast_cutoff` | schema, row count, checksum, duplicates, referential integrity, freshness |
+| `dwh_sales_history_line` | `before_backtesting_cutoff` | schema, row count, checksum, duplicates, referential integrity, date range |
 | `wms_stock_snapshot_line` | `before_replenishment_cutoff` | schema, row count, checksum, duplicates, referential integrity, freshness, negative stock |
 | `wms_open_order_line` | `before_replenishment_cutoff` | schema, row count, checksum, duplicates, referential integrity, date order |
 | `wms_in_transit_line` | `before_replenishment_cutoff` | schema, row count, checksum, duplicates, referential integrity, date order |
@@ -57,13 +59,13 @@ The frozen baseline is machine-checkable through:
 
 ## 5. DWH Scope
 
-DWH is treated as a historical source during RI-1 freeze. Its pilot role is to provide validated historical extracts aligned to the same canonical contracts:
+DWH is treated as a historical source during RI-1 freeze and RI-2 implementation. Its pilot role is to provide validated historical extracts aligned to the same canonical sales semantics:
 
-- sales history maps to `pos_sales_line` or clean sales daily outputs;
+- sales history is frozen as `dwh_sales_history_line`;
 - historical prices map to `erp_price_line` where ERP backfill is incomplete;
 - historical promo facts map to `promo_plan_line` and downstream promo backtesting marts.
 
-DWH-specific ingestion implementation is deferred to RI-2 because the frozen baseline already defines the canonical objects and reconciliation keys.
+DWH-specific sales history ingestion is implemented in RI-2 through `orchestration/airflow/dags/dwh_sales_history_ingestion.py` and `open_fnr.raw_dwh_sales_history`.
 
 ## 6. Acceptance Criteria
 

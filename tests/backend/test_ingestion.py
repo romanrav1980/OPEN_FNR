@@ -73,6 +73,18 @@ def test_pos_sales_manifest_exposes_idempotency_checksum_and_landing_uri() -> No
     assert "business_date=2026-05-28" in manifest["landed_uri"]
 
 
+def test_dwh_sales_history_manifest_exposes_training_history_source() -> None:
+    response = client.get("/data/ingestion/manifests/dwh-sales-history")
+    assert response.status_code == 200
+
+    manifest = response.json()
+    assert manifest["source_system"] == "DWH"
+    assert manifest["contract_name"] == "dwh_sales_history_line"
+    assert manifest["contract_version"] == "v1"
+    assert manifest["idempotency_key"] == "DWH:dwh_sales_history_line:v1:2026-05-28"
+    assert manifest["checksum"].startswith("sha256:")
+
+
 def test_wms_manifests_expose_projected_stock_inputs() -> None:
     endpoints = {
         "wms-stock": "wms_stock_snapshot_line",
@@ -141,9 +153,9 @@ def test_ingestion_readiness_summarizes_all_real_sources() -> None:
 
     payload = response.json()
     assert payload["status"] == "ready_for_shadow_load"
-    assert payload["ready_count"] == payload["total"] == 5
+    assert payload["ready_count"] == payload["total"] == 6
     sources = {pipeline["source_system"] for pipeline in payload["pipelines"]}
-    assert sources == {"POS", "WMS", "ERP", "MDM", "PROMO"}
+    assert sources == {"POS", "DWH", "WMS", "ERP", "MDM", "PROMO"}
     promo = next(pipeline for pipeline in payload["pipelines"] if pipeline["source_system"] == "PROMO")
     assert "overlap_dq" in promo["blocking_gates"]
     assert "display_capacity_dq" in promo["blocking_gates"]

@@ -836,3 +836,34 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/backend/test_ingestion.py tests/data/test_contract_validation.py tests/data/test_source_contract_freeze.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 492 passed, 1 warning about `.pytest_cache` permissions.
+
+## RI-2 POS And DWH Sales Ingestion
+
+- RI-2 completed as ingestion foundation.
+- Completion note: `docs/context/RI2_COMPLETION.md`.
+- POS daily sales ingestion foundation remains active:
+  - `PosSalesLine`;
+  - `pos_sales_line`;
+  - `orchestration/airflow/dags/pos_sales_ingestion.py`;
+  - `open_fnr.raw_pos_sales_lines`.
+- DWH sales history ingestion foundation added:
+  - `DwhSalesHistoryLine`;
+  - `dwh_sales_history_line`;
+  - `GET /data/ingestion/manifests/dwh-sales-history`;
+  - `orchestration/airflow/dags/dwh_sales_history_ingestion.py`;
+  - `open_fnr.raw_dwh_sales_history`.
+- Source readiness now includes DWH as first-class source for:
+  - training history;
+  - backtesting;
+  - regular forecast;
+  - promo forecast.
+- `SOURCE_CONTRACTS_FREEZE.md` updated with DWH sales history row and SLA/DQ gates.
+- Tests added/updated:
+  - `tests/orchestration/test_dwh_sales_history_ingestion.py`;
+  - `tests/data/test_clickhouse_pos_sales_schema.py`;
+  - `tests/data/test_contract_validation.py`;
+  - `tests/backend/test_ingestion.py`;
+  - `tests/data/test_source_contract_freeze.py`.
+- Verification:
+  - `pytest tests/backend/test_ingestion.py tests/data/test_contract_validation.py tests/data/test_source_contract_freeze.py tests/data/test_clickhouse_pos_sales_schema.py tests/orchestration/test_pos_sales_ingestion.py tests/orchestration/test_dwh_sales_history_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 33 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 496 passed, 1 warning about `.pytest_cache` permissions.

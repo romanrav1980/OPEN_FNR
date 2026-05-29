@@ -165,6 +165,20 @@ class PosSalesLine(BaseModel):
         return value
 
 
+class DwhSalesHistoryLine(BaseModel):
+    history_id: str = Field(min_length=1, max_length=128)
+    business_date: date
+    store_id: str = Field(min_length=1, max_length=64)
+    sku_id: str = Field(min_length=1, max_length=64)
+    sales_qty: float = Field(ge=0)
+    gross_amount: float = Field(ge=0)
+    net_amount: float = Field(ge=0)
+    discount_amount: float = Field(default=0, ge=0)
+    receipt_count: int = Field(default=0, ge=0)
+    return_qty: float = Field(default=0, ge=0)
+    source_system: str = Field(default="DWH", min_length=1, max_length=64)
+
+
 class WmsStockSnapshotLine(BaseModel):
     snapshot_id: str = Field(min_length=1, max_length=128)
     snapshot_at: datetime
@@ -319,6 +333,7 @@ SCHEMA_REGISTRY: dict[DataDomain, type[BaseModel]] = {
 
 SOURCE_CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "pos_sales_line": PosSalesLine,
+    "dwh_sales_history_line": DwhSalesHistoryLine,
     "wms_stock_snapshot_line": WmsStockSnapshotLine,
     "wms_open_order_line": WmsOpenOrderLine,
     "wms_in_transit_line": WmsInTransitLine,
@@ -344,6 +359,21 @@ SOURCE_CONTRACT_REGISTRY: tuple[SourceContractDefinition, ...] = (
         reconciliation_keys=("business_date", "store_id", "sku_id"),
         required_for=("regular_forecast", "promo_forecast", "demand_projection"),
         blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "freshness"),
+    ),
+    SourceContractDefinition(
+        source_system="DWH",
+        contract_name="dwh_sales_history_line",
+        model_name="DwhSalesHistoryLine",
+        primary_key=("history_id",),
+        required_fields=("history_id", "business_date", "store_id", "sku_id", "sales_qty", "net_amount"),
+        business_owner_role="Sales Data Owner",
+        technical_owner_role="Data Engineering",
+        source_sla="before_backtesting_cutoff",
+        freshness_field="business_date",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("business_date", "store_id", "sku_id"),
+        required_for=("training_history", "backtesting", "regular_forecast", "promo_forecast"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "date_range"),
     ),
     SourceContractDefinition(
         source_system="WMS",

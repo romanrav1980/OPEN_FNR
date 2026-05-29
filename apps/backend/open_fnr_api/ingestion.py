@@ -101,6 +101,18 @@ POS_SALES_MANIFEST = SourceBatchManifest(
     landed_uri="s3-compatible://open-fnr-landing/pos/business_date=2026-05-28/pos-sales.parquet",
 )
 
+DWH_SALES_HISTORY_MANIFEST = SourceBatchManifest(
+    batch_id="dwh-sales-history-2026-05-28-v1",
+    source_system="DWH",
+    contract_name="dwh_sales_history_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=960_000_000,
+    checksum="sha256:dwh-sales-history-20260528-v1",
+    idempotency_key="DWH:dwh_sales_history_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/dwh/sales_history/business_date=2026-05-28/dwh-sales-history.parquet",
+)
+
 WMS_STOCK_MANIFEST = SourceBatchManifest(
     batch_id="wms-stock-2026-05-28-v1",
     source_system="WMS",
@@ -208,6 +220,15 @@ SOURCE_PIPELINE_READINESS: tuple[dict[str, object], ...] = (
         "blocking_gates": ["schema", "row_count", "checksum", "dq"],
     },
     {
+        "source_system": "DWH",
+        "pipeline": "dwh_sales_history",
+        "contracts": ["dwh_sales_history_line"],
+        "status": "ready_for_shadow_load",
+        "supports_projected_stock": False,
+        "supports_forecast": True,
+        "blocking_gates": ["schema", "row_count", "checksum", "date_range", "dq"],
+    },
+    {
         "source_system": "WMS",
         "pipeline": "wms_inventory",
         "contracts": ["wms_stock_snapshot_line", "wms_open_order_line", "wms_in_transit_line"],
@@ -251,6 +272,12 @@ PILOT_REQUIRED_SOURCE_CONTRACTS: tuple[PilotSourceContract, ...] = (
         contract_name="pos_sales_line",
         owner_role="Data Engineer",
         required_for=("regular_forecast", "promo_forecast", "demand_projection"),
+    ),
+    PilotSourceContract(
+        source_system="DWH",
+        contract_name="dwh_sales_history_line",
+        owner_role="Sales Data Owner",
+        required_for=("training_history", "backtesting", "regular_forecast", "promo_forecast"),
     ),
     PilotSourceContract(
         source_system="WMS",
@@ -375,6 +402,11 @@ def list_contracts() -> dict[str, object]:
 @router.get("/ingestion/manifests/pos-sales")
 def get_pos_sales_manifest() -> dict[str, object]:
     return POS_SALES_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/dwh-sales-history")
+def get_dwh_sales_history_manifest() -> dict[str, object]:
+    return DWH_SALES_HISTORY_MANIFEST.model_dump(mode="json")
 
 
 @router.get("/ingestion/manifests/wms-stock")
