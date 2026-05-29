@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Supplement 1 Adoption</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      .warn { color: #ffd166; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Supplement 1 Adoption</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем, что требования из <code>TECHNICAL_SPEC_SUPPLEMENT_1.md</code> не остались отдельным текстом,
+          а приняты в проект как проверяемые gates: Data SLA, ML lifecycle, financial replenishment parameters,
+          business acceptance, API governance, supplier isolation, historical simulation, notifications, ITSM,
+          intraday/OTB scope и открытые бизнес-вопросы.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/supplement-1-admin.png" alt="Admin Console Supplement 1 coverage card" />
+      </section>
+      <section>
+        <h2>UI-тестирование</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Admin Console.</td>
+              <td>Проверить, что governance gates видны в рабочем UI.</td>
+              <td>Страница открывается, карточка Supplement 1 отображает coverage.</td>
+              <td class="ok">Скриншот создан.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем fallback/live состояние карточки.</td>
+              <td>Не ломать UI при старом dev backend и одновременно поддержать live API после reload.</td>
+              <td>UI остаётся работоспособным.</td>
+              <td class="ok">Frontend build passed.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Проверяем `/supplement/source-sla`.</td><td>Зафиксировать SLA источников.</td><td>POS/WMS/ERP/PROMO/MDM/external покрыты.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>2</td><td>Проверяем degraded SLA evaluation.</td><td>Убедиться, что публикация blocked by default.</td><td><code>quality_flag=degraded</code>, publish false.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>3</td><td>Проверяем ML lifecycle gate.</td><td>Не выпускать модель без shadow/backtest/fallback governance.</td><td>26 недель backtest, 14 дней shadow, rollback 1 час.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>4</td><td>Проверяем financial parameters.</td><td>Не считать replenishment optimization без бизнес-стоимостей.</td><td>holding/lost sales/waste/service level требуют sign-off.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>5</td><td>Проверяем API governance.</td><td>Зафиксировать versioning/deprecation/error registry.</td><td>`/api/v{major}/`, 90 дней, registry files существуют.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>6</td><td>Проверяем supplier isolation.</td><td>Защитить данные поставщиков.</td><td>`supplier_id` claim, row-level filter, audit.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>7</td><td>Проверяем historical simulation.</td><td>Не стартовать Parallel Run без ретроспективного доказательства.</td><td>>= 52 недели, report folder существует.</td><td class="ok">Покрыто тестом.</td></tr>
+            <tr><td>8</td><td>Проверяем notifications/ITSM/open questions.</td><td>Связать operations, escalation и business blockers.</td><td>SLA каналов, `OPEN_FNR_ITSM_WEBHOOK_URL`, M-01...M-12.</td><td class="ok">Покрыто тестом.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>Backend regression</td><td class="ok">436 passed</td></tr>
+            <tr><td>Targeted Supplement tests</td><td class="ok">22 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+            <tr><td>Docker Compose config</td><td class="ok">DEV/TEST/STAGE valid</td></tr>
+            <tr><td>External blockers</td><td class="warn">Business decisions M-01...M-12 remain external inputs.</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

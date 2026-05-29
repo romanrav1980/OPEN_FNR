@@ -164,6 +164,11 @@ type ProcessRuntimeStrategyApiResponse = {
   items: { artifact_type: string; strategy: string; status: string; artifact_count: number }[];
 };
 
+type SupplementCoverageApiResponse = {
+  sections: string[];
+  implemented_gates: string[];
+};
+
 type PilotShadowPackApiResponse = {
   pack_id: string;
   mode: string;
@@ -1382,6 +1387,7 @@ function App() {
   const [processDeploymentDryRunStatus, setProcessDeploymentDryRunStatus] = React.useState("loading");
   const [processDeployabilityStatus, setProcessDeployabilityStatus] = React.useState("loading");
   const [processRuntimeStrategyStatus, setProcessRuntimeStrategyStatus] = React.useState("loading");
+  const [supplementCoverageStatus, setSupplementCoverageStatus] = React.useState("loading");
   const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
   const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
@@ -1685,6 +1691,27 @@ function App() {
           return;
         }
         setPilotShadowPackStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/supplement/coverage"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Supplement coverage API returned ${response.status}`);
+        }
+        return response.json() as Promise<SupplementCoverageApiResponse>;
+      })
+      .then((payload) => {
+        setSupplementCoverageStatus(`${payload.sections.length} sections / ${payload.implemented_gates.length} gates`);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setSupplementCoverageStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3842,6 +3869,11 @@ function App() {
             <span>Runtime Strategy</span>
             <strong>{processRuntimeStrategyStatus}</strong>
             <p>BPMN is deployed to Flowable runtime; DMN and CMMN stay under governance until dedicated runtime adapters are approved.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Supplement 1</span>
+            <strong>{supplementCoverageStatus}</strong>
+            <p>Operational SLA, ML lifecycle, business acceptance, supplier isolation and API governance are tracked as tested gates.</p>
           </article>
         </div>
         <div className="table-shell">

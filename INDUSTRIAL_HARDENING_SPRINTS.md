@@ -378,6 +378,26 @@ Status: completed for configuration readiness diagnostics.
 - UI card: `IdP Readiness`.
 - Test evidence: `docs/test-reports/sprint-idp-readiness-gate/index.html`.
 
+## GOV-SUP-1. Supplement 1 Adoption
+
+Status: completed for project governance, API gates and regression tests.
+
+### Scope
+
+- accept `TECHNICAL_SPEC_SUPPLEMENT_1.md` as mandatory addendum;
+- expose Supplement 1 gates through backend API;
+- add API consumer and error registries;
+- add model and simulation report directories;
+- surface Supplement 1 coverage in Admin workspace.
+
+### Current Implementation
+
+- API module: `apps/backend/open_fnr_api/supplement_governance.py`.
+- API prefix: `/supplement`.
+- Adoption matrix: `SUPPLEMENT_1_ADOPTION_MATRIX.md`.
+- Test suite: `tests/backend/test_supplement_governance.py`.
+- Covered sections: A through M.
+
 ## PILOT-1. Shadow Pilot Pack
 
 Status: completed for first runbook and rollback package.

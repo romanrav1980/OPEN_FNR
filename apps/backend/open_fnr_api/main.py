@@ -35,6 +35,7 @@ from .shadow_gate import router as shadow_gate_router
 from .stage import router as stage_router
 from .store_management import router as store_management_router
 from .supplier_collaboration import router as supplier_collaboration_router
+from .supplement_governance import router as supplement_governance_router
 from .health import probe_http
 from .ingestion import router as ingestion_router
 from .kpi import router as kpi_router
@@ -93,6 +94,7 @@ app.include_router(shadow_gate_router)
 app.include_router(stage_router)
 app.include_router(store_management_router)
 app.include_router(supplier_collaboration_router)
+app.include_router(supplement_governance_router)
 
 
 @app.get("/health")
@@ -156,6 +158,7 @@ def metadata() -> dict[str, object]:
             "stage-rehearsal",
             "store-management",
             "supplier-collaboration",
+            "supplement-governance",
             "process-engine",
             "process-deployment",
             "process-governance",

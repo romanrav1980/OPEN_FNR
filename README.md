@@ -1,5 +1,7 @@
 # OPEN FNR
 
+Supplement 1 governance is adopted through [TECHNICAL_SPEC_SUPPLEMENT_1.md](TECHNICAL_SPEC_SUPPLEMENT_1.md) and [SUPPLEMENT_1_ADOPTION_MATRIX.md](SUPPLEMENT_1_ADOPTION_MATRIX.md). Operational gates are exposed under `/supplement/*` and covered by `tests/backend/test_supplement_governance.py`.
+
 > Платформа прогнозирования продаж и пополнения запасов торговой сети до **30 000 магазинов** и среднего ассортимента **5 500 SKU**.
 
 <p>

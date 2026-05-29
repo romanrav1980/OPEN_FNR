@@ -1,7 +1,7 @@
 # OPEN FNR Pilot-Ready Remaining Work
 
 Date: 2026-05-29
-Status: handoff after IdP readiness gate checkpoint.
+Status: handoff after Supplement 1 adoption checkpoint.
 
 ## What Is Now Closed
 
@@ -27,6 +27,7 @@ Status: handoff after IdP readiness gate checkpoint.
 | Process runtime strategy | closed for BPMN runtime and DMN/CMMN governance boundary | `docs/test-reports/sprint-process-runtime-strategy/index.html` |
 | JWT/JWKS signature verification | closed for RS256 production auth boundary | `docs/test-reports/sprint-jwt-jwks-signature/index.html` |
 | IdP readiness gate | closed for issuer/audience/JWKS readiness diagnostics | `docs/test-reports/sprint-idp-readiness-gate/index.html` |
+| Supplement 1 adoption | closed for A-M governance gates and API/test coverage | `SUPPLEMENT_1_ADOPTION_MATRIX.md` |
 | Pilot shadow pack | closed for first runbook/rollback package | `docs/test-reports/sprint-pilot-shadow-pack/index.html` |
 | Backend regression | green | `python -m pytest` -> 418 passed |
 | Frontend build | green | `npm.cmd run build` |
@@ -62,13 +63,14 @@ Status: handoff after IdP readiness gate checkpoint.
 | --- | --- | --- |
 | No real source samples yet | Real-data rehearsal cannot be proven end to end | Provide POS/WMS/ERP/MDM/promo files or API specs for `REAL-PILOT-1` |
 | Real OIDC details unknown | Security middleware cannot be connected to the enterprise IdP yet | Fill issuer/audience/JWKS env values and run real signed-token smoke |
+| Supplement 1 business decisions open | Some parameters cannot be set by engineering | Resolve `/supplement/open-questions` M-01...M-12 before their phase gates |
 | UI still keeps most modules in one file | Productization velocity and test isolation suffer | Continue route split module by module after pilot source wiring |
 | DMN/CMMN runtime adapters are optional future work | Decision/case artifacts are governed but not Flowable-runtime-executed | Keep strategy visible in API/UI and approve adapters only if business needs runtime execution |
 | Performance still synthetic/smoke | EPYC sizing not proven on real data | Run pilot-scale synthetic plus first real-data profile before controlled export |
 
 ## Saved Context For Resume
 
-- Latest pushed hardening commit before this checkpoint: `d562db6`; current checkpoint is the IdP readiness gate work.
-- Backend regression count after REAL-IDP-1: 425 tests passed.
+- Latest pushed hardening commit before this checkpoint: `08f13c5`; current checkpoint is the Supplement 1 adoption work.
+- Backend regression count after GOV-SUP-1: 436 tests passed.
 - Target adapter reports are under `docs/test-reports`.
 - The next autonomous implementation should start with `REAL-PILOT-1 Actual Source Connection` when real source files or API credentials are available.
