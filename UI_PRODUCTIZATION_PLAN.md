@@ -45,6 +45,7 @@ This is useful for validation, but not sufficient for production users.
 | 8 | Add forms for approve, reject, adjust, confirm and export actions |
 | 9 | Add ECharts charts where analytical comparison is needed |
 | 10 | Add Playwright E2E tests per business process |
+| 11 | Add contextual help footnotes for important UI elements with links to specs and process artifacts |
 
 ## UX Rules
 
@@ -54,6 +55,10 @@ This is useful for validation, but not sufficient for production users.
 - Every action must show result status and audit reference.
 - Error states must explain what failed and what the user can do.
 - Object-level access denial must be visible and auditable.
+- Every important UI element must expose a help footnote.
+- Help footnotes must explain what the element does, why it matters, which business process it supports and where the task/specification is documented.
+- Help footnotes must link to the relevant project document and, when applicable, BPMN/DMN/CMMN artifact or Process Engine process key.
+- Help content must be accessible by keyboard and screen reader.
 
 ## Acceptance Criteria
 
@@ -63,3 +68,4 @@ This is useful for validation, but not sufficient for production users.
 - Routes are protected by role and object scope.
 - E2E tests cover forecast, replenishment, promo, supplier and store workflows.
 - Visual regression screenshots are produced for release candidates.
+- UI screens cannot be accepted without tested help footnotes for important actions, filters, statuses, metrics, charts, tables and form fields.

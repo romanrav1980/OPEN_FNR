@@ -109,7 +109,11 @@ Source document: [SUPPLEMENT_1_IMPLEMENTATION_SPRINT_PLAN.md](SUPPLEMENT_1_IMPLE
 
 ### 8. Process Navigator
 
-Source document: [PROCESS_NAVIGATOR_MAP_SPEC.md](PROCESS_NAVIGATOR_MAP_SPEC.md).
+Source documents:
+
+- [PROCESS_NAVIGATOR_MAP_SPEC.md](PROCESS_NAVIGATOR_MAP_SPEC.md)
+- [PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md](PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md)
+- [PROCESS_NAVIGATOR_IMPLEMENTATION_PLAN.md](PROCESS_NAVIGATOR_IMPLEMENTATION_PLAN.md)
 
 | Task | Output |
 | --- | --- |
@@ -117,8 +121,15 @@ Source document: [PROCESS_NAVIGATOR_MAP_SPEC.md](PROCESS_NAVIGATOR_MAP_SPEC.md).
 | Add routed UI module | `#/process-navigator` with map canvas, filters and details |
 | Add semantic zoom | Domain cluster -> process -> BPMN step -> task/audit |
 | Add alert overlays | BPMN quality, SLA, source data, ML drift, integration and security alerts |
+| Add contract hardening | Environment selector, snapshot mode, pagination and generated_at |
 | Add Flowable runtime overlay | Live process instance, task and history data |
-| Add BPMN exact viewer | bpmn-js viewer for selected executable BPMN model |
+| Add conformance and versions | Async conformance, cached badges and process version breakdown |
+| Add performance metrics | Cycle time, waiting time, throughput and P95 SLA alerts |
+| Add infrastructure and correlation | Health linkage, causal chains and alert deduplication |
+| Add business key tracking | SKU/store and order process trail |
+| Add RBAC and accessibility | Role matrix, supplier block, WCAG 2.1 AA and keyboard navigation |
+| Add contextual UI help | Help-сноски with links to task specs and BPMN/DMN/CMMN |
+| Add reporting | Weekly digest and Superset-ready payload |
 | Add E2E and visual reports | Screenshots, business-process test narrative and regression evidence |
 
 ## Suggested Sprint Breakdown
@@ -150,10 +161,16 @@ Source document: [PROCESS_NAVIGATOR_MAP_SPEC.md](PROCESS_NAVIGATOR_MAP_SPEC.md).
 | SUP-10 | Pilot Production Gate | unified Supplement 1 go/no-go for pilot |
 | PN-1 | Process Navigator Backend Map Contract | completed API contract and tests |
 | PN-2 | Process Navigator UI Shell | completed routed map UI, filters and detail panel |
-| PN-3 | Process Runtime Overlay | Flowable task/instance/history overlay |
-| PN-4 | Alert Correlation | OpenSearch/Prometheus/Process Engine alert correlation |
-| PN-5 | BPMN Exact Viewer | bpmn-js diagram panel and drill-down |
-| PN-6 | Process Navigator Hardening | RBAC, load, audit, accessibility and presentation report |
+| PN-3 | Navigator Contract Hardening | env selector backend, snapshot mode, alert pagination and config |
+| PN-4 | Conformance And Versions | async conformance, cached summary and process version breakdown |
+| PN-5 | Performance And SLA | cycle time, waiting time, throughput and endpoint SLA tests |
+| PN-6 | Infrastructure And Alert Correlation | infrastructure health, causal chains and alert deduplication |
+| PN-7 | Business Key Tracking | SKU/store process trail and masked instance IDs |
+| PN-8 | RBAC And Supplier Block | role matrix, supplier denial and object-scope filtering |
+| PN-9 | UI Detail Panels And Help | conformance/performance/version panels and help-сноски |
+| PN-10 | Accessibility And Refresh | WCAG 2.1 AA, keyboard navigation, polling and stale state |
+| PN-11 | Reporting And Superset Payload | weekly report endpoint, digest DAG and BI dataset contract |
+| PN-12 | Load, Regression And Presentation | PN regression, performance gate and developer/user presentation |
 | Pilot 1 | Shadow Pilot | no operational exports, KPI comparison |
 | Pilot 2 | Controlled Export Pilot | limited real exports and business sign-off |
 

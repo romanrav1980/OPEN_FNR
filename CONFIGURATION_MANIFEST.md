@@ -40,6 +40,20 @@ Authentication and OIDC/JWT boundary settings are centralized as:
 - `OPEN_FNR_OIDC_AUDIENCE`;
 - `OPEN_FNR_OIDC_JWKS_URL`.
 
+Process Navigator settings are centralized as:
+
+- `OPEN_FNR_ALLOWED_ENVIRONMENTS`;
+- `OPEN_FNR_RUNTIME_MODE`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_CONFORMANCE_CACHE_TTL_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_CONFORMANCE_MAX_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_ALERT_DEDUP_WINDOW_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_POLL_ZOOM_0_1_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_POLL_ZOOM_2_3_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_POLL_ALERTS_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_POLL_INFRASTRUCTURE_SECONDS`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_ALERT_PAGE_SIZE`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_ALERT_MAX_PAGE_SIZE`.
+
 ## Allowed Exceptions
 
 The following files may contain default local development addresses because they are configuration sources:
@@ -68,6 +82,7 @@ The following files may contain default local development addresses because they
 - Flowable runtime upload must use configured `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_FLOWABLE_PORT`, `OPEN_FNR_FLOWABLE_HTTP_TIMEOUT_SECONDS`, `OPEN_FNR_FLOWABLE_REST_USERNAME` and `OPEN_FNR_FLOWABLE_REST_PASSWORD`; UI and API dry runs must not perform network upload unless `execute=true`.
 - DEV/TEST may use explicit Flowable image credentials in `.env.example`; STAGE/PROD must inject runtime credentials from secrets and keep `OPEN_FNR_FLOWABLE_REST_PASSWORD` out of committed environment files.
 - Publication, supplier, TMS capacity, Store App task, planogram and IdP/IAM target URLs must be controlled by the `OPEN_FNR_*_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`, `OPEN_FNR_PLANOGRAM_EXPORT_URL` and `OPEN_FNR_IDP_PROVISIONING_URL` settings; empty values mean local fallback mode only.
+- Process Navigator environment selector, refresh intervals, conformance TTL, conformance timeout, alert deduplication window and pagination limits must be controlled by `OPEN_FNR_PROCESS_NAVIGATOR_*` settings and `OPEN_FNR_ALLOWED_ENVIRONMENTS`.
 
 ## Quality Gate
 

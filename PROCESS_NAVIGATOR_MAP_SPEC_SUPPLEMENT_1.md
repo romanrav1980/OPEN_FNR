@@ -37,8 +37,32 @@ Process Navigator должен сравнивать модель процесс�
 - Формат внутреннего event log должен быть совместим с идеями IEEE 1849 XES: case id, activity id, timestamp, lifecycle transition, resource.
 - Методологическая база - process mining по van der Aalst: trace replay, deviation detection, fitness score.
 - Результат должен учитываться в карте процессов как отдельный слой качества исполнения, а не заменять SLA-статус.
+- Conformance check выполняется **асинхронно** при отсутствии кэша. POST `/process-navigator/processes/{key}/conformance/check` запускает фоновый job и возвращает `job_id`. GET `/process-navigator/processes/{key}/conformance/status/{job_id}` — polling статуса и готового результата.
+- GET `/process-navigator/processes/{key}/conformance` возвращает кэшированный результат, если он существует; иначе инициирует async job и возвращает ответ со статусом `pending`.
+- TTL кэша берётся из централизованной конфигурации (по умолчанию 1 час); не хардкодится.
+- Для zoom-level badge карты доступен облегченный режим: GET `.../conformance?summary_only=true` — возвращает только `conformance_score` и `last_checked_at` из кэша, никогда не запускает новый расчет.
+- Если кэш отсутствует и job не запущен, badge показывает `conformance: pending` и автоматически инициирует async check.
 
 ### 2.3. Backend Contract Additions
+
+`POST /process-navigator/processes/{key}/conformance/check` — инициировать async job.
+
+Ответ:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `job_id` | string | Идентификатор фонового задания |
+| `status` | string | `queued`, `running` |
+| `estimated_seconds` | integer | Оценка времени расчета из конфигурации |
+
+`GET /process-navigator/processes/{key}/conformance/status/{job_id}` — статус и результат job.
+
+Ответ добавляет к conformance response:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `job_status` | string | `queued`, `running`, `done`, `failed` |
+| `error` | string or null | Сообщение при `failed` |
 
 `GET /process-navigator/processes/{key}/conformance`
 
@@ -610,7 +634,8 @@ flowchart LR
     S4 --> S5[SUP-5 API and integration governance]
     S5 --> S6[SUP-6 Supplier isolation]
     S6 --> S7[SUP-7 Notifications and ITSM]
-    S7 --> S8[SUP-8 Lineage, retention and DR/BC]
+    S7 --> SREG[SUP-REG Cross-Sprint Regression]
+    SREG --> S8[SUP-8 Lineage, retention and DR/BC]
     S8 --> S9[SUP-9 Process Navigator Map]
     S9 --> S10[SUP-10 Pilot Production Gate]
 ```
@@ -728,6 +753,39 @@ Acceptance criteria:
 - `SUP-3` service level target assignment uses stored segment.
 - No inline ABC/XYZ classification logic exists in `replenishment.py`.
 
+### SUP-REG. Cross-Sprint Integration Regression
+
+| Поле | Описание |
+|---|---|
+| Цель | Проверить, что SUP-1..SUP-7 не регрессируют друг друга до тяжёлых изменений схемы в SUP-8 |
+| Gate | SUP-8 не стартует, пока хотя бы один тест из SUP-1..SUP-7 падает в полном regression run |
+
+Scope:
+
+- Полный прогон `python -m pytest` со всеми активными фичами SUP-1..SUP-7.
+- Проверка: source SLA controls (SUP-1) не сломаны notification pipeline changes (SUP-7).
+- Проверка: ML lifecycle controls (SUP-2) не сломаны API versioning changes (SUP-5).
+- Проверка: supplier isolation (SUP-6) проходит после notification changes (SUP-7).
+- Docker Compose full-stack smoke test с включёнными SUP-фичами.
+- HTML regression report: `docs/test-reports/sprint-sup-regression/index.html`.
+- Новые feature flags и конфигурации SUP-1..SUP-7 задокументированы в `CONFIGURATION_MANIFEST.md`.
+
+Test matrix:
+
+| Класс теста | Required checks |
+|---|---|
+| Backend regression | `python -m pytest` — 0 failures, все SUP-1..SUP-7 tests |
+| Integration smoke | Compose stack поднимается, health endpoints OK |
+| SUP-1 × SUP-7 | SLA breach создаёт notification без дублирования |
+| SUP-2 × SUP-5 | Versioned ML API не ломает champion/challenger protocol |
+| SUP-6 × SUP-7 | Supplier isolation alerts маршрутизируются корректно |
+
+Acceptance criteria:
+
+- `python -m pytest` проходит без failures для всех SUP-1..SUP-7 tests.
+- HTML report сформирован и содержит evidence по каждой cross-feature проверке.
+- `CONFIGURATION_MANIFEST.md` актуален для всех SUP-1..SUP-7 env vars.
+
 ## 12. Data Classification Quality Gate
 
 ### 12.1. Purpose
@@ -788,6 +846,10 @@ Process Navigator должен соответствовать WCAG 2.1 Level AA,
 - Keyboard action: `Escape` возвращает на parent zoom level.
 - Все действия должны быть доступны без мыши.
 - Touch targets для интерактивных элементов должны быть не меньше `44x44` CSS pixels.
+- **Язык UI в v1: только английский.** Все labels, tooltip, aria-label, ECharts node text и error messages — на английском.
+- Русская локализация откладывается до v2. Слой отображения текста (source из полей API response) должен быть спроектирован таким образом, чтобы поддержка второго языка добавлялась без переработки UI-компонентов.
+- ECharts aria-labels должны использовать ASCII-совместимые строки для избежания rendering issues в разных окружениях.
+- Если кто-либо из пилотных пользователей требует русскоязычной доступности — это решение пересматривается до старта пилота.
 - Pan/zoom animations должны учитывать `prefers-reduced-motion`.
 - Status colors healthy green, attention amber и blocked red должны иметь contrast ratio не ниже `4.5:1` к background в light и dark theme.
 - В UI E2E suite добавляется axe-core check для route `#/process-navigator`.
@@ -851,6 +913,16 @@ Process Navigator должен соответствовать WCAG 2.1 Level AA,
 | Configuration | Network values, environment names, component IDs и thresholds берутся из config/env |
 | Licensing | Новые dependencies совместимы с Apache License 2.0 |
 | BPMN boundary | BPMN runtime artifacts находятся в `processes/`; DMN/CMMN остаются governed API artifacts до approval |
+| Performance SLA | Все navigator endpoints имеют числовые P95 targets; performance tests используют их как критерий pass/fail |
+| Lazy load | zoom=0 загружается без conformance/performance данных; detail panel загружается on demand |
+| Real-time refresh | Карта автообновляется по configurable интервалу; пользователь всегда видит время последнего refresh |
+| RBAC navigator | Все navigator endpoints применяют role-based access через policy.py; supplier role заблокирован |
+| Business key tracking | Оператор вводит SKU ID и видит полный process trail через все домены |
+| Alert deduplication | High-frequency alerts одного типа группируются; occurrence_count виден на карте |
+| Conformance async | Conformance check асинхронен; кэш TTL из конфигурации; summary_only для badge |
+| Cross-sprint regression | SUP-REG checkpoint после SUP-7 обязателен перед SUP-8 |
+| UI language | v1 English-only; text layer localizable для v2 без переработки компонентов |
+| Process simulation (v2) | Архитектура conformance и performance metrics готова к будущей what-if simulation без смены data model |
 
 ## 15. Open Standards References
 
@@ -863,3 +935,427 @@ Process Navigator должен соответствовать WCAG 2.1 Level AA,
 | OpenTelemetry semantic principles | Согласованное описание observability events и correlation metadata |
 | Apache ECharts | Визуализация zoomable process map |
 | Flowable OSS History API | Источник фактических process execution events |
+
+---
+
+## 16. Performance SLA for Process Navigator
+
+### 16.1. Purpose
+
+Без числовых целевых значений performance tests из раздела 12 родительской спецификации не имеют критерия pass/fail. Этот раздел фиксирует обязательные SLA для всех navigator endpoints и UI-рендеринга.
+
+### 16.2. SLA Targets
+
+Backend API:
+
+| Endpoint | P50 | P95 | Max |
+|---|---|---|---|
+| `GET /process-navigator/map?zoom=0` | < 200 мс | < 500 мс | 1 с |
+| `GET /process-navigator/map?zoom=1-2` | < 300 мс | < 800 мс | 2 с |
+| `GET /process-navigator/map?zoom=3-4` | < 400 мс | < 1 000 мс | 2 с |
+| `GET /process-navigator/alerts` | < 150 мс | < 400 мс | 1 с |
+| `GET /process-navigator/processes/{key}/drilldown` | < 200 мс | < 600 мс | 1.5 с |
+| `GET /process-navigator/processes/{key}/performance` | < 300 мс | < 800 мс | 2 с |
+| `GET /process-navigator/processes/{key}/conformance` (cache hit) | < 100 мс | < 300 мс | 500 мс |
+| `GET /process-navigator/processes/{key}/conformance` (async trigger) | < 100 мс | < 200 мс | 500 мс |
+| `GET /process-navigator/processes/{key}/conformance/status/{job_id}` | < 100 мс | < 300 мс | 500 мс |
+| `GET /process-navigator/infrastructure/health` | < 200 мс | < 500 мс | 1 с |
+| `GET /process-navigator/tracking` | < 300 мс | < 800 мс | 2 с |
+| `GET /process-navigator/reports/weekly` | < 500 мс | < 2 с | 5 с |
+
+UI:
+
+| Метрика | Target |
+|---|---|
+| Time to first interactive (zoom=0, 100 nodes) | < 2 с |
+| Node click response (drill-down trigger) | < 100 мс |
+| Alert burst re-render (50 новых alerts) | < 500 мс |
+| Detail panel load (async on-demand) | < 1 с |
+
+Нагрузочный профиль: 100 одновременных пользователей на zoom=0 — все endpoints должны оставаться в пределах P95 targets.
+
+### 16.3. Requirements
+
+- Все navigator endpoints возвращают `X-Response-Time-Ms` header для observability.
+- Запросы, превышающие P95 threshold, логируются в OpenSearch как slow queries.
+- Conformance async job не должен занимать более 60 секунд для процессов с <= 10 000 instances; это ограничение берётся из конфигурации.
+- Числовые targets из этого раздела являются единственными допустимыми критериями pass/fail для performance тестов.
+
+### 16.4. Test Requirements
+
+| Тест | Проверка |
+|---|---|
+| Performance | Каждый endpoint — P50 и P95 под нагрузочным профилем |
+| ECharts | 100-node map достигает first interactive в пределах target |
+| Alert burst | 50 concurrent alerts не превышают re-render target |
+| Conformance job | Async job завершается в пределах configurable max seconds |
+| Header | `X-Response-Time-Ms` присутствует в ответе каждого endpoint |
+
+### 16.5. Acceptance Criteria
+
+- Все API endpoints проходят P95 targets под нагрузочным профилем.
+- ECharts map достигает first interactive в пределах target.
+- Performance test report сформирован в `docs/test-reports/` для спринта PN-6.
+- Числовые targets задокументированы в `CONFIGURATION_MANIFEST.md` как конфигурируемые значения.
+
+---
+
+## 17. Data Loading Strategy
+
+### 17.1. Purpose
+
+Карта с 100+ процессами плюс conformance, performance, versions, infrastructure data для каждого из них — при one-shot загрузке даёт неприемлемый payload и время ответа. Этот раздел определяет стратегию lazy/incremental загрузки и пагинации, которая является **архитектурным ограничением для всех API contracts** разделов 2–10.
+
+### 17.2. Loading Strategy by Zoom Level
+
+| Zoom | Загружается upfront | Загружается on demand |
+|---|---|---|
+| 0 | Domain cluster aggregates: health, alert_count, blocked_count | Всё остальное |
+| 1 | Process definition list: key, name, owner, artifact_type, health | BPMN graph, conformance, performance, versions, infrastructure |
+| 2 | Runtime overlay: instance_count, open_tasks, sla_status для видимых процессов | Conformance score, performance chart, infra risk detail |
+| 3 | BPMN graph только для выбранного процесса | Step-level RACI, step-level tasks |
+| 4 | Task, SLA, action history для выбранного шага | Full audit timeline, linked CMMN case |
+
+Данные conformance (раздел 2), performance (раздел 3), versions (раздел 5) и infrastructure (раздел 9) **никогда не включаются в main map response** ни на каком zoom level. Они загружаются исключительно через запросы detail panel.
+
+### 17.3. Alert Pagination
+
+| Параметр | Значение |
+|---|---|
+| Default page size | 50 |
+| Max page size | 200 |
+| Pagination type | Cursor-based (не offset) |
+| Cursor drift | Cursor-based пагинация устойчива к live updates |
+
+`GET /process-navigator/alerts` — дополнительные параметры:
+
+| Параметр | Обязательность | Описание |
+|---|---:|---|
+| `limit` | нет | Размер страницы, default 50, max 200 |
+| `cursor` | нет | Pagination cursor из предыдущего ответа |
+| `root_only` | нет | Только root cause alerts |
+
+Ответ дополняется:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `next_cursor` | string or null | Cursor для следующей страницы |
+| `total_count` | integer | Общее количество matching alerts |
+
+### 17.4. Request Batching
+
+- При drill-down на domain cluster backend **batch-запрашивает** performance summaries для всех процессов в кластере (max 20) одним внутренним запросом.
+- Клиент не должен делать N отдельных requests per cluster при drill-down.
+- zoom=0 response size не должен превышать 100 KB.
+
+### 17.5. UI Requirements
+
+- Карта остаётся интерактивной, пока detail panel загружает данные асинхронно.
+- Loading skeleton виден в detail panel во время async fetch.
+- Alert list показывает кнопку "Load more" при `next_cursor != null`.
+- Карта не блокируется на conformance или performance data — они появляются в detail panel после первоначального рендера.
+
+### 17.6. Test Requirements
+
+| Тест | Проверка |
+|---|---|
+| API zoom=0 | Response не содержит per-process conformance/performance данных |
+| API zoom=3 | BPMN graph возвращается только для выбранного процесса |
+| API alerts | Cursor-based пагинация работает корректно при live updates |
+| Response size | zoom=0 response < 100 KB |
+| UI | Карта рендерится до завершения загрузки detail panel |
+| UI | Loading skeleton виден при async fetch |
+
+### 17.7. Acceptance Criteria
+
+- zoom=0 загружается без conformance, performance и version данных.
+- Alert list пагинирован; unbounded response невозможен.
+- Detail panel загружается асинхронно без блокировки карты.
+- Response size zoom=0 < 100 KB при 100 nodes.
+
+---
+
+## 18. Real-time Refresh Strategy
+
+### 18.1. Purpose
+
+Операционный control map должен обновляться автоматически. Пользователь должен всегда знать, насколько актуальны данные на карте. Этот раздел определяет стратегию обновления для v1 и путь перехода к WebSocket в v2.
+
+### 18.2. Requirements
+
+- Live map mode использует **client-side polling** в v1. WebSocket не используется в v1.
+- Интервалы polling берутся из централизованной конфигурации, не хардкодятся.
+
+| Zoom / компонент | Default polling interval |
+|---|---|
+| zoom=0 и zoom=1 (map) | 60 секунд |
+| zoom=2 и zoom=3 (runtime overlay) | 30 секунд |
+| Alert list | 30 секунд |
+| Infrastructure health | 60 секунд |
+
+- Карта всегда показывает `Last updated: HH:MM:SS`, sourced из поля `generated_at` API response.
+- Manual refresh button доступен в любой момент и инициирует немедленный poll.
+- При переключении из snapshot mode в live mode немедленно инициируется poll.
+- При HTTP 5xx или timeout карта показывает staleness warning: `Data may be outdated — last successful refresh: HH:MM:SS`.
+- Staleness warning появляется, если время с последнего успешного poll превысило 2× polling interval.
+- **WebSocket для v2**: polling реализуется за абстракцией (hook `useNavigatorRefresh` или аналог), чтобы замена на WebSocket push не требовала изменения UI-компонентов.
+
+### 18.3. Backend Contract Additions
+
+Все map и alert endpoints возвращают:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `generated_at` | string | ISO timestamp генерации данных |
+| `data_freshness_seconds` | integer | Возраст исходных данных в секундах |
+
+### 18.4. UI Requirements
+
+- `Last updated: HH:MM:SS` виден в toolbar.
+- Staleness warning появляется при просроченном poll.
+- Manual refresh button в toolbar.
+- Refresh-логика инкапсулирована в абстракцию для будущей замены на WebSocket.
+
+### 18.5. Test Requirements
+
+| Тест | Проверка |
+|---|---|
+| Config | Polling intervals читаются из config, не хардкодятся |
+| Staleness | Staleness warning появляется после симулированного poll failure |
+| Timestamp | `generated_at` виден в UI toolbar |
+| Manual | Manual refresh инициирует немедленный poll |
+| Abstraction | Refresh hook изолирует UI-компонент от transport layer |
+
+### 18.6. Acceptance Criteria
+
+- Карта автообновляется с configurable интервалом.
+- Пользователь всегда знает время последнего успешного обновления.
+- Poll failure вызывает staleness warning, а не молчаливые устаревшие данные.
+- Polling interval нигде не хардкодится.
+
+---
+
+## 19. RBAC Matrix for Process Navigator
+
+### 19.1. Purpose
+
+Этот раздел определяет, какие роли имеют доступ к каким данным Process Navigator. Все роли берутся из реестра `policy.py`. Без этой матрицы security tests из раздела 12 родительской спецификации и SEC-2 задача проекта не могут быть покрыты.
+
+### 19.2. Role Access Matrix
+
+| Роль | Карта zoom=0-1 | Drill-down | Conformance | Performance | Instance IDs | Audit trail | Actions |
+|---|---|---|---|---|---|---|---|
+| `admin` | Да | Да | Да | Да | Немаскированные | Да | Да |
+| `supply_chain_director` | Да | Да | Да | Да | Маскированные | Собственный домен | Нет |
+| `category_manager` | Да | Свои категории | Нет | Свои категории | Нет | Нет | Нет |
+| `planner` | Да | Свой домен | Нет | Свой домен | Нет | Нет | Нет |
+| `store_manager` | zoom=0-1 only | Нет | Нет | Нет | Нет | Нет | Нет |
+| `supplier` | **Нет** | Нет | Нет | Нет | Нет | Нет | Нет |
+| `auditor` | Да | Да | Да | Да | Маскированные | Да | Нет |
+| `service_account` | Да | Да | Да | Да | Немаскированные | Нет | Да (API only) |
+
+**Instance ID masking**: роли без unmasked доступа получают `hashed_instance_id` вместо реального Flowable process instance ID.
+
+**Domain scope**: `category_manager` и `planner` видят только процессы в доменах, соответствующих scope из JWT claim.
+
+**Supplier rule**: любой запрос от роли `supplier` к любому `/process-navigator/*` endpoint возвращает HTTP 403. Проверка выполняется на уровне backend — не только UI.
+
+### 19.3. Backend Contract Additions
+
+Все `/process-navigator/*` endpoints:
+
+- Валидируют JWT claim и извлекают роль и scope через `policy.py`.
+- Применяют domain filter из JWT scope перед формированием process list.
+- Маскируют `instance_id` для ролей без unmasked доступа.
+- Возвращают HTTP 403 для роли `supplier`.
+
+### 19.4. UI Requirements
+
+- RBAC применяется на backend; UI не рендерит элементы управления, которые пользователь не может использовать.
+- Для `store_manager`: доступны только zoom=0 и zoom=1; кнопка drill-down скрыта.
+- Для `supplier`: маршрут `#/process-navigator` не отображается в навигационном меню.
+
+### 19.5. Test Requirements
+
+| Тест | Проверка |
+|---|---|
+| Security | `admin` получает немаскированные instance IDs |
+| Security | `planner` получает только domain-scoped process list |
+| Security | `store_manager` не может открыть zoom=3 drill-down |
+| Security | `supplier` получает HTTP 403 на любом navigator endpoint |
+| Security | `auditor` может читать, но не может выполнять actions |
+| Security | `service_account` имеет доступ ко всем read и action endpoints |
+| UI | Маршрут navigator отсутствует в меню для роли `supplier` |
+
+### 19.6. Acceptance Criteria
+
+- Все navigator endpoints применяют RBAC через `policy.py`.
+- Instance IDs маскируются для ролей без admin доступа.
+- Роль `supplier` заблокирована на уровне backend, не только UI.
+- Role matrix покрыта positive и negative tests.
+
+---
+
+## 20. Business Key and SKU Process Tracking
+
+### 20.1. Purpose
+
+Поиск в родительской спецификации упоминает "business key" без определения. Для операционного пользователя сценарий №1 — "что происходит с заказом на артикул X в магазине Y?" — требует явного определения business key и dedicated tracking endpoint.
+
+### 20.2. Business Key Definition
+
+| Тип | Компоненты | Пример |
+|---|---|---|
+| `sku-store` | `sku_id`, `store_id`, `business_date` | `12345_0042_2026-05-29` |
+| `forecast-run` | `forecast_run_id` | `FR-20260529-001` |
+| `order-proposal` | `order_proposal_id` | `OP-20260529-0042-12345` |
+| `replenishment-cycle` | `store_id`, `business_week` | `0042_2026-W22` |
+| `promo` | `promo_id` | `PROMO-2026-SUMMER-001` |
+
+Форматы business key зарегистрированы в централизованной конфигурации и не хардкодятся в navigator.
+
+### 20.3. SKU Process Trail
+
+По `sku_id` и `store_id` navigator показывает полный путь этого SKU через все домены в хронологическом порядке:
+
+`MDM → Feature Mart → Forecast → (Promo, если применимо) → Replenishment → Order Proposal → ERP Export → Store App`
+
+Для каждого шага отображается: `process_key`, статус, cycle time, open tasks, alerts.
+
+### 20.4. Backend Contract Additions
+
+`GET /process-navigator/tracking`
+
+Параметры:
+
+| Параметр | Обязательность | Описание |
+|---|---:|---|
+| `business_key_type` | да | `sku-store`, `forecast-run`, `order-proposal`, `replenishment-cycle`, `promo` |
+| `sku_id` | условно | Обязателен для `sku-store` |
+| `store_id` | условно | Обязателен для `sku-store`, `replenishment-cycle` |
+| `business_date` | нет | По умолчанию — сегодня |
+| `forecast_run_id` | условно | Обязателен для `forecast-run` |
+| `order_proposal_id` | условно | Обязателен для `order-proposal` |
+| `env` | нет | Окружение из разрешенного списка |
+
+Ответ:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `business_key` | string | Канонический business key string |
+| `business_key_type` | string | Тип ключа |
+| `trail` | array | Упорядоченный список шагов пути |
+
+Trail item:
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `domain` | string | Домен процесса |
+| `process_key` | string | Ключ process definition |
+| `instance_id` | string | Process instance (маскируется по RBAC) |
+| `status` | string | `healthy`, `attention`, `blocked` |
+| `cycle_time_minutes` | number or null | Фактическое cycle time |
+| `open_tasks` | integer | Открытые human tasks |
+| `alerts` | array | Linked alerts для этого шага |
+| `started_at` | string or null | ISO timestamp |
+| `completed_at` | string or null | ISO timestamp |
+
+Расширение поиска: `GET /process-navigator/map?search=SKU:12345` перенаправляет на `/tracking?business_key_type=sku-store&sku_id=12345`.
+
+### 20.5. UI Requirements
+
+- Search bar принимает SKU ID в формате `SKU:<sku_id>` или подбирает тип автоматически по формату.
+- SKU trail view показывает полный domain journey как горизонтальный timeline.
+- Каждый шаг trail кликабелен и открывает process detail panel.
+- Alerts, связанные с SKU trail, подсвечиваются на основной карте.
+
+### 20.6. Test Requirements
+
+| Тест | Проверка |
+|---|---|
+| Backend API | tracking endpoint возвращает упорядоченный trail для `sku-store` key |
+| Backend API | Неизвестный `sku_id` возвращает пустой trail, не ошибку |
+| Backend API | RBAC применён к `instance_id` в trail |
+| Config | Business key formats из конфигурации, не хардкодятся |
+| UI | Поиск по SKU ID открывает trail view |
+| UI | Trail timeline связывает шаги с process detail |
+| Integration | Trail покрывает все active domains для тестового SKU пилота |
+
+### 20.7. Acceptance Criteria
+
+- Оператор вводит SKU и видит полный process journey в одном экране.
+- Business key форматы определены в конфигурации, не хардкодятся.
+- Tracking endpoint применяет RBAC через `policy.py`.
+
+---
+
+## 21. Alert Deduplication
+
+### 21.1. Purpose
+
+При высокой частоте событий (например, POS SLA breach за один и тот же период) карта и alert panel могут быть перегружены однотипными alerts. Этот раздел определяет deduplication policy для группировки alerts без потери информации о частоте.
+
+### 21.2. Requirements
+
+- Alerts одного типа (`alert_type`), для одного `process_key`, из одного источника, в пределах configurable deduplication window (по умолчанию 15 минут из конфигурации) группируются в один **alert group**.
+- Alert group показывает `occurrence_count`, `first_seen`, `last_seen`.
+- Deduplication window нигде не хардкодится.
+- Когда deduplication window истекает без разрешения, group re-evaluated: если alert ещё активен — `occurrence_count` растёт; если resolved — group закрывается.
+- Causal chain из раздела 4 работает на уровне **deduplicated alert groups**, а не сырых alert events.
+- Каждый alert group ссылается на ITSM incident (если создан через SUP-7) через поле `itsm_incident_ref`.
+
+### 21.3. Backend Contract Additions
+
+Alert group item (заменяет individual alert в `GET /process-navigator/alerts`):
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `alert_key` | string | Deduplication key: `{alert_type}:{process_key}:{source}` |
+| `alert_type` | string | Тип алерта из раздела 8 родительской спецификации |
+| `process_key` | string | Affected process |
+| `occurrence_count` | integer | Количество raw events в группе |
+| `first_seen` | string | ISO timestamp первого события |
+| `last_seen` | string | ISO timestamp последнего события |
+| `dedup_window_seconds` | integer | Активное deduplication window из конфигурации |
+| `itsm_incident_ref` | string or null | Ссылка на ITSM incident если создан |
+| `root_cause` | boolean | Является ли group root cause |
+| `cause_chain` | array | Causal chain как определено в разделе 4 |
+
+### 21.4. UI Requirements
+
+- Alert panel показывает grouped alerts с `occurrence_count` badge.
+- Badge color: 1–5 occurrences = amber, 6+ = red.
+- Tooltip показывает `first_seen`, `last_seen`, `occurrence_count`.
+- Раскрытие группы показывает raw alert timeline.
+
+### 21.5. Test Requirements
+
+| Тест | Проверка |
+|---|---|
+| Dedup | Одинаковые `alert_type` + `process_key` в пределах window создают одну группу |
+| Dedup | Новое событие увеличивает `occurrence_count` |
+| Dedup | Истечение window инициирует re-evaluation |
+| Config | Window duration берётся из конфигурации |
+| Integration | Causal chain работает корректно с deduplicated groups |
+| UI | `occurrence_count` badge виден в alert panel |
+
+### 21.6. Acceptance Criteria
+
+- High-frequency alerts не перегружают карту и alert panel.
+- Alert группировка видна и объяснима пользователю.
+- Deduplication window configurable.
+
+---
+
+## 22. v2 Roadmap (Out of Scope for v1)
+
+Следующие возможности явно исключены из v1. Перечисление необходимо для сохранения совместимости архитектурных решений v1 с будущими требованиями.
+
+| Возможность | Причина переноса | Архитектурное требование к v1 |
+|---|---|---|
+| WebSocket push | v1 polling достаточен; замена WebSocket требует более широкого инфраструктурного решения | Refresh-логика изолирована в абстракцию (`useNavigatorRefresh`) без coupling к transport |
+| Русская локализация UI | English-only v1; pilot user feedback ещё не собран | Text layer sourced из API response fields; localizable без переработки компонентов |
+| Process simulation / what-if | Требует simulation engine или Flowable Simulation adapter | Conformance и performance data models не противоречат будущей simulation; business key и process trail готовы |
+| DMN/CMMN runtime adapter | Граница BPMN/DMN зафиксирована в CLAUDE.md; adapter требует отдельного approval | DMN/CMMN остаются governed API artifacts; architecture не предполагает их runtime deployment до approval |
+| OTB / seasonal budget integration | Деферировано из Supplement 1, раздел L | OTB spec в v2 document (docs/decisions); budget constraints не вводятся в v1 replenishment |
+| Mobile Process Navigator | Tablet/desktop first в v1 | WCAG 2.1 AA gate пройден; touch targets ≥ 44×44 px совместимы с tablet операторами |

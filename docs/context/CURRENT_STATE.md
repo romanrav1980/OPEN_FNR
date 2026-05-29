@@ -583,3 +583,21 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 
 - Extended coverage sprints 31-36: `docs/presentations/extended-coverage-sprints-31-36/index.html`.
 - Real ingestion sprints I1-I5: `docs/presentations/real-ingestion-sprints-i1-i5/index.html`.
+
+## Process Navigator Supplement 1 Expansion
+
+- Neighbor-agent additions in `PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md` are accepted as authoritative additions: async conformance, performance SLA, lazy loading, refresh strategy, RBAC matrix, business key tracking, alert deduplication and v2 boundaries.
+- New implementation plan: `PROCESS_NAVIGATOR_IMPLEMENTATION_PLAN.md`.
+- `NEXT_DELIVERY_PLAN.md` now tracks PN-3 through PN-12.
+- PN-3 has started with backend contract hardening:
+  - environment validation for `/process-navigator/*`;
+  - snapshot mode on `/process-navigator/map`;
+  - alert pagination fields;
+  - generated timestamps and data freshness fields;
+  - config settings in `apps/backend/open_fnr_api/config.py`, `.env.example` and `CONFIGURATION_MANIFEST.md`;
+  - initial backend contracts for conformance, performance, versions, infrastructure health, business key tracking and weekly reports.
+- Process Navigator backend tests now cover 15 scenarios in `tests/backend/test_process_navigator.py`.
+- Verification:
+  - `pytest tests/backend/test_process_navigator.py` -> 15 passed.
+  - `pytest tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 3 passed.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 453 passed, 1 warning about `.pytest_cache` permissions.

@@ -82,6 +82,9 @@ class Settings(BaseModel):
     landing_root_path: str = Field(default_factory=lambda: env_str("LANDING_ROOT_PATH", "data/landing"))
     process_artifacts_root_path: str = Field(default_factory=lambda: env_str("PROCESS_ARTIFACTS_ROOT_PATH", "processes"))
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
+    allowed_environments: tuple[str, ...] = Field(
+        default_factory=lambda: env_csv("ALLOWED_ENVIRONMENTS", ("dev", "test", "stage", "prod"))
+    )
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
     auth_enabled: bool = Field(default_factory=lambda: env_bool("AUTH_ENABLED", False))
@@ -91,6 +94,44 @@ class Settings(BaseModel):
     oidc_jwks_url: str = Field(default_factory=lambda: env_str("OIDC_JWKS_URL", ""))
     cors_allow_origins: tuple[str, ...] = Field(
         default_factory=lambda: env_csv("CORS_ALLOW_ORIGINS", ("http://127.0.0.1:13000", "http://localhost:13000"))
+    )
+    process_navigator_conformance_cache_ttl_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_CONFORMANCE_CACHE_TTL_SECONDS", 3600),
+        ge=1,
+    )
+    process_navigator_conformance_max_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_CONFORMANCE_MAX_SECONDS", 60),
+        ge=1,
+    )
+    process_navigator_alert_dedup_window_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_ALERT_DEDUP_WINDOW_SECONDS", 900),
+        ge=1,
+    )
+    process_navigator_poll_zoom_0_1_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_POLL_ZOOM_0_1_SECONDS", 60),
+        ge=1,
+    )
+    process_navigator_poll_zoom_2_3_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_POLL_ZOOM_2_3_SECONDS", 30),
+        ge=1,
+    )
+    process_navigator_poll_alerts_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_POLL_ALERTS_SECONDS", 30),
+        ge=1,
+    )
+    process_navigator_poll_infrastructure_seconds: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_POLL_INFRASTRUCTURE_SECONDS", 60),
+        ge=1,
+    )
+    process_navigator_alert_page_size: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_ALERT_PAGE_SIZE", 50),
+        ge=1,
+        le=200,
+    )
+    process_navigator_alert_max_page_size: int = Field(
+        default_factory=lambda: env_int("PROCESS_NAVIGATOR_ALERT_MAX_PAGE_SIZE", 200),
+        ge=1,
+        le=500,
     )
 
     def http_url(self, host: str, port: int, path: str = "") -> str:
