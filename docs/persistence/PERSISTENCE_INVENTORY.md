@@ -118,3 +118,23 @@ Every production repository must expose:
 - Replacing every module in one sprint.
 - Implementing production OIDC/JWT.
 - Changing existing API response shapes unless required by repository boundary.
+
+## 11. IH-2 Foundation Status
+
+Completed foundation:
+
+- PostgreSQL DDL for `process_tasks`, `process_task_events`, `operational_decisions`, `publication_packages` and `export_attempts`.
+- `ProcessTaskRepository` with in-memory and PostgreSQL implementations.
+- `OperationalDecisionRepository` with in-memory and PostgreSQL implementations.
+- Runtime write boundary for process task completion.
+- Runtime write boundary for publication send/retry.
+- Runtime write boundary for replenishment order proposal adjustment.
+- Runtime write boundary for store task completion.
+
+Remaining IH-2 domain-table migrations:
+
+- dedicated `manual_adjustments` table and repository;
+- dedicated `exceptions` table and repository;
+- dedicated `order_proposals`/`final_orders` PostgreSQL decision tables if pilot requires OLTP editing outside ClickHouse marts;
+- dedicated `store_task_feedback` table if photo/evidence metadata must be queried independently;
+- security admin tables for users, service accounts and access requests, unless moved to `SEC-1..SEC-3`.
