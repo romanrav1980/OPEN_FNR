@@ -9,6 +9,7 @@
     <businessRuleTask id="evaluate_supplier_risk" name="Evaluate supplier risk" />
     <exclusiveGateway id="supplier_risk_gateway" name="Supplier risk reported?" />
     <userTask id="review_supply_exception" name="Review supply exception" />
+    <serviceTask id="record_supplier_confirmation" name="Record supplier confirmation" />
     <serviceTask id="write_supplier_audit" name="Write supplier audit" />
     <endEvent id="end_supplier_collaboration" name="Supplier collaboration closed" />
     <sequenceFlow id="flow_1" sourceRef="start_supplier_share" targetRef="prepare_forecast_share" />
@@ -17,7 +18,9 @@
     <sequenceFlow id="flow_4" sourceRef="supplier_confirm_forecast" targetRef="evaluate_supplier_risk" />
     <sequenceFlow id="flow_5" sourceRef="evaluate_supplier_risk" targetRef="supplier_risk_gateway" />
     <sequenceFlow id="flow_6" sourceRef="supplier_risk_gateway" targetRef="review_supply_exception" />
+    <sequenceFlow id="flow_no_risk" sourceRef="supplier_risk_gateway" targetRef="record_supplier_confirmation" />
     <sequenceFlow id="flow_7" sourceRef="review_supply_exception" targetRef="write_supplier_audit" />
+    <sequenceFlow id="flow_confirmation_to_audit" sourceRef="record_supplier_confirmation" targetRef="write_supplier_audit" />
     <sequenceFlow id="flow_8" sourceRef="write_supplier_audit" targetRef="end_supplier_collaboration" />
   </process>
 </definitions>

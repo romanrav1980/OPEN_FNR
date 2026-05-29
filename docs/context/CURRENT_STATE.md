@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 436 automated tests passed.
+Current backend regression status: 438 automated tests passed.
 
 ## Local Infrastructure
 
@@ -446,7 +446,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 436 passed.
+- `python -m pytest` -> 438 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -457,7 +457,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Next Step
 
-Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary with RS256/JWKS verification and IdP readiness gate, shared policy layer, routed UI shell, Flowable deployment package, Flowable REST upload gate, live Flowable runtime evidence, source batch BPMN repair, process runtime strategy, Supplement 1 governance gates and pilot shadow pack are implemented and verified. Next: configure real IdP values, then connect actual pilot source files/API credentials and run a real-data rehearsal.
+Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target adapters, JWT/OIDC boundary with RS256/JWKS verification and IdP readiness gate, shared policy layer, routed UI shell, Flowable deployment package, Flowable REST upload gate, live Flowable runtime evidence, source batch BPMN repair, BPMN cognitive quality gate, process runtime strategy, Supplement 1 governance gates and pilot shadow pack are implemented and verified. Next: configure real IdP values, then connect actual pilot source files/API credentials and run a real-data rehearsal.
 
 ## Post-Sprint Planning Artifacts
 
@@ -480,6 +480,7 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - JWT/JWKS signature verification report: `docs/test-reports/sprint-jwt-jwks-signature/index.html`.
 - IdP readiness gate report: `docs/test-reports/sprint-idp-readiness-gate/index.html`.
 - Supplement 1 adoption matrix: `SUPPLEMENT_1_ADOPTION_MATRIX.md`.
+- BPMN cognitive quality gate report: `docs/test-reports/sprint-bpmn-cognitive-quality/index.html`.
 
 ## H1 Industrial Hardening Artifacts
 

@@ -4,6 +4,7 @@ from io import BytesIO
 
 from open_fnr_api.main import app
 from open_fnr_api.process_deployment import (
+    build_bpmn_quality_report,
     build_flowable_bar_archive,
     build_multipart_deployment_body,
     build_process_deployability_report,
@@ -91,6 +92,26 @@ def test_process_deployment_runtime_strategy_endpoint() -> None:
     payload = response.json()
     assert len(payload["items"]) == 3
     assert {item["artifact_type"] for item in payload["items"]} == {"bpmn", "dmn", "cmmn"}
+
+
+def test_process_deployment_bpmn_quality_gate_has_no_blockers() -> None:
+    report = build_bpmn_quality_report()
+
+    assert report.bpmn_total == 38
+    assert report.quality_gate == "passed"
+    assert report.blocker_count == 0
+    assert not [issue for issue in report.issues if issue.issue_type == "question_gateway_without_alternative"]
+    assert report.cognitive_challenge_count > 0
+
+
+def test_process_deployment_bpmn_quality_endpoint_exposes_cognitive_challenges() -> None:
+    response = client.get("/process-deployment/packages/current/bpmn-quality")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["quality_gate"] == "passed"
+    assert payload["blocker_count"] == 0
+    assert payload["cognitive_challenge_count"] > 0
 
 
 def test_process_deployment_multipart_body_contains_artifacts() -> None:

@@ -428,3 +428,23 @@ The system can enter pilot only when:
 - process deployment pipeline is available;
 - load gate proves pilot SLA;
 - business signs pilot scope and rollback plan.
+
+## PROC-QUALITY-1. BPMN Cognitive Quality Gate
+
+Status: completed for structural blockers and cognitive challenge reporting.
+
+### Scope
+
+- analyze every BPMN graph, not only XML syntax;
+- block duplicate ids, invalid sequence references, unreachable nodes, dead-end paths and question gateways without alternatives;
+- report human-task role/SLA/audit challenges for business review;
+- repair discovered one-way decision gateways.
+
+### Current Implementation
+
+- API endpoint: `/process-deployment/packages/current/bpmn-quality`.
+- Governance document: `BPMN_QUALITY_GOVERNANCE.md`.
+- Fixed processes:
+  - `processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml`.
+  - `processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml`.
+- Regression: `tests/backend/test_process_deployment.py`.

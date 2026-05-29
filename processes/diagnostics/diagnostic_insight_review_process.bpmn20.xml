@@ -10,13 +10,16 @@
     <exclusiveGateway id="action_required_gateway" name="Action required?" />
     <userTask id="create_exception_from_insight" name="Create exception from insight" />
     <serviceTask id="link_objects_and_audit" name="Link objects and audit decision" />
+    <serviceTask id="write_no_action_audit" name="Write no-action audit" />
     <endEvent id="end_closed" name="Diagnostic insight closed" />
     <sequenceFlow id="flow_1" sourceRef="start_diagnostic" targetRef="collect_evidence" />
     <sequenceFlow id="flow_2" sourceRef="collect_evidence" targetRef="classify_root_cause" />
     <sequenceFlow id="flow_3" sourceRef="classify_root_cause" targetRef="review_root_cause_card" />
     <sequenceFlow id="flow_4" sourceRef="review_root_cause_card" targetRef="action_required_gateway" />
     <sequenceFlow id="flow_5" sourceRef="action_required_gateway" targetRef="create_exception_from_insight" />
+    <sequenceFlow id="flow_no_action" sourceRef="action_required_gateway" targetRef="write_no_action_audit" />
     <sequenceFlow id="flow_6" sourceRef="create_exception_from_insight" targetRef="link_objects_and_audit" />
     <sequenceFlow id="flow_7" sourceRef="link_objects_and_audit" targetRef="end_closed" />
+    <sequenceFlow id="flow_no_action_to_end" sourceRef="write_no_action_audit" targetRef="end_closed" />
   </process>
 </definitions>

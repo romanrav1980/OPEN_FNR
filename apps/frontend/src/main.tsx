@@ -164,6 +164,13 @@ type ProcessRuntimeStrategyApiResponse = {
   items: { artifact_type: string; strategy: string; status: string; artifact_count: number }[];
 };
 
+type BpmnQualityApiResponse = {
+  quality_gate: string;
+  blocker_count: number;
+  warning_count: number;
+  cognitive_challenge_count: number;
+};
+
 type SupplementCoverageApiResponse = {
   sections: string[];
   implemented_gates: string[];
@@ -1387,6 +1394,7 @@ function App() {
   const [processDeploymentDryRunStatus, setProcessDeploymentDryRunStatus] = React.useState("loading");
   const [processDeployabilityStatus, setProcessDeployabilityStatus] = React.useState("loading");
   const [processRuntimeStrategyStatus, setProcessRuntimeStrategyStatus] = React.useState("loading");
+  const [bpmnQualityStatus, setBpmnQualityStatus] = React.useState("loading");
   const [supplementCoverageStatus, setSupplementCoverageStatus] = React.useState("loading");
   const [pilotShadowPackStatus, setPilotShadowPackStatus] = React.useState("loading");
   const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
@@ -1631,6 +1639,7 @@ function App() {
       fetch(apiUrl("/process-deployment/packages/current"), { signal: controller.signal }),
       fetch(apiUrl("/process-deployment/packages/current/deployability"), { signal: controller.signal }),
       fetch(apiUrl("/process-deployment/packages/current/runtime-strategy"), { signal: controller.signal }),
+      fetch(apiUrl("/process-deployment/packages/current/bpmn-quality"), { signal: controller.signal }),
       fetch(apiUrl("/process-deployment/packages/current/deploy"), {
         method: "POST",
         signal: controller.signal,
@@ -1638,18 +1647,19 @@ function App() {
         body: JSON.stringify({ execute: false, deployment_name: "OPEN_FNR_UI_DRY_RUN" }),
       })
     ])
-      .then(([packageResponse, deployabilityResponse, strategyResponse, dryRunResponse]) => {
-        if (!packageResponse.ok || !deployabilityResponse.ok || !strategyResponse.ok || !dryRunResponse.ok) {
+      .then(([packageResponse, deployabilityResponse, strategyResponse, qualityResponse, dryRunResponse]) => {
+        if (!packageResponse.ok || !deployabilityResponse.ok || !strategyResponse.ok || !qualityResponse.ok || !dryRunResponse.ok) {
           throw new Error("Process deployment API returned an error");
         }
         return Promise.all([
           packageResponse.json() as Promise<ProcessDeploymentPackageApiResponse>,
           deployabilityResponse.json() as Promise<ProcessDeployabilityApiResponse>,
           strategyResponse.json() as Promise<ProcessRuntimeStrategyApiResponse>,
+          qualityResponse.json() as Promise<BpmnQualityApiResponse>,
           dryRunResponse.json() as Promise<ProcessDeploymentResultApiResponse>,
         ]);
       })
-      .then(([payload, deployability, strategy, dryRun]) => {
+      .then(([payload, deployability, strategy, quality, dryRun]) => {
         setProcessDeploymentStatus(
           `${payload.artifact_count} artifacts / ${payload.bpmn_count} BPMN / ${payload.dmn_count} DMN / ${payload.cmmn_count} CMMN`,
         );
@@ -1658,6 +1668,7 @@ function App() {
         );
         const governed = strategy.items.filter((item) => item.strategy === "governed_artifact");
         setProcessRuntimeStrategyStatus(`${governed.length} governed types / BPMN runtime`);
+        setBpmnQualityStatus(`${quality.quality_gate} / ${quality.blocker_count} blockers / ${quality.cognitive_challenge_count} challenges`);
         setProcessDeploymentDryRunStatus(`${dryRun.status} / ${dryRun.execution_mode}`);
       })
       .catch((error: unknown) => {
@@ -1667,6 +1678,7 @@ function App() {
         setProcessDeploymentStatus("fallback");
         setProcessDeployabilityStatus("fallback");
         setProcessRuntimeStrategyStatus("fallback");
+        setBpmnQualityStatus("fallback");
         setProcessDeploymentDryRunStatus("fallback");
       });
     return () => controller.abort();
@@ -3869,6 +3881,11 @@ function App() {
             <span>Runtime Strategy</span>
             <strong>{processRuntimeStrategyStatus}</strong>
             <p>BPMN is deployed to Flowable runtime; DMN and CMMN stay under governance until dedicated runtime adapters are approved.</p>
+          </article>
+          <article className="feature-summary">
+            <span>BPMN Quality</span>
+            <strong>{bpmnQualityStatus}</strong>
+            <p>Business processes are checked for reachability, gateway alternatives, dead-end paths and cognitive challenges.</p>
           </article>
           <article className="feature-summary">
             <span>Supplement 1</span>

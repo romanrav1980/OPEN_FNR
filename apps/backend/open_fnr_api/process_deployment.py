@@ -100,6 +100,25 @@ class ProcessRuntimeStrategyReport(BaseModel):
     items: tuple[ProcessRuntimeStrategyItem, ...]
 
 
+class BpmnQualityIssue(BaseModel):
+    path: str
+    severity: str
+    issue_type: str
+    element_id: str
+    message: str
+    recommendation: str
+
+
+class BpmnQualityReport(BaseModel):
+    package_id: str
+    bpmn_total: int = Field(ge=0)
+    blocker_count: int = Field(ge=0)
+    warning_count: int = Field(ge=0)
+    cognitive_challenge_count: int = Field(ge=0)
+    quality_gate: str
+    issues: tuple[BpmnQualityIssue, ...]
+
+
 ElementTree.register_namespace("", BPMN_NS)
 ElementTree.register_namespace("flowable", FLOWABLE_NS)
 
@@ -203,6 +222,215 @@ def collect_bpmn_deployability_issues(path: Path) -> tuple[ProcessDeployabilityI
                     )
                 )
     return tuple(issues)
+
+
+FLOW_NODE_TAGS = (
+    "startEvent",
+    "endEvent",
+    "userTask",
+    "serviceTask",
+    "businessRuleTask",
+    "exclusiveGateway",
+    "inclusiveGateway",
+    "parallelGateway",
+)
+
+
+def collect_bpmn_quality_issues(path: Path) -> tuple[BpmnQualityIssue, ...]:
+    root = ElementTree.fromstring(path.read_bytes())
+    issues: list[BpmnQualityIssue] = []
+    nodes: dict[str, tuple[str, str]] = {}
+    duplicate_ids: set[str] = set()
+    seen_ids: set[str] = set()
+    for element in root.iter():
+        element_id = element.attrib.get("id")
+        if element_id:
+            if element_id in seen_ids:
+                duplicate_ids.add(element_id)
+            seen_ids.add(element_id)
+    for duplicate_id in sorted(duplicate_ids):
+        issues.append(
+            BpmnQualityIssue(
+                path=path.as_posix(),
+                severity="blocker",
+                issue_type="duplicate_id",
+                element_id=duplicate_id,
+                message="BPMN element id is duplicated.",
+                recommendation="Use stable unique ids for every BPMN element.",
+            )
+        )
+    for tag in FLOW_NODE_TAGS:
+        for element in root.findall(f".//{{{BPMN_NS}}}{tag}"):
+            element_id = element.attrib.get("id")
+            if element_id:
+                nodes[element_id] = (tag, element.attrib.get("name", ""))
+    incoming: dict[str, set[str]] = {node_id: set() for node_id in nodes}
+    outgoing: dict[str, set[str]] = {node_id: set() for node_id in nodes}
+    adjacency: dict[str, set[str]] = {node_id: set() for node_id in nodes}
+    reverse_adjacency: dict[str, set[str]] = {node_id: set() for node_id in nodes}
+    for flow in root.findall(f".//{{{BPMN_NS}}}sequenceFlow"):
+        flow_id = flow.attrib.get("id", "")
+        source = flow.attrib.get("sourceRef", "")
+        target = flow.attrib.get("targetRef", "")
+        if source not in nodes or target not in nodes:
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="blocker",
+                    issue_type="invalid_sequence_reference",
+                    element_id=flow_id,
+                    message=f"Sequence flow references unknown node: {source} -> {target}.",
+                    recommendation="Connect every sequence flow to existing BPMN flow nodes.",
+                )
+            )
+            continue
+        outgoing[source].add(flow_id)
+        incoming[target].add(flow_id)
+        adjacency[source].add(target)
+        reverse_adjacency[target].add(source)
+    starts = [node_id for node_id, (tag, _) in nodes.items() if tag == "startEvent"]
+    ends = [node_id for node_id, (tag, _) in nodes.items() if tag == "endEvent"]
+    if len(starts) != 1:
+        issues.append(
+            BpmnQualityIssue(
+                path=path.as_posix(),
+                severity="blocker",
+                issue_type="start_event_count",
+                element_id="process",
+                message=f"Process must have exactly one start event; found {len(starts)}.",
+                recommendation="Model one clear trigger per executable business process.",
+            )
+        )
+    if not ends:
+        issues.append(
+            BpmnQualityIssue(
+                path=path.as_posix(),
+                severity="blocker",
+                issue_type="missing_end_event",
+                element_id="process",
+                message="Process has no end event.",
+                recommendation="Add explicit end states for success, rejection or escalation outcomes.",
+            )
+        )
+    for node_id, (tag, name) in nodes.items():
+        if tag != "startEvent" and not incoming[node_id]:
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="blocker",
+                    issue_type="missing_incoming_flow",
+                    element_id=node_id,
+                    message=f"{tag} '{name}' has no incoming sequence flow.",
+                    recommendation="Every non-start step must be reachable from the process trigger.",
+                )
+            )
+        if tag != "endEvent" and not outgoing[node_id]:
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="blocker",
+                    issue_type="missing_outgoing_flow",
+                    element_id=node_id,
+                    message=f"{tag} '{name}' has no outgoing sequence flow.",
+                    recommendation="Every non-end step must have a next step or explicit terminal outcome.",
+                )
+            )
+        if tag in {"exclusiveGateway", "inclusiveGateway"} and name.strip().endswith("?") and len(outgoing[node_id]) < 2:
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="blocker",
+                    issue_type="question_gateway_without_alternative",
+                    element_id=node_id,
+                    message=f"Gateway '{name}' asks a question but has fewer than two outgoing paths.",
+                    recommendation="Add explicit yes/no or accepted/rejected paths so the business decision is meaningful.",
+                )
+            )
+        if tag == "userTask":
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="challenge",
+                    issue_type="human_task_role_sla_audit",
+                    element_id=node_id,
+                    message=f"Human task '{name}' must have role, SLA and audit expectations in process documentation.",
+                    recommendation="Verify candidate group, escalation SLA and audit event before production release.",
+                )
+            )
+    if starts:
+        reachable: set[str] = set()
+        stack = list(starts)
+        while stack:
+            current = stack.pop()
+            if current in reachable:
+                continue
+            reachable.add(current)
+            stack.extend(adjacency[current] - reachable)
+        for node_id in sorted(set(nodes) - reachable):
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="blocker",
+                    issue_type="unreachable_node",
+                    element_id=node_id,
+                    message="BPMN node is not reachable from the start event.",
+                    recommendation="Remove orphan branch or connect it to the intended business path.",
+                )
+            )
+    if ends:
+        can_reach_end: set[str] = set()
+        stack = list(ends)
+        while stack:
+            current = stack.pop()
+            if current in can_reach_end:
+                continue
+            can_reach_end.add(current)
+            stack.extend(reverse_adjacency[current] - can_reach_end)
+        for node_id in sorted(set(nodes) - can_reach_end):
+            issues.append(
+                BpmnQualityIssue(
+                    path=path.as_posix(),
+                    severity="blocker",
+                    issue_type="dead_end_path",
+                    element_id=node_id,
+                    message="BPMN node cannot reach any end event.",
+                    recommendation="Connect the path to a success, blocked, rejected or escalated end state.",
+                )
+            )
+    has_audit_named_step = any("audit" in name.lower() for _, name in nodes.values())
+    has_user_task = any(tag == "userTask" for tag, _ in nodes.values())
+    if has_user_task and not has_audit_named_step:
+        issues.append(
+            BpmnQualityIssue(
+                path=path.as_posix(),
+                severity="challenge",
+                issue_type="manual_decision_without_visible_audit",
+                element_id="process",
+                message="Process has human tasks but no visibly named audit step.",
+                recommendation="Confirm audit is implemented by engine listener, service task or backend event.",
+            )
+        )
+    return tuple(issues)
+
+
+def build_bpmn_quality_report(root_path: str | Path | None = None) -> BpmnQualityReport:
+    package = build_process_deployment_package(root_path)
+    issues: list[BpmnQualityIssue] = []
+    for artifact in package.artifacts:
+        if artifact.artifact_type == ProcessArtifactType.BPMN:
+            issues.extend(collect_bpmn_quality_issues(Path(artifact.path)))
+    blocker_count = sum(1 for issue in issues if issue.severity == "blocker")
+    warning_count = sum(1 for issue in issues if issue.severity == "warning")
+    cognitive_challenge_count = sum(1 for issue in issues if issue.severity == "challenge")
+    return BpmnQualityReport(
+        package_id=package.package_id,
+        bpmn_total=package.bpmn_count,
+        blocker_count=blocker_count,
+        warning_count=warning_count,
+        cognitive_challenge_count=cognitive_challenge_count,
+        quality_gate="passed" if blocker_count == 0 else "blocked",
+        issues=tuple(issues),
+    )
 
 
 def build_process_deployability_report(root_path: str | Path | None = None) -> ProcessDeployabilityReport:
@@ -415,6 +643,11 @@ def get_current_process_deployability_report() -> ProcessDeployabilityReport:
 @router.get("/packages/current/runtime-strategy", response_model=ProcessRuntimeStrategyReport)
 def get_current_process_runtime_strategy_report() -> ProcessRuntimeStrategyReport:
     return build_process_runtime_strategy_report()
+
+
+@router.get("/packages/current/bpmn-quality", response_model=BpmnQualityReport)
+def get_current_bpmn_quality_report() -> BpmnQualityReport:
+    return build_bpmn_quality_report()
 
 
 @router.post("/packages/current/deploy", response_model=ProcessDeploymentResult)

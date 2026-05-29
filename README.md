@@ -2,6 +2,8 @@
 
 Supplement 1 governance is adopted through [TECHNICAL_SPEC_SUPPLEMENT_1.md](TECHNICAL_SPEC_SUPPLEMENT_1.md) and [SUPPLEMENT_1_ADOPTION_MATRIX.md](SUPPLEMENT_1_ADOPTION_MATRIX.md). Operational gates are exposed under `/supplement/*` and covered by `tests/backend/test_supplement_governance.py`.
 
+BPMN process quality is governed by [BPMN_QUALITY_GOVERNANCE.md](BPMN_QUALITY_GOVERNANCE.md). The `/process-deployment/packages/current/bpmn-quality` gate checks graph logic and cognitive challenges for every BPMN process.
+
 > Платформа прогнозирования продаж и пополнения запасов торговой сети до **30 000 магазинов** и среднего ассортимента **5 500 SKU**.
 
 <p>

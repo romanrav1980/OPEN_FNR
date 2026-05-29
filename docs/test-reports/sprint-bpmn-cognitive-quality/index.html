@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - BPMN Cognitive Quality Gate</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111318; color: #f4f4f5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ff5f6d; letter-spacing: 0; }
+      section { margin: 24px 0; padding: 20px; border: 1px solid #2a2f3a; background: #171a21; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #2a2f3a; text-align: left; vertical-align: top; }
+      th { color: #ffb3ba; }
+      .ok { color: #8fd694; font-weight: 700; }
+      .warn { color: #ffd166; font-weight: 700; }
+      code { color: #ffb3ba; }
+      img { width: 100%; border: 1px solid #2a2f3a; border-radius: 8px; background: #0f1117; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>BPMN Cognitive Quality Gate</h1>
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Проверяем BPMN-модели не только как XML и deployable artifacts, а как бизнес-логику: есть ли понятный
+          старт, завершения, достижимость всех шагов, отсутствие тупиков, реальные альтернативы у gateway-вопросов,
+          а также challenge review для human tasks, SLA и audit.
+        </p>
+      </section>
+      <section>
+        <h2>Скриншот UI</h2>
+        <img src="screenshots/bpmn-quality-admin.png" alt="Admin Console BPMN quality gate" />
+      </section>
+      <section>
+        <h2>Тестирование бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Сканируем все 38 BPMN.</td><td>Проверить полный процессный каталог.</td><td>Каждая модель разобрана как граф.</td><td class="ok">38 BPMN проверены.</td></tr>
+            <tr><td>2</td><td>Проверяем start/end, sequence refs и reachability.</td><td>Исключить неисполняемые и тупиковые процессы.</td><td>0 blocker.</td><td class="ok">0 blocker.</td></tr>
+            <tr><td>3</td><td>Проверяем question gateways.</td><td>Вопрос в процессе должен иметь альтернативы.</td><td>Нет gateway без альтернативного пути.</td><td class="ok">2 найденных дефекта исправлены.</td></tr>
+            <tr><td>4</td><td>Фиксируем human-task challenges.</td><td>Перед production нужны роль, SLA, escalation и audit.</td><td>Challenges видны в API.</td><td class="warn">Требуют business sign-off, не блокируют dev.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Исправленные BPMN</h2>
+        <table>
+          <tbody>
+            <tr><td><code>diagnostic_insight_review_process.bpmn20.xml</code></td><td class="ok">Добавлен no-action audit path.</td></tr>
+            <tr><td><code>supplier_collaboration_process.bpmn20.xml</code></td><td class="ok">Добавлен no-risk confirmation path.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Результаты</h2>
+        <table>
+          <tbody>
+            <tr><td>Targeted process tests</td><td class="ok">17 passed</td></tr>
+            <tr><td>Full backend regression</td><td class="ok">438 passed</td></tr>
+            <tr><td>Frontend build</td><td class="ok">Passed</td></tr>
+            <tr><td>Docker Compose config</td><td class="ok">DEV/TEST/STAGE valid</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

@@ -28,6 +28,7 @@ Status: handoff after Supplement 1 adoption checkpoint.
 | JWT/JWKS signature verification | closed for RS256 production auth boundary | `docs/test-reports/sprint-jwt-jwks-signature/index.html` |
 | IdP readiness gate | closed for issuer/audience/JWKS readiness diagnostics | `docs/test-reports/sprint-idp-readiness-gate/index.html` |
 | Supplement 1 adoption | closed for A-M governance gates and API/test coverage | `SUPPLEMENT_1_ADOPTION_MATRIX.md` |
+| BPMN cognitive quality gate | closed for structural blockers and challenge reporting | `BPMN_QUALITY_GOVERNANCE.md` |
 | Pilot shadow pack | closed for first runbook/rollback package | `docs/test-reports/sprint-pilot-shadow-pack/index.html` |
 | Backend regression | green | `python -m pytest` -> 418 passed |
 | Frontend build | green | `npm.cmd run build` |
@@ -66,11 +67,12 @@ Status: handoff after Supplement 1 adoption checkpoint.
 | Supplement 1 business decisions open | Some parameters cannot be set by engineering | Resolve `/supplement/open-questions` M-01...M-12 before their phase gates |
 | UI still keeps most modules in one file | Productization velocity and test isolation suffer | Continue route split module by module after pilot source wiring |
 | DMN/CMMN runtime adapters are optional future work | Decision/case artifacts are governed but not Flowable-runtime-executed | Keep strategy visible in API/UI and approve adapters only if business needs runtime execution |
+| BPMN cognitive challenges remain review items | Human tasks still need role/SLA/audit sign-off before production | Use `/process-deployment/packages/current/bpmn-quality` in every process release review |
 | Performance still synthetic/smoke | EPYC sizing not proven on real data | Run pilot-scale synthetic plus first real-data profile before controlled export |
 
 ## Saved Context For Resume
 
 - Latest pushed hardening commit before this checkpoint: `08f13c5`; current checkpoint is the Supplement 1 adoption work.
-- Backend regression count after GOV-SUP-1: 436 tests passed.
+- Backend regression count after PROC-QUALITY-1: 438 tests passed.
 - Target adapter reports are under `docs/test-reports`.
 - The next autonomous implementation should start with `REAL-PILOT-1 Actual Source Connection` when real source files or API credentials are available.
