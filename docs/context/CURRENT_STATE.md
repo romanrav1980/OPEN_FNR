@@ -1161,3 +1161,21 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_ml_training.py tests/backend/test_ml_models.py tests/backend/test_ml_governance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 18 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 546 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after ML-1: 12 sprints (`ML-2..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## ML-2 Forecast Training And Retraining
+
+- ML-2 completed as forecast training/retraining foundation.
+- Completion note: `docs/context/ML2_COMPLETION.md`.
+- Specification added: `ML_FORECAST_TRAINING_RETRAINING_SPEC.md`.
+- Backend added:
+  - `apps/backend/open_fnr_api/ml_training_jobs.py`;
+  - `/ml/training/runs`;
+  - `/ml/training/runs/{run_id}`;
+  - `/ml/training/runs/{run_id}/release-readiness`;
+  - `/ml/training/retraining-plan`.
+- Tests added:
+  - `tests/backend/test_ml_training_jobs.py`.
+- Verification:
+  - `pytest tests/backend/test_ml_training_jobs.py tests/backend/test_ml_training.py tests/backend/test_ml_models.py tests/backend/test_ml_governance.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 22 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 550 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after ML-2: 11 sprints (`ML-3..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).

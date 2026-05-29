@@ -17,6 +17,7 @@ from .forecast import router as forecast_router
 from .ml_models import router as ml_models_router
 from .ml_governance import router as ml_governance_router
 from .ml_training import router as ml_training_router
+from .ml_training_jobs import router as ml_training_jobs_router
 from .multi_echelon import router as multi_echelon_router
 from .observability import router as observability_router
 from .performance import router as performance_router
@@ -77,6 +78,7 @@ app.include_router(forecast_router)
 app.include_router(ml_models_router)
 app.include_router(ml_governance_router)
 app.include_router(ml_training_router)
+app.include_router(ml_training_jobs_router)
 app.include_router(multi_echelon_router)
 app.include_router(observability_router)
 app.include_router(performance_router)
@@ -150,6 +152,7 @@ def metadata() -> dict[str, object]:
             "ml-models",
             "ml-governance",
             "ml-training-data",
+            "ml-training",
             "marts",
             "promo",
             "procurement",
