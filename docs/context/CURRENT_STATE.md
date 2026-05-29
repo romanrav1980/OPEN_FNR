@@ -1023,3 +1023,27 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/quality/test_no_committed_secrets.py tests/backend/test_security.py tests/backend/test_policy.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 25 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 516 passed, 1 warning about `.pytest_cache` permissions.
+
+## SEC-4 Security Audit And Access Review
+
+- SEC-4 completed as access review foundation.
+- Completion note: `docs/context/SEC4_COMPLETION.md`.
+- Security access review specification added: `SECURITY_ACCESS_REVIEW_SPEC.md`.
+- Access review BPMN added:
+  - `processes/security/access_review_process.bpmn20.xml`.
+- Security API added:
+  - `GET /security/access-review/report`.
+- Access review report includes:
+  - user roles;
+  - region/category/supplier scopes;
+  - excessive access flag;
+  - recommendation;
+  - process key.
+- Tests added/updated:
+  - `tests/backend/test_security.py`;
+  - `tests/backend/test_process_deployment.py`;
+  - `tests/process/test_security_access_review_process.py`.
+- Verification:
+  - `pytest tests/backend/test_security.py tests/backend/test_policy.py tests/process/test_security_access_review_process.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 28 passed, 1 warning about `.pytest_cache` permissions.
+  - `pytest tests/backend/test_process_deployment.py tests/backend/test_security.py tests/process/test_security_access_review_process.py` -> 29 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 519 passed, 1 warning about `.pytest_cache` permissions.

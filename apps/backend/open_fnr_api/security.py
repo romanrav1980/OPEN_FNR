@@ -83,6 +83,30 @@ class SecurityAuditEvent(BaseModel):
     created_at: datetime
 
 
+class AccessReviewItem(BaseModel):
+    user_id: str
+    email: str
+    roles: tuple[RoleName, ...]
+    regions: tuple[str, ...]
+    categories: tuple[str, ...]
+    suppliers: tuple[str, ...]
+    status: str
+    recommendation: str
+    evidence: tuple[str, ...]
+
+
+class AccessReviewReport(BaseModel):
+    review_id: str
+    business_date: str
+    status: str
+    reviewer_role: RoleName
+    total_users: int = Field(ge=0)
+    excessive_access_count: int = Field(ge=0)
+    inactive_access_count: int = Field(ge=0)
+    items: tuple[AccessReviewItem, ...]
+    process_key: str = "access_review_process"
+
+
 class IdpProvisionPreview(BaseModel):
     target: str
     request_id: str
@@ -221,6 +245,46 @@ def build_idp_provision(access_request: AccessRequest) -> IdpProvisionPreview:
     )
 
 
+def build_access_review_report(business_date: str, reviewer_role: RoleName) -> AccessReviewReport:
+    assert_any_role(role_principal(reviewer_role), {RoleName.ADMIN, RoleName.SECURITY_OWNER}, "access review requires Security Owner or Admin role")
+    items: list[AccessReviewItem] = []
+    for user in USERS:
+        evidence = [
+            f"roles={','.join(role.value for role in user.roles)}",
+            f"regions={','.join(user.regions)}",
+            f"categories={','.join(user.categories)}",
+            f"suppliers={','.join(user.suppliers)}",
+        ]
+        excessive = RoleName.ADMIN in user.roles and "all" in user.regions and "all" in user.categories
+        status = "review_required" if excessive else "ok"
+        recommendation = "confirm_admin_need_or_reduce_scope" if excessive else "keep_current_access"
+        items.append(
+            AccessReviewItem(
+                user_id=user.user_id,
+                email=user.email,
+                roles=user.roles,
+                regions=user.regions,
+                categories=user.categories,
+                suppliers=user.suppliers,
+                status=status,
+                recommendation=recommendation,
+                evidence=tuple(evidence),
+            )
+        )
+    excessive_count = sum(1 for item in items if item.status == "review_required")
+    inactive_count = sum(1 for user in USERS if not user.active)
+    return AccessReviewReport(
+        review_id=f"access-review-{business_date}",
+        business_date=business_date,
+        status="action_required" if excessive_count or inactive_count else "passed",
+        reviewer_role=reviewer_role,
+        total_users=len(items),
+        excessive_access_count=excessive_count,
+        inactive_access_count=inactive_count,
+        items=tuple(items),
+    )
+
+
 def send_idp_provision_to_target(provision: IdpProvisionPreview) -> tuple[str, str]:
     if not settings.idp_provisioning_url:
         return "202", "sent to local IdP fallback"
@@ -261,6 +325,11 @@ def list_access_requests(actor_role: RoleName = RoleName.SECURITY_OWNER) -> dict
         "access request visibility denied",
     )
     return {"items": [item.model_dump(mode="json") for item in ACCESS_REQUESTS], "total": len(ACCESS_REQUESTS)}
+
+
+@router.get("/access-review/report", response_model=AccessReviewReport)
+def get_access_review_report(business_date: str, reviewer_role: RoleName = RoleName.SECURITY_OWNER) -> AccessReviewReport:
+    return build_access_review_report(business_date, reviewer_role)
 
 
 @router.post("/access-requests/{request_id}/{action}")

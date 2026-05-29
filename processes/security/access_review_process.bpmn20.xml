@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/security">
+  <process id="access_review_process" name="Periodic access review process" isExecutable="true">
+    <startEvent id="start_access_review" name="Access review scheduled" />
+    <sequenceFlow id="flow_start_to_collect" sourceRef="start_access_review" targetRef="collect_access_evidence" />
+    <serviceTask id="collect_access_evidence" name="Collect access evidence" />
+    <sequenceFlow id="flow_collect_to_review" sourceRef="collect_access_evidence" targetRef="review_excessive_access" />
+    <userTask id="review_excessive_access" name="Review excessive access" />
+    <sequenceFlow id="flow_review_to_decision" sourceRef="review_excessive_access" targetRef="access_review_decision" />
+    <exclusiveGateway id="access_review_decision" name="Remediation required?" />
+    <sequenceFlow id="flow_remediate" sourceRef="access_review_decision" targetRef="remediate_access_scope" />
+    <sequenceFlow id="flow_no_remediation" sourceRef="access_review_decision" targetRef="record_review_passed" />
+    <userTask id="remediate_access_scope" name="Remediate access scope" />
+    <sequenceFlow id="flow_remediate_to_audit" sourceRef="remediate_access_scope" targetRef="write_access_review_audit" />
+    <serviceTask id="record_review_passed" name="Record review passed" />
+    <sequenceFlow id="flow_passed_to_audit" sourceRef="record_review_passed" targetRef="write_access_review_audit" />
+    <serviceTask id="write_access_review_audit" name="Write access review audit" />
+    <sequenceFlow id="flow_audit_to_end" sourceRef="write_access_review_audit" targetRef="end_access_review" />
+    <endEvent id="end_access_review" name="Access review completed" />
+  </process>
+</definitions>

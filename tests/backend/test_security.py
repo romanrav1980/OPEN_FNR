@@ -208,6 +208,33 @@ def test_access_request_rejects_wrong_actor_role() -> None:
     assert response.json()["detail"] == "Security Owner role required"
 
 
+def test_access_review_report_requires_security_owner_or_admin() -> None:
+    response = client.get(
+        "/security/access-review/report",
+        params={"business_date": "2026-05-29", "reviewer_role": "Viewer"},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "access review requires Security Owner or Admin role"
+
+
+def test_access_review_report_flags_excessive_admin_access() -> None:
+    response = client.get(
+        "/security/access-review/report",
+        params={"business_date": "2026-05-29", "reviewer_role": "Security Owner"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["review_id"] == "access-review-2026-05-29"
+    assert payload["process_key"] == "access_review_process"
+    assert payload["status"] == "action_required"
+    assert payload["excessive_access_count"] >= 1
+    admin_item = next(item for item in payload["items"] if item["user_id"] == "u-admin-001")
+    assert admin_item["status"] == "review_required"
+    assert admin_item["recommendation"] == "confirm_admin_need_or_reduce_scope"
+
+
 def test_security_helpers_cover_role_and_scope() -> None:
     admin = USERS[0]
     viewer = USERS[1]

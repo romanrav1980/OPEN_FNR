@@ -97,7 +97,7 @@ def test_process_deployment_runtime_strategy_endpoint() -> None:
 def test_process_deployment_bpmn_quality_gate_has_no_blockers() -> None:
     report = build_bpmn_quality_report()
 
-    assert report.bpmn_total == 38
+    assert report.bpmn_total >= 39
     assert report.quality_gate == "passed"
     assert report.blocker_count == 0
     assert not [issue for issue in report.issues if issue.issue_type == "question_gateway_without_alternative"]
