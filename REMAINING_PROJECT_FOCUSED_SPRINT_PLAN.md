@@ -62,7 +62,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | DEP-1 | Environment Topology | DEV/TEST/STAGE/PROD Compose/Kubernetes decision and config matrix | Completed foundation |
 | DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | Completed foundation |
 | DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | Completed foundation |
-| DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | IH-4, DEP-2 |
+| DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | Completed foundation |
 | PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | RI-6 |
 | PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | ML-4, UI-5 |
 | PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | PILOT-2, DEP-4 |
@@ -781,6 +781,13 @@ Acceptance criteria:
 
 - failed release has documented recovery path;
 - DR evidence is available before pilot export.
+
+Completion checkpoint:
+
+- DEP-4 runbook is stored in `docs/runbooks/ROLLBACK_DR_DRILL_RUNBOOK.md`;
+- release-gate API exposes rollback plan, DR drill evidence and degraded modes;
+- BPMN `rollback_drill_process` covers export freeze, application rollback, migration recovery, restore smoke, degraded mode, reconciliation and evidence write;
+- automated tests validate rollback plan, DR evidence, degraded mode, runbook and BPMN control points.
 
 ### PILOT-1. Pilot Scope And Data Readiness
 

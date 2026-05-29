@@ -1277,3 +1277,27 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_observability.py tests/operations/test_observability_runbooks.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 18 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 576 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after DEP-3: 6 sprints (`DEP-4`, `PILOT-1..PILOT-5`).
+
+## DEP-4 Rollback And DR Drill
+
+- DEP-4 completed as rollback/DR drill foundation.
+- Completion note: `docs/context/DEP4_COMPLETION.md`.
+- Runbook added:
+  - `docs/runbooks/ROLLBACK_DR_DRILL_RUNBOOK.md`.
+- Process artifact added:
+  - `processes/release-gate/rollback_drill_process.bpmn20.xml`.
+- Process Engine metadata registered:
+  - `rollback_drill_process`.
+- Backend extended:
+  - `GET /release-gate/rollback-plan`;
+  - `GET /release-gate/dr-drill`;
+  - `GET /release-gate/degraded-modes`.
+- Tests added/updated:
+  - `tests/backend/test_release_gate.py`;
+  - `tests/process/test_rollback_drill_process.py`;
+  - `tests/operations/test_rollback_dr_runbook.py`.
+- Verification:
+  - `pytest tests/backend/test_release_gate.py tests/backend/test_process_engine.py tests/process/test_rollback_drill_process.py tests/operations/test_rollback_dr_runbook.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 28 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 581 passed, 1 warning about `.pytest_cache` permissions.
+- R6 Deployment and operations status: completed foundation.
+- Remaining focused sprint count after DEP-4: 5 sprints (`PILOT-1..PILOT-5`).

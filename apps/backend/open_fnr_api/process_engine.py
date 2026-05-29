@@ -400,6 +400,16 @@ PROCESS_DEFINITIONS: tuple[ProcessDefinition, ...] = (
         owner_role="Product Owner",
     ),
     ProcessDefinition(
+        key="rollback_drill_process",
+        name="Rollback and DR drill process",
+        artifact_type=ProcessArtifactType.BPMN,
+        version=1,
+        status=ProcessDefinitionStatus.DEPLOYED,
+        deployment_id="flowable-dev-deploy-20260529-025",
+        source_path="processes/release-gate/rollback_drill_process.bpmn20.xml",
+        owner_role="Release Manager",
+    ),
+    ProcessDefinition(
         key="incident_management_process",
         name="Incident management process",
         artifact_type=ProcessArtifactType.BPMN,

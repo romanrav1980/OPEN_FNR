@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  targetNamespace="https://open-fnr.local/release-gate">
+  <process id="rollback_drill_process" name="Rollback and DR drill process" isExecutable="true">
+    <startEvent id="start_release_failure_detected" name="Release failure detected" />
+    <sequenceFlow id="flow_start_to_freeze" sourceRef="start_release_failure_detected" targetRef="freeze_controlled_exports" />
+    <serviceTask id="freeze_controlled_exports" name="Freeze controlled exports" />
+    <sequenceFlow id="flow_freeze_to_decision" sourceRef="freeze_controlled_exports" targetRef="classify_rollback_path" />
+    <businessRuleTask id="classify_rollback_path" name="Classify rollback path" />
+    <sequenceFlow id="flow_decision_to_restore_app" sourceRef="classify_rollback_path" targetRef="restore_previous_application_version" />
+    <serviceTask id="restore_previous_application_version" name="Restore previous application version" />
+    <sequenceFlow id="flow_restore_app_to_migration" sourceRef="restore_previous_application_version" targetRef="apply_migration_recovery" />
+    <userTask id="apply_migration_recovery" name="Apply migration rollback or forward fix" />
+    <sequenceFlow id="flow_migration_to_restore" sourceRef="apply_migration_recovery" targetRef="validate_backup_restore_smoke" />
+    <serviceTask id="validate_backup_restore_smoke" name="Validate backup restore smoke" />
+    <sequenceFlow id="flow_restore_to_degraded" sourceRef="validate_backup_restore_smoke" targetRef="activate_degraded_mode_if_needed" />
+    <userTask id="activate_degraded_mode_if_needed" name="Activate degraded mode if needed" />
+    <sequenceFlow id="flow_degraded_to_reconcile" sourceRef="activate_degraded_mode_if_needed" targetRef="run_reconciliation_gate" />
+    <serviceTask id="run_reconciliation_gate" name="Run reconciliation gate" />
+    <sequenceFlow id="flow_reconcile_to_gateway" sourceRef="run_reconciliation_gate" targetRef="resume_exports_gateway" />
+    <exclusiveGateway id="resume_exports_gateway" name="Resume exports?" />
+    <sequenceFlow id="flow_resume_exports" sourceRef="resume_exports_gateway" targetRef="resume_controlled_exports" />
+    <sequenceFlow id="flow_keep_stopped" sourceRef="resume_exports_gateway" targetRef="record_exports_stopped" />
+    <serviceTask id="resume_controlled_exports" name="Resume controlled exports" />
+    <sequenceFlow id="flow_resume_to_close" sourceRef="resume_controlled_exports" targetRef="write_dr_evidence" />
+    <serviceTask id="record_exports_stopped" name="Record exports stopped decision" />
+    <sequenceFlow id="flow_stopped_to_close" sourceRef="record_exports_stopped" targetRef="write_dr_evidence" />
+    <serviceTask id="write_dr_evidence" name="Write DR drill evidence" />
+    <sequenceFlow id="flow_evidence_to_end" sourceRef="write_dr_evidence" targetRef="end_dr_drill_complete" />
+    <endEvent id="end_dr_drill_complete" name="DR drill complete" />
+  </process>
+</definitions>
