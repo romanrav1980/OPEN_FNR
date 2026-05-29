@@ -125,6 +125,30 @@ type PublicationPackageApiResponse = {
   items: PublicationPackageApiItem[];
 };
 
+type SupplierShareRow = {
+  package: string;
+  supplier: string;
+  sku: string;
+  dc: string;
+  forecast: string;
+  orderForecast: string;
+  status: string;
+  cutoff: string;
+  channel: string;
+};
+
+type SupplierShareApiItem = {
+  package_id: string;
+  supplier_id: string;
+  sku: string;
+  dc: string;
+  forecast_qty: number;
+  order_forecast_qty: number;
+  status: string;
+  cutoff_at: string;
+  export_channel: string;
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -964,7 +988,7 @@ const diagnosticLinkedObjects = [
   { type: "Inbound", object: "inbound-po-001", state: "late" },
 ];
 
-const supplierShareRows = [
+const supplierShareRows: SupplierShareRow[] = [
   {
     package: "supplier-share-20260602-sup-fast",
     supplier: "SUP_FAST",
@@ -974,6 +998,7 @@ const supplierShareRows = [
     orderForecast: "12 000",
     status: "forecast_sent",
     cutoff: "2026-06-02 16:00",
+    channel: "local_fallback",
   },
 ];
 
@@ -1047,6 +1072,8 @@ function App() {
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimePublicationPackages, setRuntimePublicationPackages] =
     React.useState<PublicationPackageRow[]>(publicationPackages);
+  const [supplierApiStatus, setSupplierApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeSupplierShareRows, setRuntimeSupplierShareRows] = React.useState<SupplierShareRow[]>(supplierShareRows);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1149,6 +1176,40 @@ function App() {
           return;
         }
         setPublicationApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch(apiUrl("/supplier-collaboration/forecast-share"), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Supplier collaboration API returned ${response.status}`);
+        }
+        return response.json() as Promise<SupplierShareApiItem[]>;
+      })
+      .then((payload) => {
+        setRuntimeSupplierShareRows(
+          payload.map((share) => ({
+            package: share.package_id,
+            supplier: share.supplier_id,
+            sku: share.sku,
+            dc: share.dc,
+            forecast: share.forecast_qty.toLocaleString("ru-RU"),
+            orderForecast: share.order_forecast_qty.toLocaleString("ru-RU"),
+            status: share.status,
+            cutoff: share.cutoff_at,
+            channel: share.export_channel,
+          })),
+        );
+        setSupplierApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setSupplierApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -4231,12 +4292,12 @@ function App() {
           <article className="feature-summary">
             <span>Forecast Share</span>
             <strong>SUP_FAST forecast package sent</strong>
-            <p>30-day forecast and order forecast are exported through API/CSV mock with idempotency key.</p>
+            <p>30-day forecast and order forecast use configured supplier target URL or local fallback.</p>
           </article>
           <article className="feature-summary">
-            <span>Supplier Response</span>
-            <strong>9 000 of 12 000 confirmed</strong>
-            <p>Short confirmation escalates supply risk before cutoff and opens exception review.</p>
+            <span>API Status</span>
+            <strong>{supplierApiStatus}</strong>
+            <p>Forecast share rows are loaded from `/supplier-collaboration/forecast-share` when backend is available.</p>
           </article>
         </div>
         <div className="table-shell">
@@ -4251,10 +4312,11 @@ function App() {
                 <th>Order forecast</th>
                 <th>Status</th>
                 <th>Cutoff</th>
+                <th>Channel</th>
               </tr>
             </thead>
             <tbody>
-              {supplierShareRows.map((row) => (
+              {runtimeSupplierShareRows.map((row) => (
                 <tr key={row.package}>
                   <td>{row.package}</td>
                   <td>{row.supplier}</td>
@@ -4264,6 +4326,7 @@ function App() {
                   <td>{row.orderForecast}</td>
                   <td>{row.status}</td>
                   <td>{row.cutoff}</td>
+                  <td>{row.channel}</td>
                 </tr>
               ))}
             </tbody>
@@ -4332,10 +4395,11 @@ function App() {
             </div>
           </aside>
           <aside className="dq-detail">
-            <span className="eyebrow">Integration Mock</span>
-            <h3>API/CSV package</h3>
+            <span className="eyebrow">Integration Target</span>
+            <h3>HTTP target or local fallback</h3>
             <p>
               Export package contains supplier, SKU, DC, horizon, order forecast, cutoff and idempotency key.
+              Target URL is controlled by environment configuration.
             </p>
           </aside>
         </div>

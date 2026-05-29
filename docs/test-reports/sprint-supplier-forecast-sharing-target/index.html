@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR Supplier Forecast Sharing Target Test Report</title>
+    <style>
+      body { margin: 0; background: #1e1e1e; color: #d4d4d4; font-family: Arial, sans-serif; }
+      main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 32px 0; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 30px; }
+      h2 { margin-top: 28px; }
+      p { margin-top: 8px; color: #aeb4bf; line-height: 1.55; }
+      .eyebrow { color: #b83a4b; font-weight: 700; text-transform: uppercase; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; border: 1px solid #3a3a3a; background: #252526; }
+      th, td { border-bottom: 1px solid #3a3a3a; padding: 12px; text-align: left; vertical-align: top; }
+      th { color: #9da3ae; font-size: 12px; text-transform: uppercase; }
+      tr:last-child td { border-bottom: 0; }
+      .ok { color: #8fd19e; font-weight: 700; }
+      img { width: 100%; margin-top: 16px; border: 1px solid #3a3a3a; }
+      code { color: #ffcf70; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">UI, API и бизнес-процесс тест</p>
+      <h1>Supplier Forecast Sharing Target</h1>
+      <p>
+        Аннотация: тестируем отправку прогноза поставщику через управляемый target adapter:
+        local fallback для DEV/TEST и HTTP endpoint через <code>OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL</code> для stage/prod.
+      </p>
+
+      <h2>Скриншот</h2>
+      <p>UI получает supplier forecast share rows из <code>GET /supplier-collaboration/forecast-share</code>.</p>
+      <img src="screenshots/supplier-forecast-sharing.png" alt="Supplier forecast sharing in OPEN FNR Control Tower" />
+
+      <h2>UI-тестирование</h2>
+      <table>
+        <thead><tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Открываем Supplier Collaboration.</td><td>Проверяем рабочее место supplier coordinator.</td><td>Секция отображается.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем API status.</td><td>Нужно видеть live/fallback режим.</td><td>При backend online статус live.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем forecast share table.</td><td>Нужны supplier, SKU, DC, forecast, order forecast, cutoff.</td><td>Все поля видны.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем channel.</td><td>Пользователь должен понимать, куда уходит forecast share.</td><td>Видно local_fallback или http_api.</td><td class="ok">Пройдено.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Тестирование бизнес-процесса</h2>
+      <table>
+        <thead><tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидаемый результат</th><th>Факт</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Запрашиваем forecast share.</td><td>Пакет должен иметь idempotency key.</td><td>Возвращается supplier-share package.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Пробуем send с wrong account.</td><td>Write operation требует service account.</td><td>403.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Отправляем через local fallback.</td><td>DEV/TEST должны работать без реального supplier endpoint.</td><td>202 и audit_recorded=true.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Отправляем через configured HTTP target.</td><td>Stage/prod должны подключать endpoint из env.</td><td>POST с Idempotency-Key.</td><td class="ok">Покрыто monkeypatch-тестом.</td></tr>
+          <tr><td>5</td><td>Supplier подтверждает меньше requested.</td><td>Short confirmation должна создать supply risk.</td><td>status escalated.</td><td class="ok">Покрыто тестом.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Проверки</h2>
+      <table>
+        <thead><tr><th>Тип</th><th>Команда</th><th>Результат</th></tr></thead>
+        <tbody>
+          <tr><td>Backend regression</td><td><code>python -m pytest</code></td><td class="ok">376 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Compose DEV/TEST/STAGE</td><td><code>docker compose config --quiet</code></td><td class="ok">passed</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>

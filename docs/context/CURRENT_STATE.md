@@ -412,6 +412,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 - Supplier shortage CMMN: `processes/supplier-collaboration/supplier_shortage_case.cmmn.xml`.
 - UI Supplier Collaboration section with forecast share, supplier confirmation, performance and exception actions.
 - HTML test report with screenshot: `docs/test-reports/sprint-35-supplier-collaboration/index.html`.
+- Supplier forecast sharing target hardening report: `docs/test-reports/sprint-supplier-forecast-sharing-target/index.html`.
 
 ## Sprint 36 Artifacts
 
