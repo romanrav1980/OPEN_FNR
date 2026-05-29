@@ -917,3 +917,18 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/orchestration/test_erp_commercial_ingestion.py tests/data/test_clickhouse_erp_schema.py tests/data/test_contract_validation.py tests/data/test_source_contract_freeze.py tests/backend/test_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 33 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 499 passed, 1 warning about `.pytest_cache` permissions.
+
+## RI-5 MDM And Promo Ingestion
+
+- RI-5 completed as ingestion foundation.
+- Completion note: `docs/context/RI5_COMPLETION.md`.
+- MDM/Promo ingestion specification added: `MDM_PROMO_INGESTION_SPEC.md`.
+- MDM quality plan helper added:
+  - `build_mdm_quality_plan()`;
+  - hierarchy, lifecycle, fresh attributes, supplier reference, routing and replenishment calendar checks.
+- Promo quality plan helper added:
+  - `build_promo_quality_plan()`;
+  - SKU/store scope, date range, overlap, price/discount, display location and display capacity checks.
+- Verification:
+  - `pytest tests/orchestration/test_mdm_reference_ingestion.py tests/orchestration/test_promo_plan_ingestion.py tests/data/test_clickhouse_mdm_schema.py tests/data/test_clickhouse_promo_schema.py tests/data/test_source_contract_freeze.py tests/backend/test_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 27 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 501 passed, 1 warning about `.pytest_cache` permissions.

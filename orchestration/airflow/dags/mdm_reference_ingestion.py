@@ -20,6 +20,30 @@ def build_mdm_manifest(contract_name: str, business_date: str) -> dict[str, obje
     }
 
 
+def build_mdm_quality_plan(business_date: str) -> dict[str, object]:
+    contracts = (
+        {
+            "contract_name": "mdm_product_line",
+            "quality_checks": ("hierarchy_integrity", "lifecycle_validity", "fresh_attributes", "supplier_reference"),
+            "blocks": ("assortment", "fresh", "lifecycle", "forecast", "replenishment"),
+            "owner_role": "MDM Data Owner",
+        },
+        {
+            "contract_name": "mdm_store_line",
+            "quality_checks": ("region_integrity", "timezone_validity", "warehouse_routing", "replenishment_calendar"),
+            "blocks": ("store_scope", "replenishment_calendar", "routing", "forecast", "replenishment"),
+            "owner_role": "MDM Data Owner",
+        },
+    )
+    return {
+        "business_date": business_date,
+        "source_system": "MDM",
+        "contracts": contracts,
+        "required_count": len(contracts),
+        "failure_action": "create_mdm_data_owner_recovery_task",
+    }
+
+
 if dag is not None and task is not None:
 
     @dag(
@@ -46,9 +70,14 @@ if dag is not None and task is not None:
             return [{**manifest, "dq_status": "accepted"} for manifest in manifests]
 
         @task
+        def validate_master_data_quality(manifests: list[dict[str, object]]) -> list[dict[str, object]]:
+            plan = build_mdm_quality_plan(str(manifests[0]["business_date"]))
+            return [{**manifest, "quality_plan": plan, "quality_status": "accepted"} for manifest in manifests]
+
+        @task
         def publish_reference_data(manifests: list[dict[str, object]]) -> list[dict[str, object]]:
             return [{**manifest, "publish_status": "published"} for manifest in manifests]
 
-        publish_reference_data(run_master_data_dq(validate_schema(create_manifests())))
+        publish_reference_data(validate_master_data_quality(run_master_data_dq(validate_schema(create_manifests()))))
 
     mdm_reference_ingestion_dag()
