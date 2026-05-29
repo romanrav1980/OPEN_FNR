@@ -627,7 +627,17 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - PN-9 evidence report:
   - `docs/test-reports/sprint-pn-9-process-navigator-ui/index.html`;
   - `docs/test-reports/sprint-pn-9-process-navigator-ui/screenshots/process-navigator-ui.png`.
-- Process Navigator implementation plan now marks PN-3..PN-9 as completed; remaining PN sprints are PN-10, PN-11 and PN-12.
+- PN-10 has completed accessibility and refresh hardening:
+  - frontend config now includes runtime mode, allowed environments and Process Navigator polling intervals;
+  - Process Navigator UI has an environment selector and sends `env` to map, alert, drilldown, conformance, performance, versions and infrastructure endpoints;
+  - the UI shows auto-refresh interval, generated timestamp and data freshness;
+  - manual refresh increments a refresh tick without changing route state;
+  - keyboard Escape zooms one semantic level out;
+  - focus-visible styles, 44 CSS px touch targets and reduced-motion CSS are present.
+- PN-10 evidence report:
+  - `docs/test-reports/sprint-pn-10-accessibility-refresh/index.html`;
+  - `docs/test-reports/sprint-pn-10-accessibility-refresh/screenshots/process-navigator-refresh.png`.
+- Process Navigator implementation plan now marks PN-3..PN-10 as completed; remaining PN sprints are PN-11 and PN-12.
 - Process Navigator backend tests now cover 26 scenarios in `tests/backend/test_process_navigator.py`.
 - Verification:
   - `npm.cmd run build` in `apps/frontend` -> passed.

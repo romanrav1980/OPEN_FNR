@@ -418,7 +418,7 @@ button:hover {
 
 .process-toolbar {
   display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(260px, 0.9fr) repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -462,14 +462,14 @@ button:hover {
 
 .zoom-control {
   display: grid;
-  grid-template-columns: repeat(5, 42px);
+  grid-template-columns: repeat(5, 44px);
   gap: 8px;
   align-content: end;
 }
 
 .zoom-control button {
-  min-width: 42px;
-  min-height: 38px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
 }
 
@@ -483,6 +483,27 @@ button:hover {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
   gap: 12px;
+}
+
+.process-refresh-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-soft);
+  background: #202020;
+  padding: 10px 12px;
+}
+
+.process-refresh-strip span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.process-refresh-strip button {
+  min-height: 44px;
 }
 
 .process-map-canvas,
@@ -535,6 +556,14 @@ button:hover {
 .process-node:hover:not(:disabled) {
   border-color: var(--noble-red-light);
   background: #2a2022;
+}
+
+.process-node:focus-visible,
+.zoom-control button:focus-visible,
+.process-refresh-strip button:focus-visible,
+.help-footnote summary:focus-visible {
+  outline: 3px solid var(--noble-red-light);
+  outline-offset: 2px;
 }
 
 .process-node span,
@@ -656,8 +685,8 @@ button:hover {
 .help-footnote summary {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--border-soft);
   background: #252525;
   color: var(--text-main);
@@ -709,6 +738,17 @@ button:hover {
 .help-footnote a {
   color: var(--noble-red-light);
   font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 .process-status-live {

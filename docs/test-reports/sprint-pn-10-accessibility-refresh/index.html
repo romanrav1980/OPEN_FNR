@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - PN-10 Accessibility and Refresh Test Report</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151515;
+        --panel: #202020;
+        --text: #f3f0ed;
+        --muted: #b8aaa5;
+        --red: #9f1d35;
+        --red-light: #df556d;
+        --border: #3a3030;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 24px 56px;
+      }
+      h1 {
+        border-left: 6px solid var(--red);
+        padding-left: 16px;
+      }
+      section {
+        margin-top: 24px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        padding: 18px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 10px;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+      a {
+        color: var(--red-light);
+      }
+      img {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #111;
+      }
+      .meta {
+        color: var(--muted);
+      }
+      .ok {
+        color: #8fd19e;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>PN-10 Process Navigator - accessibility and refresh</h1>
+      <p class="meta">
+        Дата: 2026-05-29. Цель: проверить, что Process Navigator стал удобнее для операторов без мыши, показывает
+        окружение, свежесть данных и использует интервалы обновления из конфигурации.
+      </p>
+
+      <section>
+        <h2>Аннотация теста</h2>
+        <p>
+          Мы тестируем доступность и обновление карты бизнес-процессов, потому что в промышленной эксплуатации
+          операторы, аудиторы и менеджеры должны понимать, какой контур они смотрят, насколько свежи данные и как
+          управлять картой клавиатурой. Такой тест снижает риск ошибочного анализа скриншотов из разных окружений.
+        </p>
+      </section>
+
+      <section>
+        <h2>Скриншот</h2>
+        <img src="screenshots/process-navigator-refresh.png" alt="Process Navigator refresh and accessibility screenshot" />
+      </section>
+
+      <section>
+        <h2>UI-тесты</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Шаг</th>
+              <th>Что делаем</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Открываем Process Navigator после production build.</td>
+              <td>Проверить, что новые элементы не ломают shell.</td>
+              <td>Страница рендерится, screenshot создается.</td>
+              <td class="ok">Пройдено.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Проверяем environment selector.</td>
+              <td>Скриншоты DEV/STAGE/PROD должны быть однозначны.</td>
+              <td>Контур выбирается из `VITE_OPEN_FNR_ALLOWED_ENVIRONMENTS`.</td>
+              <td class="ok">Добавлен selector и query `env` во все Process Navigator API calls.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Проверяем freshness strip и ручной refresh.</td>
+              <td>Оператор должен видеть свежесть карты и иметь безопасное ручное обновление.</td>
+              <td>Интервал берется из env, ручной refresh увеличивает refresh tick.</td>
+              <td class="ok">Добавлены auto-refresh, generated_at, data freshness и кнопка Refresh.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Проверяем клавиатурную навигацию.</td>
+              <td>Process Navigator должен соответствовать базовым ожиданиям WCAG 2.1 AA.</td>
+              <td>Tab проходит по controls/nodes, Escape возвращает zoom на уровень выше.</td>
+              <td class="ok">Добавлены focus-visible states и Escape handler.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Проверяем touch target и reduced motion.</td>
+              <td>Интерфейс должен быть пригоден для планшетов и пользователей с reduced motion.</td>
+              <td>Интерактивные элементы не меньше 44 CSS px, motion уважает media query.</td>
+              <td class="ok">CSS обновлен.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Тесты бизнес-процессов</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Процесс</th>
+              <th>Что проверяем</th>
+              <th>Почему</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Process monitoring by environment</td>
+              <td>Все map/detail/alert запросы получают выбранный `env`.</td>
+              <td>DEV, STAGE и PROD не должны смешиваться в операционной картине.</td>
+              <td class="ok">Готово.</td>
+            </tr>
+            <tr>
+              <td>Operational refresh</td>
+              <td>Карта обновляется по интервалам из frontend config.</td>
+              <td>Алерты и SLA должны обновляться без ручного перезахода.</td>
+              <td class="ok">Готово.</td>
+            </tr>
+            <tr>
+              <td>Keyboard investigation</td>
+              <td>Оператор может перейти по controls и вернуться zoom out через Escape.</td>
+              <td>Разбор инцидента должен быть возможен без мыши.</td>
+              <td class="ok">Готово.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

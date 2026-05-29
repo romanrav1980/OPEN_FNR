@@ -1823,6 +1823,8 @@ function App() {
   const [processNavigatorApiStatus, setProcessNavigatorApiStatus] =
     React.useState<"loading" | "live" | "fallback">("loading");
   const [processNavigatorZoom, setProcessNavigatorZoom] = React.useState(1);
+  const [processNavigatorEnvironment, setProcessNavigatorEnvironment] = React.useState(serviceConfig.runtimeMode);
+  const [processNavigatorRefreshTick, setProcessNavigatorRefreshTick] = React.useState(0);
   const [selectedProcessKey, setSelectedProcessKey] = React.useState("forecast_review_process");
   const [runtimeProcessMap, setRuntimeProcessMap] =
     React.useState<ProcessNavigatorMapApiResponse>(fallbackProcessNavigatorMap);
@@ -1850,6 +1852,11 @@ function App() {
     (component) => component.status !== "healthy",
   );
   const causalAlertEdges = runtimeProcessMap.causal_edges ?? [];
+  const processNavigatorPollSeconds =
+    processNavigatorZoom <= 1
+      ? serviceConfig.processNavigatorPollZoom01Seconds
+      : serviceConfig.processNavigatorPollZoom23Seconds;
+  const processNavigatorEnvironmentQuery = `env=${encodeURIComponent(processNavigatorEnvironment)}`;
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1895,15 +1902,15 @@ function App() {
   React.useEffect(() => {
     const controller = new AbortController();
     Promise.all([
-      fetch(apiUrl(`/process-navigator/map?zoom=${processNavigatorZoom}`), { signal: controller.signal }).then(
-        (response) => {
+      fetch(apiUrl(`/process-navigator/map?zoom=${processNavigatorZoom}&${processNavigatorEnvironmentQuery}`), {
+        signal: controller.signal,
+      }).then((response) => {
           if (!response.ok) {
             throw new Error(`Process Navigator map API returned ${response.status}`);
           }
           return response.json() as Promise<ProcessNavigatorMapApiResponse>;
-        },
-      ),
-      fetch(apiUrl("/process-navigator/alerts"), { signal: controller.signal }).then((response) => {
+        }),
+      fetch(apiUrl(`/process-navigator/alerts?${processNavigatorEnvironmentQuery}`), { signal: controller.signal }).then((response) => {
         if (!response.ok) {
           throw new Error(`Process Navigator alerts API returned ${response.status}`);
         }
@@ -1927,13 +1934,15 @@ function App() {
           return;
         }
         setProcessNavigatorApiStatus("fallback");
-      });
+    });
     return () => controller.abort();
-  }, [processNavigatorZoom, selectedProcessKey]);
+  }, [processNavigatorZoom, selectedProcessKey, processNavigatorEnvironmentQuery, processNavigatorRefreshTick]);
 
   React.useEffect(() => {
     const controller = new AbortController();
-    fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/drilldown`), { signal: controller.signal })
+    fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/drilldown?${processNavigatorEnvironmentQuery}`), {
+      signal: controller.signal,
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Process Navigator drilldown API returned ${response.status}`);
@@ -1950,22 +1959,27 @@ function App() {
         }
         setRuntimeProcessDrilldown(fallbackProcessNavigatorDrilldown);
         setProcessNavigatorApiStatus((status) => (status === "live" ? "live" : "fallback"));
-      });
+    });
     return () => controller.abort();
-  }, [selectedProcessKey]);
+  }, [selectedProcessKey, processNavigatorEnvironmentQuery, processNavigatorRefreshTick]);
 
   React.useEffect(() => {
     const controller = new AbortController();
     Promise.all([
-      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/conformance?summary_only=true`), {
-        signal: controller.signal,
-      }).then((response) => {
+      fetch(
+        apiUrl(
+          `/process-navigator/processes/${selectedProcessKey}/conformance?summary_only=true&${processNavigatorEnvironmentQuery}`,
+        ),
+        {
+          signal: controller.signal,
+        },
+      ).then((response) => {
         if (!response.ok) {
           throw new Error(`Process Navigator conformance API returned ${response.status}`);
         }
         return response.json() as Promise<ProcessNavigatorConformanceApiResponse>;
       }),
-      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/performance`), {
+      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/performance?${processNavigatorEnvironmentQuery}`), {
         signal: controller.signal,
       }).then((response) => {
         if (!response.ok) {
@@ -1973,20 +1987,27 @@ function App() {
         }
         return response.json() as Promise<ProcessNavigatorPerformanceApiResponse>;
       }),
-      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/versions?include_instances=true`), {
-        signal: controller.signal,
-      }).then((response) => {
+      fetch(
+        apiUrl(
+          `/process-navigator/processes/${selectedProcessKey}/versions?include_instances=true&${processNavigatorEnvironmentQuery}`,
+        ),
+        {
+          signal: controller.signal,
+        },
+      ).then((response) => {
         if (!response.ok) {
           throw new Error(`Process Navigator versions API returned ${response.status}`);
         }
         return response.json() as Promise<ProcessNavigatorVersionsApiResponse>;
       }),
-      fetch(apiUrl("/process-navigator/infrastructure/health"), { signal: controller.signal }).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Process Navigator infrastructure API returned ${response.status}`);
-        }
-        return response.json() as Promise<ProcessNavigatorInfrastructureApiResponse>;
-      }),
+      fetch(apiUrl(`/process-navigator/infrastructure/health?${processNavigatorEnvironmentQuery}`), {
+        signal: controller.signal,
+      }).then((response) => {
+          if (!response.ok) {
+            throw new Error(`Process Navigator infrastructure API returned ${response.status}`);
+          }
+          return response.json() as Promise<ProcessNavigatorInfrastructureApiResponse>;
+        }),
     ])
       .then(([conformancePayload, performancePayload, versionsPayload, infrastructurePayload]) => {
         setRuntimeProcessConformance(conformancePayload);
@@ -2013,9 +2034,16 @@ function App() {
         });
         setRuntimeProcessInfrastructure(fallbackProcessNavigatorInfrastructure);
         setProcessNavigatorApiStatus((status) => (status === "live" ? "live" : "fallback"));
-      });
+    });
     return () => controller.abort();
-  }, [selectedProcessKey]);
+  }, [selectedProcessKey, processNavigatorEnvironmentQuery, processNavigatorRefreshTick]);
+
+  React.useEffect(() => {
+    const interval = window.setInterval(() => {
+      setProcessNavigatorRefreshTick((value) => value + 1);
+    }, processNavigatorPollSeconds * 1000);
+    return () => window.clearInterval(interval);
+  }, [processNavigatorPollSeconds]);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -2563,7 +2591,15 @@ function App() {
         </article>
       </section>
 
-      <section className="data-section process-navigator-section" aria-label="Process Navigator Map">
+      <section
+        className="data-section process-navigator-section"
+        aria-label="Process Navigator Map"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setProcessNavigatorZoom((zoom) => Math.max(0, zoom - 1));
+          }
+        }}
+      >
         <div className="section-heading">
           <div>
             <h2>Process Navigator Map</h2>
@@ -2649,8 +2685,50 @@ function App() {
           </label>
           <label>
             Environment
-            <input readOnly value={`${runtimeProcessMap.environment ?? "dev"} / ${runtimeProcessMap.mode ?? "live"}`} />
+            <select
+              aria-label="Process Navigator environment"
+              value={processNavigatorEnvironment}
+              onChange={(event) => setProcessNavigatorEnvironment(event.target.value)}
+            >
+              {serviceConfig.allowedEnvironments.map((environment) => (
+                <option key={environment} value={environment}>
+                  {environment.toUpperCase()}
+                </option>
+              ))}
+            </select>
           </label>
+          <label>
+            Freshness
+            <input
+              readOnly
+              value={`${runtimeProcessMap.environment ?? processNavigatorEnvironment} / ${
+                runtimeProcessMap.mode ?? "live"
+              } / ${runtimeProcessMap.data_freshness_seconds ?? 0}s`}
+            />
+          </label>
+        </div>
+        <div className="process-refresh-strip" aria-label="Process navigator refresh status">
+          <span>Auto-refresh every {processNavigatorPollSeconds}s</span>
+          <span>Last generated {runtimeProcessMap.generated_at || "pending"}</span>
+          <button type="button" onClick={() => setProcessNavigatorRefreshTick((value) => value + 1)}>
+            Refresh
+          </button>
+          <HelpFootnote
+            title="Refresh and freshness"
+            links={[
+              {
+                label: "Supplement refresh strategy",
+                href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#6-environment-selector",
+              },
+              {
+                label: "Operational governance",
+                href: "TECHNICAL_SPEC_SUPPLEMENT_1.md#k-operational-governance",
+              },
+            ]}
+          >
+            Polling intervals are read from frontend environment configuration, while the backend response carries
+            generated time and data freshness for operational screenshots.
+          </HelpFootnote>
         </div>
         <div className="process-map-layout">
           <div className="process-map-canvas" aria-label="Zoomable business process map">
@@ -2663,6 +2741,7 @@ function App() {
             <div className="process-node-grid">
               {processMapNodes.map((node) => (
                 <button
+                  aria-label={`${node.label}. Status ${node.status}. Alerts ${node.alert_count}.`}
                   className={`process-node process-node-${node.status} process-node-${node.node_type}`}
                   disabled={node.node_type !== "process_definition" || node.artifact_type !== "bpmn"}
                   key={node.id}
