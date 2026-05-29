@@ -85,10 +85,12 @@ def test_publication_target_urls_are_centralized_settings() -> None:
         erp_export_url="http://erp.local/orders",
         wms_export_url="http://wms.local/orders",
         dwh_export_url="http://dwh.local/forecast",
+        supplier_forecast_share_url="http://supplier.local/share",
         publication_http_timeout_seconds=11,
     )
 
     assert settings.erp_export_url == "http://erp.local/orders"
     assert settings.wms_export_url == "http://wms.local/orders"
     assert settings.dwh_export_url == "http://dwh.local/forecast"
+    assert settings.supplier_forecast_share_url == "http://supplier.local/share"
     assert settings.publication_http_timeout_seconds == 11

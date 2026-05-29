@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 373 automated tests passed.
+Current backend regression status: 376 automated tests passed.
 
 ## Local Infrastructure
 
@@ -405,6 +405,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Supplier Collaboration API: `apps/backend/open_fnr_api/supplier_collaboration.py`.
 - Supplier Collaboration tests: `tests/backend/test_supplier_collaboration.py`.
+- Supplier forecast share send API with service account gate, local fallback and configurable HTTP target URL.
 - Supplier collaboration process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Supplier collaboration BPMN: `processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml`.
 - Supplier risk DMN: `processes/supplier-collaboration/supplier_risk_decision.dmn.xml`.

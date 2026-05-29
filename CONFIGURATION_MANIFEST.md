@@ -23,6 +23,7 @@ External integration endpoints must also be configured, not embedded in code. Ou
 - `OPEN_FNR_DWH_EXPORT_URL`;
 - `OPEN_FNR_BI_EXPORT_URL`;
 - `OPEN_FNR_AUTO_ORDER_EXPORT_URL`;
+- `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`;
 - `OPEN_FNR_PUBLICATION_HTTP_TIMEOUT_SECONDS`.
 
 Browser-to-backend access is controlled by `OPEN_FNR_CORS_ALLOW_ORIGINS`.
@@ -50,7 +51,7 @@ The following files may contain default local development addresses because they
 - Sprint reports may mention command evidence, but executable code must stay configuration-driven.
 - Business process audit must be controlled by `OPEN_FNR_AUDIT_ENABLED`; default is enabled.
 - Source file landing paths must be controlled by `OPEN_FNR_LANDING_ROOT_PATH`; source adapters must not hardcode local paths.
-- Publication target URLs must be controlled by the `OPEN_FNR_*_EXPORT_URL` settings; empty values mean local fallback mode only.
+- Publication and supplier target URLs must be controlled by the `OPEN_FNR_*_EXPORT_URL` and `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL` settings; empty values mean local fallback mode only.
 
 ## Quality Gate
 

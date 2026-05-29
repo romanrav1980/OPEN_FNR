@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import supplier_collaboration
 from open_fnr_api.main import app
 from open_fnr_api.supplier_collaboration import SupplierCollaborationStatus, decide_supplier_risk
 
@@ -16,8 +17,83 @@ def test_supplier_forecast_share_can_be_exported_with_idempotency_key() -> None:
     assert share["status"] == "forecast_sent"
     assert share["forecast_qty"] == 18400
     assert share["order_forecast_qty"] == 12000
-    assert share["export_channel"] == "api_csv_mock"
+    assert share["export_channel"] == "local_fallback"
     assert share["idempotency_key"] == "supplier-share-20260602-sup-fast:v1"
+
+
+def test_supplier_forecast_share_send_uses_local_fallback_with_audit() -> None:
+    response = client.post(
+        "/supplier-collaboration/forecast-share/supplier-share-20260602-sup-fast/send",
+        json={
+            "actor": "supplier.coordinator@example.org",
+            "actor_role": "Internal Supplier Coordinator",
+            "service_account": "svc-open-fnr-supplier-share",
+        },
+    )
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["package"]["export_channel"] == "local_fallback"
+    assert payload["response_code"] == "202"
+    assert payload["audit_recorded"] is True
+
+
+def test_supplier_forecast_share_send_requires_service_account() -> None:
+    response = client.post(
+        "/supplier-collaboration/forecast-share/supplier-share-20260602-sup-fast/send",
+        json={
+            "actor": "supplier.coordinator@example.org",
+            "actor_role": "Internal Supplier Coordinator",
+            "service_account": "wrong-account",
+        },
+    )
+    assert response.status_code == 403
+
+
+def test_supplier_forecast_share_can_post_to_configured_http_target(monkeypatch) -> None:
+    calls = []
+    original_url = supplier_collaboration.settings.supplier_forecast_share_url
+    original_timeout = supplier_collaboration.settings.publication_http_timeout_seconds
+
+    class FakeResponse:
+        status = 202
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return b"accepted by supplier"
+
+    def fake_urlopen(request, timeout):
+        calls.append((request, timeout))
+        return FakeResponse()
+
+    monkeypatch.setattr("open_fnr_api.supplier_collaboration.urlopen", fake_urlopen)
+    supplier_collaboration.settings.supplier_forecast_share_url = "http://supplier.integration.local/share"
+    supplier_collaboration.settings.publication_http_timeout_seconds = 19
+    try:
+        response = client.post(
+            "/supplier-collaboration/forecast-share/supplier-share-20260602-sup-fast/send",
+            json={
+                "actor": "supplier.coordinator@example.org",
+                "actor_role": "Internal Supplier Coordinator",
+                "service_account": "svc-open-fnr-supplier-share",
+            },
+        )
+    finally:
+        supplier_collaboration.settings.supplier_forecast_share_url = original_url
+        supplier_collaboration.settings.publication_http_timeout_seconds = original_timeout
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["package"]["export_channel"] == "http_api"
+    assert payload["response_message"] == "accepted by supplier"
+    assert calls[0][0].full_url == "http://supplier.integration.local/share"
+    assert calls[0][0].headers["Idempotency-key"] == "supplier-share-20260602-sup-fast:v1"
+    assert calls[0][1] == 19
 
 
 def test_supplier_performance_is_visible_for_dashboard() -> None:

@@ -147,6 +147,7 @@ flowchart LR
 | `OPEN_FNR_DWH_EXPORT_URL` | DWH outbound endpoint |
 | `OPEN_FNR_BI_EXPORT_URL` | BI outbound endpoint |
 | `OPEN_FNR_AUTO_ORDER_EXPORT_URL` | Auto-order outbound endpoint |
+| `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL` | Supplier forecast share endpoint |
 | `OPEN_FNR_PUBLICATION_HTTP_TIMEOUT_SECONDS` | HTTP timeout |
 
 ## 7. Idempotency
