@@ -65,6 +65,14 @@ DOMAIN_LABELS = {
     "supplier-collaboration": "Supplier Collaboration",
 }
 
+PROCESS_DEPENDENCY_EDGES: tuple[tuple[str, str], ...] = (
+    ("source_batch_publication_process", "feature_build_process"),
+    ("feature_build_process", "forecast_review_process"),
+    ("forecast_review_process", "replenishment_calculation_process"),
+    ("replenishment_calculation_process", "order_proposal_generation_process"),
+    ("order_proposal_generation_process", "publication_process"),
+)
+
 
 class ProcessMapNode(BaseModel):
     id: str
@@ -346,6 +354,69 @@ def _alert(
     )
 
 
+def correlate_alert_cause_chains(
+    alerts: tuple[ProcessNavigatorAlert, ...],
+    dependency_edges: tuple[tuple[str, str], ...] = PROCESS_DEPENDENCY_EDGES,
+) -> tuple[ProcessNavigatorAlert, ...]:
+    alerts_by_process = {alert.process_key: alert for alert in alerts if alert.process_key}
+    downstream_by_process: dict[str, list[str]] = defaultdict(list)
+    for source, target in dependency_edges:
+        downstream_by_process[source].append(target)
+    correlated: dict[str, ProcessNavigatorAlert] = {alert.alert_key: alert for alert in alerts}
+    for root_alert in alerts:
+        if not root_alert.process_key:
+            continue
+        queue: list[tuple[str, tuple[str, ...], int]] = [
+            (target_process, (root_alert.alert_key,), 1)
+            for target_process in downstream_by_process.get(root_alert.process_key, [])
+        ]
+        visited = {root_alert.process_key}
+        while queue:
+            process_key, upstream_chain, level = queue.pop(0)
+            if process_key in visited:
+                continue
+            visited.add(process_key)
+            alert = alerts_by_process.get(process_key)
+            next_chain = upstream_chain
+            if alert is not None:
+                next_chain = upstream_chain + (alert.alert_key,)
+                correlated[alert.alert_key] = alert.model_copy(
+                    update={
+                        "upstream_alert_key": upstream_chain[-1],
+                        "cause_chain": next_chain,
+                        "root_cause": False,
+                        "cascade_level": level,
+                    }
+                )
+                upstream_alert = correlated.get(upstream_chain[-1])
+                if upstream_alert is not None:
+                    downstream = tuple(sorted(set(upstream_alert.downstream_alert_keys + (alert.alert_key,))))
+                    correlated[upstream_alert.alert_key] = upstream_alert.model_copy(
+                        update={"downstream_alert_keys": downstream}
+                    )
+            for target_process in downstream_by_process.get(process_key, []):
+                queue.append((target_process, next_chain, level + 1))
+    return tuple(correlated[alert.alert_key] for alert in alerts)
+
+
+def deduplicate_alerts(alerts: tuple[ProcessNavigatorAlert, ...]) -> tuple[ProcessNavigatorAlert, ...]:
+    grouped: dict[str, ProcessNavigatorAlert] = {}
+    for alert in alerts:
+        dedup_key = f"{alert.source}:{alert.process_key or alert.domain}:{alert.severity}"
+        existing = grouped.get(dedup_key)
+        if existing is None:
+            grouped[dedup_key] = alert.model_copy(update={"alert_key": dedup_key})
+            continue
+        grouped[dedup_key] = existing.model_copy(
+            update={
+                "occurrence_count": existing.occurrence_count + alert.occurrence_count,
+                "last_seen": max(existing.last_seen, alert.last_seen),
+                "downstream_alert_keys": tuple(sorted(set(existing.downstream_alert_keys + alert.downstream_alert_keys))),
+            }
+        )
+    return tuple(grouped.values())
+
+
 def build_process_navigator_alerts() -> tuple[ProcessNavigatorAlert, ...]:
     quality = build_bpmn_quality_report()
     alerts: list[ProcessNavigatorAlert] = []
@@ -377,7 +448,7 @@ def build_process_navigator_alerts() -> tuple[ProcessNavigatorAlert, ...]:
                     status="open",
                 )
             )
-    return tuple(alerts)
+    return correlate_alert_cause_chains(deduplicate_alerts(tuple(alerts)))
 
 
 def _domain_for_process_key(process_key: str) -> str:
@@ -602,6 +673,18 @@ def build_process_map(zoom_level: int = 1, env: str | None = None, business_date
         3: "bpmn_steps",
         4: "task_audit_timeline",
     }
+    causal_edges = tuple(
+        ProcessMapEdge(
+            source=f"process:{upstream.process_key}",
+            target=f"process:{alert.process_key}",
+            edge_type="causal_alert",
+            label="causes",
+        )
+        for alert in alerts
+        if alert.upstream_alert_key
+        for upstream in alerts
+        if upstream.alert_key == alert.upstream_alert_key and upstream.process_key and alert.process_key
+    )
     return ProcessMapResponse(
         zoom_level=zoom_level,
         semantic_level=semantic_levels[zoom_level],
@@ -611,9 +694,10 @@ def build_process_map(zoom_level: int = 1, env: str | None = None, business_date
         generated_at=_now_iso(),
         data_freshness_seconds=0,
         node_count=len(nodes),
-        edge_count=len(edges),
+        edge_count=len(edges) + len(causal_edges),
         nodes=tuple(nodes),
         edges=tuple(edges),
+        causal_edges=causal_edges,
         legend={
             "healthy": "No blocker or SLA alert is open.",
             "attention": "Review warning, cognitive challenge or escalated task.",

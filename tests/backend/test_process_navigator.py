@@ -4,10 +4,13 @@ from fastapi.testclient import TestClient
 
 from open_fnr_api.main import app
 from open_fnr_api.process_navigator import (
+    _alert,
     build_bpmn_flow_model,
     build_process_map,
     build_process_navigator_alerts,
     build_process_performance,
+    correlate_alert_cause_chains,
+    deduplicate_alerts,
     evaluate_bpmn_trace,
 )
 
@@ -48,6 +51,57 @@ def test_process_navigator_alerts_include_quality_challenges_and_sla() -> None:
     assert all(alert.alert_key for alert in alerts)
     assert all(alert.cause_chain for alert in alerts)
     assert all(alert.occurrence_count >= 1 for alert in alerts)
+
+
+def test_process_navigator_alert_correlation_marks_cascaded_effects() -> None:
+    root = _alert(
+        alert_id="a-source",
+        severity="critical",
+        domain="data-ingestion",
+        process_key="source_batch_publication_process",
+        source="source_sla",
+        message="Source late.",
+        recommended_action="Restore source.",
+        status="open",
+    )
+    forecast = _alert(
+        alert_id="a-forecast",
+        severity="warning",
+        domain="forecast",
+        process_key="forecast_review_process",
+        source="forecast_degraded",
+        message="Forecast degraded.",
+        recommended_action="Review forecast.",
+        status="open",
+    )
+
+    correlated = correlate_alert_cause_chains((root, forecast))
+    forecast_alert = next(alert for alert in correlated if alert.alert_id == "a-forecast")
+    root_alert = next(alert for alert in correlated if alert.alert_id == "a-source")
+
+    assert root_alert.root_cause is True
+    assert forecast_alert.root_cause is False
+    assert forecast_alert.upstream_alert_key == root.alert_key
+    assert forecast_alert.cause_chain == (root.alert_key, forecast.alert_key)
+
+
+def test_process_navigator_alert_deduplication_groups_repeated_events() -> None:
+    first = _alert(
+        alert_id="sla-1",
+        severity="warning",
+        domain="replenishment",
+        process_key="replenishment_calculation_process",
+        source="process_task_sla",
+        message="Task late.",
+        recommended_action="Review task.",
+        status="open",
+    )
+    second = first.model_copy(update={"alert_id": "sla-2"})
+
+    grouped = deduplicate_alerts((first, second))
+
+    assert len(grouped) == 1
+    assert grouped[0].occurrence_count == 2
 
 
 def test_process_navigator_drilldown_returns_bpmn_graph() -> None:

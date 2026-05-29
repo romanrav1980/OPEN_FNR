@@ -605,8 +605,12 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - waiting and processing time are derived from human task timestamps;
   - throughput is grouped by business day;
   - rework rate is derived from `REWORK_REQUESTED` audit events.
-- Process Navigator backend tests now cover 18 scenarios in `tests/backend/test_process_navigator.py`.
+- PN-6 has started with alert correlation and deduplication:
+  - `deduplicate_alerts()` groups repeated alerts by source, process/domain and severity;
+  - `correlate_alert_cause_chains()` builds BFS causal chains across process dependencies;
+  - map responses expose `causal_edges` for cascaded degraded/blocked process nodes.
+- Process Navigator backend tests now cover 20 scenarios in `tests/backend/test_process_navigator.py`.
 - Verification:
-  - `pytest tests/backend/test_process_navigator.py` -> 18 passed.
+  - `pytest tests/backend/test_process_navigator.py` -> 20 passed.
   - `pytest tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 3 passed.
-  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 453 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 456 passed, 1 warning about `.pytest_cache` permissions.
