@@ -64,7 +64,7 @@ Status: completed.
 
 ## I1. POS Sales Ingestion
 
-Status: in progress.
+Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
 
 ### Scope
 
@@ -83,7 +83,7 @@ Status: in progress.
 
 ## I2. WMS Stock, Open Orders And In-Transit
 
-Status: in progress.
+Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
 
 ### Scope
 
@@ -101,7 +101,7 @@ Status: in progress.
 
 ## I3. ERP Prices And Order Export Statuses
 
-Status: in progress.
+Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
 
 ### Scope
 
@@ -120,7 +120,7 @@ Status: in progress.
 
 ## I4. MDM And PIM Reference Data
 
-Status: in progress.
+Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
 
 ### Scope
 
@@ -139,7 +139,7 @@ Status: in progress.
 
 ## I5. Promo Source Ingestion
 
-Status: in progress.
+Status: implemented as contract, manifest and DAG skeleton; awaiting real pilot source connection.
 
 ### Scope
 
@@ -158,6 +158,8 @@ Status: in progress.
 
 ## S1. Production Security Foundation
 
+Status: partially completed.
+
 ### Scope
 
 - add authentication middleware;
@@ -166,7 +168,48 @@ Status: in progress.
 - persist audit events for all writes;
 - add security regression tests.
 
+### Current Implementation
+
+- Admin Console and Security API expose users, service accounts, access requests and scope checks.
+- Access approval/provisioning process is covered by API tests and UI evidence.
+- IdP/IAM provisioning target adapter is configurable through `OPEN_FNR_IDP_PROVISIONING_URL`.
+- Local fallback is available for DEV/TEST; service account `svc-open-fnr-idp-provisioning` gates outbound provisioning.
+- Remaining work: OIDC/JWT middleware, shared policy layer, object-level access enforcement and external secret store.
+
+## X1. Outbound Target Adapter Hardening
+
+Status: completed for core pilot outbound targets.
+
+### Scope
+
+- replace hardcoded/mock-only outbound behavior with configurable target adapters;
+- keep DEV/TEST local fallback mode;
+- require service accounts and idempotency keys for sends;
+- add UI evidence and business-process test reports.
+
+### Current Implementation
+
+- Publication export targets: `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL`, `OPEN_FNR_AUTO_ORDER_EXPORT_URL`.
+- Supplier forecast sharing target: `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`.
+- Procurement ERP target: `OPEN_FNR_ERP_EXPORT_URL`.
+- Capacity TMS target: `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`.
+- Store App task target: `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`.
+- Planogram target: `OPEN_FNR_PLANOGRAM_EXPORT_URL`.
+- IdP/IAM provisioning target: `OPEN_FNR_IDP_PROVISIONING_URL`.
+
+### Evidence
+
+- `docs/test-reports/sprint-outbound-publication-targets/index.html`
+- `docs/test-reports/sprint-supplier-forecast-sharing-target/index.html`
+- `docs/test-reports/sprint-procurement-erp-target/index.html`
+- `docs/test-reports/sprint-capacity-tms-target/index.html`
+- `docs/test-reports/sprint-store-app-task-target/index.html`
+- `docs/test-reports/sprint-planogram-target/index.html`
+- `docs/test-reports/sprint-idp-provisioning-target/index.html`
+
 ## U1. Routed UI Foundation
+
+Status: not started.
 
 ### Scope
 

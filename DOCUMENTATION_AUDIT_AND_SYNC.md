@@ -1,7 +1,7 @@
 # OPEN FNR Documentation Audit And Sync
 
-Date: 2026-05-28
-Status: updated after completion of 37 sprint checkpoints.
+Date: 2026-05-29
+Status: updated after industrial hardening target-adapter checkpoints.
 
 ## Purpose
 
@@ -18,13 +18,13 @@ This document records the post-sprint documentation review and aligns strategic 
 | Promo | `promo.py` | Promo Workbench | `processes/promo` | Implemented mock/dev slice |
 | Replenishment | `replenishment.py`, `replenishment_scale.py` | Replenishment Workbench | `processes/replenishment`, `processes/replenishment-scale` | Implemented mock/dev slice |
 | Exceptions | `exceptions.py` | Exception Center | `processes/exceptions` | Implemented mock/dev slice |
-| Publication/export | `publication.py` | Publication Console | `processes/publication` | Implemented mock/dev slice |
+| Publication/export | `publication.py` | Publication Console | `processes/publication` | Implemented with configurable ERP/WMS/DWH/BI/auto-order targets and local fallback |
 | KPI | `kpi.py` | KPI Dashboard | `processes/kpi` | Implemented mock/dev slice |
 | Fresh | `replenishment.py` | Fresh Workbench | `processes/fresh` | Implemented mock/dev slice |
 | Lifecycle | `lifecycle.py` | SKU Lifecycle | `processes/lifecycle` | Implemented mock/dev slice |
 | Multi-echelon | `multi_echelon.py` | Supply Chain Dashboard | `processes/multi-echelon` | Implemented mock/dev slice |
 | Performance | `performance.py` | Performance Gate | `processes/performance` | Implemented mock/dev slice |
-| Security | `security.py` | Admin Console | `processes/security` | Implemented mock/dev slice |
+| Security | `security.py` | Admin Console | `processes/security` | Implemented with configurable IdP provisioning target and local fallback |
 | Stage rehearsal | `stage.py` | Stage Rehearsal | `processes/stage` | Implemented mock/dev slice |
 | Pilot | `pilot.py` | Business Pilot Dashboard | `processes/pilot` | Implemented mock/dev slice |
 | Data scale | `data_scale.py` | Production Data Scale | `processes/data-scale` | Implemented mock/dev slice |
@@ -32,12 +32,12 @@ This document records the post-sprint documentation review and aligns strategic 
 | Process governance | `process_governance.py` | Process Governance | `processes/process-governance` | Implemented mock/dev slice |
 | Observability | `observability.py` | Ops Dashboard | `processes/observability` | Implemented mock/dev slice |
 | Release gate | `release_gate.py` | Release Readiness Dashboard | `processes/release-gate` | Implemented mock/dev slice |
-| Procurement | `procurement.py` | Purchase Proposal | `processes/procurement` | Implemented mock/dev slice |
-| Shelf space | `shelf_space.py` | Shelf Space | `processes/shelf-space` | Implemented mock/dev slice |
-| Capacity/workload | `capacity.py` | Capacity Workbench | `processes/capacity` | Implemented mock/dev slice |
+| Procurement | `procurement.py` | Purchase Proposal | `processes/procurement` | Implemented with configurable ERP target and local fallback |
+| Shelf space | `shelf_space.py` | Shelf Space | `processes/shelf-space` | Implemented with configurable planogram target and local fallback |
+| Capacity/workload | `capacity.py` | Capacity Workbench | `processes/capacity` | Implemented with configurable TMS target and local fallback |
 | Diagnostics | `diagnostics.py` | Supply Chain Diagnostics | `processes/diagnostics` | Implemented mock/dev slice |
-| Supplier collaboration | `supplier_collaboration.py` | Supplier Collaboration | `processes/supplier-collaboration` | Implemented mock/dev slice |
-| True inventory/store | `store_management.py` | True Inventory And Store Management | `processes/store-management` | Implemented mock/dev slice |
+| Supplier collaboration | `supplier_collaboration.py` | Supplier Collaboration | `processes/supplier-collaboration` | Implemented with configurable supplier forecast target and local fallback |
+| True inventory/store | `store_management.py` | True Inventory And Store Management | `processes/store-management` | Implemented with configurable Store App task target and local fallback |
 
 ## Strategic Document Sync Result
 
@@ -60,12 +60,12 @@ This document records the post-sprint documentation review and aligns strategic 
 
 | Gap | Impact | Next action |
 | --- | --- | --- |
-| UI is still a demo control tower | Users cannot operate production workflows end to end | Build routed React application with API-backed screens |
-| API uses in-memory mock data | No production persistence or real facts | Add repositories, migrations and real ingestion pipelines |
+| UI is still a demo control tower, though key widgets now call live APIs | Users cannot operate production workflows end to end | Build routed React application with API-backed screens |
+| Many domain APIs still use in-memory sample data | No production persistence or real facts for all modules | Add repositories, migrations and real ingestion pipelines by domain priority |
 | Process artifacts are validated as XML but not deployed automatically to Flowable | Process runtime is not productionized | Add deployment pipeline and process version migration |
-| Security is role checks in endpoints, not full authn/authz | Not production-ready | Add OIDC, JWT validation, object-level access and audit store |
+| Security has RBAC checks and IdP provisioning target, but no JWT/OIDC middleware yet | Not production-ready for real users | Add OIDC, JWT validation, object-level access and secret store integration |
 | Docker Compose is development-grade | Stage can run, but production HA is not covered | Add Kubernetes/Helm or production Compose profile decision |
-| Integrations are mocks | No real POS/ERP/WMS/DWH/MDM data flow | Implement adapters and contract tests |
+| Inbound integrations are contract/DAG skeletons; selected outbound targets now have HTTP adapters | No real POS/ERP/WMS/DWH/MDM daily data flow yet | Implement real source adapters, contract tests and pilot file/API connections |
 | Performance tests are smoke-level | EPYC sizing is not proven on real data | Add synthetic and production-like load tests |
 
 ## Updated Definition Of Done For Next Phase
