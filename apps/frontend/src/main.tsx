@@ -184,6 +184,8 @@ type ProcessNavigatorNode = {
   count: number;
   alert_count: number;
   challenge_count: number;
+  conformance_score?: number | null;
+  active_version_count?: number | null;
 };
 
 type ProcessNavigatorEdge = {
@@ -196,15 +198,22 @@ type ProcessNavigatorEdge = {
 type ProcessNavigatorMapApiResponse = {
   zoom_level: number;
   semantic_level: string;
+  environment?: string;
+  mode?: string;
+  business_date?: string | null;
+  generated_at?: string;
+  data_freshness_seconds?: number;
   node_count: number;
   edge_count: number;
   nodes: ProcessNavigatorNode[];
   edges: ProcessNavigatorEdge[];
+  causal_edges?: ProcessNavigatorEdge[];
   legend: Record<string, string>;
 };
 
 type ProcessNavigatorAlert = {
   alert_id: string;
+  alert_key?: string;
   severity: string;
   domain: string;
   process_key: string | null;
@@ -212,6 +221,16 @@ type ProcessNavigatorAlert = {
   message: string;
   recommended_action: string;
   status: string;
+  upstream_alert_key?: string | null;
+  downstream_alert_keys?: string[];
+  cause_chain?: string[];
+  root_cause?: boolean;
+  cascade_level?: number;
+  occurrence_count?: number;
+  first_seen?: string;
+  last_seen?: string;
+  dedup_window_seconds?: number;
+  itsm_incident_ref?: string | null;
 };
 
 type ProcessNavigatorAlertApiResponse = {
@@ -231,6 +250,89 @@ type ProcessNavigatorDrilldownApiResponse = {
   audit_event_count: number;
   nodes: ProcessNavigatorNode[];
   edges: ProcessNavigatorEdge[];
+};
+
+type ProcessConformanceDeviation = {
+  instance_id: string;
+  step_id: string;
+  deviation_type: string;
+  expected: string;
+  actual: string;
+  severity: string;
+};
+
+type ProcessNavigatorConformanceApiResponse = {
+  process_key: string;
+  process_definition_id: string;
+  environment: string;
+  job_status: string;
+  conformance_score: number | null;
+  checked_instances: number;
+  deviations: ProcessConformanceDeviation[];
+  mandatory_steps_skipped: number;
+  unexpected_sequences: number;
+  generated_at: string;
+  last_checked_at: string | null;
+  job_id: string | null;
+  error: string | null;
+};
+
+type ProcessHumanTaskPerformanceMetric = {
+  task_key: string;
+  waiting_time_p95_minutes: number;
+  processing_time_p95_minutes: number;
+};
+
+type ProcessThroughputMetric = {
+  business_day: string;
+  started: number;
+  completed: number;
+};
+
+type ProcessNavigatorPerformanceApiResponse = {
+  process_key: string;
+  environment: string;
+  window_days: number;
+  cycle_time_median_minutes: number;
+  cycle_time_p95_minutes: number;
+  cycle_time_max_minutes: number;
+  human_task_metrics: ProcessHumanTaskPerformanceMetric[];
+  rework_rate: number;
+  throughput_by_business_day: ProcessThroughputMetric[];
+  sla_thresholds: Record<string, number>;
+  generated_at: string;
+  data_freshness_seconds: number;
+};
+
+type ProcessVersionItem = {
+  version: number;
+  status: string;
+  running_instances: number;
+  stuck_instances: number;
+  completed_instances: number;
+  instance_list: string[];
+};
+
+type ProcessNavigatorVersionsApiResponse = {
+  process_key: string;
+  environment: string;
+  current_version: number;
+  active_version_count: number;
+  versions: ProcessVersionItem[];
+};
+
+type ProcessInfrastructureComponentStatus = {
+  component_type: string;
+  component_id: string;
+  status: string;
+  risk_reason: string;
+};
+
+type ProcessNavigatorInfrastructureApiResponse = {
+  environment: string;
+  components: ProcessInfrastructureComponentStatus[];
+  dependent_processes: string[];
+  generated_at: string;
 };
 
 type SupplementCoverageApiResponse = {
@@ -1574,6 +1676,88 @@ const fallbackProcessNavigatorDrilldown: ProcessNavigatorDrilldownApiResponse = 
   edges: [],
 };
 
+const fallbackProcessNavigatorConformance: ProcessNavigatorConformanceApiResponse = {
+  process_key: "forecast_review_process",
+  process_definition_id: "forecast_review_process:current",
+  environment: "dev",
+  job_status: "pending",
+  conformance_score: null,
+  checked_instances: 0,
+  deviations: [],
+  mandatory_steps_skipped: 0,
+  unexpected_sequences: 0,
+  generated_at: "",
+  last_checked_at: null,
+  job_id: null,
+  error: null,
+};
+
+const fallbackProcessNavigatorPerformance: ProcessNavigatorPerformanceApiResponse = {
+  process_key: "forecast_review_process",
+  environment: "dev",
+  window_days: 30,
+  cycle_time_median_minutes: 0,
+  cycle_time_p95_minutes: 0,
+  cycle_time_max_minutes: 0,
+  human_task_metrics: [],
+  rework_rate: 0,
+  throughput_by_business_day: [],
+  sla_thresholds: {},
+  generated_at: "",
+  data_freshness_seconds: 0,
+};
+
+const fallbackProcessNavigatorVersions: ProcessNavigatorVersionsApiResponse = {
+  process_key: "forecast_review_process",
+  environment: "dev",
+  current_version: 1,
+  active_version_count: 1,
+  versions: [
+    {
+      version: 1,
+      status: "current",
+      running_instances: 0,
+      stuck_instances: 0,
+      completed_instances: 0,
+      instance_list: [],
+    },
+  ],
+};
+
+const fallbackProcessNavigatorInfrastructure: ProcessNavigatorInfrastructureApiResponse = {
+  environment: "dev",
+  components: [],
+  dependent_processes: [],
+  generated_at: "",
+};
+
+function HelpFootnote({
+  title,
+  children,
+  links,
+}: {
+  title: string;
+  children: React.ReactNode;
+  links: { label: string; href: string }[];
+}) {
+  return (
+    <details className="help-footnote">
+      <summary aria-label={`${title} help`}>?</summary>
+      <div>
+        <strong>{title}</strong>
+        <p>{children}</p>
+        <ul>
+          {links.map((link) => (
+            <li key={link.href}>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  );
+}
+
 function routeFromHash(hash: string): AppRoute {
   const routeKey = hash.replace("#/", "") || "control-tower";
   return appRoutes.find((route) => route.key === routeKey) ?? appRoutes[0];
@@ -1646,6 +1830,14 @@ function App() {
     React.useState<ProcessNavigatorAlert[]>(fallbackProcessNavigatorAlerts);
   const [runtimeProcessDrilldown, setRuntimeProcessDrilldown] =
     React.useState<ProcessNavigatorDrilldownApiResponse>(fallbackProcessNavigatorDrilldown);
+  const [runtimeProcessConformance, setRuntimeProcessConformance] =
+    React.useState<ProcessNavigatorConformanceApiResponse>(fallbackProcessNavigatorConformance);
+  const [runtimeProcessPerformance, setRuntimeProcessPerformance] =
+    React.useState<ProcessNavigatorPerformanceApiResponse>(fallbackProcessNavigatorPerformance);
+  const [runtimeProcessVersions, setRuntimeProcessVersions] =
+    React.useState<ProcessNavigatorVersionsApiResponse>(fallbackProcessNavigatorVersions);
+  const [runtimeProcessInfrastructure, setRuntimeProcessInfrastructure] =
+    React.useState<ProcessNavigatorInfrastructureApiResponse>(fallbackProcessNavigatorInfrastructure);
 
   const selectedProcessNode = runtimeProcessMap.nodes.find((node) => node.id === `process:${selectedProcessKey}`);
   const processMapNodes = runtimeProcessMap.nodes.slice(0, processNavigatorZoom >= 3 ? 24 : 14);
@@ -1654,6 +1846,10 @@ function App() {
     counts[node.status] = (counts[node.status] ?? 0) + 1;
     return counts;
   }, {});
+  const selectedInfrastructureRisks = runtimeProcessInfrastructure.components.filter(
+    (component) => component.status !== "healthy",
+  );
+  const causalAlertEdges = runtimeProcessMap.causal_edges ?? [];
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1753,6 +1949,69 @@ function App() {
           return;
         }
         setRuntimeProcessDrilldown(fallbackProcessNavigatorDrilldown);
+        setProcessNavigatorApiStatus((status) => (status === "live" ? "live" : "fallback"));
+      });
+    return () => controller.abort();
+  }, [selectedProcessKey]);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/conformance?summary_only=true`), {
+        signal: controller.signal,
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process Navigator conformance API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessNavigatorConformanceApiResponse>;
+      }),
+      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/performance`), {
+        signal: controller.signal,
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process Navigator performance API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessNavigatorPerformanceApiResponse>;
+      }),
+      fetch(apiUrl(`/process-navigator/processes/${selectedProcessKey}/versions?include_instances=true`), {
+        signal: controller.signal,
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process Navigator versions API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessNavigatorVersionsApiResponse>;
+      }),
+      fetch(apiUrl("/process-navigator/infrastructure/health"), { signal: controller.signal }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Process Navigator infrastructure API returned ${response.status}`);
+        }
+        return response.json() as Promise<ProcessNavigatorInfrastructureApiResponse>;
+      }),
+    ])
+      .then(([conformancePayload, performancePayload, versionsPayload, infrastructurePayload]) => {
+        setRuntimeProcessConformance(conformancePayload);
+        setRuntimeProcessPerformance(performancePayload);
+        setRuntimeProcessVersions(versionsPayload);
+        setRuntimeProcessInfrastructure(infrastructurePayload);
+        setProcessNavigatorApiStatus((status) => (status === "fallback" ? status : "live"));
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setRuntimeProcessConformance({
+          ...fallbackProcessNavigatorConformance,
+          process_key: selectedProcessKey,
+        });
+        setRuntimeProcessPerformance({
+          ...fallbackProcessNavigatorPerformance,
+          process_key: selectedProcessKey,
+        });
+        setRuntimeProcessVersions({
+          ...fallbackProcessNavigatorVersions,
+          process_key: selectedProcessKey,
+        });
+        setRuntimeProcessInfrastructure(fallbackProcessNavigatorInfrastructure);
         setProcessNavigatorApiStatus((status) => (status === "live" ? "live" : "fallback"));
       });
     return () => controller.abort();
@@ -2315,21 +2574,59 @@ function App() {
           </span>
         </div>
         <div className="process-toolbar" aria-label="Process navigator controls">
-          <div className="zoom-control" aria-label="Semantic zoom">
-            {[0, 1, 2, 3, 4].map((zoom) => (
-              <button
-                aria-pressed={processNavigatorZoom === zoom}
-                className={processNavigatorZoom === zoom ? "zoom-active" : ""}
-                key={zoom}
-                onClick={() => setProcessNavigatorZoom(zoom)}
-                type="button"
+          <div className="toolbar-field">
+            <div className="toolbar-label-row">
+              <span>Semantic zoom</span>
+              <HelpFootnote
+                title="Semantic zoom"
+                links={[
+                  {
+                    label: "Process Navigator parent spec",
+                    href: "PROCESS_NAVIGATOR_MAP_SPEC.md#7-ui-requirements",
+                  },
+                  {
+                    label: "Navigator supplement",
+                    href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#13-accessibility-requirements",
+                  },
+                ]}
               >
-                Z{zoom}
-              </button>
-            ))}
+                Zoom changes the business-process abstraction level from domain clusters to process definitions,
+                BPMN steps and runtime evidence.
+              </HelpFootnote>
+            </div>
+            <div className="zoom-control" aria-label="Semantic zoom">
+              {[0, 1, 2, 3, 4].map((zoom) => (
+                <button
+                  aria-pressed={processNavigatorZoom === zoom}
+                  className={processNavigatorZoom === zoom ? "zoom-active" : ""}
+                  key={zoom}
+                  onClick={() => setProcessNavigatorZoom(zoom)}
+                  type="button"
+                >
+                  Z{zoom}
+                </button>
+              ))}
+            </div>
           </div>
           <label>
-            Selected process
+            <span className="toolbar-label-row">
+              <span>Selected process</span>
+              <HelpFootnote
+                title="Selected process"
+                links={[
+                  {
+                    label: "Business process UI spec",
+                    href: "BUSINESS_PROCESSES_UI_SPEC.md#process-navigator",
+                  },
+                  {
+                    label: "BPMN runtime scope",
+                    href: "PROCESS_ENGINE_GOVERNANCE.md#bpmn-dmn-cmmn-runtime-boundary",
+                  },
+                ]}
+              >
+                The selected BPMN process drives the detail panel, alerts, conformance summary and version visibility.
+              </HelpFootnote>
+            </span>
             <select value={selectedProcessKey} onChange={(event) => setSelectedProcessKey(event.target.value)}>
               {runtimeProcessMap.nodes
                 .filter((node) => node.node_type === "process_definition" && node.artifact_type === "bpmn")
@@ -2351,8 +2648,8 @@ function App() {
             />
           </label>
           <label>
-            Semantic level
-            <input readOnly value={runtimeProcessMap.semantic_level} />
+            Environment
+            <input readOnly value={`${runtimeProcessMap.environment ?? "dev"} / ${runtimeProcessMap.mode ?? "live"}`} />
           </label>
         </div>
         <div className="process-map-layout">
@@ -2361,6 +2658,7 @@ function App() {
               <span>{runtimeProcessMap.node_count} nodes</span>
               <span>{runtimeProcessMap.edge_count} edges</span>
               <span>{runtimeProcessAlerts.length} alerts</span>
+              <span>{causalAlertEdges.length} causal edges</span>
             </div>
             <div className="process-node-grid">
               {processMapNodes.map((node) => (
@@ -2376,6 +2674,12 @@ function App() {
                   <small>
                     {node.node_type} / alerts {node.alert_count}
                   </small>
+                  {node.node_type === "process_definition" ? (
+                    <small>
+                      conf {node.conformance_score ?? runtimeProcessConformance.conformance_score ?? "pending"} / v
+                      {node.active_version_count ?? runtimeProcessVersions.active_version_count}
+                    </small>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -2404,6 +2708,126 @@ function App() {
               </div>
             </dl>
             <p>{selectedProcessNode?.artifact_path ?? runtimeProcessDrilldown.artifact_path}</p>
+            <div className="process-metric-grid" aria-label="Process runtime metrics">
+              <article>
+                <span>Conformance</span>
+                <strong>
+                  {runtimeProcessConformance.conformance_score === null
+                    ? runtimeProcessConformance.job_status
+                    : `${runtimeProcessConformance.conformance_score.toFixed(1)}%`}
+                </strong>
+                <small>
+                  skipped {runtimeProcessConformance.mandatory_steps_skipped} / sequence{" "}
+                  {runtimeProcessConformance.unexpected_sequences}
+                </small>
+                <HelpFootnote
+                  title="Conformance checking"
+                  links={[
+                    {
+                      label: "Supplement topic 1",
+                      href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#2-conformance-checking",
+                    },
+                    {
+                      label: "BPMN artifact",
+                      href: runtimeProcessDrilldown.artifact_path,
+                    },
+                  ]}
+                >
+                  Compares the designed BPMN path with Flowable history traces to detect approval bypass,
+                  skipped mandatory tasks and unexpected task order.
+                </HelpFootnote>
+              </article>
+              <article>
+                <span>P95 cycle time</span>
+                <strong>{runtimeProcessPerformance.cycle_time_p95_minutes.toFixed(0)} min</strong>
+                <small>
+                  median {runtimeProcessPerformance.cycle_time_median_minutes.toFixed(0)} / rework{" "}
+                  {(runtimeProcessPerformance.rework_rate * 100).toFixed(1)}%
+                </small>
+                <HelpFootnote
+                  title="Performance metrics"
+                  links={[
+                    {
+                      label: "Supplement topic 2",
+                      href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#3-process-performance-metrics",
+                    },
+                    {
+                      label: "SLA targets",
+                      href: "TECHNICAL_SPEC_SUPPLEMENT_1.md#k-operational-governance",
+                    },
+                  ]}
+                >
+                  Shows whether the process is fast enough for daily forecasting and replenishment operations.
+                </HelpFootnote>
+              </article>
+              <article>
+                <span>Versions</span>
+                <strong>
+                  v{runtimeProcessVersions.current_version} / {runtimeProcessVersions.active_version_count} active
+                </strong>
+                <small>
+                  stuck{" "}
+                  {runtimeProcessVersions.versions.reduce((total, version) => total + version.stuck_instances, 0)}
+                </small>
+                <HelpFootnote
+                  title="Version co-existence"
+                  links={[
+                    {
+                      label: "Supplement topic 4",
+                      href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#5-process-version-co-existence",
+                    },
+                    {
+                      label: "Process engine governance",
+                      href: "PROCESS_ENGINE_GOVERNANCE.md#process-versioning",
+                    },
+                  ]}
+                >
+                  Highlights old Flowable versions that still have running or stuck instances after a new BPMN version
+                  is deployed.
+                </HelpFootnote>
+              </article>
+              <article>
+                <span>Infrastructure risk</span>
+                <strong>{selectedInfrastructureRisks.length === 0 ? "clear" : selectedInfrastructureRisks.length}</strong>
+                <small>{runtimeProcessInfrastructure.environment}</small>
+                <HelpFootnote
+                  title="Infrastructure linkage"
+                  links={[
+                    {
+                      label: "Supplement topic 8",
+                      href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#9-infrastructure-component-linkage",
+                    },
+                    {
+                      label: "Observability strategy",
+                      href: "OBSERVABILITY_SUPPORT.md",
+                    },
+                  ]}
+                >
+                  Connects business-process health to Airflow, Flowable, ClickHouse, PostgreSQL and OpenSearch
+                  component health.
+                </HelpFootnote>
+              </article>
+            </div>
+            <div className="process-mini-list" aria-label="Process version breakdown">
+              <strong>Version breakdown</strong>
+              {runtimeProcessVersions.versions.map((version) => (
+                <span key={version.version}>
+                  v{version.version} {version.status}: running {version.running_instances}, stuck{" "}
+                  {version.stuck_instances}
+                </span>
+              ))}
+            </div>
+            <div className="process-mini-list" aria-label="Infrastructure dependencies">
+              <strong>Infrastructure dependencies</strong>
+              {(runtimeProcessInfrastructure.components.length > 0
+                ? runtimeProcessInfrastructure.components
+                : [{ component_type: "configured", component_id: "no runtime sample", status: "healthy", risk_reason: "" }]
+              ).map((component) => (
+                <span key={`${component.component_type}-${component.component_id}`}>
+                  {component.component_type}: {component.component_id} - {component.status}
+                </span>
+              ))}
+            </div>
             <div className="action-row">
               <button type="button">Open BPMN</button>
               <button type="button">Open Tasks</button>
@@ -2419,6 +2843,7 @@ function App() {
                   <th>Alert</th>
                   <th>Severity</th>
                   <th>Source</th>
+                  <th>Cause</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -2429,12 +2854,32 @@ function App() {
                       <td>{alert.message}</td>
                       <td>{alert.severity}</td>
                       <td>{alert.source}</td>
+                      <td>
+                        {alert.root_cause === false ? "cascade" : "root"}
+                        {alert.cause_chain && alert.cause_chain.length > 1 ? ` / ${alert.cause_chain.join(" > ")}` : ""}
+                      </td>
                       <td>{alert.recommended_action}</td>
                     </tr>
                   ),
                 )}
               </tbody>
             </table>
+            <HelpFootnote
+              title="Causal alert chain"
+              links={[
+                {
+                  label: "Supplement topic 3",
+                  href: "PROCESS_NAVIGATOR_MAP_SPEC_SUPPLEMENT_1.md#4-causal-chain-alert-correlation",
+                },
+                {
+                  label: "Testing strategy",
+                  href: "TESTING_STRATEGY.md#business-process-testing",
+                },
+              ]}
+            >
+              The alert table separates root causes from cascaded effects so operational users fix the first broken
+              dependency instead of treating every downstream symptom as an independent incident.
+            </HelpFootnote>
           </div>
           <div className="table-shell">
             <table>

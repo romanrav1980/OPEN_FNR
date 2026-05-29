@@ -29,13 +29,13 @@ Source specs:
 | --- | --- | --- | --- |
 | PN-1 | Backend Map Contract | `/map`, `/alerts`, `/drilldown` | Completed |
 | PN-2 | UI Process Navigator Shell | route, ECharts map, alert panel, screenshot report | Completed |
-| PN-3 | Navigator Contract Hardening | env selector backend, snapshot mode, pagination, generated_at, config manifest | In progress |
-| PN-4 | Conformance And Versions | async conformance jobs, cached summary, process version breakdown | Planned |
-| PN-5 | Performance And SLA | cycle time, waiting time, throughput, endpoint SLA tests | Planned |
-| PN-6 | Infrastructure And Alert Correlation | infrastructure health, causal chains, deduplication | Planned |
-| PN-7 | Business Key Tracking | SKU/store process trail, search integration, masked instance IDs | Planned |
-| PN-8 | RBAC And Supplier Block | role matrix, supplier deny, scope filtering, audit access | Planned |
-| PN-9 | UI Detail Panels And Help | conformance/performance/version/detail panels with help-сноски | Planned |
+| PN-3 | Navigator Contract Hardening | env selector backend, snapshot mode, pagination, generated_at, config manifest | Completed |
+| PN-4 | Conformance And Versions | async conformance jobs, cached summary, process version breakdown | Completed |
+| PN-5 | Performance And SLA | cycle time, waiting time, throughput, endpoint SLA tests | Completed |
+| PN-6 | Infrastructure And Alert Correlation | infrastructure health, causal chains, deduplication | Completed |
+| PN-7 | Business Key Tracking | SKU/store process trail, search integration, masked instance IDs | Completed |
+| PN-8 | RBAC And Supplier Block | role matrix, supplier deny, scope filtering, audit access | Completed |
+| PN-9 | UI Detail Panels And Help | conformance/performance/version/detail panels with help-сноски | Completed |
 | PN-10 | Accessibility And Refresh | WCAG 2.1 AA, keyboard map, polling/staleness, axe-core | Planned |
 | PN-11 | Reporting And Superset Payload | weekly report endpoint, Airflow digest, BI dataset contract | Planned |
 | PN-12 | Load, Regression And Presentation | performance gate, HTML reports, stakeholder/developer presentation | Planned |
@@ -332,10 +332,16 @@ Acceptance criteria:
 
 ## 5. Текущий Статус
 
-На момент создания плана:
+Статус после завершения `PN-9`:
 
-- `PN-1` завершен;
-- `PN-2` завершен;
-- `PN-3` начат: добавляются config/env/snapshot/pagination contracts и backend tests.
+- `PN-1` завершен: backend map contract.
+- `PN-2` завершен: routed Process Navigator shell.
+- `PN-3` завершен: env, snapshot, pagination и generated metadata.
+- `PN-4` завершен: conformance evaluator и version contracts.
+- `PN-5` завершен: process performance metrics.
+- `PN-6` завершен: infrastructure health, causal alert chains и deduplication.
+- `PN-7` завершен: business key tracking.
+- `PN-8` завершен: backend RBAC boundary и supplier block.
+- `PN-9` завершен: UI detail panels, contextual help footnotes и HTML evidence report.
 
-Осталось `10` PN-спринтов после завершения `PN-3`.
+Осталось `3` PN-спринта: `PN-10` accessibility/refresh, `PN-11` reporting/Superset payload, `PN-12` load/regression/presentation.

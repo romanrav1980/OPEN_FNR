@@ -618,8 +618,18 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - role checks reuse shared `policy.py`;
   - `Supplier User`/`supplier` roles are blocked at backend level;
   - store roles are limited to zoom 0-1.
+- PN-9 has completed the Process Navigator UI detail panel:
+  - the UI consumes conformance, performance, versions and infrastructure health contracts;
+  - process cards show conformance and active-version hints;
+  - the detail panel exposes conformance, P95 cycle time, version breakdown and infrastructure risk;
+  - the alert table separates root alerts from cascaded effects and displays cause chains;
+  - contextual help footnotes link UI elements to task specs, process specs and BPMN artifacts.
+- PN-9 evidence report:
+  - `docs/test-reports/sprint-pn-9-process-navigator-ui/index.html`;
+  - `docs/test-reports/sprint-pn-9-process-navigator-ui/screenshots/process-navigator-ui.png`.
+- Process Navigator implementation plan now marks PN-3..PN-9 as completed; remaining PN sprints are PN-10, PN-11 and PN-12.
 - Process Navigator backend tests now cover 26 scenarios in `tests/backend/test_process_navigator.py`.
 - Verification:
-  - `pytest tests/backend/test_process_navigator.py` -> 26 passed.
-  - `pytest tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 3 passed.
-  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 461 passed, 1 warning about `.pytest_cache` permissions.
+  - `npm.cmd run build` in `apps/frontend` -> passed.
+  - `pytest tests/backend/test_process_navigator.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 29 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 464 passed, 1 warning about `.pytest_cache` permissions.

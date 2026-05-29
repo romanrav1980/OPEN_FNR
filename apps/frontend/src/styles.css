@@ -422,6 +422,23 @@ button:hover {
   gap: 10px;
 }
 
+.toolbar-field {
+  display: grid;
+  gap: 6px;
+  align-content: end;
+}
+
+.toolbar-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .process-toolbar label {
   display: grid;
   gap: 6px;
@@ -584,6 +601,114 @@ button:hover {
   font-size: 13px;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+.process-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.process-metric-grid article {
+  display: grid;
+  gap: 7px;
+  min-height: 132px;
+  border: 1px solid var(--border-soft);
+  background: #202020;
+  padding: 10px;
+}
+
+.process-metric-grid span,
+.process-metric-grid small,
+.process-mini-list span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.process-metric-grid strong {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.process-mini-list {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--border-soft);
+  background: #202020;
+  padding: 10px;
+}
+
+.process-mini-list strong {
+  font-size: 13px;
+}
+
+.help-footnote {
+  position: relative;
+  justify-self: start;
+}
+
+.toolbar-label-row .help-footnote {
+  justify-self: end;
+}
+
+.help-footnote summary {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-soft);
+  background: #252525;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.help-footnote summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-footnote[open] summary {
+  border-color: var(--noble-red-light);
+  background: var(--noble-red);
+}
+
+.help-footnote div {
+  position: absolute;
+  z-index: 5;
+  width: min(340px, 78vw);
+  margin-top: 8px;
+  border: 1px solid var(--border-soft);
+  background: #181818;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 35%);
+  padding: 12px;
+}
+
+.toolbar-label-row .help-footnote div {
+  right: 0;
+}
+
+.help-footnote p {
+  margin: 8px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-transform: none;
+}
+
+.help-footnote ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 16px;
+}
+
+.help-footnote a {
+  color: var(--noble-red-light);
+  font-size: 12px;
 }
 
 .process-status-live {
