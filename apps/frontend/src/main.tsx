@@ -189,6 +189,48 @@ type CapacityPlanApiItem = {
   }[];
 };
 
+type TrueInventoryRow = {
+  store: string;
+  sku: string;
+  system: number;
+  movements: number;
+  deliveries: number;
+  corrections: number;
+  virtual: number;
+  confidence: string;
+  status: string;
+};
+
+type TrueInventoryApiItem = {
+  store_id: string;
+  sku: string;
+  system_stock: number;
+  pos_movements: number;
+  deliveries: number;
+  corrections: number;
+  virtual_stock: number;
+  confidence: number;
+  status: string;
+};
+
+type StoreTaskRow = {
+  task: string;
+  type: string;
+  priority: string;
+  status: string;
+  sla: string;
+  instruction: string;
+};
+
+type StoreTaskApiItem = {
+  task_id: string;
+  task_type: string;
+  priority: string;
+  status: string;
+  sla_due_at: string;
+  instruction: string;
+};
+
 const serviceLinks: ServiceLink[] = [
   { name: "API", url: localServiceUrl(serviceConfig.apiPort, "/docs"), purpose: "OpenAPI" },
   { name: "Airflow", url: localServiceUrl(serviceConfig.airflowPort), purpose: "Batch orchestration" },
@@ -1057,7 +1099,7 @@ const supplierConfirmationRows = [
   },
 ];
 
-const trueInventoryRows = [
+const trueInventoryRows: TrueInventoryRow[] = [
   {
     store: "S001",
     sku: "SKU001",
@@ -1071,7 +1113,7 @@ const trueInventoryRows = [
   },
 ];
 
-const storeTaskRows = [
+const storeTaskRows: StoreTaskRow[] = [
   {
     task: "store-task-stock-s001-sku001",
     type: "stock_check",
@@ -1119,6 +1161,10 @@ function App() {
     React.useState<PurchaseProposalRow[]>(purchaseProposalRows);
   const [capacityApiStatus, setCapacityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeCapacityMoveRows, setRuntimeCapacityMoveRows] = React.useState<CapacityMoveRow[]>(capacityMoveRows);
+  const [storeApiStatus, setStoreApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeTrueInventoryRows, setRuntimeTrueInventoryRows] =
+    React.useState<TrueInventoryRow[]>(trueInventoryRows);
+  const [runtimeStoreTaskRows, setRuntimeStoreTaskRows] = React.useState<StoreTaskRow[]>(storeTaskRows);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -1322,6 +1368,56 @@ function App() {
           return;
         }
         setCapacityApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      fetch(apiUrl("/store-management/true-inventory?store_id=S001"), { signal: controller.signal }),
+      fetch(apiUrl("/store-management/tasks?store_id=S001"), { signal: controller.signal }),
+    ])
+      .then(([inventoryResponse, tasksResponse]) => {
+        if (!inventoryResponse.ok || !tasksResponse.ok) {
+          throw new Error("Store management API returned an error");
+        }
+        return Promise.all([
+          inventoryResponse.json() as Promise<TrueInventoryApiItem[]>,
+          tasksResponse.json() as Promise<StoreTaskApiItem[]>,
+        ]);
+      })
+      .then(([inventory, tasks]) => {
+        setRuntimeTrueInventoryRows(
+          inventory.map((row) => ({
+            store: row.store_id,
+            sku: row.sku,
+            system: row.system_stock,
+            movements: row.pos_movements,
+            deliveries: row.deliveries,
+            corrections: row.corrections,
+            virtual: row.virtual_stock,
+            confidence: row.confidence.toFixed(2),
+            status: row.status,
+          })),
+        );
+        setRuntimeStoreTaskRows(
+          tasks.map((task) => ({
+            task: task.task_id,
+            type: task.task_type,
+            priority: task.priority,
+            status: task.status,
+            sla: task.sla_due_at,
+            instruction: task.instruction,
+          })),
+        );
+        setStoreApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setStoreApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -4545,6 +4641,11 @@ function App() {
             <strong>Counted 38 vs virtual 40</strong>
             <p>Store task completion updates quality flag and records optional photo placeholder.</p>
           </article>
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{storeApiStatus}</strong>
+            <p>Store tasks and true inventory are loaded from Store Management API with local fallback data.</p>
+          </article>
         </div>
         <div className="table-shell">
           <table>
@@ -4562,7 +4663,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {trueInventoryRows.map((row) => (
+              {runtimeTrueInventoryRows.map((row) => (
                 <tr key={`${row.store}-${row.sku}`}>
                   <td>{row.store}</td>
                   <td>{row.sku}</td>
@@ -4591,7 +4692,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {storeTaskRows.map((row) => (
+              {runtimeStoreTaskRows.map((row) => (
                 <tr key={row.task}>
                   <td>{row.task}</td>
                   <td>{row.type}</td>
@@ -4632,14 +4733,14 @@ function App() {
         </div>
         <div className="dq-layout">
           <aside className="dq-detail">
-            <span className="eyebrow">Mobile Store Task</span>
-            <h3>Complete count and display confirmation</h3>
+            <span className="eyebrow">Store App Target</span>
+            <h3>Dispatch task through configured endpoint</h3>
             <p>
-              Store Operations sees only own store tasks, enters counted quantity,
-              optional photo placeholder and comment before closing the task.
+              Store Operations sees only own store tasks. Task dispatch uses an idempotency key,
+              service account gate and target URL from environment configuration.
             </p>
             <div className="action-row">
-              <button type="button">Open task</button>
+              <button type="button">Dispatch task</button>
               <button type="button">Submit count</button>
               <button type="button">Confirm display</button>
             </div>

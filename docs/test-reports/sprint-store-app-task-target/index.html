@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR Store App Task Target Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f4eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Store App Task Target</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем отправку задач магазина из OPEN FNR в Store App через configurable target adapter.
+          Такой тест нужен, чтобы бизнес-процесс инвентаризации и подтверждения промо-выкладки не зависел от
+          hardcoded endpoint: в DEV/TEST работает local fallback, в STAGE/PROD endpoint задается через
+          <code>OPEN_FNR_STORE_APP_TASK_EXPORT_URL</code>.
+        </p>
+        <p>UI получает true inventory и store tasks из <code>/store-management</code> API и показывает статус live/fallback.</p>
+        <img src="screenshots/store-app-task-target.png" alt="Store App target in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем Control Tower.</td><td>Проверяем доступность UI после изменений.</td><td>Страница загружается.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем API status в Store Management.</td><td>UI должен отличать live API от fallback данных.</td><td>При backend online статус live.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем таблицы true inventory и tasks.</td><td>Пользователь должен видеть виртуальный остаток, SLA и инструкции.</td><td>Строки S001/SKU001 и task ids видны.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем Store App Target panel.</td><td>В UI не должно быть скрытого hardcode endpoint.</td><td>Показан configured endpoint/local fallback подход.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Рассчитываем true inventory.</td><td>Система должна выявить низкую уверенность остатка.</td><td>virtual_stock = 40, confidence = 0.58.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>Создаем store task.</td><td>Низкая уверенность требует действия магазина.</td><td>stock_check и promo_display_confirmation доступны.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Preview dispatch.</td><td>До отправки проверяем idempotency key.</td><td>Ключ task:store-app:v1.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Отправляем через local fallback.</td><td>DEV/TEST должны работать без реального Store App.</td><td>202 и audit_recorded=true.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Отправляем через configured HTTP target.</td><td>Production endpoint задается настройкой.</td><td>POST с Idempotency-Key.</td><td class="ok">Покрыто monkeypatch-тестом.</td></tr>
+          <tr><td>6</td><td>Проверяем service account gate.</td><td>Отправка задач во внешний Store App должна быть защищена.</td><td>Неверный account получает 403.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_store_management.py tests/backend/test_config.py tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">17 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Compose config</td><td><code>docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml config --quiet</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page ...</code></td><td class="ok">store-app-task-target.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

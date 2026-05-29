@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import store_management
 from open_fnr_api.main import app
 from open_fnr_api.store_management import calculate_virtual_stock
 
@@ -73,3 +74,89 @@ def test_store_task_completion_requires_role_scope_and_returns_audit() -> None:
     assert payload["status"] == "corrected"
     assert payload["quality_flag"] == "store_feedback_received"
     assert payload["audit"]["photo_reference"] == "store-photo-placeholder-001"
+
+
+def test_store_task_dispatch_preview_is_idempotent_and_uses_local_fallback() -> None:
+    response = client.get("/store-management/tasks/store-task-stock-s001-sku001/dispatch")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["target"] == "Store App task"
+    assert payload["idempotency_key"] == "store-task-stock-s001-sku001:store-app:v1"
+    assert payload["export_channel"] == "local_fallback"
+
+
+def test_store_task_dispatch_send_requires_service_account() -> None:
+    response = client.post(
+        "/store-management/tasks/store-task-stock-s001-sku001/dispatch/send",
+        json={
+            "actor": "store.ops@example.org",
+            "actor_role": "Store Operations",
+            "service_account": "wrong-account",
+        },
+    )
+
+    assert response.status_code == 403
+
+
+def test_store_task_dispatch_send_uses_local_fallback_with_audit() -> None:
+    response = client.post(
+        "/store-management/tasks/store-task-stock-s001-sku001/dispatch/send",
+        json={
+            "actor": "store.ops@example.org",
+            "actor_role": "Store Operations",
+            "service_account": "svc-open-fnr-store-app",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["dispatch"]["export_channel"] == "local_fallback"
+    assert payload["response_code"] == "202"
+    assert payload["audit_recorded"] is True
+
+
+def test_store_task_dispatch_can_post_to_configured_http_target(monkeypatch) -> None:
+    calls = []
+    original_url = store_management.settings.store_app_task_export_url
+    original_timeout = store_management.settings.publication_http_timeout_seconds
+
+    class FakeResponse:
+        status = 202
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return b"accepted by store app"
+
+    def fake_urlopen(request, timeout):
+        calls.append((request, timeout))
+        return FakeResponse()
+
+    monkeypatch.setattr("open_fnr_api.store_management.urlopen", fake_urlopen)
+    store_management.settings.store_app_task_export_url = "http://store-app.integration.local/tasks"
+    store_management.settings.publication_http_timeout_seconds = 17
+    try:
+        response = client.post(
+            "/store-management/tasks/store-task-stock-s001-sku001/dispatch/send",
+            json={
+                "actor": "store.ops@example.org",
+                "actor_role": "Store Operations",
+                "service_account": "svc-open-fnr-store-app",
+            },
+        )
+    finally:
+        store_management.settings.store_app_task_export_url = original_url
+        store_management.settings.publication_http_timeout_seconds = original_timeout
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["dispatch"]["export_channel"] == "http_api"
+    assert payload["response_message"] == "accepted by store app"
+    assert calls[0][0].full_url == "http://store-app.integration.local/tasks"
+    assert calls[0][0].headers["Idempotency-key"] == "store-task-stock-s001-sku001:store-app:v1"
+    assert calls[0][1] == 17

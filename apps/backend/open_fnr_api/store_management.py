@@ -1,9 +1,13 @@
+import json
 from enum import StrEnum
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
+from .config import settings
 
 
 router = APIRouter(prefix="/store-management", tags=["store-management"])
@@ -57,6 +61,31 @@ class StoreTaskCompletionRequest(BaseModel):
     photo_reference: str | None = None
 
 
+class StoreTaskDispatchRequest(BaseModel):
+    actor: str = Field(min_length=1)
+    actor_role: str = Field(default="Store Operations", min_length=1)
+    service_account: str = Field(min_length=1)
+
+
+class StoreTaskDispatchPreview(BaseModel):
+    target: str
+    task_id: str
+    store_id: str
+    task_type: StoreTaskType
+    priority: str
+    sla_due_at: str
+    instruction: str
+    idempotency_key: str
+    export_channel: str
+
+
+class StoreTaskDispatchResponse(BaseModel):
+    dispatch: StoreTaskDispatchPreview
+    response_code: str
+    response_message: str
+    audit_recorded: bool
+
+
 def calculate_virtual_stock(system_stock: int, pos_movements: int, deliveries: int, corrections: int) -> int:
     return max(system_stock - pos_movements + deliveries + corrections, 0)
 
@@ -99,6 +128,51 @@ STORE_TASKS = (
 )
 
 
+def store_app_task_export_channel() -> str:
+    return "http_api" if settings.store_app_task_export_url else "local_fallback"
+
+
+def find_store_task(task_id: str) -> StoreTask:
+    task = next((item for item in STORE_TASKS if item.task_id == task_id), None)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Store task not found")
+    return task
+
+
+def build_store_task_dispatch(task: StoreTask) -> StoreTaskDispatchPreview:
+    return StoreTaskDispatchPreview(
+        target="Store App task",
+        task_id=task.task_id,
+        store_id=task.store_id,
+        task_type=task.task_type,
+        priority=task.priority,
+        sla_due_at=task.sla_due_at,
+        instruction=task.instruction,
+        idempotency_key=f"{task.task_id}:store-app:v1",
+        export_channel=store_app_task_export_channel(),
+    )
+
+
+def send_store_task_to_target(dispatch: StoreTaskDispatchPreview) -> tuple[str, str]:
+    if not settings.store_app_task_export_url:
+        return "202", "sent to local store app fallback"
+    request = Request(
+        settings.store_app_task_export_url,
+        data=json.dumps(dispatch.model_dump(mode="json"), ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "Idempotency-Key": dispatch.idempotency_key,
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=settings.publication_http_timeout_seconds) as response:
+            response_body = response.read().decode("utf-8", errors="replace").strip()
+            return str(response.status), response_body or "sent to store app target"
+    except URLError as exc:
+        raise HTTPException(status_code=503, detail=f"store app target unavailable: {exc}") from exc
+
+
 @router.get("/true-inventory", response_model=tuple[TrueInventoryRecord, ...])
 def list_true_inventory(store_id: str = Query(default="S001")) -> tuple[TrueInventoryRecord, ...]:
     if store_id != TRUE_INVENTORY.store_id:
@@ -113,9 +187,7 @@ def list_store_tasks(store_id: str = Query(default="S001")) -> tuple[StoreTask, 
 
 @router.post("/tasks/{task_id}/complete")
 def complete_store_task(task_id: str, request: StoreTaskCompletionRequest) -> dict[str, object]:
-    task = next((item for item in STORE_TASKS if item.task_id == task_id), None)
-    if task is None:
-        raise HTTPException(status_code=404, detail="Store task not found")
+    task = find_store_task(task_id)
     if request.actor_role not in {"Store Operations", "Inventory Data Owner"}:
         raise HTTPException(status_code=403, detail="Role is not allowed to complete store task")
     if request.store_id != task.store_id:
@@ -157,3 +229,44 @@ def complete_store_task(task_id: str, request: StoreTaskCompletionRequest) -> di
             "photo_reference": request.photo_reference,
         },
     }
+
+
+@router.get("/tasks/{task_id}/dispatch")
+def get_store_task_dispatch(task_id: str) -> dict[str, object]:
+    task = find_store_task(task_id)
+    return build_store_task_dispatch(task).model_dump(mode="json")
+
+
+@router.post("/tasks/{task_id}/dispatch/send", response_model=StoreTaskDispatchResponse)
+def send_store_task_dispatch(task_id: str, request: StoreTaskDispatchRequest) -> StoreTaskDispatchResponse:
+    if request.actor_role not in {"Store Operations", "Inventory Data Owner"}:
+        raise HTTPException(status_code=403, detail="Role is not allowed to dispatch store task")
+    if request.service_account != "svc-open-fnr-store-app":
+        raise HTTPException(status_code=403, detail="service account is not allowed to dispatch store task")
+    task = find_store_task(task_id)
+    dispatch = build_store_task_dispatch(task)
+    response_code, response_message = send_store_task_to_target(dispatch)
+    event = record_audit_event_if_enabled(
+        AuditEventCreate(
+            event_type="store_task_dispatched",
+            actor=request.actor,
+            actor_role=request.actor_role,
+            object_type="store_task",
+            object_id=task_id,
+            action="dispatch",
+            reason=f"Sent store task through {dispatch.export_channel}",
+            correlation_id=dispatch.idempotency_key,
+            payload={
+                "store_id": dispatch.store_id,
+                "task_type": dispatch.task_type,
+                "priority": dispatch.priority,
+                "export_channel": dispatch.export_channel,
+            },
+        )
+    )
+    return StoreTaskDispatchResponse(
+        dispatch=dispatch,
+        response_code=response_code,
+        response_message=response_message,
+        audit_recorded=event is not None,
+    )

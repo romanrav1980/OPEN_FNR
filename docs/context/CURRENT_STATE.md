@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 382 automated tests passed.
+Current backend regression status: 386 automated tests passed.
 
 ## Local Infrastructure
 
@@ -422,17 +422,19 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Store Management API: `apps/backend/open_fnr_api/store_management.py`.
 - Store Management tests: `tests/backend/test_store_management.py`.
+- Store App task dispatch API with service account gate, local fallback and configurable `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`.
 - Store management process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Store task BPMN: `processes/store-management/store_task_process.bpmn20.xml`.
 - True inventory confidence DMN: `processes/store-management/true_inventory_confidence_decision.dmn.xml`.
 - Store task priority DMN: `processes/store-management/store_task_priority_decision.dmn.xml`.
 - Inventory mismatch CMMN: `processes/store-management/inventory_mismatch_case.cmmn.xml`.
-- UI True Inventory And Store Management section with virtual stock, confidence, store tasks and feedback audit.
+- UI True Inventory And Store Management section with virtual stock, confidence, store tasks, API status, Store App target dispatch and feedback audit.
 - HTML test report with screenshot: `docs/test-reports/sprint-36-true-inventory-store-management/index.html`.
+- Store App task target hardening report: `docs/test-reports/sprint-store-app-task-target/index.html`.
 
 ## Verification
 
-- `python -m pytest` -> 301 passed.
+- `python -m pytest` -> 386 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -460,7 +462,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 
 - Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
 - Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=true` by default.
-- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL` and `OPEN_FNR_AUTO_ORDER_EXPORT_URL`.
+- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL`, `OPEN_FNR_AUTO_ORDER_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL` and `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`.
 - Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Audit API: `apps/backend/open_fnr_api/audit.py`.
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.
