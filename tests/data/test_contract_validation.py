@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from open_fnr_api.data_contracts import (
     ErpPriceLine,
+    ErpSupplierTermLine,
     DwhSalesHistoryLine,
     MdmProductLine,
     MdmStoreLine,
@@ -124,6 +125,31 @@ def test_erp_price_line_rejects_extreme_selling_price() -> None:
             valid_from=date(2026, 5, 28),
             regular_price=100,
             selling_price=1001,
+        )
+
+
+def test_erp_supplier_terms_require_positive_pack_size() -> None:
+    ErpSupplierTermLine(
+        supplier_term_id="TERM001",
+        supplier_id="SUP001",
+        sku_id="SKU001",
+        location_scope="STORE001",
+        valid_from=date(2026, 5, 28),
+        lead_time_days=3,
+        moq_qty=12,
+        pack_size_qty=6,
+    )
+
+    with pytest.raises(ValidationError):
+        ErpSupplierTermLine(
+            supplier_term_id="TERM002",
+            supplier_id="SUP001",
+            sku_id="SKU001",
+            location_scope="STORE001",
+            valid_from=date(2026, 5, 28),
+            lead_time_days=3,
+            moq_qty=12,
+            pack_size_qty=0,
         )
 
 

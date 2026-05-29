@@ -228,6 +228,26 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(exported_at)
 ORDER BY (exported_at, target_system, status, proposal_id, export_id);
 
+CREATE TABLE IF NOT EXISTS open_fnr.raw_erp_supplier_terms
+(
+    batch_id String,
+    supplier_term_id String,
+    supplier_id String,
+    sku_id String,
+    location_scope String,
+    valid_from Date,
+    valid_to Nullable(Date),
+    lead_time_days UInt32,
+    moq_qty Float64,
+    pack_size_qty Float64,
+    order_calendar_id Nullable(String),
+    source_system String,
+    loaded_at DateTime DEFAULT now()
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(valid_from)
+ORDER BY (valid_from, supplier_id, sku_id, location_scope, supplier_term_id);
+
 CREATE TABLE IF NOT EXISTS open_fnr.dq_error_rows
 (
     incident_id String,

@@ -173,6 +173,18 @@ ERP_ORDER_STATUS_MANIFEST = SourceBatchManifest(
     landed_uri="s3-compatible://open-fnr-landing/erp/order_statuses/business_date=2026-05-28/erp-order-statuses.parquet",
 )
 
+ERP_SUPPLIER_TERMS_MANIFEST = SourceBatchManifest(
+    batch_id="erp-supplier-terms-2026-05-28-v1",
+    source_system="ERP",
+    contract_name="erp_supplier_term_line",
+    contract_version="v1",
+    business_date=date(2026, 5, 28),
+    row_count=320_000,
+    checksum="sha256:erp-supplier-terms-20260528-v1",
+    idempotency_key="ERP:erp_supplier_term_line:v1:2026-05-28",
+    landed_uri="s3-compatible://open-fnr-landing/erp/supplier_terms/business_date=2026-05-28/erp-supplier-terms.parquet",
+)
+
 MDM_PRODUCTS_MANIFEST = SourceBatchManifest(
     batch_id="mdm-products-2026-05-28-v1",
     source_system="MDM",
@@ -240,7 +252,7 @@ SOURCE_PIPELINE_READINESS: tuple[dict[str, object], ...] = (
     {
         "source_system": "ERP",
         "pipeline": "erp_commercial",
-        "contracts": ["erp_price_line", "erp_order_export_status_line"],
+        "contracts": ["erp_price_line", "erp_order_export_status_line", "erp_supplier_term_line"],
         "status": "ready_for_shadow_load",
         "supports_projected_stock": False,
         "supports_forecast": True,
@@ -308,6 +320,12 @@ PILOT_REQUIRED_SOURCE_CONTRACTS: tuple[PilotSourceContract, ...] = (
         contract_name="erp_order_export_status_line",
         owner_role="Integration Owner",
         required_for=("publication_reconciliation", "order_status_monitoring"),
+    ),
+    PilotSourceContract(
+        source_system="ERP",
+        contract_name="erp_supplier_term_line",
+        owner_role="Commercial Data Owner",
+        required_for=("replenishment", "procurement", "supplier_collaboration"),
     ),
     PilotSourceContract(
         source_system="MDM",
@@ -432,6 +450,11 @@ def get_erp_prices_manifest() -> dict[str, object]:
 @router.get("/ingestion/manifests/erp-order-statuses")
 def get_erp_order_status_manifest() -> dict[str, object]:
     return ERP_ORDER_STATUS_MANIFEST.model_dump(mode="json")
+
+
+@router.get("/ingestion/manifests/erp-supplier-terms")
+def get_erp_supplier_terms_manifest() -> dict[str, object]:
+    return ERP_SUPPLIER_TERMS_MANIFEST.model_dump(mode="json")
 
 
 @router.get("/ingestion/manifests/mdm-products")

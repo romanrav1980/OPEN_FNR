@@ -108,6 +108,7 @@ def test_erp_manifests_expose_prices_and_order_export_statuses() -> None:
     endpoints = {
         "erp-prices": "erp_price_line",
         "erp-order-statuses": "erp_order_export_status_line",
+        "erp-supplier-terms": "erp_supplier_term_line",
     }
 
     for endpoint, contract_name in endpoints.items():

@@ -42,7 +42,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | RI-1 | Source Contracts Freeze | Real source contracts, field mapping and SLA matrix | Completed |
 | RI-2 | POS And DWH Sales Ingestion | Real sales facts and history ingestion | Completed foundation |
 | RI-3 | WMS Stock, In-Transit And Open Orders | Real stock/in-transit/open-order ingestion | Completed foundation |
-| RI-4 | ERP Prices, Suppliers And Order Status | ERP commercial ingestion and outbound status reconciliation | RI-1 |
+| RI-4 | ERP Prices, Suppliers And Order Status | ERP commercial ingestion and outbound status reconciliation | Completed foundation |
 | RI-5 | MDM And Promo Ingestion | Product, store, hierarchy, lifecycle and promo ingestion | RI-1 |
 | RI-6 | Reconciliation, Retries And Source SLA | Idempotency, retry, reconciliation, degraded mode and source SLA gates | RI-2..RI-5 |
 | SEC-1 | OIDC/JWT Authentication | Real authentication and token verification | IH-2 |

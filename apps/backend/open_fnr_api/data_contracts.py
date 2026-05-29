@@ -265,6 +265,20 @@ class ErpOrderExportStatusLine(BaseModel):
     source_system: str = Field(default="ERP", min_length=1, max_length=64)
 
 
+class ErpSupplierTermLine(BaseModel):
+    supplier_term_id: str = Field(min_length=1, max_length=128)
+    supplier_id: str = Field(min_length=1, max_length=64)
+    sku_id: str = Field(min_length=1, max_length=64)
+    location_scope: str = Field(min_length=1, max_length=64)
+    valid_from: date
+    valid_to: date | None = None
+    lead_time_days: int = Field(ge=0)
+    moq_qty: float = Field(ge=0)
+    pack_size_qty: float = Field(gt=0)
+    order_calendar_id: str | None = Field(default=None, max_length=64)
+    source_system: str = Field(default="ERP", min_length=1, max_length=64)
+
+
 class MdmProductLine(BaseModel):
     sku_id: str = Field(min_length=1, max_length=64)
     product_name: str = Field(min_length=1, max_length=255)
@@ -339,6 +353,7 @@ SOURCE_CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "wms_in_transit_line": WmsInTransitLine,
     "erp_price_line": ErpPriceLine,
     "erp_order_export_status_line": ErpOrderExportStatusLine,
+    "erp_supplier_term_line": ErpSupplierTermLine,
     "mdm_product_line": MdmProductLine,
     "mdm_store_line": MdmStoreLine,
     "promo_plan_line": PromoPlanLine,
@@ -449,6 +464,21 @@ SOURCE_CONTRACT_REGISTRY: tuple[SourceContractDefinition, ...] = (
         reconciliation_keys=("export_id", "proposal_id", "external_order_id"),
         required_for=("publication_reconciliation", "order_status_monitoring"),
         blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "status_validity", "export_reconciliation"),
+    ),
+    SourceContractDefinition(
+        source_system="ERP",
+        contract_name="erp_supplier_term_line",
+        model_name="ErpSupplierTermLine",
+        primary_key=("supplier_term_id",),
+        required_fields=("supplier_term_id", "supplier_id", "sku_id", "location_scope", "valid_from", "lead_time_days", "moq_qty", "pack_size_qty"),
+        business_owner_role="Commercial Data Owner",
+        technical_owner_role="Integration Owner",
+        source_sla="before_replenishment_cutoff",
+        freshness_field="valid_from",
+        idempotency_fields=("source_system", "contract_name", "contract_version", "business_date", "checksum"),
+        reconciliation_keys=("supplier_id", "sku_id", "location_scope", "valid_from"),
+        required_for=("replenishment", "procurement", "supplier_collaboration"),
+        blocking_dq_checks=("schema", "row_count", "checksum", "duplicates", "referential_integrity", "commercial_terms_validity"),
     ),
     SourceContractDefinition(
         source_system="MDM",

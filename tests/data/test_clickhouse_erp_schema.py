@@ -15,3 +15,8 @@ def test_raw_erp_commercial_schemas_exist() -> None:
     assert "export_id String" in sql
     assert "proposal_id String" in sql
     assert "retry_count UInt32" in sql
+    assert "CREATE TABLE IF NOT EXISTS open_fnr.raw_erp_supplier_terms" in sql
+    assert "supplier_term_id String" in sql
+    assert "lead_time_days UInt32" in sql
+    assert "moq_qty Float64" in sql
+    assert "pack_size_qty Float64" in sql

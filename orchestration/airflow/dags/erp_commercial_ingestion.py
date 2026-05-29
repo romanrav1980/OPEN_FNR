@@ -20,6 +20,36 @@ def build_erp_manifest(contract_name: str, business_date: str) -> dict[str, obje
     }
 
 
+def build_erp_reconciliation_plan(business_date: str) -> dict[str, object]:
+    contracts = (
+        {
+            "contract_name": "erp_price_line",
+            "reconciliation_keys": ("sku_id", "location_scope", "valid_from"),
+            "blocks": ("regular_forecast", "promo_forecast", "replenishment"),
+            "sla": "before_forecast_and_replenishment_cutoff",
+        },
+        {
+            "contract_name": "erp_supplier_term_line",
+            "reconciliation_keys": ("supplier_id", "sku_id", "location_scope", "valid_from"),
+            "blocks": ("replenishment", "procurement", "supplier_collaboration"),
+            "sla": "before_replenishment_cutoff",
+        },
+        {
+            "contract_name": "erp_order_export_status_line",
+            "reconciliation_keys": ("export_id", "proposal_id", "external_order_id"),
+            "blocks": ("publication_reconciliation", "order_status_monitoring"),
+            "sla": "before_export_reconciliation_cutoff",
+        },
+    )
+    return {
+        "business_date": business_date,
+        "source_system": "ERP",
+        "contracts": contracts,
+        "required_count": len(contracts),
+        "failure_action": "create_integration_owner_recovery_task",
+    }
+
+
 if dag is not None and task is not None:
 
     @dag(
@@ -35,6 +65,7 @@ if dag is not None and task is not None:
             return [
                 build_erp_manifest("erp_price_line", ds),
                 build_erp_manifest("erp_order_export_status_line", ds),
+                build_erp_manifest("erp_supplier_term_line", ds),
             ]
 
         @task
@@ -46,9 +77,14 @@ if dag is not None and task is not None:
             return [{**manifest, "dq_status": "accepted"} for manifest in manifests]
 
         @task
+        def reconcile_commercial_inputs(manifests: list[dict[str, object]]) -> list[dict[str, object]]:
+            plan = build_erp_reconciliation_plan(str(manifests[0]["business_date"]))
+            return [{**manifest, "reconciliation_status": "accepted", "reconciliation_plan": plan} for manifest in manifests]
+
+        @task
         def publish_commercial_data(manifests: list[dict[str, object]]) -> list[dict[str, object]]:
             return [{**manifest, "publish_status": "published"} for manifest in manifests]
 
-        publish_commercial_data(run_dq(validate_schema(create_manifests())))
+        publish_commercial_data(reconcile_commercial_inputs(run_dq(validate_schema(create_manifests()))))
 
     erp_commercial_ingestion_dag()

@@ -895,3 +895,25 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/orchestration/test_wms_inventory_ingestion.py tests/data/test_clickhouse_wms_schema.py tests/data/test_source_contract_freeze.py tests/backend/test_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 24 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 497 passed, 1 warning about `.pytest_cache` permissions.
+
+## RI-4 ERP Prices, Suppliers And Order Status
+
+- RI-4 completed as ingestion foundation.
+- Completion note: `docs/context/RI4_COMPLETION.md`.
+- ERP commercial ingestion specification added: `ERP_COMMERCIAL_INGESTION_SPEC.md`.
+- ERP supplier terms contract added:
+  - `ErpSupplierTermLine`;
+  - `erp_supplier_term_line`;
+  - lead time, MOQ, pack size and order calendar fields.
+- ERP manifest endpoint added:
+  - `GET /data/ingestion/manifests/erp-supplier-terms`.
+- Raw ClickHouse schema added:
+  - `open_fnr.raw_erp_supplier_terms`.
+- ERP Airflow DAG now includes:
+  - price manifest;
+  - supplier terms manifest;
+  - order export status manifest;
+  - reconciliation plan step.
+- Verification:
+  - `pytest tests/orchestration/test_erp_commercial_ingestion.py tests/data/test_clickhouse_erp_schema.py tests/data/test_contract_validation.py tests/data/test_source_contract_freeze.py tests/backend/test_ingestion.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 33 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 499 passed, 1 warning about `.pytest_cache` permissions.

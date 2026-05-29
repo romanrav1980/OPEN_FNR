@@ -38,6 +38,7 @@ The frozen baseline is machine-checkable through:
 | WMS | `wms_in_transit_line` | `WmsInTransitLine` | `shipment_id`, `line_id` | Supply Chain Data Owner | Data Engineering | projected stock, replenishment, capacity |
 | ERP | `erp_price_line` | `ErpPriceLine` | `price_id` | Commercial Data Owner | Integration Owner | regular forecast, promo forecast, procurement |
 | ERP | `erp_order_export_status_line` | `ErpOrderExportStatusLine` | `export_id` | Integration Owner | Integration Owner | publication reconciliation, order status monitoring |
+| ERP | `erp_supplier_term_line` | `ErpSupplierTermLine` | `supplier_term_id` | Commercial Data Owner | Integration Owner | replenishment, procurement, supplier collaboration |
 | MDM | `mdm_product_line` | `MdmProductLine` | `sku_id` | MDM Data Owner | Data Engineering | assortment, fresh, lifecycle, hierarchy |
 | MDM | `mdm_store_line` | `MdmStoreLine` | `store_id` | MDM Data Owner | Data Engineering | store scope, replenishment calendar, routing |
 | Promo | `promo_plan_line` | `PromoPlanLine` | `promo_id`, `sku_id`, `store_scope_id` | Promo Planner | Data Engineering | promo forecast, shelf space, display capacity |
@@ -53,6 +54,7 @@ The frozen baseline is machine-checkable through:
 | `wms_in_transit_line` | `before_replenishment_cutoff` | schema, row count, checksum, duplicates, referential integrity, date order |
 | `erp_price_line` | `before_forecast_and_replenishment_cutoff` | schema, row count, checksum, duplicates, referential integrity, price validity |
 | `erp_order_export_status_line` | `before_export_reconciliation_cutoff` | schema, row count, checksum, duplicates, status validity, export reconciliation |
+| `erp_supplier_term_line` | `before_replenishment_cutoff` | schema, row count, checksum, duplicates, referential integrity, commercial terms validity |
 | `mdm_product_line` | `before_master_data_cutoff` | schema, row count, checksum, duplicates, hierarchy integrity, lifecycle validity |
 | `mdm_store_line` | `before_master_data_cutoff` | schema, row count, checksum, duplicates, region integrity, calendar integrity |
 | `promo_plan_line` | `before_promo_forecast_cutoff` | schema, row count, checksum, duplicates, promo overlap, display capacity |
