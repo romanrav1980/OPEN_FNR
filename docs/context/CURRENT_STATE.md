@@ -1301,3 +1301,31 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 581 passed, 1 warning about `.pytest_cache` permissions.
 - R6 Deployment and operations status: completed foundation.
 - Remaining focused sprint count after DEP-4: 5 sprints (`PILOT-1..PILOT-5`).
+
+## PILOT-1 Pilot Scope And Data Readiness
+
+- PILOT-1 completed as pilot scope/readiness foundation.
+- Completion note: `docs/context/PILOT1_COMPLETION.md`.
+- Specification added: `PILOT_SCOPE_DATA_READINESS_SPEC.md`.
+- Backend extended:
+  - `GET /pilot/scope-signoff`;
+  - `GET /pilot/data-readiness`;
+  - `GET /pilot/readiness-pack`.
+- Pilot scope now includes:
+  - store count;
+  - SKU count;
+  - suppliers.
+- Readiness pack includes:
+  - signed scope;
+  - sales history depth;
+  - stock/in-transit readiness;
+  - active matrix coverage;
+  - promo history depth;
+  - business calendar;
+  - WAPE, service level, lost sales, overstock and waste thresholds.
+- Tests added/updated:
+  - `tests/backend/test_pilot.py`.
+- Verification:
+  - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_pilot.py tests/backend/test_ingestion.py tests/backend/test_shadow_gate.py tests/backend/test_pilot_fixtures.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 36 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 584 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after PILOT-1: 4 sprints (`PILOT-2..PILOT-5`).

@@ -32,9 +32,53 @@ class PilotScope(BaseModel):
     scope_id: str
     regions: tuple[str, ...]
     stores: tuple[str, ...]
+    store_count: int
+    sku_count: int
     categories: tuple[str, ...]
+    suppliers: tuple[str, ...] = ()
     users: tuple[str, ...]
     status: PilotStatus
+
+
+class PilotScopeSignoff(BaseModel):
+    signoff_id: str
+    scope_id: str
+    signed_roles: tuple[str, ...]
+    pending_roles: tuple[str, ...]
+    status: str
+    signed_at: datetime | None
+
+
+class PilotDataReadinessItem(BaseModel):
+    area: str
+    status: str
+    coverage_percent: float = Field(ge=0, le=100)
+    history_months: int | None = Field(default=None, ge=0)
+    evidence: str
+    blocker_count: int = Field(ge=0)
+
+
+class PilotBusinessCalendarDay(BaseModel):
+    business_date: str
+    day_type: str
+    notes: str
+
+
+class PilotAcceptanceThreshold(BaseModel):
+    metric: str
+    threshold: float
+    unit: str
+    direction: str
+    owner_role: str
+
+
+class PilotReadinessPack(BaseModel):
+    scope: PilotScope
+    signoff: PilotScopeSignoff
+    data_readiness: tuple[PilotDataReadinessItem, ...]
+    business_calendar: tuple[PilotBusinessCalendarDay, ...]
+    thresholds: tuple[PilotAcceptanceThreshold, ...]
+    ready_for_shadow_mode: bool
 
 
 class PilotKpi(BaseModel):
@@ -115,9 +159,70 @@ PILOT_SCOPE = PilotScope(
     scope_id="pilot-north-fresh-001",
     regions=("north",),
     stores=("S001", "S002", "S003"),
+    store_count=3,
+    sku_count=1200,
     categories=("fresh", "grocery"),
+    suppliers=("SUP-FRESH-01", "SUP-GROCERY-02"),
     users=("forecast.planner@example.org", "supply.manager@example.org", "business.owner@example.org"),
     status=PilotStatus.ACCEPTANCE_PENDING,
+)
+
+PILOT_SCOPE_SIGNOFF = PilotScopeSignoff(
+    signoff_id="pilot-scope-signoff-20260529-001",
+    scope_id=PILOT_SCOPE.scope_id,
+    signed_roles=("Business Owner", "Supply Chain Director", "Data Platform Lead", "IT Ops"),
+    pending_roles=(),
+    status="signed",
+    signed_at=datetime(2026, 5, 29, 9, 0, tzinfo=timezone.utc),
+)
+
+PILOT_DATA_READINESS: tuple[PilotDataReadinessItem, ...] = (
+    PilotDataReadinessItem(
+        area="sales_history",
+        status="ready",
+        coverage_percent=99.4,
+        history_months=24,
+        evidence="POS and DWH history available for pilot scope",
+        blocker_count=0,
+    ),
+    PilotDataReadinessItem(
+        area="stock_and_in_transit",
+        status="ready",
+        coverage_percent=98.7,
+        history_months=None,
+        evidence="WMS stock, in-transit and open-order contracts are ready",
+        blocker_count=0,
+    ),
+    PilotDataReadinessItem(
+        area="active_matrix",
+        status="ready",
+        coverage_percent=100.0,
+        history_months=None,
+        evidence="Pilot SKU/store active matrix is frozen",
+        blocker_count=0,
+    ),
+    PilotDataReadinessItem(
+        area="promo_history",
+        status="ready",
+        coverage_percent=96.8,
+        history_months=18,
+        evidence="Promo plan and promo facts are available for pilot categories",
+        blocker_count=0,
+    ),
+)
+
+PILOT_BUSINESS_CALENDAR: tuple[PilotBusinessCalendarDay, ...] = (
+    PilotBusinessCalendarDay(business_date="2026-06-01", day_type="pilot_start", notes="Shadow mode starts"),
+    PilotBusinessCalendarDay(business_date="2026-06-14", day_type="shadow_gate", notes="Minimum shadow evidence window complete"),
+    PilotBusinessCalendarDay(business_date="2026-06-15", day_type="controlled_export_gate", notes="Controlled export decision point"),
+)
+
+PILOT_ACCEPTANCE_THRESHOLDS: tuple[PilotAcceptanceThreshold, ...] = (
+    PilotAcceptanceThreshold(metric="wape", threshold=18.0, unit="%", direction="less_or_equal", owner_role="DS Lead"),
+    PilotAcceptanceThreshold(metric="service_level", threshold=95.0, unit="%", direction="greater_or_equal", owner_role="Supply Chain Director"),
+    PilotAcceptanceThreshold(metric="lost_sales_reduction", threshold=3.0, unit="pp", direction="greater_or_equal", owner_role="Commercial Director"),
+    PilotAcceptanceThreshold(metric="overstock_reduction", threshold=2.0, unit="pp", direction="greater_or_equal", owner_role="Supply Chain Director"),
+    PilotAcceptanceThreshold(metric="waste_reduction", threshold=1.5, unit="pp", direction="greater_or_equal", owner_role="Fresh Category Manager"),
 )
 
 PILOT_KPIS: tuple[PilotKpi, ...] = (
@@ -211,9 +316,48 @@ def build_pilot_shadow_pack() -> PilotShadowPack:
     )
 
 
+def build_pilot_readiness_pack() -> PilotReadinessPack:
+    ready = (
+        PILOT_SCOPE_SIGNOFF.status == "signed"
+        and not PILOT_SCOPE_SIGNOFF.pending_roles
+        and all(item.status == "ready" and item.blocker_count == 0 for item in PILOT_DATA_READINESS)
+        and all(item.history_months is None or item.history_months >= 12 for item in PILOT_DATA_READINESS)
+    )
+    return PilotReadinessPack(
+        scope=PILOT_SCOPE,
+        signoff=PILOT_SCOPE_SIGNOFF,
+        data_readiness=PILOT_DATA_READINESS,
+        business_calendar=PILOT_BUSINESS_CALENDAR,
+        thresholds=PILOT_ACCEPTANCE_THRESHOLDS,
+        ready_for_shadow_mode=ready,
+    )
+
+
 @router.get("/scope")
 def get_pilot_scope() -> dict[str, object]:
     return PILOT_SCOPE.model_dump(mode="json")
+
+
+@router.get("/scope-signoff")
+def get_pilot_scope_signoff() -> dict[str, object]:
+    return PILOT_SCOPE_SIGNOFF.model_dump(mode="json")
+
+
+@router.get("/data-readiness")
+def get_pilot_data_readiness() -> dict[str, object]:
+    pack = build_pilot_readiness_pack()
+    return {
+        "scope_id": pack.scope.scope_id,
+        "items": [item.model_dump(mode="json") for item in pack.data_readiness],
+        "business_calendar": [item.model_dump(mode="json") for item in pack.business_calendar],
+        "thresholds": [item.model_dump(mode="json") for item in pack.thresholds],
+        "ready_for_shadow_mode": pack.ready_for_shadow_mode,
+    }
+
+
+@router.get("/readiness-pack")
+def get_pilot_readiness_pack() -> dict[str, object]:
+    return build_pilot_readiness_pack().model_dump(mode="json")
 
 
 @router.get("/dashboard")

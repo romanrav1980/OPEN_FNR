@@ -7,6 +7,7 @@ from open_fnr_api.pilot import (
     PilotIssue,
     PilotIssueStatus,
     PilotKpi,
+    build_pilot_readiness_pack,
     build_pilot_shadow_pack,
     pilot_ready_for_acceptance,
 )
@@ -22,6 +23,8 @@ def test_pilot_dashboard_contains_scope_kpis_feedback_and_issues() -> None:
     payload = response.json()
     assert payload["scope"]["scope_id"] == "pilot-north-fresh-001"
     assert payload["scope"]["regions"] == ["north"]
+    assert payload["scope"]["store_count"] == 3
+    assert payload["scope"]["sku_count"] == 1200
     assert payload["ready_for_acceptance"] is True
     assert {kpi["name"] for kpi in payload["kpis"]} == {"wape", "service_level", "lost_sales_reduction", "overstock_reduction"}
     assert payload["feedback"][0]["status"] == "triaged"
@@ -67,6 +70,44 @@ def test_pilot_shadow_pack_helper_is_ready_when_all_checklist_items_ready() -> N
     assert pack.ready_for_shadow is True
     assert pack.scope.scope_id == "pilot-north-fresh-001"
     assert pack.runbook[0].owner_role == "Data Engineer"
+
+
+def test_pilot_readiness_pack_freezes_scope_data_calendar_and_thresholds() -> None:
+    response = client.get("/pilot/readiness-pack")
+    assert response.status_code == 200
+
+    payload = response.json()
+    readiness_areas = {item["area"] for item in payload["data_readiness"]}
+    threshold_metrics = {item["metric"] for item in payload["thresholds"]}
+
+    assert payload["scope"]["suppliers"] == ["SUP-FRESH-01", "SUP-GROCERY-02"]
+    assert payload["signoff"]["status"] == "signed"
+    assert payload["signoff"]["pending_roles"] == []
+    assert payload["ready_for_shadow_mode"] is True
+    assert {"sales_history", "stock_and_in_transit", "active_matrix", "promo_history"}.issubset(readiness_areas)
+    assert {"wape", "service_level", "lost_sales_reduction", "overstock_reduction", "waste_reduction"}.issubset(
+        threshold_metrics
+    )
+    assert payload["business_calendar"][0]["day_type"] == "pilot_start"
+
+
+def test_pilot_data_readiness_requires_at_least_twelve_months_when_history_is_applicable() -> None:
+    pack = build_pilot_readiness_pack()
+
+    assert pack.ready_for_shadow_mode is True
+    assert all(item.blocker_count == 0 for item in pack.data_readiness)
+    assert all(item.history_months is None or item.history_months >= 12 for item in pack.data_readiness)
+
+
+def test_pilot_scope_signoff_endpoint_records_all_required_roles() -> None:
+    response = client.get("/pilot/scope-signoff")
+    assert response.status_code == 200
+
+    payload = response.json()
+
+    assert payload["scope_id"] == "pilot-north-fresh-001"
+    assert set(payload["signed_roles"]) == {"Business Owner", "Supply Chain Director", "Data Platform Lead", "IT Ops"}
+    assert payload["status"] == "signed"
 
 
 def test_pilot_acceptance_requires_business_owner() -> None:

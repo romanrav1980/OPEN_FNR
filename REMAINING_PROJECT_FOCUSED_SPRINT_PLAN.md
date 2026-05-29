@@ -63,7 +63,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | DEP-2 | CI/CD Release Gates | Build, test, migration, image and artifact gates | Completed foundation |
 | DEP-3 | Observability And Runbooks | Metrics, logs, traces, alerts and operational runbooks | Completed foundation |
 | DEP-4 | Rollback And DR Drill | Release rollback, backup restore and degraded mode drill | Completed foundation |
-| PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | RI-6 |
+| PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | Completed foundation |
 | PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | ML-4, UI-5 |
 | PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | PILOT-2, DEP-4 |
 | PILOT-4 | Business KPI Acceptance | WAPE, service level, lost sales, overstock and waste evidence | PILOT-3 |
@@ -810,6 +810,13 @@ Acceptance criteria:
 
 - pilot scope is signed;
 - data is ready for shadow mode.
+
+Completion checkpoint:
+
+- PILOT-1 scope and readiness rules are fixed in `PILOT_SCOPE_DATA_READINESS_SPEC.md`;
+- pilot API exposes readiness pack, data readiness and scope sign-off;
+- readiness includes stores, SKU count, categories, suppliers, active matrix, 12-24 month history, business calendar and KPI thresholds;
+- automated tests validate sign-off, historical depth, active matrix coverage and threshold completeness.
 
 ### PILOT-2. Shadow Mode
 
