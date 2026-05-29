@@ -4,6 +4,7 @@ from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from hashlib import sha256
 from pathlib import Path
+from statistics import median
 from uuid import uuid4
 from xml.etree import ElementTree
 
@@ -12,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from .config import settings
 from .process_deployment import BPMN_NS, build_bpmn_quality_report, build_process_deployment_package
-from .process_engine import AUDIT_EVENTS, PROCESS_DEFINITIONS, TASKS, ProcessArtifactType
+from .process_engine import AUDIT_EVENTS, PROCESS_DEFINITIONS, TASKS, AuditEventType, ProcessArtifactType, TaskStatus
 
 
 router = APIRouter(prefix="/process-navigator", tags=["process-navigator"])
@@ -258,6 +259,17 @@ class WeeklyReportResponse(BaseModel):
     superset_dataset_ref: str
 
 
+class BpmnFlowModel(BaseModel):
+    process_key: str
+    step_ids: tuple[str, ...]
+    user_task_ids: tuple[str, ...]
+    service_task_ids: tuple[str, ...]
+    business_rule_task_ids: tuple[str, ...]
+    start_event_ids: tuple[str, ...]
+    end_event_ids: tuple[str, ...]
+    edges: tuple[tuple[str, str], ...]
+
+
 CONFORMANCE_CACHE: dict[tuple[str, str], ConformanceResponse] = {}
 CONFORMANCE_JOBS: dict[str, tuple[str, str]] = {}
 
@@ -414,6 +426,110 @@ def _flow_nodes_for_bpmn(path: Path, process_key: str, domain: str) -> tuple[tup
     return tuple(nodes), tuple(edges)
 
 
+def build_bpmn_flow_model(path: Path, process_key: str) -> BpmnFlowModel:
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="BPMN artifact file not found")
+    root = ElementTree.fromstring(path.read_bytes())
+    tag_to_ids: dict[str, list[str]] = {tag: [] for tag in FLOW_NODE_TAGS}
+    for tag in FLOW_NODE_TAGS:
+        for element in root.findall(f".//{{{BPMN_NS}}}{tag}"):
+            element_id = element.attrib.get("id")
+            if element_id:
+                tag_to_ids[tag].append(element_id)
+    node_ids = {node_id for values in tag_to_ids.values() for node_id in values}
+    edges: list[tuple[str, str]] = []
+    for flow in root.findall(f".//{{{BPMN_NS}}}sequenceFlow"):
+        source = flow.attrib.get("sourceRef")
+        target = flow.attrib.get("targetRef")
+        if source in node_ids and target in node_ids:
+            edges.append((source, target))
+    return BpmnFlowModel(
+        process_key=process_key,
+        step_ids=tuple(sorted(node_ids)),
+        user_task_ids=tuple(tag_to_ids["userTask"]),
+        service_task_ids=tuple(tag_to_ids["serviceTask"]),
+        business_rule_task_ids=tuple(tag_to_ids["businessRuleTask"]),
+        start_event_ids=tuple(tag_to_ids["startEvent"]),
+        end_event_ids=tuple(tag_to_ids["endEvent"]),
+        edges=tuple(edges),
+    )
+
+
+def _reachable_pairs(model: BpmnFlowModel) -> set[tuple[str, str]]:
+    adjacency: dict[str, set[str]] = {step_id: set() for step_id in model.step_ids}
+    for source, target in model.edges:
+        adjacency.setdefault(source, set()).add(target)
+    pairs: set[tuple[str, str]] = set()
+    for source in model.step_ids:
+        seen: set[str] = set()
+        stack = list(adjacency.get(source, set()))
+        while stack:
+            target = stack.pop()
+            if target in seen:
+                continue
+            seen.add(target)
+            pairs.add((source, target))
+            stack.extend(adjacency.get(target, set()) - seen)
+    return pairs
+
+
+def evaluate_bpmn_trace(
+    *,
+    process_key: str,
+    model: BpmnFlowModel,
+    executed_step_ids: tuple[str, ...],
+    required_step_ids: tuple[str, ...] | None = None,
+    instance_id: str = "sample-instance",
+) -> ConformanceResponse:
+    required = tuple(required_step_ids if required_step_ids is not None else model.user_task_ids)
+    executed_positions = {step_id: index for index, step_id in enumerate(executed_step_ids)}
+    deviations: list[ConformanceDeviation] = []
+    for step_id in required:
+        if step_id not in executed_positions:
+            deviations.append(
+                ConformanceDeviation(
+                    instance_id=_mask_instance_id(instance_id),
+                    step_id=step_id,
+                    deviation_type="skipped_mandatory_step",
+                    expected=f"Mandatory step {step_id} must be present in the execution trace.",
+                    actual="Step was not found in the execution trace.",
+                    severity="critical",
+                )
+            )
+    reachable_pairs = _reachable_pairs(model)
+    executed_known_steps = tuple(step_id for step_id in executed_step_ids if step_id in model.step_ids)
+    for later_index, later_step in enumerate(executed_known_steps):
+        for earlier_step in executed_known_steps[later_index + 1 :]:
+            if (earlier_step, later_step) in reachable_pairs:
+                deviations.append(
+                    ConformanceDeviation(
+                        instance_id=_mask_instance_id(instance_id),
+                        step_id=earlier_step,
+                        deviation_type="unexpected_sequence",
+                        expected=f"{earlier_step} must be completed before {later_step}.",
+                        actual=f"{later_step} appeared before {earlier_step}.",
+                        severity="major",
+                    )
+                )
+    mandatory_steps_skipped = sum(1 for item in deviations if item.deviation_type == "skipped_mandatory_step")
+    unexpected_sequences = sum(1 for item in deviations if item.deviation_type == "unexpected_sequence")
+    checked = max(1, len(executed_step_ids))
+    penalty = mandatory_steps_skipped * 25 + unexpected_sequences * 15
+    score = max(0.0, 100.0 - penalty)
+    return ConformanceResponse(
+        process_key=process_key,
+        process_definition_id=f"{process_key}:current",
+        environment="trace-evaluation",
+        conformance_score=score,
+        checked_instances=checked,
+        deviations=tuple(deviations),
+        mandatory_steps_skipped=mandatory_steps_skipped,
+        unexpected_sequences=unexpected_sequences,
+        generated_at=_now_iso(),
+        last_checked_at=_now_iso(),
+    )
+
+
 def build_process_map(zoom_level: int = 1, env: str | None = None, business_date: date | None = None) -> ProcessMapResponse:
     zoom_level = max(0, min(4, zoom_level))
     environment = _resolve_env(env)
@@ -551,60 +667,114 @@ def build_process_conformance(process_key: str, environment: str) -> Conformance
     definition = _get_definition(process_key)
     if definition.artifact_type != ProcessArtifactType.BPMN:
         raise HTTPException(status_code=400, detail="conformance is available for BPMN process definitions")
-    nodes, _ = _flow_nodes_for_bpmn(Path(definition.source_path), definition.key, domain_from_path(definition.source_path))
-    mandatory_steps_skipped = 1 if len(nodes) == 0 else 0
-    score = 100.0 if mandatory_steps_skipped == 0 else 75.0
-    deviations: tuple[ConformanceDeviation, ...] = ()
-    if mandatory_steps_skipped:
-        deviations = (
-            ConformanceDeviation(
-                instance_id=_mask_instance_id(f"{process_key}-sample"),
-                step_id="mandatory_approval",
-                deviation_type="skipped_mandatory_step",
-                expected="Mandatory human approval must be completed.",
-                actual="Approval event was not found in history.",
-                severity="critical",
-            ),
-        )
-    response = ConformanceResponse(
+    model = build_bpmn_flow_model(Path(definition.source_path), definition.key)
+    representative_trace = model.business_rule_task_ids + model.user_task_ids + model.service_task_ids
+    evaluated = evaluate_bpmn_trace(
         process_key=process_key,
-        process_definition_id=f"{process_key}:current",
-        environment=environment,
-        conformance_score=score,
-        checked_instances=max(1, len(nodes)),
-        deviations=deviations,
-        mandatory_steps_skipped=mandatory_steps_skipped,
-        unexpected_sequences=0,
-        generated_at=_now_iso(),
-        last_checked_at=_now_iso(),
+        model=model,
+        executed_step_ids=representative_trace,
+        required_step_ids=model.user_task_ids,
+        instance_id=f"{process_key}-representative",
+    )
+    response = evaluated.model_copy(
+        update={
+            "environment": environment,
+            "process_definition_id": f"{process_key}:current",
+            "checked_instances": max(1, len({task.process_instance_id for task in TASKS if task.process_key == process_key})),
+        }
     )
     CONFORMANCE_CACHE[(environment, process_key)] = response
     return response
+
+
+def _percentile(values: tuple[float, ...], percentile: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = min(len(ordered) - 1, max(0, round((len(ordered) - 1) * percentile)))
+    return ordered[index]
+
+
+def _minutes_between(start: datetime, end: datetime) -> float:
+    return max(0.0, (end - start).total_seconds() / 60.0)
 
 
 def build_process_performance(process_key: str, environment: str, window_days: int) -> ProcessPerformanceResponse:
     definition = _get_definition(process_key)
     if definition.artifact_type != ProcessArtifactType.BPMN:
         raise HTTPException(status_code=400, detail="performance is available for BPMN process definitions")
-    open_task_count = sum(1 for task in TASKS if task.process_key == process_key and task.status != "completed")
-    base = 45.0 + open_task_count * 15.0
+    process_tasks = tuple(task for task in TASKS if task.process_key == process_key)
+    events_by_instance: dict[str, list] = defaultdict(list)
+    events_by_task: dict[str, list] = defaultdict(list)
+    for event in AUDIT_EVENTS:
+        events_by_instance[event.process_instance_id].append(event)
+        if event.task_id:
+            events_by_task[event.task_id].append(event)
+    instance_ids = {task.process_instance_id for task in process_tasks}
+    cycle_times: list[float] = []
+    for instance_id in instance_ids:
+        task_times = [task.created_at for task in process_tasks if task.process_instance_id == instance_id]
+        event_times = [event.created_at for event in events_by_instance.get(instance_id, [])]
+        all_times = sorted(task_times + event_times)
+        if len(all_times) >= 2:
+            cycle_times.append(_minutes_between(all_times[0], all_times[-1]))
+    if not cycle_times:
+        model = build_bpmn_flow_model(Path(definition.source_path), process_key)
+        cycle_times = [float(max(1, len(model.step_ids)) * 10)]
+    waiting_times: list[float] = []
+    processing_times: list[float] = []
+    reference_now = datetime.now(timezone.utc)
+    for task in process_tasks:
+        task_events = sorted(events_by_task.get(task.task_id, []), key=lambda item: item.created_at)
+        first_event_at = task_events[0].created_at if task_events else task.created_at
+        waiting_times.append(_minutes_between(task.created_at, first_event_at))
+        completed_event = next((event for event in task_events if event.event_type == AuditEventType.TASK_COMPLETED), None)
+        end_at = completed_event.created_at if completed_event else min(task.sla_due_at, reference_now)
+        processing_times.append(_minutes_between(first_event_at, end_at))
+    if not waiting_times:
+        waiting_times = [0.0]
+    if not processing_times:
+        processing_times = [0.0]
+    instance_count = max(1, len(instance_ids))
+    rework_events = sum(
+        1
+        for event in AUDIT_EVENTS
+        if event.event_type == AuditEventType.REWORK_REQUESTED and event.process_instance_id in instance_ids
+    )
+    throughput_counts: dict[date, dict[str, int]] = defaultdict(lambda: {"started": 0, "completed": 0})
+    for event in AUDIT_EVENTS:
+        if event.process_instance_id not in instance_ids:
+            continue
+        event_day = event.created_at.date()
+        if event.event_type in {AuditEventType.PROCESS_STARTED, AuditEventType.APPROVAL_REQUESTED}:
+            throughput_counts[event_day]["started"] += 1
+        if event.event_type == AuditEventType.TASK_COMPLETED:
+            throughput_counts[event_day]["completed"] += 1
+    if not throughput_counts:
+        throughput_counts[date.today()]["started"] = len(process_tasks)
+        throughput_counts[date.today()]["completed"] = sum(1 for task in process_tasks if task.status == TaskStatus.COMPLETED)
     return ProcessPerformanceResponse(
         process_key=process_key,
         environment=environment,
         window_days=window_days,
-        cycle_time_median_minutes=base,
-        cycle_time_p95_minutes=base * 1.8,
-        cycle_time_max_minutes=base * 2.4,
+        cycle_time_median_minutes=median(cycle_times),
+        cycle_time_p95_minutes=_percentile(tuple(cycle_times), 0.95),
+        cycle_time_max_minutes=max(cycle_times),
         human_task_metrics=(
             HumanTaskPerformanceMetric(
                 task_key="human_review",
-                waiting_time_p95_minutes=base * 0.6,
-                processing_time_p95_minutes=base * 0.4,
+                waiting_time_p95_minutes=_percentile(tuple(waiting_times), 0.95),
+                processing_time_p95_minutes=_percentile(tuple(processing_times), 0.95),
             ),
         ),
-        rework_rate=0.0,
-        throughput_by_business_day=(
-            ThroughputMetric(business_day=date.today(), started=max(1, open_task_count), completed=0),
+        rework_rate=rework_events / instance_count,
+        throughput_by_business_day=tuple(
+            ThroughputMetric(
+                business_day=business_day,
+                started=counts["started"],
+                completed=counts["completed"],
+            )
+            for business_day, counts in sorted(throughput_counts.items())
         ),
         sla_thresholds={"green_minutes": 120.0, "amber_minutes": 240.0, "red_minutes": 480.0},
         generated_at=_now_iso(),

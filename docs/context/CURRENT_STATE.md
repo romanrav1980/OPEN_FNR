@@ -596,8 +596,17 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - generated timestamps and data freshness fields;
   - config settings in `apps/backend/open_fnr_api/config.py`, `.env.example` and `CONFIGURATION_MANIFEST.md`;
   - initial backend contracts for conformance, performance, versions, infrastructure health, business key tracking and weekly reports.
-- Process Navigator backend tests now cover 15 scenarios in `tests/backend/test_process_navigator.py`.
+- PN-4 has started with a BPMN trace conformance evaluator:
+  - `build_bpmn_flow_model()` parses executable BPMN flow nodes and sequence edges;
+  - `evaluate_bpmn_trace()` detects `skipped_mandatory_step` and `unexpected_sequence`;
+  - conformance async endpoints now use the trace evaluator for representative BPMN execution.
+- PN-5 foundation has started with computed process performance metrics:
+  - cycle time is derived from task/audit timestamps where available;
+  - waiting and processing time are derived from human task timestamps;
+  - throughput is grouped by business day;
+  - rework rate is derived from `REWORK_REQUESTED` audit events.
+- Process Navigator backend tests now cover 18 scenarios in `tests/backend/test_process_navigator.py`.
 - Verification:
-  - `pytest tests/backend/test_process_navigator.py` -> 15 passed.
+  - `pytest tests/backend/test_process_navigator.py` -> 18 passed.
   - `pytest tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 3 passed.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 453 passed, 1 warning about `.pytest_cache` permissions.

@@ -1,7 +1,15 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from open_fnr_api.main import app
-from open_fnr_api.process_navigator import build_process_map, build_process_navigator_alerts
+from open_fnr_api.process_navigator import (
+    build_bpmn_flow_model,
+    build_process_map,
+    build_process_navigator_alerts,
+    build_process_performance,
+    evaluate_bpmn_trace,
+)
 
 
 client = TestClient(app)
@@ -102,6 +110,46 @@ def test_process_navigator_conformance_async_contract() -> None:
     assert payload["conformance_score"] >= 0
 
 
+def test_process_navigator_bpmn_trace_detects_skipped_mandatory_step() -> None:
+    model = build_bpmn_flow_model(
+        path=Path("processes/forecast/forecast_review_process.bpmn20.xml"),
+        process_key="forecast_review_process",
+    )
+
+    result = evaluate_bpmn_trace(
+        process_key="forecast_review_process",
+        model=model,
+        executed_step_ids=("accept_forecast_slice",),
+        required_step_ids=("review_forecast_anomaly", "accept_forecast_slice"),
+        instance_id="trace-skipped-review",
+    )
+
+    assert result.mandatory_steps_skipped == 1
+    assert any(item.deviation_type == "skipped_mandatory_step" for item in result.deviations)
+    assert result.conformance_score is not None
+    assert result.conformance_score < 100
+
+
+def test_process_navigator_bpmn_trace_detects_unexpected_sequence() -> None:
+    model = build_bpmn_flow_model(
+        path=Path("processes/forecast/forecast_review_process.bpmn20.xml"),
+        process_key="forecast_review_process",
+    )
+
+    result = evaluate_bpmn_trace(
+        process_key="forecast_review_process",
+        model=model,
+        executed_step_ids=("accept_forecast_slice", "review_forecast_anomaly"),
+        required_step_ids=("review_forecast_anomaly", "accept_forecast_slice"),
+        instance_id="trace-reversed-review",
+    )
+
+    assert result.unexpected_sequences == 1
+    assert any(item.deviation_type == "unexpected_sequence" for item in result.deviations)
+    assert result.conformance_score is not None
+    assert result.conformance_score < 100
+
+
 def test_process_navigator_conformance_summary_only_does_not_fail_without_cache() -> None:
     response = client.get(
         "/process-navigator/processes/replenishment_calculation_process/conformance",
@@ -119,6 +167,17 @@ def test_process_navigator_performance_contract() -> None:
     payload = response.json()
     assert payload["cycle_time_p95_minutes"] >= payload["cycle_time_median_minutes"]
     assert payload["sla_thresholds"]["red_minutes"] > payload["sla_thresholds"]["green_minutes"]
+    assert payload["human_task_metrics"][0]["processing_time_p95_minutes"] > 0
+    assert payload["throughput_by_business_day"]
+
+
+def test_process_navigator_performance_uses_task_timing() -> None:
+    performance = build_process_performance("forecast_review_process", "dev", 30)
+
+    assert performance.cycle_time_median_minutes > 0
+    assert performance.human_task_metrics[0].processing_time_p95_minutes > 0
+    assert performance.rework_rate == 0
+    assert any(day.started >= 1 for day in performance.throughput_by_business_day)
 
 
 def test_process_navigator_versions_contract() -> None:
