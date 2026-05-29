@@ -1,10 +1,14 @@
+import json
 from datetime import datetime, timezone
 from enum import StrEnum
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from .audit import AuditEventCreate, record_audit_event_if_enabled
+from .config import settings
 
 
 router = APIRouter(prefix="/publication", tags=["publication"])
@@ -63,6 +67,11 @@ class ExportRequest(BaseModel):
 class ExportResponse(BaseModel):
     package: PublicationPackage
     duplicate: bool
+
+
+class TargetExportResult(BaseModel):
+    response_code: str = Field(min_length=1, max_length=64)
+    response_message: str = Field(min_length=1, max_length=512)
 
 
 PUBLICATION_PACKAGES: tuple[PublicationPackage, ...] = (
@@ -154,6 +163,56 @@ def find_duplicate_export(idempotency_key: str) -> PublicationPackage | None:
     return next((package for package in PUBLICATION_PACKAGES if package.idempotency_key == idempotency_key), None)
 
 
+def export_url_for_target(target: PublicationTarget) -> str:
+    return {
+        PublicationTarget.ERP: settings.erp_export_url,
+        PublicationTarget.WMS: settings.wms_export_url,
+        PublicationTarget.DWH: settings.dwh_export_url,
+        PublicationTarget.BI: settings.bi_export_url,
+        PublicationTarget.AUTO_ORDER: settings.auto_order_export_url,
+    }[target]
+
+
+def export_payload(package: PublicationPackage, request: ExportRequest) -> dict[str, object]:
+    return {
+        "package_id": package.package_id,
+        "target": package.target.value,
+        "idempotency_key": request.idempotency_key,
+        "actor": request.actor,
+        "service_account": request.service_account,
+        "items": [item.model_dump(mode="json") for item in package.items],
+    }
+
+
+def send_to_publication_target(package: PublicationPackage, request: ExportRequest, retry: bool = False) -> TargetExportResult:
+    target_url = export_url_for_target(package.target)
+    if not target_url:
+        return TargetExportResult(
+            response_code="202",
+            response_message="retry sent to mock target" if retry else "sent to mock target",
+        )
+
+    http_request = Request(
+        target_url,
+        data=json.dumps(export_payload(package, request), ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "Idempotency-Key": request.idempotency_key,
+            "X-Service-Account": request.service_account,
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(http_request, timeout=settings.publication_http_timeout_seconds) as response:
+            response_body = response.read().decode("utf-8", errors="replace").strip()
+            return TargetExportResult(
+                response_code=str(response.status),
+                response_message=response_body or "sent to http target",
+            )
+    except URLError as exc:
+        raise HTTPException(status_code=503, detail=f"publication target unavailable: {exc}") from exc
+
+
 def send_export(package: PublicationPackage, request: ExportRequest) -> ExportResponse:
     duplicate = find_duplicate_export(request.idempotency_key)
     if duplicate is not None and duplicate.package_id != package.package_id:
@@ -162,12 +221,13 @@ def send_export(package: PublicationPackage, request: ExportRequest) -> ExportRe
         raise HTTPException(status_code=403, detail="service account is not allowed to export")
     if not all_items_approved(package):
         raise HTTPException(status_code=409, detail="cannot export package with unapproved items")
+    target_result = send_to_publication_target(package, request)
     sent_package = package.model_copy(
         update={
             "status": ExportStatus.SENT,
             "sent_at": datetime(2026, 5, 28, 7, 0, tzinfo=timezone.utc),
-            "response_code": "202",
-            "response_message": "sent to mock target",
+            "response_code": target_result.response_code,
+            "response_message": target_result.response_message,
         }
     )
     record_audit_event_if_enabled(
@@ -191,14 +251,17 @@ def send_export(package: PublicationPackage, request: ExportRequest) -> ExportRe
 
 
 def retry_export(package: PublicationPackage, request: ExportRequest) -> ExportResponse:
+    if request.service_account != "svc-open-fnr-export":
+        raise HTTPException(status_code=403, detail="service account is not allowed to export")
     if package.status != ExportStatus.FAILED:
         raise HTTPException(status_code=409, detail="only failed package can be retried")
+    target_result = send_to_publication_target(package, request, retry=True)
     retried_package = package.model_copy(
         update={
             "status": ExportStatus.SENT,
             "sent_at": datetime(2026, 5, 28, 7, 5, tzinfo=timezone.utc),
-            "response_code": "202",
-            "response_message": "retry sent to mock target",
+            "response_code": target_result.response_code,
+            "response_message": target_result.response_message,
             "retry_count": package.retry_count + 1,
         }
     )

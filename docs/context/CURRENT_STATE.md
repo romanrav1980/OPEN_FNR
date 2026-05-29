@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 370 automated tests passed.
+Current backend regression status: 373 automated tests passed.
 
 ## Local Infrastructure
 
@@ -193,6 +193,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Publication API: `apps/backend/open_fnr_api/publication.py`.
 - Publication tests: `tests/backend/test_publication.py`.
+- Publication outbound HTTP adapter with per-target env URLs for ERP, WMS, DWH, BI and auto-order integrations.
 - Publication BPMN: `processes/publication/publication_process.bpmn20.xml`.
 - Publication eligibility DMN: `processes/publication/publication_eligibility_decision.dmn.xml`.
 - Export failure CMMN: `processes/publication/export_failure_case.cmmn.xml`.

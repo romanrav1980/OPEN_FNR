@@ -78,3 +78,17 @@ def test_clickhouse_credentials_are_centralized_settings() -> None:
     assert settings.clickhouse_user == "ch_user"
     assert settings.clickhouse_password == "ch_password"
     assert settings.clickhouse_database == "ch_database"
+
+
+def test_publication_target_urls_are_centralized_settings() -> None:
+    settings = Settings(
+        erp_export_url="http://erp.local/orders",
+        wms_export_url="http://wms.local/orders",
+        dwh_export_url="http://dwh.local/forecast",
+        publication_http_timeout_seconds=11,
+    )
+
+    assert settings.erp_export_url == "http://erp.local/orders"
+    assert settings.wms_export_url == "http://wms.local/orders"
+    assert settings.dwh_export_url == "http://dwh.local/forecast"
+    assert settings.publication_http_timeout_seconds == 11

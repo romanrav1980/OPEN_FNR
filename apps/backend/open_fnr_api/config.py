@@ -56,6 +56,16 @@ class Settings(BaseModel):
     clickhouse_user: str = Field(default_factory=lambda: env_str("CLICKHOUSE_USER", "open_fnr"))
     clickhouse_password: str = Field(default_factory=lambda: env_str("CLICKHOUSE_PASSWORD", "open_fnr_dev"))
     clickhouse_database: str = Field(default_factory=lambda: env_str("CLICKHOUSE_DATABASE", "open_fnr"))
+    erp_export_url: str = Field(default_factory=lambda: env_str("ERP_EXPORT_URL", ""))
+    wms_export_url: str = Field(default_factory=lambda: env_str("WMS_EXPORT_URL", ""))
+    dwh_export_url: str = Field(default_factory=lambda: env_str("DWH_EXPORT_URL", ""))
+    bi_export_url: str = Field(default_factory=lambda: env_str("BI_EXPORT_URL", ""))
+    auto_order_export_url: str = Field(default_factory=lambda: env_str("AUTO_ORDER_EXPORT_URL", ""))
+    publication_http_timeout_seconds: int = Field(
+        default_factory=lambda: env_int("PUBLICATION_HTTP_TIMEOUT_SECONDS", 30),
+        ge=1,
+        le=300,
+    )
     landing_root_path: str = Field(default_factory=lambda: env_str("LANDING_ROOT_PATH", "data/landing"))
     runtime_mode: str = Field(default_factory=lambda: env_str("RUNTIME_MODE", "dev"))
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
