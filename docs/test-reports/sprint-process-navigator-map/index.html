@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPEN FNR - Process Navigator Map</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111827; color: #f8fafc; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { margin: 0 0 12px; }
+      section { background: #1f2937; border: 1px solid #374151; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid #374151; padding: 10px; text-align: left; vertical-align: top; }
+      th { color: #fecaca; }
+      code { color: #fecaca; }
+      .ok { color: #86efac; font-weight: 700; }
+      .warn { color: #fde68a; font-weight: 700; }
+      .note { color: #cbd5e1; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>OPEN FNR Process Navigator Map</h1>
+      <p class="note">
+        Аннотация: тестируем первый backend-контракт отдельного модуля навигации по бизнес-процессам.
+        Цель проверки - убедиться, что система может показать процессный ландшафт как карту: от домена
+        до конкретного BPMN-процесса, шага, SLA-алерта и audit-context.
+      </p>
+
+      <section>
+        <h2>Что тестируем и зачем</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Область</th>
+              <th>Зачем</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Process map zoom 0</td>
+              <td>Бизнесу нужен верхнеуровневый обзор доменов процессов.</td>
+              <td>Карта возвращает доменные кластеры.</td>
+              <td class="ok">Пройдено: есть forecast и replenishment кластеры.</td>
+            </tr>
+            <tr>
+              <td>Semantic zoom</td>
+              <td>При приближении процесс должен распадаться на составляющие.</td>
+              <td>Zoom 3 содержит BPMN steps и sequence edges.</td>
+              <td class="ok">Пройдено: BPMN nodes/edges добавлены.</td>
+            </tr>
+            <tr>
+              <td>Alerts</td>
+              <td>Карта должна показывать несоответствия, а не только красивую схему.</td>
+              <td>Есть BPMN quality challenges и SLA alerts.</td>
+              <td class="ok">Пройдено: quality и escalated task алерты видны.</td>
+            </tr>
+            <tr>
+              <td>BPMN drill-down</td>
+              <td>Операционный пользователь должен провалиться в конкретную модель.</td>
+              <td>Для forecast review возвращается BPMN-граф.</td>
+              <td class="ok">Пройдено: узлы и связи процесса возвращены.</td>
+            </tr>
+            <tr>
+              <td>Boundary check</td>
+              <td>DMN/CMMN не должны ошибочно открываться как BPMN-граф.</td>
+              <td>Non-BPMN drill-down отклоняется.</td>
+              <td class="ok">Пройдено: API возвращает 400.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Команды проверки</h2>
+        <p>
+          Запущено:
+          <code>pytest tests/backend/test_process_navigator.py tests/backend/test_process_deployment.py tests/backend/test_process_engine.py</code>
+        </p>
+        <p class="ok">Результат: 30 passed.</p>
+      </section>
+
+      <section>
+        <h2>UI-скриншоты</h2>
+        <p class="warn">
+          UI-маршрут Process Navigator будет реализован следующим спринтом PN-2. В этом checkpoint UI-скриншоты
+          не прикладываются, потому что изменен только backend-контракт и документация. Следующий отчет должен
+          включать скриншоты карты, фильтров, drill-down панели и алерт-оверлея.
+        </p>
+      </section>
+
+      <section>
+        <h2>Следующий шаг</h2>
+        <p>
+          Реализовать route <code>#/process-navigator</code> на React + Apache ECharts, подключить API
+          <code>/process-navigator/map</code>, добавить pan/zoom, фильтры, detail panel и визуальную регрессию.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

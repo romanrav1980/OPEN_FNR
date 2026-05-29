@@ -448,3 +448,43 @@ Status: completed for structural blockers and cognitive challenge reporting.
   - `processes/diagnostics/diagnostic_insight_review_process.bpmn20.xml`.
   - `processes/supplier-collaboration/supplier_collaboration_process.bpmn20.xml`.
 - Regression: `tests/backend/test_process_deployment.py`.
+
+## SUP-PLAN-1. Supplement 1 Implementation Sprint Plan
+
+Status: completed for planning baseline.
+
+### Scope
+
+- decompose `TECHNICAL_SPEC_SUPPLEMENT_1.md` into executable implementation sprints;
+- keep Supplement 1 adoption separate from production hardening work;
+- define process, UI, backend, data, ML, integration, security and performance tests per sprint;
+- preserve Apache 2 compatible self-hosted stack boundary.
+
+### Current Implementation
+
+- Planning document: `SUPPLEMENT_1_IMPLEMENTATION_SPRINT_PLAN.md`.
+- Sprint sequence: SUP-0 through SUP-10.
+- Supplement 1 adoption remains completed; runtime hardening work is planned through SUP-1...SUP-10.
+
+## PROC-NAV-1. Process Navigator Map Backend Contract
+
+Status: completed for backend contract and design specification.
+
+### Scope
+
+- define separate Process Navigator module for business-process navigation;
+- expose process map with semantic zoom levels;
+- expose alerts from BPMN quality and process SLA state;
+- expose BPMN drill-down for selected processes;
+- define future UI map with pan, zoom, aggregation, alert overlay and task/audit drill-down.
+
+### Current Implementation
+
+- API module: `apps/backend/open_fnr_api/process_navigator.py`.
+- API endpoints:
+  - `/process-navigator/map?zoom=0..4`;
+  - `/process-navigator/alerts`;
+  - `/process-navigator/processes/{process_key}/drilldown`.
+- Specification: `PROCESS_NAVIGATOR_MAP_SPEC.md`.
+- Test suite: `tests/backend/test_process_navigator.py`.
+- Test evidence: `docs/test-reports/sprint-process-navigator-map/index.html`.

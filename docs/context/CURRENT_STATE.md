@@ -4,9 +4,15 @@ Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
+Industrial hardening continues after real-ingestion I1-I5. The current focus is Supplement 1 production hardening and process observability: source SLA, ML lifecycle, acceptance gates and the new Process Navigator map.
 
-Current backend regression status: 438 automated tests passed.
+Current backend regression status: 30 focused process navigator/process regression tests passed in the latest checkpoint; previous full regression status was 438 automated tests passed.
+
+Latest planning and navigation additions:
+
+- Supplement 1 sprint plan: `SUPPLEMENT_1_IMPLEMENTATION_SPRINT_PLAN.md`.
+- Process Navigator map specification: `PROCESS_NAVIGATOR_MAP_SPEC.md`.
+- Process Navigator backend API: `/process-navigator/map`, `/process-navigator/alerts`, `/process-navigator/processes/{process_key}/drilldown`.
 
 ## Local Infrastructure
 

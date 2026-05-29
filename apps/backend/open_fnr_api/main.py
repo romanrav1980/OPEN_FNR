@@ -23,6 +23,7 @@ from .pilot import router as pilot_router
 from .process_engine import router as process_engine_router
 from .process_deployment import router as process_deployment_router
 from .process_governance import router as process_governance_router
+from .process_navigator import router as process_navigator_router
 from .promo import router as promo_router
 from .procurement import router as procurement_router
 from .publication import router as publication_router
@@ -83,6 +84,7 @@ app.include_router(release_gate_router)
 app.include_router(process_engine_router)
 app.include_router(process_deployment_router)
 app.include_router(process_governance_router)
+app.include_router(process_navigator_router)
 app.include_router(replenishment_router)
 app.include_router(replenishment_scale_router)
 app.include_router(kpi_router)
@@ -162,6 +164,7 @@ def metadata() -> dict[str, object]:
             "process-engine",
             "process-deployment",
             "process-governance",
+            "process-navigator",
             "ui",
         ],
     }
