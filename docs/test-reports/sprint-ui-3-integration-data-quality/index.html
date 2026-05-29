@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>OPEN FNR UI-3 Integration And Data Quality UI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; color: #1f2328; }
+    h1, h2 { color: #8f1d2c; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px; vertical-align: top; }
+    th { background: #f6f8fa; }
+    .ok { color: #1a7f37; font-weight: 700; }
+    .note { background: #fff8c5; padding: 12px; border-left: 4px solid #bf8700; }
+  </style>
+</head>
+<body>
+  <h1>UI-3: Integration And Data Quality UI</h1>
+  <p><strong>Annotation.</strong> We test whether a data operator can see source readiness, DQ blockers, retry plan, reconciliation keys and downstream blockers from the UI. This test protects the operational flow that prevents bad source data from entering forecast, replenishment and publication.</p>
+
+  <h2>Business Process Test Walkthrough</h2>
+  <table>
+    <tr><th>Process</th><th>What We Do</th><th>Why</th><th>Expected Result</th><th>Actual Result</th></tr>
+    <tr>
+      <td>Source blocker recovery</td>
+      <td>Check source readiness rows, owner, blocker count and recovery action.</td>
+      <td>Operator must know who acts and what must be rerun.</td>
+      <td>Readiness table is visible.</td>
+      <td class="ok">Passed by static UI test.</td>
+    </tr>
+    <tr>
+      <td>Idempotent retry</td>
+      <td>Check retry strategy, idempotency key, attempts and next action.</td>
+      <td>Retries must not duplicate clean canonical rows.</td>
+      <td>Retry table is visible.</td>
+      <td class="ok">Passed by static UI test.</td>
+    </tr>
+    <tr>
+      <td>Reconciliation</td>
+      <td>Check reconciliation keys and downstream blockers.</td>
+      <td>Forecast and replenishment must stay blocked while critical sources are inconsistent.</td>
+      <td>Reconciliation table is visible.</td>
+      <td class="ok">Passed by static UI test.</td>
+    </tr>
+    <tr>
+      <td>DQ waiver or rerun</td>
+      <td>Check DQ incident panel, waiver/rerun/export actions and publication blocker text.</td>
+      <td>Waivers are high-risk and must be role-controlled and auditable.</td>
+      <td>DQ action panel is visible.</td>
+      <td class="ok">Passed by static UI test.</td>
+    </tr>
+  </table>
+
+  <h2>UI Testing</h2>
+  <table>
+    <tr><th>Test Class</th><th>Check</th><th>Result</th></tr>
+    <tr><td>Smoke</td><td>Shadow Load Gate, DQ Console, Integration Operations Console and Daily Pipeline Gate are present.</td><td class="ok">Passed</td></tr>
+    <tr><td>API wiring</td><td>Source-readiness, retry-plan and reconciliation endpoints are called through shared config.</td><td class="ok">Passed</td></tr>
+    <tr><td>Audit/process</td><td>Owner, idempotency, downstream blocker and Process Engine task context are shown.</td><td class="ok">Passed</td></tr>
+    <tr><td>Accessibility smoke</td><td>Critical sections have aria-label attributes.</td><td class="ok">Passed</td></tr>
+  </table>
+
+  <p class="note">Screenshot evidence is deferred to UI-5, where the unified Playwright visual/accessibility suite will capture the routed UI pages after UI-2..UI-4 are complete.</p>
+</body>
+</html>

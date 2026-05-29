@@ -68,6 +68,85 @@ type PilotShadowLoadPlanApiResponse = {
   recovery_tasks: PilotShadowLoadTaskApiItem[];
 };
 
+type IntegrationReadinessRow = {
+  source: string;
+  contract: string;
+  status: string;
+  blockers: number;
+  warnings: number;
+  owner: string;
+  action: string;
+};
+
+type IntegrationRetryRow = {
+  source: string;
+  contract: string;
+  idempotencyKey: string;
+  strategy: string;
+  attempts: number;
+  owner: string;
+  nextAction: string;
+};
+
+type IntegrationReconciliationRow = {
+  source: string;
+  contract: string;
+  status: string;
+  keys: string;
+  downstreamBlockers: string;
+  owner: string;
+};
+
+type SourceReadinessApiItem = {
+  source_system: string;
+  contract_name: string;
+  status: string;
+  blocker_count: number;
+  warning_count: number;
+  owner_role: string;
+  recovery_action: string;
+};
+
+type SourceReadinessApiResponse = {
+  status: string;
+  total_contracts: number;
+  ready_contracts: number;
+  blocked_contracts: number;
+  warning_contracts: number;
+  items: SourceReadinessApiItem[];
+};
+
+type RetryPlanApiItem = {
+  source_system: string;
+  contract_name: string;
+  idempotency_key: string;
+  retry_strategy: string;
+  max_attempts: number;
+  owner_role: string;
+  next_action: string;
+};
+
+type RetryPlanApiResponse = {
+  total: number;
+  items: RetryPlanApiItem[];
+};
+
+type ReconciliationApiItem = {
+  source_system: string;
+  contract_name: string;
+  reconciliation_keys: string[];
+  status: string;
+  downstream_blockers: string[];
+  owner_role: string;
+};
+
+type ReconciliationApiResponse = {
+  status: string;
+  total: number;
+  blocked_count: number;
+  items: ReconciliationApiItem[];
+};
+
 type FeatureMartStatus = {
   version: string;
   status: "published" | "validated" | "failed";
@@ -676,6 +755,76 @@ const shadowLoadTasks: ShadowLoadTask[] = [
     owner: "Promo Planner",
     reason: "missing_files",
     actions: "request_resend / approve_reprocessing / comment",
+  },
+];
+
+const integrationReadinessRows: IntegrationReadinessRow[] = [
+  {
+    source: "POS",
+    contract: "pos_sales_line",
+    status: "ready",
+    blockers: 0,
+    warnings: 0,
+    owner: "Sales Data Owner",
+    action: "monitor",
+  },
+  {
+    source: "WMS",
+    contract: "wms_stock_snapshot_line",
+    status: "blocked",
+    blockers: 1,
+    warnings: 0,
+    owner: "Supply Chain Data Owner",
+    action: "request_resend_and_rerun",
+  },
+  {
+    source: "PROMO",
+    contract: "promo_plan_line",
+    status: "blocked",
+    blockers: 1,
+    warnings: 0,
+    owner: "Promo Planner",
+    action: "request_resend_and_rerun",
+  },
+];
+
+const integrationRetryRows: IntegrationRetryRow[] = [
+  {
+    source: "WMS",
+    contract: "wms_stock_snapshot_line",
+    idempotencyKey: "WMS:wms_stock_snapshot_line:2026-05-28",
+    strategy: "same_idempotency_key_no_duplicate_clean_rows",
+    attempts: 3,
+    owner: "Supply Chain Data Owner",
+    nextAction: "request_resend_and_rerun",
+  },
+  {
+    source: "PROMO",
+    contract: "promo_plan_line",
+    idempotencyKey: "PROMO:promo_plan_line:2026-05-28",
+    strategy: "same_idempotency_key_no_duplicate_clean_rows",
+    attempts: 3,
+    owner: "Promo Planner",
+    nextAction: "request_resend_and_rerun",
+  },
+];
+
+const integrationReconciliationRows: IntegrationReconciliationRow[] = [
+  {
+    source: "POS",
+    contract: "pos_sales_line",
+    status: "ready",
+    keys: "business_date, store_id, sku_id",
+    downstreamBlockers: "-",
+    owner: "Sales Data Owner",
+  },
+  {
+    source: "WMS",
+    contract: "wms_stock_snapshot_line",
+    status: "blocked",
+    keys: "business_date, location_id, sku_id",
+    downstreamBlockers: "replenishment_projection, true_inventory",
+    owner: "Supply Chain Data Owner",
   },
 ];
 
@@ -1788,6 +1937,15 @@ function App() {
   const [runtimeShadowLoadSources, setRuntimeShadowLoadSources] =
     React.useState<ShadowLoadSource[]>(shadowLoadSources);
   const [runtimeShadowLoadTasks, setRuntimeShadowLoadTasks] = React.useState<ShadowLoadTask[]>(shadowLoadTasks);
+  const [integrationOpsApiStatus, setIntegrationOpsApiStatus] =
+    React.useState<"loading" | "live" | "fallback">("loading");
+  const [integrationOpsSummary, setIntegrationOpsSummary] = React.useState("blocked / 3 source contracts need action");
+  const [runtimeIntegrationReadinessRows, setRuntimeIntegrationReadinessRows] =
+    React.useState<IntegrationReadinessRow[]>(integrationReadinessRows);
+  const [runtimeIntegrationRetryRows, setRuntimeIntegrationRetryRows] =
+    React.useState<IntegrationRetryRow[]>(integrationRetryRows);
+  const [runtimeIntegrationReconciliationRows, setRuntimeIntegrationReconciliationRows] =
+    React.useState<IntegrationReconciliationRow[]>(integrationReconciliationRows);
   const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [authBoundaryStatus, setAuthBoundaryStatus] = React.useState("loading");
   const [idpReadinessStatus, setIdpReadinessStatus] = React.useState("loading");
@@ -2113,6 +2271,71 @@ function App() {
           return;
         }
         setShadowLoadApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    const businessDate = "2026-05-28";
+    Promise.all([
+      fetch(apiUrl(`/integration/operations/source-readiness?business_date=${businessDate}`), { signal: controller.signal }),
+      fetch(apiUrl(`/integration/operations/retry-plan?business_date=${businessDate}`), { signal: controller.signal }),
+      fetch(apiUrl(`/integration/operations/reconciliation?business_date=${businessDate}`), { signal: controller.signal }),
+    ])
+      .then(([readinessResponse, retryResponse, reconciliationResponse]) => {
+        if (!readinessResponse.ok || !retryResponse.ok || !reconciliationResponse.ok) {
+          throw new Error("Integration operations API returned an error");
+        }
+        return Promise.all([
+          readinessResponse.json() as Promise<SourceReadinessApiResponse>,
+          retryResponse.json() as Promise<RetryPlanApiResponse>,
+          reconciliationResponse.json() as Promise<ReconciliationApiResponse>,
+        ]);
+      })
+      .then(([readiness, retryPlan, reconciliation]) => {
+        setIntegrationOpsSummary(
+          `${readiness.status} / ready ${readiness.ready_contracts}/${readiness.total_contracts} / blocked ${readiness.blocked_contracts}`,
+        );
+        setRuntimeIntegrationReadinessRows(
+          readiness.items.map((item) => ({
+            source: item.source_system,
+            contract: item.contract_name,
+            status: item.status,
+            blockers: item.blocker_count,
+            warnings: item.warning_count,
+            owner: item.owner_role,
+            action: item.recovery_action,
+          })),
+        );
+        setRuntimeIntegrationRetryRows(
+          retryPlan.items.map((item) => ({
+            source: item.source_system,
+            contract: item.contract_name,
+            idempotencyKey: item.idempotency_key,
+            strategy: item.retry_strategy,
+            attempts: item.max_attempts,
+            owner: item.owner_role,
+            nextAction: item.next_action,
+          })),
+        );
+        setRuntimeIntegrationReconciliationRows(
+          reconciliation.items.map((item) => ({
+            source: item.source_system,
+            contract: item.contract_name,
+            status: item.status,
+            keys: item.reconciliation_keys.join(", "),
+            downstreamBlockers: item.downstream_blockers.length ? item.downstream_blockers.join(", ") : "-",
+            owner: item.owner_role,
+          })),
+        );
+        setIntegrationOpsApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setIntegrationOpsApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3179,6 +3402,135 @@ function App() {
               <button type="button">Waive</button>
               <button type="button">Export rows</button>
             </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="data-section" aria-label="Integration operations console">
+        <div className="section-heading">
+          <h2>Integration Operations Console</h2>
+          <p>Source readiness, retry plan, reconciliation and downstream blockers</p>
+        </div>
+        <div className="feature-grid">
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{integrationOpsApiStatus}</strong>
+            <p>Operational data is loaded from `/integration/operations/*` through shared API configuration.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Source Readiness</span>
+            <strong>{integrationOpsSummary}</strong>
+            <p>Readiness combines shadow-load discovery, source contract DQ and configured source SLA.</p>
+          </article>
+          <article className="feature-summary">
+            <span>Recovery Mode</span>
+            <strong>idempotent retry</strong>
+            <p>Retries reuse the same idempotency key and must not duplicate clean canonical rows.</p>
+          </article>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Contract</th>
+                <th>Status</th>
+                <th>Blockers</th>
+                <th>Warnings</th>
+                <th>Owner</th>
+                <th>Recovery action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runtimeIntegrationReadinessRows.map((row) => (
+                <tr key={`${row.source}-${row.contract}`}>
+                  <td>{row.source}</td>
+                  <td>{row.contract}</td>
+                  <td>{row.status}</td>
+                  <td>{row.blockers}</td>
+                  <td>{row.warnings}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.action}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Contract</th>
+                <th>Idempotency key</th>
+                <th>Strategy</th>
+                <th>Attempts</th>
+                <th>Owner</th>
+                <th>Next action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runtimeIntegrationRetryRows.map((row) => (
+                <tr key={`${row.source}-${row.contract}-${row.idempotencyKey}`}>
+                  <td>{row.source}</td>
+                  <td>{row.contract}</td>
+                  <td>{row.idempotencyKey}</td>
+                  <td>{row.strategy}</td>
+                  <td>{row.attempts}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.nextAction}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Contract</th>
+                <th>Status</th>
+                <th>Reconciliation keys</th>
+                <th>Downstream blockers</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runtimeIntegrationReconciliationRows.map((row) => (
+                <tr key={`${row.source}-${row.contract}-reconciliation`}>
+                  <td>{row.source}</td>
+                  <td>{row.contract}</td>
+                  <td>{row.status}</td>
+                  <td>{row.keys}</td>
+                  <td>{row.downstreamBlockers}</td>
+                  <td>{row.owner}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="dq-layout">
+          <aside className="dq-detail">
+            <span className="eyebrow">Operator Action</span>
+            <h3>Resolve source blocker</h3>
+            <p>
+              Data Operator requests resend, reruns the source contract DQ check and verifies reconciliation
+              before the source can unblock forecast, replenishment or publication.
+            </p>
+            <div className="action-row">
+              <button type="button">Request resend</button>
+              <button type="button">Run retry</button>
+              <button type="button">Open reconciliation</button>
+            </div>
+          </aside>
+          <aside className="dq-detail">
+            <span className="eyebrow">Audit Expectation</span>
+            <h3>Every recovery action is traceable</h3>
+            <p>
+              The action must store actor, source contract, idempotency key, result status,
+              downstream blocker state and linked Process Engine task.
+            </p>
           </aside>
         </div>
       </section>

@@ -51,7 +51,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | SEC-4 | Security Audit And Access Review | Audit views, access review workflow and negative tests | Completed foundation |
 | UI-1 | Routed Application Foundation | React Router, feature pages and API client | Completed foundation |
 | UI-2 | Forecast And Replenishment Workbenches | Real API-backed forecast/order workflows | Completed foundation |
-| UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | UI-1, RI-6 |
+| UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | Completed foundation |
 | UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | UI-1, SEC-4 |
 | UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | UI-2..UI-4 |
 | ML-1 | Training Data Mart And Backtesting | Real training dataset and backtesting jobs | RI-6 |
@@ -469,6 +469,13 @@ Acceptance criteria:
 
 - data operators can resolve source blockers without database access;
 - every action is auditable.
+
+Completion checkpoint:
+
+- UI-3 foundation scope is fixed in `UI_INTEGRATION_DATA_QUALITY_SPEC.md`;
+- frontend Integration Operations Console reads source readiness, retry plan and reconciliation through shared API config;
+- static frontend tests cover DQ blockers, retry/reconciliation context, audit expectations and accessible labels;
+- sprint evidence report is stored in `docs/test-reports/sprint-ui-3-integration-data-quality/index.html`.
 
 ### UI-4. Security, Admin And Process UI
 

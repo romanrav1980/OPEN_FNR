@@ -1086,3 +1086,22 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `npm.cmd run build` in `apps/frontend` -> passed.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 527 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after UI-2: 16 sprints (`UI-3..UI-5`, `ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
+
+## UI-3 Integration And Data Quality UI
+
+- UI-3 completed as integration operations and DQ UI foundation.
+- Completion note: `docs/context/UI3_COMPLETION.md`.
+- Specification added: `UI_INTEGRATION_DATA_QUALITY_SPEC.md`.
+- Frontend updated:
+  - added Integration Operations Console;
+  - wired `/integration/operations/source-readiness`, `/integration/operations/retry-plan` and `/integration/operations/reconciliation` through `apiUrl(...)`;
+  - exposed source owner, blockers, retry idempotency key, reconciliation keys and downstream blockers.
+- Tests added:
+  - `tests/frontend/test_ui_integration_data_quality.py`.
+- Evidence report:
+  - `docs/test-reports/sprint-ui-3-integration-data-quality/index.html`.
+- Verification:
+  - `pytest tests/frontend/test_ui_integration_data_quality.py tests/frontend/test_ui_forecast_replenishment_workbenches.py tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 16 passed, 1 warning about `.pytest_cache` permissions.
+  - `npm.cmd run build` in `apps/frontend` -> passed.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 532 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after UI-3: 15 sprints (`UI-4..UI-5`, `ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
