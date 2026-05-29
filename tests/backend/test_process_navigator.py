@@ -130,6 +130,29 @@ def test_process_navigator_rejects_unknown_environment() -> None:
     assert response.status_code == 422
 
 
+def test_process_navigator_blocks_supplier_role_on_backend() -> None:
+    response = client.get("/process-navigator/map", params={"actor_role": "Supplier User"})
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "supplier role cannot access process navigator"
+
+
+def test_process_navigator_limits_store_role_to_top_zoom_levels() -> None:
+    allowed = client.get("/process-navigator/map", params={"actor_role": "Store Manager", "zoom": 1})
+    denied = client.get("/process-navigator/map", params={"actor_role": "Store Manager", "zoom": 3})
+
+    assert allowed.status_code == 200
+    assert denied.status_code == 403
+    assert denied.json()["detail"] == "store role can access only process navigator zoom 0-1"
+
+
+def test_process_navigator_rejects_unlisted_role() -> None:
+    response = client.get("/process-navigator/alerts", params={"actor_role": "Viewer"})
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "process navigator role denied"
+
+
 def test_process_navigator_snapshot_mode_uses_business_date() -> None:
     response = client.get("/process-navigator/map", params={"zoom": 0, "business_date": "2026-05-01"})
 

@@ -12,6 +12,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from .config import settings
+from .policy import Principal, assert_any_role
 from .process_deployment import BPMN_NS, build_bpmn_quality_report, build_process_deployment_package
 from .process_engine import AUDIT_EVENTS, PROCESS_DEFINITIONS, TASKS, AuditEventType, ProcessArtifactType, TaskStatus
 
@@ -72,6 +73,26 @@ PROCESS_DEPENDENCY_EDGES: tuple[tuple[str, str], ...] = (
     ("replenishment_calculation_process", "order_proposal_generation_process"),
     ("order_proposal_generation_process", "publication_process"),
 )
+
+NAVIGATOR_READ_ROLES = {
+    "Admin",
+    "Supply Chain Manager",
+    "Supply Chain Director",
+    "Forecast Planner",
+    "Forecast Owner",
+    "Replenishment Planner",
+    "Replenishment Owner",
+    "Category Manager",
+    "Promo Planner",
+    "Data Platform Owner",
+    "Data Engineer",
+    "Auditor",
+    "Store Manager",
+    "Store Operations",
+    "Service Account",
+}
+
+SUPPLIER_DENIED_ROLES = {"supplier", "supplier user"}
 
 
 class ProcessMapNode(BaseModel):
@@ -291,6 +312,20 @@ def _resolve_env(env: str | None) -> str:
     if resolved not in settings.allowed_environments:
         raise HTTPException(status_code=422, detail="environment is not allowed")
     return resolved
+
+
+def _assert_navigator_access(actor_role: str | None, zoom: int | None = None) -> str:
+    role = actor_role or "Admin"
+    if role.strip().lower() in SUPPLIER_DENIED_ROLES:
+        raise HTTPException(status_code=403, detail="supplier role cannot access process navigator")
+    if role in {"Store Manager", "Store Operations"} and zoom is not None and zoom > 1:
+        raise HTTPException(status_code=403, detail="store role can access only process navigator zoom 0-1")
+    assert_any_role(
+        Principal(subject="process-navigator-request", roles=(role,), regions=("all",), categories=("all")),
+        NAVIGATOR_READ_ROLES,
+        "process navigator role denied",
+    )
+    return role
 
 
 def domain_from_path(path: str) -> str:
@@ -929,7 +964,9 @@ def get_process_map(
     zoom: int = Query(default=1, ge=0, le=4),
     env: str | None = None,
     business_date: date | None = None,
+    actor_role: str | None = None,
 ) -> ProcessMapResponse:
+    _assert_navigator_access(actor_role, zoom)
     return build_process_map(zoom, env, business_date)
 
 
@@ -939,7 +976,9 @@ def get_process_alerts(
     limit: int | None = Query(default=None, ge=1),
     cursor: str | None = None,
     root_only: bool = False,
+    actor_role: str | None = None,
 ) -> dict[str, object]:
+    _assert_navigator_access(actor_role)
     _resolve_env(env)
     max_size = settings.process_navigator_alert_max_page_size
     page_size = min(limit or settings.process_navigator_alert_page_size, max_size)
@@ -951,13 +990,15 @@ def get_process_alerts(
 
 
 @router.get("/processes/{process_key}/drilldown")
-def get_process_drilldown(process_key: str, env: str | None = None) -> ProcessDrilldownResponse:
+def get_process_drilldown(process_key: str, env: str | None = None, actor_role: str | None = None) -> ProcessDrilldownResponse:
+    _assert_navigator_access(actor_role, 3)
     _resolve_env(env)
     return build_process_drilldown(process_key)
 
 
 @router.post("/processes/{process_key}/conformance/check")
-def start_conformance_check(process_key: str, env: str | None = None) -> ConformanceJobResponse:
+def start_conformance_check(process_key: str, env: str | None = None, actor_role: str | None = None) -> ConformanceJobResponse:
+    _assert_navigator_access(actor_role)
     environment = _resolve_env(env)
     _get_definition(process_key)
     job_id = str(uuid4())
@@ -970,7 +1011,13 @@ def start_conformance_check(process_key: str, env: str | None = None) -> Conform
 
 
 @router.get("/processes/{process_key}/conformance/status/{job_id}")
-def get_conformance_job_status(process_key: str, job_id: str, env: str | None = None) -> ConformanceResponse:
+def get_conformance_job_status(
+    process_key: str,
+    job_id: str,
+    env: str | None = None,
+    actor_role: str | None = None,
+) -> ConformanceResponse:
+    _assert_navigator_access(actor_role)
     environment = _resolve_env(env)
     job = CONFORMANCE_JOBS.get(job_id)
     if job is None or job != (environment, process_key):
@@ -984,7 +1031,9 @@ def get_process_conformance(
     process_key: str,
     env: str | None = None,
     summary_only: bool = False,
+    actor_role: str | None = None,
 ) -> ConformanceResponse:
+    _assert_navigator_access(actor_role)
     environment = _resolve_env(env)
     cached = CONFORMANCE_CACHE.get((environment, process_key))
     if cached is not None:
@@ -1015,7 +1064,9 @@ def get_process_performance(
     process_key: str,
     env: str | None = None,
     window_days: int = Query(default=30, ge=1),
+    actor_role: str | None = None,
 ) -> ProcessPerformanceResponse:
+    _assert_navigator_access(actor_role)
     return build_process_performance(process_key, _resolve_env(env), window_days)
 
 
@@ -1024,12 +1075,15 @@ def get_process_versions(
     process_key: str,
     env: str | None = None,
     include_instances: bool = False,
+    actor_role: str | None = None,
 ) -> ProcessVersionsResponse:
+    _assert_navigator_access(actor_role)
     return build_process_versions(process_key, _resolve_env(env), include_instances)
 
 
 @router.get("/infrastructure/health")
-def get_infrastructure_health(env: str | None = None) -> InfrastructureHealthResponse:
+def get_infrastructure_health(env: str | None = None, actor_role: str | None = None) -> InfrastructureHealthResponse:
+    _assert_navigator_access(actor_role)
     environment = _resolve_env(env)
     components = (
         InfrastructureComponentStatus(
@@ -1070,7 +1124,9 @@ def get_process_tracking(
     order_proposal_id: str | None = None,
     promo_id: str | None = None,
     env: str | None = None,
+    actor_role: str | None = None,
 ) -> ProcessTrackingResponse:
+    _assert_navigator_access(actor_role)
     environment = _resolve_env(env)
     business_key = build_business_key(
         business_key_type=business_key_type,
@@ -1114,7 +1170,8 @@ def get_process_tracking(
 
 
 @router.get("/reports/weekly")
-def get_weekly_report(business_week: str, env: str | None = None) -> WeeklyReportResponse:
+def get_weekly_report(business_week: str, env: str | None = None, actor_role: str | None = None) -> WeeklyReportResponse:
+    _assert_navigator_access(actor_role)
     environment = _resolve_env(env)
     alerts = build_process_navigator_alerts()
     domain_counts = Counter(alert.domain for alert in alerts)
