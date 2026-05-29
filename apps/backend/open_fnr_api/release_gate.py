@@ -90,6 +90,24 @@ class DegradedModePlan(BaseModel):
     exit_criteria: tuple[str, ...]
 
 
+class ProductionGoNoGoGate(BaseModel):
+    gate_id: str
+    area: str
+    status: ChecklistStatus
+    evidence: str
+    owner_role: str
+
+
+class ProductionGoNoGoPack(BaseModel):
+    pack_id: str
+    release_candidate_id: str
+    gates: tuple[ProductionGoNoGoGate, ...]
+    unresolved_risks: tuple[str, ...]
+    sign_off_roles: tuple[str, ...]
+    decision: ReleaseDecision
+    next_action: str
+
+
 CHECKLIST: tuple[ReleaseChecklistItem, ...] = (
     ReleaseChecklistItem(item_id="rel-001", area="full_regression", status=ChecklistStatus.PASSED, evidence="236 automated tests passed", owner_role="Product Owner"),
     ReleaseChecklistItem(item_id="rel-002", area="performance", status=ChecklistStatus.PASSED, evidence="Industrial projection within target", owner_role="Architecture"),
@@ -159,6 +177,51 @@ DEGRADED_MODES: tuple[DegradedModePlan, ...] = (
     ),
 )
 
+PRODUCTION_GO_NO_GO_GATES: tuple[ProductionGoNoGoGate, ...] = (
+    ProductionGoNoGoGate(
+        gate_id="prod-gate-regression",
+        area="final_regression",
+        status=ChecklistStatus.PASSED,
+        evidence="full automated regression is green",
+        owner_role="QA Lead",
+    ),
+    ProductionGoNoGoGate(
+        gate_id="prod-gate-security",
+        area="security",
+        status=ChecklistStatus.PASSED,
+        evidence="OIDC/JWT, RBAC, object access, secrets and audit gates passed",
+        owner_role="Security Owner",
+    ),
+    ProductionGoNoGoGate(
+        gate_id="prod-gate-dr",
+        area="dr",
+        status=ChecklistStatus.PASSED,
+        evidence="rollback and DR drill evidence accepted",
+        owner_role="IT Ops",
+    ),
+    ProductionGoNoGoGate(
+        gate_id="prod-gate-business-acceptance",
+        area="business_acceptance",
+        status=ChecklistStatus.PASSED,
+        evidence="pilot KPI acceptance pack decision accepted",
+        owner_role="Business Owner",
+    ),
+    ProductionGoNoGoGate(
+        gate_id="prod-gate-controlled-export",
+        area="controlled_export",
+        status=ChecklistStatus.PASSED,
+        evidence="controlled export gate and reconciliation passed",
+        owner_role="Integration Owner",
+    ),
+    ProductionGoNoGoGate(
+        gate_id="prod-gate-support-handover",
+        area="support_handover",
+        status=ChecklistStatus.PASSED,
+        evidence="observability, runbooks and incident roles assigned",
+        owner_role="Incident Manager",
+    ),
+)
+
 RISKS: tuple[ReleaseRisk, ...] = (
     ReleaseRisk(
         risk_id="risk-20260528-001",
@@ -202,6 +265,20 @@ def build_rollback_plan() -> RollbackPlan:
     )
 
 
+def build_production_go_no_go_pack() -> ProductionGoNoGoPack:
+    failed_gates = [gate.gate_id for gate in PRODUCTION_GO_NO_GO_GATES if gate.status == ChecklistStatus.FAILED]
+    decision = ReleaseDecision.NO_GO if failed_gates else ReleaseDecision.GO
+    return ProductionGoNoGoPack(
+        pack_id="production-go-no-go-20260620-001",
+        release_candidate_id="open-fnr-industrial-rc1",
+        gates=PRODUCTION_GO_NO_GO_GATES,
+        unresolved_risks=tuple(failed_gates),
+        sign_off_roles=("Product Owner", "Business Owner", "IT Ops", "Security Owner", "Architecture"),
+        decision=decision,
+        next_action="launch_pilot_expansion" if decision == ReleaseDecision.GO else "create_remediation_plan",
+    )
+
+
 @router.get("/candidate")
 def get_release_candidate() -> dict[str, object]:
     return build_release_candidate().model_dump(mode="json")
@@ -220,6 +297,11 @@ def get_dr_drill() -> dict[str, object]:
 @router.get("/degraded-modes")
 def get_degraded_modes() -> dict[str, object]:
     return {"items": [item.model_dump(mode="json") for item in DEGRADED_MODES], "total": len(DEGRADED_MODES)}
+
+
+@router.get("/production-go-no-go")
+def get_production_go_no_go() -> dict[str, object]:
+    return build_production_go_no_go_pack().model_dump(mode="json")
 
 
 @router.post("/candidate/approve")

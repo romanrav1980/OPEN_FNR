@@ -4,9 +4,9 @@ Last updated: 2026-05-29
 
 ## Active Work
 
-Industrial hardening continues after real-ingestion I1-I5. The current focus is Supplement 1 production hardening and process observability: source SLA, ML lifecycle, acceptance gates and the new Process Navigator map.
+The focused sprint plan through UI-2..UI-5, ML-1..ML-5, DEP-1..DEP-4 and PILOT-1..PILOT-5 is completed at foundation level. Current focus after this checkpoint is real environment deployment, real source credentials/data connection, pilot execution on actual data and production hardening beyond foundation mocks.
 
-Current backend regression status: 30 focused process navigator/process regression tests passed in the latest checkpoint; previous full regression status was 438 automated tests passed.
+Current full regression status: 597 automated tests passed in the latest checkpoint.
 
 Latest planning and navigation additions:
 
@@ -1394,3 +1394,25 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_kpi.py tests/backend/test_pilot.py tests/backend/test_publication.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 42 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 595 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after PILOT-4: 1 sprint (`PILOT-5`).
+
+## PILOT-5 Production Go/No-Go
+
+- PILOT-5 completed as final go/no-go foundation.
+- Completion note: `docs/context/PILOT5_COMPLETION.md`.
+- Specification added: `PRODUCTION_GO_NO_GO_SPEC.md`.
+- Backend extended:
+  - `GET /release-gate/production-go-no-go`.
+- Final go/no-go pack covers:
+  - final regression;
+  - security;
+  - DR;
+  - business acceptance;
+  - controlled export;
+  - support handover.
+- Tests added/updated:
+  - `tests/backend/test_release_gate.py`.
+- Verification:
+  - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_release_gate.py tests/backend/test_security.py tests/backend/test_kpi.py tests/backend/test_publication.py tests/operations/test_rollback_dr_runbook.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 53 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 597 passed, 1 warning about `.pytest_cache` permissions.
+- R7 Pilot launch status: completed foundation.
+- Remaining focused sprint count after PILOT-5: 0 sprints.

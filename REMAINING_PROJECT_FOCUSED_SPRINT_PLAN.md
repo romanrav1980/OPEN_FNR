@@ -1,6 +1,6 @@
 # OPEN FNR Remaining Project Focused Sprint Plan
 
-Status: active tactical plan  
+Status: completed foundation  
 Date: 2026-05-29  
 Scope: remaining work after completed Process Navigator PN-3..PN-12
 
@@ -67,7 +67,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | Completed foundation |
 | PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | Completed foundation |
 | PILOT-4 | Business KPI Acceptance | WAPE, service level, lost sales, overstock and waste evidence | Completed foundation |
-| PILOT-5 | Production Go/No-Go | Final acceptance pack and launch decision | PILOT-4 |
+| PILOT-5 | Production Go/No-Go | Final acceptance pack and launch decision | Completed foundation |
 
 ## 5. Detailed Sprints
 
@@ -926,6 +926,13 @@ Acceptance criteria:
 
 - production decision is recorded;
 - launch or remediation plan is approved.
+
+Completion checkpoint:
+
+- PILOT-5 go/no-go rules are fixed in `PRODUCTION_GO_NO_GO_SPEC.md`;
+- release-gate API exposes final production go/no-go pack;
+- final gates cover regression, security, DR, business acceptance, controlled export and support handover;
+- automated tests validate launch blocking on failed gates and launch action on passed gates.
 
 ## 6. Focus Control
 

@@ -1,7 +1,16 @@
 from fastapi.testclient import TestClient
 
 from open_fnr_api.main import app
-from open_fnr_api.release_gate import CHECKLIST, RISKS, ChecklistStatus, ReleaseChecklistItem, ReleaseDecision, release_readiness_decision
+from open_fnr_api.release_gate import (
+    CHECKLIST,
+    PRODUCTION_GO_NO_GO_GATES,
+    RISKS,
+    ChecklistStatus,
+    ReleaseChecklistItem,
+    ReleaseDecision,
+    build_production_go_no_go_pack,
+    release_readiness_decision,
+)
 
 
 client = TestClient(app)
@@ -98,3 +107,35 @@ def test_degraded_modes_block_exports_and_keep_review_capabilities() -> None:
     assert "forecast review" in mode["allowed_capabilities"]
     assert "ERP export" in mode["blocked_capabilities"]
     assert mode["activation_owner_role"] == "Incident Manager"
+
+
+def test_production_go_no_go_pack_covers_final_launch_gates() -> None:
+    response = client.get("/release-gate/production-go-no-go")
+    assert response.status_code == 200
+
+    payload = response.json()
+    areas = {gate["area"] for gate in payload["gates"]}
+
+    assert payload["decision"] == "go"
+    assert payload["next_action"] == "launch_pilot_expansion"
+    assert payload["unresolved_risks"] == []
+    assert {
+        "final_regression",
+        "security",
+        "dr",
+        "business_acceptance",
+        "controlled_export",
+        "support_handover",
+    }.issubset(areas)
+    assert "Product Owner" in payload["sign_off_roles"]
+
+
+def test_production_go_no_go_helper_blocks_failed_gate(monkeypatch) -> None:
+    failed_gate = PRODUCTION_GO_NO_GO_GATES[0].model_copy(update={"status": ChecklistStatus.FAILED})
+    monkeypatch.setattr("open_fnr_api.release_gate.PRODUCTION_GO_NO_GO_GATES", (failed_gate, *PRODUCTION_GO_NO_GO_GATES[1:]))
+
+    pack = build_production_go_no_go_pack()
+
+    assert pack.decision == ReleaseDecision.NO_GO
+    assert pack.unresolved_risks == ("prod-gate-regression",)
+    assert pack.next_action == "create_remediation_plan"
