@@ -133,6 +133,15 @@ class Settings(BaseModel):
         ge=1,
         le=500,
     )
+    process_navigator_business_key_types: tuple[str, ...] = Field(
+        default_factory=lambda: env_csv(
+            "PROCESS_NAVIGATOR_BUSINESS_KEY_TYPES",
+            ("sku-store", "forecast-run", "order-proposal", "replenishment-cycle", "promo"),
+        )
+    )
+    process_navigator_business_key_separator: str = Field(
+        default_factory=lambda: env_str("PROCESS_NAVIGATOR_BUSINESS_KEY_SEPARATOR", "_")
+    )
 
     def http_url(self, host: str, port: int, path: str = "") -> str:
         normalized_path = path if path.startswith("/") or path == "" else f"/{path}"

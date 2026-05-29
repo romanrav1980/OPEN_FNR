@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -6,6 +7,7 @@ from open_fnr_api.main import app
 from open_fnr_api.process_navigator import (
     _alert,
     build_bpmn_flow_model,
+    build_business_key,
     build_process_map,
     build_process_navigator_alerts,
     build_process_performance,
@@ -265,6 +267,40 @@ def test_process_navigator_tracking_contract() -> None:
     payload = response.json()
     assert payload["business_key_type"] == "sku-store"
     assert payload["trail"]
+    assert all(len(item["instance_id"]) == 16 for item in payload["trail"])
+
+
+def test_process_navigator_business_key_builder_uses_configured_separator() -> None:
+    business_key = build_business_key(
+        business_key_type="sku-store",
+        sku_id="SKU-1",
+        store_id="STORE-1",
+        business_date_value=date(2026, 5, 29),
+    )
+
+    assert business_key == "SKU-1_STORE-1_2026-05-29"
+
+
+def test_process_navigator_tracking_supports_replenishment_cycle_and_promo() -> None:
+    cycle = client.get(
+        "/process-navigator/tracking",
+        params={"business_key_type": "replenishment-cycle", "store_id": "STORE-1", "business_week": "2026-W22"},
+    )
+    promo = client.get(
+        "/process-navigator/tracking",
+        params={"business_key_type": "promo", "promo_id": "PROMO-1"},
+    )
+
+    assert cycle.status_code == 200
+    assert cycle.json()["business_key"] == "STORE-1_2026-W22"
+    assert promo.status_code == 200
+    assert promo.json()["business_key"] == "PROMO-1"
+
+
+def test_process_navigator_tracking_rejects_incomplete_business_key() -> None:
+    response = client.get("/process-navigator/tracking", params={"business_key_type": "promo"})
+
+    assert response.status_code == 422
 
 
 def test_process_navigator_weekly_report_contract() -> None:

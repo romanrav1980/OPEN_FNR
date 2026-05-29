@@ -609,8 +609,12 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `deduplicate_alerts()` groups repeated alerts by source, process/domain and severity;
   - `correlate_alert_cause_chains()` builds BFS causal chains across process dependencies;
   - map responses expose `causal_edges` for cascaded degraded/blocked process nodes.
-- Process Navigator backend tests now cover 20 scenarios in `tests/backend/test_process_navigator.py`.
+- PN-7 has started with config-driven business key tracking:
+  - business key types and separator are controlled by `OPEN_FNR_PROCESS_NAVIGATOR_BUSINESS_KEY_TYPES` and `OPEN_FNR_PROCESS_NAVIGATOR_BUSINESS_KEY_SEPARATOR`;
+  - `/process-navigator/tracking` supports `sku-store`, `forecast-run`, `order-proposal`, `replenishment-cycle` and `promo`;
+  - tracking trail instance IDs are masked.
+- Process Navigator backend tests now cover 23 scenarios in `tests/backend/test_process_navigator.py`.
 - Verification:
-  - `pytest tests/backend/test_process_navigator.py` -> 20 passed.
+  - `pytest tests/backend/test_process_navigator.py` -> 23 passed.
   - `pytest tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 3 passed.
-  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 456 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 458 passed, 1 warning about `.pytest_cache` permissions.

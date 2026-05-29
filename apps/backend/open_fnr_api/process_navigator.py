@@ -783,6 +783,44 @@ def _minutes_between(start: datetime, end: datetime) -> float:
     return max(0.0, (end - start).total_seconds() / 60.0)
 
 
+def build_business_key(
+    *,
+    business_key_type: str,
+    sku_id: str | None = None,
+    store_id: str | None = None,
+    business_date_value: date | None = None,
+    business_week: str | None = None,
+    forecast_run_id: str | None = None,
+    order_proposal_id: str | None = None,
+    promo_id: str | None = None,
+) -> str:
+    if business_key_type not in settings.process_navigator_business_key_types:
+        raise HTTPException(status_code=422, detail="unsupported business key type")
+    separator = settings.process_navigator_business_key_separator
+    if business_key_type == "sku-store":
+        if not sku_id or not store_id:
+            raise HTTPException(status_code=422, detail="sku_id and store_id are required for sku-store tracking")
+        key_date = business_date_value or date.today()
+        return separator.join((sku_id, store_id, key_date.isoformat()))
+    if business_key_type == "forecast-run":
+        if not forecast_run_id:
+            raise HTTPException(status_code=422, detail="forecast_run_id is required for forecast-run tracking")
+        return forecast_run_id
+    if business_key_type == "order-proposal":
+        if not order_proposal_id:
+            raise HTTPException(status_code=422, detail="order_proposal_id is required for order-proposal tracking")
+        return order_proposal_id
+    if business_key_type == "replenishment-cycle":
+        if not store_id or not business_week:
+            raise HTTPException(status_code=422, detail="store_id and business_week are required for replenishment-cycle tracking")
+        return separator.join((store_id, business_week))
+    if business_key_type == "promo":
+        if not promo_id:
+            raise HTTPException(status_code=422, detail="promo_id is required for promo tracking")
+        return promo_id
+    raise HTTPException(status_code=422, detail="unsupported business key type")
+
+
 def build_process_performance(process_key: str, environment: str, window_days: int) -> ProcessPerformanceResponse:
     definition = _get_definition(process_key)
     if definition.artifact_type != ProcessArtifactType.BPMN:
@@ -1027,22 +1065,23 @@ def get_process_tracking(
     sku_id: str | None = None,
     store_id: str | None = None,
     business_date: date | None = None,
+    business_week: str | None = None,
     forecast_run_id: str | None = None,
     order_proposal_id: str | None = None,
+    promo_id: str | None = None,
     env: str | None = None,
 ) -> ProcessTrackingResponse:
     environment = _resolve_env(env)
-    if business_key_type == "sku-store":
-        if not sku_id or not store_id:
-            raise HTTPException(status_code=422, detail="sku_id and store_id are required for sku-store tracking")
-        key_date = business_date or date.today()
-        business_key = f"{sku_id}_{store_id}_{key_date.isoformat()}"
-    elif business_key_type == "forecast-run" and forecast_run_id:
-        business_key = forecast_run_id
-    elif business_key_type == "order-proposal" and order_proposal_id:
-        business_key = order_proposal_id
-    else:
-        raise HTTPException(status_code=422, detail="unsupported or incomplete business key")
+    business_key = build_business_key(
+        business_key_type=business_key_type,
+        sku_id=sku_id,
+        store_id=store_id,
+        business_date_value=business_date,
+        business_week=business_week,
+        forecast_run_id=forecast_run_id,
+        order_proposal_id=order_proposal_id,
+        promo_id=promo_id,
+    )
     domain_sequence = ("feature-mart", "forecast", "replenishment", "publication", "store-management")
     trail = tuple(
         ProcessTrackingTrailItem(

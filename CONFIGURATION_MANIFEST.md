@@ -52,7 +52,9 @@ Process Navigator settings are centralized as:
 - `OPEN_FNR_PROCESS_NAVIGATOR_POLL_ALERTS_SECONDS`;
 - `OPEN_FNR_PROCESS_NAVIGATOR_POLL_INFRASTRUCTURE_SECONDS`;
 - `OPEN_FNR_PROCESS_NAVIGATOR_ALERT_PAGE_SIZE`;
-- `OPEN_FNR_PROCESS_NAVIGATOR_ALERT_MAX_PAGE_SIZE`.
+- `OPEN_FNR_PROCESS_NAVIGATOR_ALERT_MAX_PAGE_SIZE`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_BUSINESS_KEY_TYPES`;
+- `OPEN_FNR_PROCESS_NAVIGATOR_BUSINESS_KEY_SEPARATOR`.
 
 ## Allowed Exceptions
 
@@ -82,7 +84,7 @@ The following files may contain default local development addresses because they
 - Flowable runtime upload must use configured `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_FLOWABLE_PORT`, `OPEN_FNR_FLOWABLE_HTTP_TIMEOUT_SECONDS`, `OPEN_FNR_FLOWABLE_REST_USERNAME` and `OPEN_FNR_FLOWABLE_REST_PASSWORD`; UI and API dry runs must not perform network upload unless `execute=true`.
 - DEV/TEST may use explicit Flowable image credentials in `.env.example`; STAGE/PROD must inject runtime credentials from secrets and keep `OPEN_FNR_FLOWABLE_REST_PASSWORD` out of committed environment files.
 - Publication, supplier, TMS capacity, Store App task, planogram and IdP/IAM target URLs must be controlled by the `OPEN_FNR_*_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`, `OPEN_FNR_PLANOGRAM_EXPORT_URL` and `OPEN_FNR_IDP_PROVISIONING_URL` settings; empty values mean local fallback mode only.
-- Process Navigator environment selector, refresh intervals, conformance TTL, conformance timeout, alert deduplication window and pagination limits must be controlled by `OPEN_FNR_PROCESS_NAVIGATOR_*` settings and `OPEN_FNR_ALLOWED_ENVIRONMENTS`.
+- Process Navigator environment selector, refresh intervals, conformance TTL, conformance timeout, alert deduplication window, pagination limits and business key formats must be controlled by `OPEN_FNR_PROCESS_NAVIGATOR_*` settings and `OPEN_FNR_ALLOWED_ENVIRONMENTS`.
 
 ## Quality Gate
 
