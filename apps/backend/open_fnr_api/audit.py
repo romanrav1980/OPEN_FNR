@@ -1,6 +1,7 @@
 from uuid import uuid4
+from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from .config import settings
@@ -39,5 +40,39 @@ def create_audit_event(request: AuditEventCreate) -> AuditEventRecord:
 
 
 @router.get("/events", response_model=tuple[AuditEventRecord, ...])
-def list_audit_events(limit: int = Query(default=50, ge=1, le=500)) -> tuple[AuditEventRecord, ...]:
-    return audit_event_repository.list_recent(limit=limit)
+def list_audit_events(
+    limit: int = Query(default=50, ge=1, le=500),
+    actor: str | None = None,
+    object_type: str | None = None,
+    object_id: str | None = None,
+    event_type: str | None = None,
+    correlation_id: str | None = None,
+) -> tuple[AuditEventRecord, ...]:
+    return audit_event_repository.search(
+        limit=limit,
+        actor=actor,
+        object_type=object_type,
+        object_id=object_id,
+        event_type=event_type,
+        correlation_id=correlation_id,
+    )
+
+
+@router.get("/retention-plan")
+def get_audit_retention_plan() -> dict[str, object]:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=settings.audit_retention_days)
+    return {
+        "retention_days": settings.audit_retention_days,
+        "cutoff_before": cutoff.isoformat(),
+        "repository_mode": audit_event_repository.mode,
+        "business_process_audit_default": settings.audit_enabled,
+    }
+
+
+@router.post("/retention/purge")
+def purge_audit_events(actor_role: str = Query(min_length=1)) -> dict[str, object]:
+    if actor_role not in {"Admin", "Auditor"}:
+        raise HTTPException(status_code=403, detail="actor role is not allowed to purge audit events")
+    cutoff = datetime.now(timezone.utc) - timedelta(days=settings.audit_retention_days)
+    deleted = audit_event_repository.delete_older_than(cutoff)
+    return {"deleted": deleted, "cutoff_before": cutoff.isoformat()}

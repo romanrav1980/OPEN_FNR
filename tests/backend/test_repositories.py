@@ -22,6 +22,7 @@ from open_fnr_api.repositories import (
 class FakeCursor:
     def __init__(self) -> None:
         self.executed: list[tuple[str, tuple[object, ...]]] = []
+        self.rowcount = 3
 
     def execute(self, sql: str, params: tuple[object, ...]) -> None:
         self.executed.append((sql, params))
@@ -117,6 +118,31 @@ def test_postgres_audit_repository_inserts_and_reads_events() -> None:
     recent = repository.list_recent(limit=1)
     assert recent[0].event_id == "audit-1"
     assert recent[0].payload == {"ok": True}
+
+
+def test_postgres_audit_repository_searches_and_purges_events() -> None:
+    fake_connection = FakeConnection()
+    repository = PostgresAuditEventRepository(lambda: fake_connection)
+    cutoff = datetime(2026, 1, 1, tzinfo=timezone.utc)
+
+    found = repository.search(
+        limit=10,
+        actor="planner@example.org",
+        object_type="forecast",
+        object_id="forecast-1",
+        event_type="approval",
+        correlation_id="corr-1",
+    )
+    deleted = repository.delete_older_than(cutoff)
+
+    search_sql, search_params = fake_connection.cursor_instance.executed[0]
+    delete_sql, delete_params = fake_connection.cursor_instance.executed[1]
+    assert found[0].event_id == "audit-1"
+    assert "WHERE (%s::text IS NULL OR actor = %s)" in search_sql
+    assert search_params[-1] == 10
+    assert "DELETE FROM open_fnr.audit_events" in delete_sql
+    assert delete_params == (cutoff,)
+    assert deleted == 3
 
 
 def test_postgres_process_task_repository_upserts_task_and_appends_event() -> None:

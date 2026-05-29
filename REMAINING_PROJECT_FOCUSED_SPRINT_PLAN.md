@@ -37,7 +37,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | --- | --- | --- | --- |
 | IH-1 | Persistence Inventory And Repository Boundaries | Inventory of remaining mock/in-memory state and repository interfaces | Completed |
 | IH-2 | PostgreSQL Persistence And Migrations | Metadata, process, audit and operational tables with migrations | Completed foundation |
-| IH-3 | Production Audit Event Storage | Production-grade audit/event repository, retention and query APIs | IH-2 |
+| IH-3 | Production Audit Event Storage | Production-grade audit/event repository, retention and query APIs | In progress |
 | IH-4 | Backup Restore Smoke | PostgreSQL/ClickHouse backup/restore smoke and runbook | IH-2 |
 | RI-1 | Source Contracts Freeze | Real source contracts, field mapping and SLA matrix | IH-1 |
 | RI-2 | POS And DWH Sales Ingestion | Real sales facts and history ingestion | RI-1 |

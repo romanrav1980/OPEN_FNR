@@ -134,6 +134,12 @@ CREATE INDEX IF NOT EXISTS ix_audit_events_object
 CREATE INDEX IF NOT EXISTS ix_audit_events_actor
     ON open_fnr.audit_events (actor, created_at DESC);
 
+CREATE INDEX IF NOT EXISTS ix_audit_events_correlation
+    ON open_fnr.audit_events (correlation_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS ix_audit_events_type
+    ON open_fnr.audit_events (event_type, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS open_fnr.integration_batches
 (
     batch_id text PRIMARY KEY,

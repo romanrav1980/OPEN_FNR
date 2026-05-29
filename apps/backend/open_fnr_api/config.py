@@ -87,6 +87,7 @@ class Settings(BaseModel):
     )
     mock_mode: bool = Field(default_factory=lambda: env_bool("MOCK_MODE", True))
     audit_enabled: bool = Field(default_factory=lambda: env_bool("AUDIT_ENABLED", True))
+    audit_retention_days: int = Field(default_factory=lambda: env_int("AUDIT_RETENTION_DAYS", 1095), ge=1)
     auth_enabled: bool = Field(default_factory=lambda: env_bool("AUTH_ENABLED", False))
     auth_dev_bypass_enabled: bool = Field(default_factory=lambda: env_bool("AUTH_DEV_BYPASS_ENABLED", True))
     oidc_issuer: str = Field(default_factory=lambda: env_str("OIDC_ISSUER", ""))

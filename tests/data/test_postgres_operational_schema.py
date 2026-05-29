@@ -24,3 +24,5 @@ def test_postgres_schema_contains_idempotency_and_process_indexes() -> None:
     assert "ix_process_tasks_business_key" in sql
     assert "ix_operational_decisions_object" in sql
     assert "ix_export_attempts_package" in sql
+    assert "ix_audit_events_correlation" in sql
+    assert "ix_audit_events_type" in sql

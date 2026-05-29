@@ -16,6 +16,8 @@ All network addresses must be read from central project configuration:
 
 Backend runtime supports both a shared `OPEN_FNR_SERVICE_HOST` for local host access and per-service hosts such as `OPEN_FNR_POSTGRES_HOST`, `OPEN_FNR_CLICKHOUSE_HOST`, `OPEN_FNR_FLOWABLE_HOST`, `OPEN_FNR_AIRFLOW_HOST`, `OPEN_FNR_OPENSEARCH_HOST` and `OPEN_FNR_SUPERSET_HOST` for container networks.
 
+Audit retention is controlled by `OPEN_FNR_AUDIT_RETENTION_DAYS`. Business-process event audit remains enabled by default through `OPEN_FNR_AUDIT_ENABLED=true`.
+
 External integration endpoints must also be configured, not embedded in code. Outbound publication uses:
 
 - `OPEN_FNR_ERP_EXPORT_URL`;

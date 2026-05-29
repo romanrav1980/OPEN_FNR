@@ -38,6 +38,21 @@ class AuditEventRepository(Protocol):
     def list_recent(self, limit: int = 50) -> tuple[AuditEventRecord, ...]:
         ...
 
+    def search(
+        self,
+        *,
+        limit: int = 50,
+        actor: str | None = None,
+        object_type: str | None = None,
+        object_id: str | None = None,
+        event_type: str | None = None,
+        correlation_id: str | None = None,
+    ) -> tuple[AuditEventRecord, ...]:
+        ...
+
+    def delete_older_than(self, cutoff: datetime) -> int:
+        ...
+
 
 class ProcessTaskRecord(BaseModel):
     task_id: str
@@ -113,6 +128,34 @@ class InMemoryAuditEventRepository:
     def list_recent(self, limit: int = 50) -> tuple[AuditEventRecord, ...]:
         return tuple(reversed(self._events[-limit:]))
 
+    def search(
+        self,
+        *,
+        limit: int = 50,
+        actor: str | None = None,
+        object_type: str | None = None,
+        object_id: str | None = None,
+        event_type: str | None = None,
+        correlation_id: str | None = None,
+    ) -> tuple[AuditEventRecord, ...]:
+        events = tuple(reversed(self._events))
+        if actor is not None:
+            events = tuple(event for event in events if event.actor == actor)
+        if object_type is not None:
+            events = tuple(event for event in events if event.object_type == object_type)
+        if object_id is not None:
+            events = tuple(event for event in events if event.object_id == object_id)
+        if event_type is not None:
+            events = tuple(event for event in events if event.event_type == event_type)
+        if correlation_id is not None:
+            events = tuple(event for event in events if event.correlation_id == correlation_id)
+        return events[:limit]
+
+    def delete_older_than(self, cutoff: datetime) -> int:
+        before = len(self._events)
+        self._events = [event for event in self._events if event.created_at >= cutoff]
+        return before - len(self._events)
+
 
 class PostgresAuditEventRepository:
     mode = RepositoryMode.POSTGRES
@@ -153,6 +196,18 @@ class PostgresAuditEventRepository:
         return event
 
     def list_recent(self, limit: int = 50) -> tuple[AuditEventRecord, ...]:
+        return self.search(limit=limit)
+
+    def search(
+        self,
+        *,
+        limit: int = 50,
+        actor: str | None = None,
+        object_type: str | None = None,
+        object_id: str | None = None,
+        event_type: str | None = None,
+        correlation_id: str | None = None,
+    ) -> tuple[AuditEventRecord, ...]:
         with managed_connection(self._connection_factory) as connection:
             cursor = connection.cursor()
             cursor.execute(
@@ -161,10 +216,27 @@ class PostgresAuditEventRepository:
                     event_id, event_type, actor, actor_role, object_type, object_id,
                     action, reason, correlation_id, payload, created_at
                 FROM open_fnr.audit_events
+                WHERE (%s::text IS NULL OR actor = %s)
+                  AND (%s::text IS NULL OR object_type = %s)
+                  AND (%s::text IS NULL OR object_id = %s)
+                  AND (%s::text IS NULL OR event_type = %s)
+                  AND (%s::text IS NULL OR correlation_id = %s)
                 ORDER BY created_at DESC
                 LIMIT %s
                 """,
-                (limit,),
+                (
+                    actor,
+                    actor,
+                    object_type,
+                    object_type,
+                    object_id,
+                    object_id,
+                    event_type,
+                    event_type,
+                    correlation_id,
+                    correlation_id,
+                    limit,
+                ),
             )
             rows = cursor.fetchall()
 
@@ -184,6 +256,18 @@ class PostgresAuditEventRepository:
             )
             for row in rows
         )
+
+    def delete_older_than(self, cutoff: datetime) -> int:
+        with managed_connection(self._connection_factory) as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                DELETE FROM open_fnr.audit_events
+                WHERE created_at < %s
+                """,
+                (cutoff,),
+            )
+            return int(getattr(cursor, "rowcount", 0) or 0)
 
 
 class InMemoryProcessTaskRepository:

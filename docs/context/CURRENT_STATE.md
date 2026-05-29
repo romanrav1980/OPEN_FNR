@@ -741,3 +741,23 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/backend/test_store_management.py tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 49 passed, 1 warning about `.pytest_cache` permissions.
   - `pytest tests/backend/test_adjustments.py tests/backend/test_exceptions.py tests/backend/test_store_management.py tests/backend/test_replenishment.py tests/backend/test_publication.py tests/backend/test_process_engine.py` -> 61 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 482 passed, 1 warning about `.pytest_cache` permissions.
+
+## IH-3 Production Audit Event Storage
+
+- IH-3 started.
+- Audit retention configuration added:
+  - `OPEN_FNR_AUDIT_RETENTION_DAYS`;
+  - default is 1095 days.
+- Audit repository now supports:
+  - filtered search by actor, object type, object id, event type and correlation id;
+  - retention purge by cutoff.
+- Audit API now supports:
+  - `GET /audit/events` with investigation filters;
+  - `GET /audit/retention-plan`;
+  - `POST /audit/retention/purge?actor_role=...` guarded to `Admin` and `Auditor`.
+- PostgreSQL audit indexes added:
+  - `ix_audit_events_correlation`;
+  - `ix_audit_events_type`.
+- Runbook added: `docs/runbooks/AUDIT_RETENTION_RUNBOOK.md`.
+- Verification:
+  - `pytest tests/backend/test_audit.py tests/backend/test_repositories.py tests/data/test_postgres_operational_schema.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 17 passed, 1 warning about `.pytest_cache` permissions.

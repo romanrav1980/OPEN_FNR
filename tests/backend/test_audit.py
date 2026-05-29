@@ -33,6 +33,52 @@ def test_audit_event_can_be_recorded_and_listed() -> None:
     assert listed.json()[0]["event_id"] == event["event_id"]
 
 
+def test_audit_events_can_be_filtered_for_investigation() -> None:
+    created = client.post(
+        "/audit/events",
+        json={
+            "event_type": "process_task",
+            "actor": "audited.actor@example.org",
+            "actor_role": "Auditor",
+            "object_type": "process_task",
+            "object_id": "task-1",
+            "action": "complete",
+            "reason": "filter test",
+            "correlation_id": "corr-filter-001",
+            "payload": {"ok": True},
+        },
+    )
+    assert created.status_code == 200
+
+    response = client.get(
+        "/audit/events",
+        params={
+            "actor": "audited.actor@example.org",
+            "object_type": "process_task",
+            "object_id": "task-1",
+            "event_type": "process_task",
+            "correlation_id": "corr-filter-001",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()[0]["object_id"] == "task-1"
+
+
+def test_audit_retention_plan_and_purge_are_role_guarded() -> None:
+    plan = client.get("/audit/retention-plan")
+    assert plan.status_code == 200
+    assert plan.json()["retention_days"] >= 1
+    assert plan.json()["business_process_audit_default"] is True
+
+    denied = client.post("/audit/retention/purge", params={"actor_role": "Viewer"})
+    assert denied.status_code == 403
+
+    allowed = client.post("/audit/retention/purge", params={"actor_role": "Auditor"})
+    assert allowed.status_code == 200
+    assert "deleted" in allowed.json()
+
+
 def test_metadata_exposes_runtime_and_mock_mode() -> None:
     response = client.get("/metadata")
     assert response.status_code == 200
