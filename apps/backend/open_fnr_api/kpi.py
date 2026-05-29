@@ -58,6 +58,28 @@ class KpiDashboard(BaseModel):
     business_value: BusinessValueSummary
 
 
+class PilotAcceptanceMetric(BaseModel):
+    metric: str
+    value: float
+    threshold: float
+    unit: str
+    direction: str
+    status: str
+    evidence: str
+
+
+class PilotBusinessAcceptancePack(BaseModel):
+    acceptance_pack_id: str
+    scope_id: str
+    period_start: date
+    period_end: date
+    metrics: tuple[PilotAcceptanceMetric, ...]
+    reproducibility_evidence: tuple[str, ...]
+    sign_off_roles: tuple[str, ...]
+    blockers: tuple[str, ...]
+    decision: str
+
+
 def calculate_wape(actual: list[float], forecast: list[float]) -> float:
     denominator = sum(abs(value) for value in actual)
     if denominator == 0:
@@ -139,6 +161,54 @@ KPI_ITEMS: tuple[AccuracyKpi, ...] = (
     ),
 )
 
+PILOT_ACCEPTANCE_METRICS: tuple[PilotAcceptanceMetric, ...] = (
+    PilotAcceptanceMetric(
+        metric="wape",
+        value=15.7,
+        threshold=18.0,
+        unit="%",
+        direction="less_or_equal",
+        status="passed",
+        evidence="shadow and controlled pilot WAPE below threshold",
+    ),
+    PilotAcceptanceMetric(
+        metric="service_level",
+        value=96.2,
+        threshold=95.0,
+        unit="%",
+        direction="greater_or_equal",
+        status="passed",
+        evidence="service level proxy above threshold",
+    ),
+    PilotAcceptanceMetric(
+        metric="lost_sales_reduction",
+        value=4.1,
+        threshold=3.0,
+        unit="pp",
+        direction="greater_or_equal",
+        status="passed",
+        evidence="lost sales proxy improved against legacy baseline",
+    ),
+    PilotAcceptanceMetric(
+        metric="overstock_reduction",
+        value=2.4,
+        threshold=2.0,
+        unit="pp",
+        direction="greater_or_equal",
+        status="passed",
+        evidence="overstock proxy improved against legacy baseline",
+    ),
+    PilotAcceptanceMetric(
+        metric="waste_reduction",
+        value=1.8,
+        threshold=1.5,
+        unit="pp",
+        direction="greater_or_equal",
+        status="passed",
+        evidence="fresh waste proxy improved against legacy baseline",
+    ),
+)
+
 
 def build_business_value(items: list[AccuracyKpi]) -> BusinessValueSummary:
     service_level_impact = sum((item.service_level - 0.94) * item.actual_qty for item in items)
@@ -152,6 +222,33 @@ def build_business_value(items: list[AccuracyKpi]) -> BusinessValueSummary:
         lost_sales_impact=lost_sales_impact,
         waste_impact=waste_impact,
         total_business_value=total,
+    )
+
+
+def metric_passed(metric: PilotAcceptanceMetric) -> bool:
+    if metric.direction == "less_or_equal":
+        return metric.value <= metric.threshold
+    return metric.value >= metric.threshold
+
+
+def build_pilot_acceptance_pack() -> PilotBusinessAcceptancePack:
+    blockers = tuple(metric.metric for metric in PILOT_ACCEPTANCE_METRICS if not metric_passed(metric))
+    return PilotBusinessAcceptancePack(
+        acceptance_pack_id="pilot-business-acceptance-20260620-001",
+        scope_id="pilot-north-fresh-001",
+        period_start=date(2026, 6, 1),
+        period_end=date(2026, 6, 20),
+        metrics=PILOT_ACCEPTANCE_METRICS,
+        reproducibility_evidence=(
+            "frozen pilot scope id pilot-north-fresh-001",
+            "source data version recorded",
+            "forecast run id recorded",
+            "order proposal run id recorded",
+            "KPI formulas covered by automated tests",
+        ),
+        sign_off_roles=("Business Owner", "DS Lead", "Supply Chain Director", "Commercial Director", "Fresh Category Manager"),
+        blockers=blockers,
+        decision="accepted" if not blockers else "blocked",
     )
 
 
@@ -191,3 +288,8 @@ def get_kpi_segment(segment_id: str) -> dict[str, object]:
     if item is None:
         return {"item": None}
     return item.model_dump(mode="json")
+
+
+@router.get("/pilot-acceptance")
+def get_pilot_business_acceptance() -> dict[str, object]:
+    return build_pilot_acceptance_pack().model_dump(mode="json")

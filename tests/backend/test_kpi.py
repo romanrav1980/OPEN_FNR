@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from open_fnr_api.kpi import calculate_bias, calculate_wape, kpi_alert_required
+from open_fnr_api.kpi import PILOT_ACCEPTANCE_METRICS, build_pilot_acceptance_pack, calculate_bias, calculate_wape, kpi_alert_required, metric_passed
 from open_fnr_api.main import app
 
 
@@ -50,3 +50,42 @@ def test_kpi_alert_decision_thresholds() -> None:
     assert kpi_alert_required(wape=0.1, bias=0.07, service_level=0.96) is True
     assert kpi_alert_required(wape=0.1, bias=0.01, service_level=0.91) is True
     assert kpi_alert_required(wape=0.1, bias=0.01, service_level=0.96) is False
+
+
+def test_pilot_business_acceptance_pack_covers_required_business_metrics() -> None:
+    response = client.get("/kpi/pilot-acceptance")
+    assert response.status_code == 200
+
+    payload = response.json()
+    metrics = {item["metric"]: item for item in payload["metrics"]}
+
+    assert payload["scope_id"] == "pilot-north-fresh-001"
+    assert payload["decision"] == "accepted"
+    assert payload["blockers"] == []
+    assert {"wape", "service_level", "lost_sales_reduction", "overstock_reduction", "waste_reduction"}.issubset(
+        metrics
+    )
+    assert metrics["wape"]["direction"] == "less_or_equal"
+    assert metrics["service_level"]["direction"] == "greater_or_equal"
+    assert "KPI formulas covered by automated tests" in payload["reproducibility_evidence"]
+    assert "Business Owner" in payload["sign_off_roles"]
+
+
+def test_pilot_acceptance_metric_threshold_helper_handles_direction() -> None:
+    assert all(metric_passed(metric) for metric in PILOT_ACCEPTANCE_METRICS)
+
+    bad_wape = PILOT_ACCEPTANCE_METRICS[0].model_copy(update={"value": 19.0})
+    bad_service = PILOT_ACCEPTANCE_METRICS[1].model_copy(update={"value": 94.0})
+
+    assert metric_passed(bad_wape) is False
+    assert metric_passed(bad_service) is False
+
+
+def test_pilot_acceptance_pack_helper_blocks_when_metric_fails(monkeypatch) -> None:
+    bad_metric = PILOT_ACCEPTANCE_METRICS[0].model_copy(update={"value": 19.0, "status": "failed"})
+
+    monkeypatch.setattr("open_fnr_api.kpi.PILOT_ACCEPTANCE_METRICS", (bad_metric, *PILOT_ACCEPTANCE_METRICS[1:]))
+    pack = build_pilot_acceptance_pack()
+
+    assert pack.decision == "blocked"
+    assert pack.blockers == ("wape",)

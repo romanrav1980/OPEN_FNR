@@ -1374,3 +1374,23 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_publication.py tests/backend/test_integration_operations.py tests/backend/test_release_gate.py tests/operations/test_rollback_dr_runbook.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 34 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 592 passed, 1 warning about `.pytest_cache` permissions.
 - Remaining focused sprint count after PILOT-3: 2 sprints (`PILOT-4..PILOT-5`).
+
+## PILOT-4 Business KPI Acceptance
+
+- PILOT-4 completed as business KPI acceptance foundation.
+- Completion note: `docs/context/PILOT4_COMPLETION.md`.
+- Specification added: `PILOT_BUSINESS_KPI_ACCEPTANCE_SPEC.md`.
+- Backend extended:
+  - `GET /kpi/pilot-acceptance`.
+- Acceptance pack covers:
+  - WAPE;
+  - service level;
+  - lost sales reduction;
+  - overstock reduction;
+  - waste reduction.
+- Tests added/updated:
+  - `tests/backend/test_kpi.py`.
+- Verification:
+  - `pytest --basetemp tmp\pytest-basetemp tests/backend/test_kpi.py tests/backend/test_pilot.py tests/backend/test_publication.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py tests/quality/test_no_committed_secrets.py` -> 42 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 595 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after PILOT-4: 1 sprint (`PILOT-5`).

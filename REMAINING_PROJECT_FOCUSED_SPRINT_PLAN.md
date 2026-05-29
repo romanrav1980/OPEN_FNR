@@ -66,7 +66,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | PILOT-1 | Pilot Scope And Data Readiness | Stores/SKU/categories/suppliers, 12-24 month history readiness | Completed foundation |
 | PILOT-2 | Shadow Mode | OPEN FNR vs current process comparison without operational exports | Completed foundation |
 | PILOT-3 | Controlled Export Pilot | Limited ERP/auto-order export with rollback | Completed foundation |
-| PILOT-4 | Business KPI Acceptance | WAPE, service level, lost sales, overstock and waste evidence | PILOT-3 |
+| PILOT-4 | Business KPI Acceptance | WAPE, service level, lost sales, overstock and waste evidence | Completed foundation |
 | PILOT-5 | Production Go/No-Go | Final acceptance pack and launch decision | PILOT-4 |
 
 ## 5. Detailed Sprints
@@ -896,6 +896,13 @@ Tests:
 Acceptance criteria:
 
 - KPI evidence is accepted or gap actions are documented.
+
+Completion checkpoint:
+
+- PILOT-4 KPI acceptance rules are fixed in `PILOT_BUSINESS_KPI_ACCEPTANCE_SPEC.md`;
+- KPI API exposes pilot business acceptance pack;
+- acceptance pack covers WAPE, service level, lost sales, overstock and waste;
+- automated tests validate direction-aware thresholds, blockers and sign-off evidence.
 
 ### PILOT-5. Production Go/No-Go
 
