@@ -89,6 +89,7 @@ def test_publication_target_urls_are_centralized_settings() -> None:
         tms_capacity_export_url="http://tms.local/capacity",
         store_app_task_export_url="http://store-app.local/tasks",
         planogram_export_url="http://planogram.local/decisions",
+        idp_provisioning_url="http://idp.local/provision",
         publication_http_timeout_seconds=11,
     )
 
@@ -99,4 +100,5 @@ def test_publication_target_urls_are_centralized_settings() -> None:
     assert settings.tms_capacity_export_url == "http://tms.local/capacity"
     assert settings.store_app_task_export_url == "http://store-app.local/tasks"
     assert settings.planogram_export_url == "http://planogram.local/decisions"
+    assert settings.idp_provisioning_url == "http://idp.local/provision"
     assert settings.publication_http_timeout_seconds == 11

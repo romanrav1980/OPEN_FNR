@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>OPEN FNR IdP Provisioning Target Test Report</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #181818; color: #f6eeee; }
+      main { max-width: 1180px; margin: 0 auto; padding: 32px; }
+      h1, h2 { color: #ffb3b3; }
+      .card { background: #241d1f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px; margin: 18px 0; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #4b2528; padding: 10px; text-align: left; vertical-align: top; }
+      th { background: #3a171a; color: #ffd5d5; }
+      code { color: #ffd5d5; }
+      .ok { color: #8ef0a5; font-weight: 700; }
+      img { width: 100%; border: 1px solid #7f1d1d; border-radius: 8px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>IdP Provisioning Target</h1>
+      <div class="card">
+        <p>
+          Аннотация: тестируем production security path для выдачи ролей пользователям.
+          Access request проходит review, после чего User Manager отправляет provisioning request в IdP/IAM.
+          В DEV/TEST используется local fallback, в STAGE/PROD endpoint задается через
+          <code>OPEN_FNR_IDP_PROVISIONING_URL</code>.
+        </p>
+        <p>UI получает users и access requests из <code>/security</code> API и показывает live/fallback статус.</p>
+        <img src="screenshots/idp-provisioning-target.png" alt="IdP provisioning target in OPEN FNR Control Tower" />
+      </div>
+
+      <div class="card">
+        <h2>UI Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Зачем</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Открываем Control Tower.</td><td>Проверяем доступность Admin Console после изменений.</td><td>Страница загружена.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>2</td><td>Проверяем Security API status.</td><td>UI должен отличать live API от fallback данных.</td><td>При backend online статус live.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>3</td><td>Проверяем users table.</td><td>Администратор должен видеть роли, регионы, категории и статус.</td><td>Admin и Viewer видны.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>4</td><td>Проверяем access requests table.</td><td>Security Owner должен видеть requested role и approver role.</td><td>access-20260528-001 виден.</td><td class="ok">Пройдено.</td></tr>
+          <tr><td>5</td><td>Проверяем IdP Target panel.</td><td>Provisioning endpoint не должен быть hardcoded.</td><td>Показан configured endpoint подход.</td><td class="ok">Пройдено.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Business Process Test Steps</h2>
+        <table>
+          <tr><th>Шаг</th><th>Что делаем</th><th>Почему</th><th>Ожидание</th><th>Результат</th></tr>
+          <tr><td>1</td><td>Security Owner approve.</td><td>Выдача роли требует бизнес-проверки.</td><td>status approved.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>2</td><td>User Manager provision.</td><td>Разделяем approval и фактическую выдачу доступа.</td><td>status provisioned.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>3</td><td>Preview IdP provision.</td><td>Перед отправкой нужен idempotency key.</td><td>access-20260528-001:idp:v1.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>4</td><td>Отправляем через local fallback.</td><td>DEV/TEST должны работать без реального IdP.</td><td>202 и audit_recorded=true.</td><td class="ok">Покрыто тестом.</td></tr>
+          <tr><td>5</td><td>Отправляем через configured HTTP target.</td><td>Production endpoint задается настройкой.</td><td>POST с Idempotency-Key.</td><td class="ok">Покрыто monkeypatch-тестом.</td></tr>
+          <tr><td>6</td><td>Проверяем service account gate.</td><td>Права во внешней IAM системе нельзя выдавать от имени обычного пользователя.</td><td>Неверный account получает 403.</td><td class="ok">Покрыто тестом.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Verification</h2>
+        <table>
+          <tr><th>Тип</th><th>Команда</th><th>Результат</th></tr>
+          <tr><td>Backend targeted</td><td><code>python -m pytest tests/backend/test_security.py tests/backend/test_config.py tests/quality/test_no_hardcoded_network_config.py</code></td><td class="ok">20 passed</td></tr>
+          <tr><td>Frontend build</td><td><code>npm.cmd run build</code></td><td class="ok">passed</td></tr>
+          <tr><td>Compose config</td><td><code>docker compose --env-file infra/dev/.env.example -f infra/dev/compose.yaml config --quiet</code></td><td class="ok">passed</td></tr>
+          <tr><td>Screenshot</td><td><code>npx.cmd playwright screenshot --full-page ...</code></td><td class="ok">idp-provisioning-target.png created</td></tr>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

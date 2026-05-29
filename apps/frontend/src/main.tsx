@@ -98,6 +98,40 @@ type DailyPipelineGateApiResponse = {
   stages: DailyPipelineStage[];
 };
 
+type SecurityUserRow = {
+  user: string;
+  roles: string;
+  regions: string;
+  categories: string;
+  status: string;
+};
+
+type SecurityUserApiItem = {
+  email: string;
+  roles: string[];
+  regions: string[];
+  categories: string[];
+  active: boolean;
+};
+
+type AccessRequestRow = {
+  id: string;
+  user: string;
+  role: string;
+  regions: string;
+  status: string;
+  approver: string;
+};
+
+type AccessRequestApiItem = {
+  request_id: string;
+  user_id: string;
+  requested_role: string;
+  requested_regions: string[];
+  status: string;
+  approver_role: string;
+};
+
 type PublicationPackageRow = {
   id: string;
   target: string;
@@ -839,12 +873,12 @@ const performanceBottlenecks = [
   },
 ];
 
-const securityUsers = [
+const securityUsers: SecurityUserRow[] = [
   { user: "admin@example.org", roles: "Admin", regions: "all", categories: "all", status: "active" },
   { user: "viewer@example.org", roles: "Viewer", regions: "north", categories: "fresh", status: "active" },
 ];
 
-const accessRequests = [
+const accessRequests: AccessRequestRow[] = [
   {
     id: "access-20260528-001",
     user: "viewer@example.org",
@@ -1189,6 +1223,9 @@ function App() {
   const [dailyPipelineApiStatus, setDailyPipelineApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimeDailyPipelineStages, setRuntimeDailyPipelineStages] =
     React.useState<DailyPipelineStage[]>(dailyPipelineStages);
+  const [securityApiStatus, setSecurityApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
+  const [runtimeSecurityUsers, setRuntimeSecurityUsers] = React.useState<SecurityUserRow[]>(securityUsers);
+  const [runtimeAccessRequests, setRuntimeAccessRequests] = React.useState<AccessRequestRow[]>(accessRequests);
   const [publicationApiStatus, setPublicationApiStatus] = React.useState<"loading" | "live" | "fallback">("loading");
   const [runtimePublicationPackages, setRuntimePublicationPackages] =
     React.useState<PublicationPackageRow[]>(publicationPackages);
@@ -1277,6 +1314,52 @@ function App() {
           return;
         }
         setDailyPipelineApiStatus("fallback");
+      });
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      fetch(apiUrl("/security/users?actor_role=Admin"), { signal: controller.signal }),
+      fetch(apiUrl("/security/access-requests?actor_role=Security%20Owner"), { signal: controller.signal }),
+    ])
+      .then(([usersResponse, requestsResponse]) => {
+        if (!usersResponse.ok || !requestsResponse.ok) {
+          throw new Error("Security API returned an error");
+        }
+        return Promise.all([
+          usersResponse.json() as Promise<{ items: SecurityUserApiItem[] }>,
+          requestsResponse.json() as Promise<{ items: AccessRequestApiItem[] }>,
+        ]);
+      })
+      .then(([users, requests]) => {
+        setRuntimeSecurityUsers(
+          users.items.map((user) => ({
+            user: user.email,
+            roles: user.roles.join(", "),
+            regions: user.regions.join(", "),
+            categories: user.categories.join(", "),
+            status: user.active ? "active" : "inactive",
+          })),
+        );
+        setRuntimeAccessRequests(
+          requests.items.map((request) => ({
+            id: request.request_id,
+            user: request.user_id,
+            role: request.requested_role,
+            regions: request.requested_regions.join(", "),
+            status: request.status,
+            approver: request.approver_role,
+          })),
+        );
+        setSecurityApiStatus("live");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setSecurityApiStatus("fallback");
       });
     return () => controller.abort();
   }, []);
@@ -3369,6 +3452,11 @@ function App() {
             <strong>Viewer cannot open Admin users</strong>
             <p>Admin console data is protected by Admin role, while object access checks region and category scopes.</p>
           </article>
+          <article className="feature-summary">
+            <span>API Status</span>
+            <strong>{securityApiStatus}</strong>
+            <p>Users and access requests are loaded from Security API with IdP provisioning target support.</p>
+          </article>
         </div>
         <div className="table-shell">
           <table>
@@ -3382,7 +3470,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {securityUsers.map((row) => (
+              {runtimeSecurityUsers.map((row) => (
                 <tr key={row.user}>
                   <td>{row.user}</td>
                   <td>{row.roles}</td>
@@ -3407,7 +3495,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {accessRequests.map((row) => (
+              {runtimeAccessRequests.map((row) => (
                 <tr key={row.id}>
                   <td>{row.id}</td>
                   <td>{row.user}</td>
@@ -3457,11 +3545,11 @@ function App() {
             </div>
           </aside>
           <aside className="dq-detail">
-            <span className="eyebrow">Scope Check</span>
-            <h3>Region and category guard</h3>
+            <span className="eyebrow">IdP Target</span>
+            <h3>Configured provisioning endpoint</h3>
             <p>
-              Viewer has access to north/fresh only. Requests outside that scope show denied state
-              and are traceable in audit.
+              Approved access can be dispatched to IdP/IAM through a service account,
+              idempotency key and endpoint controlled by environment configuration.
             </p>
           </aside>
         </div>

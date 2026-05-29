@@ -65,6 +65,7 @@ class Settings(BaseModel):
     tms_capacity_export_url: str = Field(default_factory=lambda: env_str("TMS_CAPACITY_EXPORT_URL", ""))
     store_app_task_export_url: str = Field(default_factory=lambda: env_str("STORE_APP_TASK_EXPORT_URL", ""))
     planogram_export_url: str = Field(default_factory=lambda: env_str("PLANOGRAM_EXPORT_URL", ""))
+    idp_provisioning_url: str = Field(default_factory=lambda: env_str("IDP_PROVISIONING_URL", ""))
     publication_http_timeout_seconds: int = Field(
         default_factory=lambda: env_int("PUBLICATION_HTTP_TIMEOUT_SECONDS", 30),
         ge=1,

@@ -151,6 +151,7 @@ flowchart LR
 | `OPEN_FNR_TMS_CAPACITY_EXPORT_URL` | TMS capacity export endpoint |
 | `OPEN_FNR_STORE_APP_TASK_EXPORT_URL` | Store App task dispatch endpoint |
 | `OPEN_FNR_PLANOGRAM_EXPORT_URL` | Planogram or space-management export endpoint |
+| `OPEN_FNR_IDP_PROVISIONING_URL` | IdP/IAM user provisioning endpoint |
 | `OPEN_FNR_PUBLICATION_HTTP_TIMEOUT_SECONDS` | HTTP timeout |
 
 ## 7. Idempotency

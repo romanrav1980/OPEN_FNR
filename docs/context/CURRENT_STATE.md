@@ -6,7 +6,7 @@ Last updated: 2026-05-29
 
 Industrial hardening continues after real-ingestion I1-I5. The current focus is connecting validated clean source publications to feature mart build planning, ML/replenishment inputs and pilot-readiness rehearsal.
 
-Current backend regression status: 390 automated tests passed.
+Current backend regression status: 394 automated tests passed.
 
 ## Local Infrastructure
 
@@ -259,12 +259,14 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 - Security API: `apps/backend/open_fnr_api/security.py`.
 - Security tests: `tests/backend/test_security.py`.
+- IdP provisioning send API with service account gate, local fallback and configurable `OPEN_FNR_IDP_PROVISIONING_URL`.
 - Security process definitions registered in `apps/backend/open_fnr_api/process_engine.py`.
 - Access request BPMN: `processes/security/access_request_process.bpmn20.xml`.
 - Role assignment DMN: `processes/security/role_assignment_decision.dmn.xml`.
 - Security incident CMMN: `processes/security/security_incident_case.cmmn.xml`.
-- UI Admin Console V1 section with roles, region/category scopes, access requests, audit viewer and denied-state explanation.
+- UI Admin Console V1 section with live Security API status, roles, region/category scopes, access requests, IdP target provisioning, audit viewer and denied-state explanation.
 - HTML test report with screenshot: `docs/test-reports/sprint-22-security-rbac/index.html`.
+- IdP provisioning target hardening report: `docs/test-reports/sprint-idp-provisioning-target/index.html`.
 
 ## Sprint 23 Artifacts
 
@@ -436,7 +438,7 @@ Network configuration rule: IP addresses, host names and port numbers are centra
 
 ## Verification
 
-- `python -m pytest` -> 390 passed.
+- `python -m pytest` -> 394 passed.
 - `npm.cmd install` in `apps/frontend` -> completed, 0 vulnerabilities.
 - `npm.cmd run build` in `apps/frontend` -> completed.
 - `docker compose --env-file infra/test/.env.example -f infra/dev/compose.yaml config --quiet` -> TEST compose config valid.
@@ -464,7 +466,7 @@ Real-ingestion I1-I5 is implemented and verified. Next: connect real source adap
 
 - Runtime and mock mode settings: `apps/backend/open_fnr_api/config.py`.
 - Business audit recording flag: `OPEN_FNR_AUDIT_ENABLED=true` by default.
-- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL`, `OPEN_FNR_AUTO_ORDER_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL` and `OPEN_FNR_PLANOGRAM_EXPORT_URL`.
+- Outbound publication target URLs configurable through `OPEN_FNR_ERP_EXPORT_URL`, `OPEN_FNR_WMS_EXPORT_URL`, `OPEN_FNR_DWH_EXPORT_URL`, `OPEN_FNR_BI_EXPORT_URL`, `OPEN_FNR_AUTO_ORDER_EXPORT_URL`, `OPEN_FNR_SUPPLIER_FORECAST_SHARE_URL`, `OPEN_FNR_TMS_CAPACITY_EXPORT_URL`, `OPEN_FNR_STORE_APP_TASK_EXPORT_URL`, `OPEN_FNR_PLANOGRAM_EXPORT_URL` and `OPEN_FNR_IDP_PROVISIONING_URL`.
 - Repository boundary and in-memory audit repository: `apps/backend/open_fnr_api/repositories.py`.
 - Audit API: `apps/backend/open_fnr_api/audit.py`.
 - PostgreSQL audit and integration batch tables: `infra/dev/postgres/init/001_open_fnr.sql`.

@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from open_fnr_api import security
 from open_fnr_api.main import app
 from open_fnr_api.security import (
     RoleName,
@@ -19,6 +20,7 @@ def test_admin_can_view_users_and_service_accounts() -> None:
     assert users_response.status_code == 200
     assert service_response.status_code == 200
     assert users_response.json()["total"] == 2
+    assert service_response.json()["total"] == 2
     assert service_response.json()["items"][0]["secret_rotation_days"] == 90
 
 
@@ -67,12 +69,101 @@ def test_user_manager_can_provision_after_approval_step() -> None:
         json={
             "actor": "user.manager@example.org",
             "actor_role": "User Manager",
-            "reason": "Role provisioned in local IdP mock.",
+            "reason": "Role provisioned through configured IdP path.",
         },
     )
 
     assert response.status_code == 200
     assert response.json()["request"]["status"] == "provisioned"
+
+
+def test_idp_provision_preview_is_idempotent_and_uses_local_fallback() -> None:
+    response = client.get("/security/access-requests/access-20260528-001/idp-provision")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["target"] == "IdP provisioning"
+    assert payload["idempotency_key"] == "access-20260528-001:idp:v1"
+    assert payload["export_channel"] == "local_fallback"
+
+
+def test_idp_provision_send_requires_service_account() -> None:
+    response = client.post(
+        "/security/access-requests/access-20260528-001/idp-provision/send",
+        json={
+            "actor": "user.manager@example.org",
+            "actor_role": "User Manager",
+            "service_account": "wrong-account",
+            "reason": "Provision role.",
+        },
+    )
+
+    assert response.status_code == 403
+
+
+def test_idp_provision_send_uses_local_fallback_with_audit() -> None:
+    response = client.post(
+        "/security/access-requests/access-20260528-001/idp-provision/send",
+        json={
+            "actor": "user.manager@example.org",
+            "actor_role": "User Manager",
+            "service_account": "svc-open-fnr-idp-provisioning",
+            "reason": "Provision approved role.",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["provision"]["export_channel"] == "local_fallback"
+    assert payload["response_code"] == "202"
+    assert payload["audit_recorded"] is True
+
+
+def test_idp_provision_can_post_to_configured_http_target(monkeypatch) -> None:
+    calls = []
+    original_url = security.settings.idp_provisioning_url
+    original_timeout = security.settings.publication_http_timeout_seconds
+
+    class FakeResponse:
+        status = 202
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return b"accepted by idp"
+
+    def fake_urlopen(request, timeout):
+        calls.append((request, timeout))
+        return FakeResponse()
+
+    monkeypatch.setattr("open_fnr_api.security.urlopen", fake_urlopen)
+    security.settings.idp_provisioning_url = "http://idp.integration.local/provision"
+    security.settings.publication_http_timeout_seconds = 23
+    try:
+        response = client.post(
+            "/security/access-requests/access-20260528-001/idp-provision/send",
+            json={
+                "actor": "user.manager@example.org",
+                "actor_role": "User Manager",
+                "service_account": "svc-open-fnr-idp-provisioning",
+                "reason": "Provision approved role.",
+            },
+        )
+    finally:
+        security.settings.idp_provisioning_url = original_url
+        security.settings.publication_http_timeout_seconds = original_timeout
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["provision"]["export_channel"] == "http_api"
+    assert payload["response_message"] == "accepted by idp"
+    assert calls[0][0].full_url == "http://idp.integration.local/provision"
+    assert calls[0][0].headers["Idempotency-key"] == "access-20260528-001:idp:v1"
+    assert calls[0][1] == 23
 
 
 def test_access_request_rejects_wrong_actor_role() -> None:
