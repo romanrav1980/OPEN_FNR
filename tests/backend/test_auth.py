@@ -346,3 +346,77 @@ def test_jwt_claims_reject_wrong_audience() -> None:
 
     assert response.status_code == 401
     assert "audience mismatch" in response.json()["detail"]
+
+
+def test_jwt_claims_reject_missing_expiration() -> None:
+    original = (
+        auth.settings.auth_enabled,
+        auth.settings.auth_dev_bypass_enabled,
+        auth.settings.runtime_mode,
+        auth.settings.oidc_issuer,
+        auth.settings.oidc_audience,
+        auth.settings.oidc_jwks_url,
+    )
+    auth.settings.auth_enabled = True
+    auth.settings.auth_dev_bypass_enabled = False
+    auth.settings.runtime_mode = "test"
+    token = make_unsigned_jwt({"sub": "u-123"})
+    try:
+        response = client.get("/auth/context", headers={"Authorization": f"Bearer {token}"})
+    finally:
+        restore_auth_settings(original)
+
+    assert response.status_code == 401
+    assert "expiration missing" in response.json()["detail"]
+
+
+def test_jwt_claims_reject_token_before_nbf_outside_clock_skew() -> None:
+    original = (
+        auth.settings.auth_enabled,
+        auth.settings.auth_dev_bypass_enabled,
+        auth.settings.runtime_mode,
+        auth.settings.oidc_issuer,
+        auth.settings.oidc_audience,
+        auth.settings.oidc_jwks_url,
+    )
+    original_skew = auth.settings.oidc_clock_skew_seconds
+    auth.settings.auth_enabled = True
+    auth.settings.auth_dev_bypass_enabled = False
+    auth.settings.runtime_mode = "test"
+    auth.settings.oidc_clock_skew_seconds = 5
+    token = make_unsigned_jwt(
+        {
+            "sub": "u-123",
+            "exp": int(time.time()) + 300,
+            "nbf": int(time.time()) + 60,
+        }
+    )
+    try:
+        response = client.get("/auth/context", headers={"Authorization": f"Bearer {token}"})
+    finally:
+        restore_auth_settings(original)
+        auth.settings.oidc_clock_skew_seconds = original_skew
+
+    assert response.status_code == 401
+    assert "token not yet valid" in response.json()["detail"]
+
+
+def test_stage_rejects_dev_bypass_header_even_if_bypass_flag_is_true() -> None:
+    original = (
+        auth.settings.auth_enabled,
+        auth.settings.auth_dev_bypass_enabled,
+        auth.settings.runtime_mode,
+        auth.settings.oidc_issuer,
+        auth.settings.oidc_audience,
+        auth.settings.oidc_jwks_url,
+    )
+    auth.settings.auth_enabled = True
+    auth.settings.auth_dev_bypass_enabled = True
+    auth.settings.runtime_mode = "stage"
+    try:
+        response = client.get("/auth/context", headers={"X-Open-FNR-Dev-User": "admin@example.org"})
+    finally:
+        restore_auth_settings(original)
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Bearer token required"

@@ -53,6 +53,7 @@ def test_settings_expose_runtime_mode_and_mock_mode() -> None:
         oidc_issuer="https://idp.example.org",
         oidc_audience="open-fnr-api",
         oidc_jwks_url="https://idp.example.org/.well-known/jwks.json",
+        oidc_clock_skew_seconds=45,
     )
 
     assert settings.runtime_mode == "test"
@@ -63,6 +64,7 @@ def test_settings_expose_runtime_mode_and_mock_mode() -> None:
     assert settings.oidc_issuer == "https://idp.example.org"
     assert settings.oidc_audience == "open-fnr-api"
     assert settings.oidc_jwks_url == "https://idp.example.org/.well-known/jwks.json"
+    assert settings.oidc_clock_skew_seconds == 45
 
 
 def test_audit_is_enabled_by_default_and_can_be_disabled() -> None:

@@ -965,3 +965,24 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
 - Verification:
   - `pytest tests/backend/test_integration_operations.py tests/backend/test_data_quality.py tests/backend/test_dq_execution.py tests/backend/test_shadow_gate.py tests/backend/test_daily_pipeline.py tests/backend/test_pilot_fixtures.py tests/backend/test_ingestion.py tests/data/test_source_contract_freeze.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 43 passed, 1 warning about `.pytest_cache` permissions.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 506 passed, 1 warning about `.pytest_cache` permissions.
+
+## SEC-1 OIDC/JWT Authentication
+
+- SEC-1 completed as authentication foundation.
+- Completion note: `docs/context/SEC1_COMPLETION.md`.
+- Production authentication specification added: `PRODUCTION_AUTHENTICATION_SPEC.md`.
+- JWT validation hardened:
+  - `exp` is mandatory;
+  - expired tokens are rejected;
+  - future `nbf` is rejected outside configured clock skew.
+- Config added:
+  - `OPEN_FNR_OIDC_CLOCK_SKEW_SECONDS`.
+- DEV bypass boundary verified:
+  - allowed only in DEV/TEST;
+  - rejected in STAGE even if bypass flag is accidentally true.
+- Tests added/updated:
+  - `tests/backend/test_auth.py`;
+  - `tests/backend/test_config.py`.
+- Verification:
+  - `pytest tests/backend/test_auth.py tests/backend/test_config.py tests/backend/test_security.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 35 passed, 1 warning about `.pytest_cache` permissions.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 509 passed, 1 warning about `.pytest_cache` permissions.

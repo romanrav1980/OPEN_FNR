@@ -134,8 +134,13 @@ def tuple_from_claim(value: object) -> tuple[str, ...]:
 def validate_jwt_claims(payload: dict[str, object]) -> AuthContext:
     now = int(time.time())
     exp = payload.get("exp")
-    if isinstance(exp, int | float) and exp < now:
+    if not isinstance(exp, int | float):
+        raise ValueError("expiration missing")
+    if exp < now - settings.oidc_clock_skew_seconds:
         raise ValueError("token expired")
+    nbf = payload.get("nbf")
+    if isinstance(nbf, int | float) and nbf > now + settings.oidc_clock_skew_seconds:
+        raise ValueError("token not yet valid")
     if settings.oidc_issuer and payload.get("iss") != settings.oidc_issuer:
         raise ValueError("issuer mismatch")
     audience = payload.get("aud")

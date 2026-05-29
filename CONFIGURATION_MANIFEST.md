@@ -42,7 +42,8 @@ Authentication and OIDC/JWT boundary settings are centralized as:
 - `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED`;
 - `OPEN_FNR_OIDC_ISSUER`;
 - `OPEN_FNR_OIDC_AUDIENCE`;
-- `OPEN_FNR_OIDC_JWKS_URL`.
+- `OPEN_FNR_OIDC_JWKS_URL`;
+- `OPEN_FNR_OIDC_CLOCK_SKEW_SECONDS`.
 
 Process Navigator settings are centralized as:
 
@@ -83,6 +84,7 @@ The following files may contain default local development addresses because they
 - Sprint reports may mention command evidence, but executable code must stay configuration-driven.
 - Business process audit must be controlled by `OPEN_FNR_AUDIT_ENABLED`; default is enabled.
 - Authentication must be controlled by `OPEN_FNR_AUTH_ENABLED`; DEV/TEST bypass must be controlled by `OPEN_FNR_AUTH_DEV_BYPASS_ENABLED` and disabled in STAGE/PROD configuration.
+- JWT validation must require `exp`, must reject expired tokens, and must respect `OPEN_FNR_OIDC_CLOCK_SKEW_SECONDS` for `nbf` validation.
 - Source file landing paths must be controlled by `OPEN_FNR_LANDING_ROOT_PATH`; source adapters must not hardcode local paths.
 - Backup artifact paths and retention must be controlled by `OPEN_FNR_BACKUP_ROOT_PATH` and `OPEN_FNR_BACKUP_RETENTION_DAYS`; restore smoke must require an explicit execute mode and dedicated restore database variables.
 - Process artifact deployment paths must be controlled by `OPEN_FNR_PROCESS_ARTIFACTS_ROOT_PATH`; Flowable deployment packaging must not hardcode environment-specific paths.

@@ -95,6 +95,7 @@ class Settings(BaseModel):
     oidc_issuer: str = Field(default_factory=lambda: env_str("OIDC_ISSUER", ""))
     oidc_audience: str = Field(default_factory=lambda: env_str("OIDC_AUDIENCE", ""))
     oidc_jwks_url: str = Field(default_factory=lambda: env_str("OIDC_JWKS_URL", ""))
+    oidc_clock_skew_seconds: int = Field(default_factory=lambda: env_int("OIDC_CLOCK_SKEW_SECONDS", 60), ge=0, le=600)
     cors_allow_origins: tuple[str, ...] = Field(
         default_factory=lambda: env_csv("CORS_ALLOW_ORIGINS", ("http://127.0.0.1:13000", "http://localhost:13000"))
     )
