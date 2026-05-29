@@ -50,7 +50,7 @@ This document turns the remaining OPEN FNR work into a focused sprint plan. It i
 | SEC-3 | Secrets And Service Accounts | Secrets outside git and controlled integration identities | Completed foundation |
 | SEC-4 | Security Audit And Access Review | Audit views, access review workflow and negative tests | Completed foundation |
 | UI-1 | Routed Application Foundation | React Router, feature pages and API client | Completed foundation |
-| UI-2 | Forecast And Replenishment Workbenches | Real API-backed forecast/order workflows | UI-1, RI-6 |
+| UI-2 | Forecast And Replenishment Workbenches | Real API-backed forecast/order workflows | Completed foundation |
 | UI-3 | Integration And Data Quality UI | Source status, DQ, reconciliation and retry screens | UI-1, RI-6 |
 | UI-4 | Security, Admin And Process UI | User/role/admin/process operational screens | UI-1, SEC-4 |
 | UI-5 | UI E2E Visual Accessibility Suite | Playwright E2E, visual checks and accessibility reports | UI-2..UI-4 |
@@ -441,6 +441,12 @@ Acceptance criteria:
 
 - planner can complete core forecast and replenishment workflows through UI;
 - actions write audit and process events.
+
+Completion checkpoint:
+
+- UI-2 foundation scope is fixed in `UI_FORECAST_REPLENISHMENT_WORKBENCH_SPEC.md`;
+- static frontend tests cover forecast, promo uplift, demand projection, order proposal, replenishment adjustment and audit/process context;
+- sprint evidence report is stored in `docs/test-reports/sprint-ui-2-forecast-replenishment-workbenches/index.html`.
 
 ### UI-3. Integration And Data Quality UI
 

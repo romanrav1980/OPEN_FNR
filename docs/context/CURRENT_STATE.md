@@ -1066,3 +1066,23 @@ Real-ingestion I1-I5 contracts, pilot shadow-load source wiring, outbound target
   - `pytest tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 6 passed, 1 warning about `.pytest_cache` permissions.
   - `npm.cmd run build` in `apps/frontend` -> passed.
   - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 522 passed, 1 warning about `.pytest_cache` permissions.
+
+## UI-2 Forecast And Replenishment Workbenches
+
+- UI-2 completed as forecast/replenishment workbench foundation.
+- Completion note: `docs/context/UI2_COMPLETION.md`.
+- Specification added: `UI_FORECAST_REPLENISHMENT_WORKBENCH_SPEC.md`.
+- Verified existing frontend capabilities:
+  - forecast review and promo uplift workbench sections;
+  - inventory projection, order proposal and replenishment workbench sections;
+  - manual adjustment and exception audit context;
+  - accessible section labels for critical planner panels.
+- Tests added:
+  - `tests/frontend/test_ui_forecast_replenishment_workbenches.py`.
+- Evidence report:
+  - `docs/test-reports/sprint-ui-2-forecast-replenishment-workbenches/index.html`.
+- Verification:
+  - `pytest tests/frontend/test_ui_forecast_replenishment_workbenches.py tests/frontend/test_ui_routed_foundation.py tests/quality/test_text_encoding.py tests/quality/test_no_hardcoded_network_config.py` -> 11 passed, 1 warning about `.pytest_cache` permissions.
+  - `npm.cmd run build` in `apps/frontend` -> passed.
+  - `$env:PYTHONPATH='apps/backend;.'; pytest --basetemp tmp\pytest-basetemp` -> 527 passed, 1 warning about `.pytest_cache` permissions.
+- Remaining focused sprint count after UI-2: 16 sprints (`UI-3..UI-5`, `ML-1..ML-5`, `DEP-1..DEP-4`, `PILOT-1..PILOT-5`).
