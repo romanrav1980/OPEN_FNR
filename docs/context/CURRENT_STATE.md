@@ -1,12 +1,14 @@
 # OPEN FNR Current State
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
 
 ## Active Work
 
 The focused sprint plan through UI-2..UI-5, ML-1..ML-5, DEP-1..DEP-4 and PILOT-1..PILOT-5 is completed at foundation level. Current focus after this checkpoint is real environment deployment, real source credentials/data connection, pilot execution on actual data and production hardening beyond foundation mocks.
 
 Current full regression status: 597 automated tests passed in the latest checkpoint.
+
+Latest reload checkpoint: `docs/context/RELOAD_CHECKPOINT_2026_06_01.md`.
 
 Latest planning and navigation additions:
 
