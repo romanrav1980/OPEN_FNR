@@ -8,7 +8,7 @@ The focused sprint plan through UI-2..UI-5, ML-1..ML-5, DEP-1..DEP-4 and PILOT-1
 
 Current full regression status: 597 automated tests passed in the latest checkpoint.
 
-Latest reload checkpoint: `docs/context/RELOAD_CHECKPOINT_2026_06_01.md`.
+Latest reload checkpoint: `docs/context/RELOAD_CHECKPOINT_2026_06_01_2.md`.
 
 Latest planning and navigation additions:
 
